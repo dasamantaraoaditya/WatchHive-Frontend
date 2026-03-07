@@ -1,0 +1,130 @@
+.comments-modal {
+    width: 100%;
+    max-width: 500px;
+    height: 80vh;
+    /* Fill most of height on mobile especially */
+    max-height: 600px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+}
+
+.comments-header {
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comments-header h3 {
+    margin: 0;
+    font-size: var(--text-lg);
+}
+
+.comments-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.comment-item {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.comment-body {
+    flex: 1;
+    background: var(--bg-tertiary);
+    /* Subtle background for comment bubble */
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    border-top-left-radius: 2px;
+    /* Chat bubble style */
+}
+
+.comment-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-1);
+}
+
+.comment-author {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-right: var(--space-2);
+}
+
+.delete-comment-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.delete-comment-btn:hover {
+    opacity: 1;
+    color: var(--error-500);
+}
+
+.comment-text {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.comment-form {
+    padding: var(--space-4);
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    gap: var(--space-2);
+    background: var(--bg-secondary);
+}
+
+.comment-form .wh-input-wrapper {
+    flex: 1;
+    margin-bottom: 0;
+    /* Override default input margin */
+}
+
+.loading-text,
+.empty-text {
+    text-align: center;
+    color: var(--text-tertiary);
+    margin-top: var(--space-8);
+}
+
+/* Modal Overlay (Duplicate of common modal styles if not global) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    padding: var(--space-4);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}

@@ -1,0 +1,441 @@
+/* ============================================
+   Input Component - Minimalistic Design
+   ============================================ */
+
+/* ============================================
+   INPUT WRAPPER
+   ============================================ */
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 100%;
+}
+
+/* ============================================
+   LABEL
+   ============================================ */
+
+.input-label {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--text-primary);
+    line-height: var(--leading-tight);
+}
+
+.input-label.required::after {
+    content: ' *';
+    color: var(--error-500);
+}
+
+/* ============================================
+   INPUT BASE
+   ============================================ */
+
+.input {
+    width: 100%;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: var(--font-normal);
+    line-height: var(--leading-normal);
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+
+    padding: var(--space-3) var(--space-4);
+    min-height: 2.75rem;
+
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+
+    transition: all var(--transition-base);
+
+    /* Remove default appearance */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.input::placeholder {
+    color: var(--text-tertiary);
+    opacity: 1;
+}
+
+/* Focus State */
+.input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+/* Hover State */
+.input:hover:not(:disabled):not(:focus) {
+    border-color: var(--border-dark);
+}
+
+/* ============================================
+   INPUT SIZES
+   ============================================ */
+
+.input-sm {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    min-height: 2.25rem;
+    border-radius: var(--radius-md);
+}
+
+.input-md {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-base);
+    min-height: 2.75rem;
+}
+
+.input-lg {
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--text-lg);
+    min-height: 3.25rem;
+    border-radius: var(--radius-xl);
+}
+
+/* ============================================
+   INPUT STATES
+   ============================================ */
+
+/* Disabled */
+.input:disabled {
+    background-color: var(--bg-secondary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Error State */
+.input.error,
+.input-wrapper.error .input {
+    border-color: var(--error-500);
+}
+
+.input.error:focus,
+.input-wrapper.error .input:focus {
+    border-color: var(--error-500);
+    box-shadow: 0 0 0 3px var(--error-50);
+}
+
+/* Success State */
+.input.success,
+.input-wrapper.success .input {
+    border-color: var(--success-500);
+}
+
+.input.success:focus,
+.input-wrapper.success .input:focus {
+    border-color: var(--success-500);
+    box-shadow: 0 0 0 3px var(--success-50);
+}
+
+/* ============================================
+   INPUT WITH ICONS
+   ============================================ */
+
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.input-group .input {
+    flex: 1;
+}
+
+/* Left Icon */
+.input-group.has-icon-left .input {
+    padding-left: var(--space-10);
+}
+
+.input-icon-left {
+    position: absolute;
+    left: var(--space-4);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* Right Icon */
+.input-group.has-icon-right .input {
+    padding-right: var(--space-10);
+}
+
+.input-icon-right {
+    position: absolute;
+    right: var(--space-4);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* Interactive right icon (e.g., password toggle) */
+.input-icon-right.interactive {
+    cursor: pointer;
+    pointer-events: auto;
+    transition: color var(--transition-fast);
+}
+
+.input-icon-right.interactive:hover {
+    color: var(--text-primary);
+}
+
+/* ============================================
+   HELPER TEXT
+   ============================================ */
+
+.input-helper {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: var(--leading-snug);
+}
+
+.input-wrapper.error .input-helper,
+.input-error {
+    color: var(--error-600);
+}
+
+.input-wrapper.success .input-helper,
+.input-success {
+    color: var(--success-600);
+}
+
+/* ============================================
+   TEXTAREA
+   ============================================ */
+
+.textarea {
+    min-height: 6rem;
+    resize: vertical;
+    padding: var(--space-3) var(--space-4);
+    line-height: var(--leading-relaxed);
+}
+
+.textarea-sm {
+    min-height: 4rem;
+    padding: var(--space-2) var(--space-3);
+}
+
+.textarea-lg {
+    min-height: 8rem;
+    padding: var(--space-4) var(--space-5);
+}
+
+/* ============================================
+   SELECT
+   ============================================ */
+
+.select {
+    cursor: pointer;
+    padding-right: var(--space-10);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23737373' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-4) center;
+    background-size: 1rem;
+}
+
+.select:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%230284c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   CHECKBOX & RADIO
+   ============================================ */
+
+.checkbox-wrapper,
+.radio-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox,
+.radio {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+    border: 2px solid var(--border-medium);
+    background-color: var(--bg-primary);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.checkbox {
+    border-radius: var(--radius-sm);
+}
+
+.radio {
+    border-radius: var(--radius-full);
+}
+
+/* Checked State */
+.checkbox:checked,
+.radio:checked {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3 8L6.5 11.5L13 4.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 0.875rem;
+}
+
+.radio:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Ccircle cx='8' cy='8' r='3' fill='white'/%3E%3C/svg%3E");
+}
+
+/* Focus State */
+.checkbox:focus,
+.radio:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+/* Hover State */
+.checkbox:hover:not(:disabled),
+.radio:hover:not(:disabled) {
+    border-color: var(--accent-primary);
+}
+
+/* Disabled State */
+.checkbox:disabled,
+.radio:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.checkbox-wrapper.disabled,
+.radio-wrapper.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Label */
+.checkbox-label,
+.radio-label {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+    line-height: var(--leading-snug);
+    cursor: pointer;
+}
+
+/* ============================================
+   SEARCH INPUT
+   ============================================ */
+
+.input-search {
+    padding-left: var(--space-10);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35' stroke='%23737373' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left var(--space-4) center;
+    background-size: 1.25rem;
+}
+
+.input-search:focus {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35' stroke='%230284c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   AUTOFILL STYLING
+   ============================================ */
+
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-primary) inset;
+    -webkit-text-fill-color: var(--text-primary);
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ============================================
+   MOBILE OPTIMIZATIONS
+   ============================================ */
+
+@media (max-width: 640px) {
+
+    .input,
+    .textarea,
+    .select {
+        font-size: 16px;
+        /* Prevents zoom on iOS */
+        min-height: 3rem;
+        /* More touch-friendly */
+    }
+
+    .input-sm {
+        font-size: 16px;
+        min-height: 2.5rem;
+    }
+
+    .input-lg {
+        min-height: 3.5rem;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+
+    .input,
+    .textarea,
+    .select,
+    .checkbox,
+    .radio {
+        border-width: 2px;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .input,
+    .textarea,
+    .select,
+    .checkbox,
+    .radio {
+        transition: none;
+    }
+}
+
+/* ============================================
+   DARK MODE ADJUSTMENTS
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    .select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+
+    .select:focus {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%230ea5e9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+
+    .input-search {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+
+    .input-search:focus {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35' stroke='%230ea5e9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+}

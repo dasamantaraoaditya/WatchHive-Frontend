@@ -1,0 +1,185 @@
+.notification-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 500px;
+}
+
+.notification-list-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notification-list-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.mark-all-btn {
+    background: transparent;
+    border: none;
+    color: var(--primary-400);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.mark-all-btn:hover {
+    background: rgba(14, 165, 233, 0.1);
+}
+
+.notification-items {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.notification-item-container {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.notification-item {
+    display: flex;
+    padding: 12px 20px;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.2s;
+    position: relative;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 12px 52px;
+}
+
+.accept-btn,
+.reject-btn {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.accept-btn {
+    background: var(--primary-500);
+    border: none;
+    color: white;
+}
+
+.accept-btn:hover {
+    background: var(--primary-600);
+}
+
+.reject-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.reject-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.notification-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.notification-item-container.unread {
+    background: rgba(14, 165, 233, 0.05);
+}
+
+.notification-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.notification-item.unread .notification-content p {
+    color: var(--text-primary);
+}
+
+.actor-name {
+    font-weight: 700;
+    color: var(--primary-400);
+}
+
+.notification-time {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.unread-indicator {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--primary-500);
+    border-radius: 50%;
+}
+
+.notification-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.notification-list-footer {
+    padding: 12px 20px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.notification-list-footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.notification-list-footer a:hover {
+    color: var(--primary-400);
+}
+
+/* Custom scrollbar for notifications */
+.notification-items::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notification-items::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notification-items::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}

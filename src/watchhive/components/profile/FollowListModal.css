@@ -1,0 +1,126 @@
+.follow-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.follow-modal-content {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-light);
+}
+
+.follow-modal-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.follow-modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: capitalize;
+}
+
+.follow-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.follow-modal-close:hover {
+    color: var(--text-primary);
+}
+
+.follow-modal-body {
+    padding: 0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.follow-modal-spinner,
+.follow-modal-empty {
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.follow-user-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.follow-user-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    gap: 1rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.follow-user-item:last-child {
+    border-bottom: none;
+}
+
+.follow-user-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.follow-user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.follow-user-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.follow-user-handle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.view-profile-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.follow-user-item:hover .view-profile-btn {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .view-profile-btn {
+        opacity: 1;
+    }
+}

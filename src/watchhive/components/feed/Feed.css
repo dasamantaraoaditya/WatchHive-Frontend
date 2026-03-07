@@ -1,0 +1,484 @@
+/* ============================================
+   FEED LAYOUT - Modern & Spacious
+   ============================================ */
+.feed-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4) var(--space-12);
+    min-height: 100vh;
+}
+
+.feed-page__header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+}
+
+.feed-page__welcome {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.feed-page__greeting h1 {
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    margin-bottom: var(--space-1);
+}
+
+.feed-page__greeting p {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+}
+
+.gradient-text {
+    background: linear-gradient(to right, var(--primary-400), var(--accent-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Feed Loader */
+.feed-loader {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-8);
+    color: var(--text-tertiary);
+    font-weight: 500;
+}
+
+/* Feed Empty State */
+.feed-empty {
+    text-align: center;
+    padding: var(--space-12) var(--space-4);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-light);
+}
+
+.feed-empty__icon {
+    color: var(--text-tertiary);
+    margin-bottom: var(--space-4);
+    opacity: 0.5;
+}
+
+.feed-empty h2 {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-2);
+}
+
+.feed-empty p {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   FEED CARD - Glassmorphism & Modern Design
+   ============================================ */
+.feed-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    margin-bottom: var(--space-6);
+    transition: all var(--transition-base);
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 2px 4px -1px rgba(0, 0, 0, 0.03),
+        0 0 0 1px rgba(0, 0, 0, 0.02);
+}
+
+.feed-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.08),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04),
+        0 0 0 1px rgba(0, 0, 0, 0.03);
+    border-color: rgba(14, 165, 233, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-card {
+        background: rgba(23, 23, 23, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.3),
+            0 2px 4px -1px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .feed-card:hover {
+        background: rgba(38, 38, 38, 0.9);
+        border-color: rgba(14, 165, 233, 0.3);
+        box-shadow:
+            0 20px 25px -5px rgba(0, 0, 0, 0.5),
+            0 10px 10px -5px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(14, 165, 233, 0.2);
+    }
+}
+
+/* Header */
+.feed-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.feed-card__user-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.feed-card__username {
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    line-height: 1.2;
+}
+
+.feed-card__username:hover {
+    text-decoration: underline;
+}
+
+.feed-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+}
+
+.feed-card__handle {
+    color: inherit;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.feed-card__handle:hover {
+    color: var(--text-secondary);
+}
+
+.feed-card__dot {
+    opacity: 0.5;
+}
+
+/* ============================================
+   SUGGESTION BADGE - Gradient & Modern
+   ============================================ */
+.suggestion-badge {
+    margin-bottom: var(--space-4);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.suggestion-badge span {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    box-shadow:
+        0 4px 6px -1px rgba(236, 72, 153, 0.3),
+        0 2px 4px -1px rgba(236, 72, 153, 0.2);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 4px 6px -1px rgba(236, 72, 153, 0.3),
+            0 2px 4px -1px rgba(236, 72, 153, 0.2);
+    }
+
+    50% {
+        box-shadow:
+            0 4px 12px -1px rgba(236, 72, 153, 0.5),
+            0 2px 8px -1px rgba(236, 72, 153, 0.4);
+    }
+}
+
+/* ============================================
+   CONTENT LAYOUT - Poster & Details
+   ============================================ */
+.feed-card__content {
+    display: flex;
+    gap: var(--space-5);
+    align-items: flex-start;
+}
+
+.feed-card__poster-wrapper {
+    flex-shrink: 0;
+    width: 120px;
+    position: relative;
+}
+
+.feed-card__poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: var(--radius-xl);
+    object-fit: cover;
+    background: linear-gradient(135deg, var(--neutral-200) 0%, var(--neutral-300) 100%);
+    box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.15),
+        0 4px 6px -2px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-base);
+}
+
+.feed-card__poster:hover {
+    transform: scale(1.03);
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, 0.2),
+        0 10px 10px -5px rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-card__poster {
+        background: linear-gradient(135deg, var(--neutral-800) 0%, var(--neutral-700) 100%);
+    }
+}
+
+.feed-card__details {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.feed-card__title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.feed-card__title {
+    font-size: var(--text-lg);
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.feed-card__rating {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: var(--neutral-900);
+    padding: 4px 10px;
+    border-radius: var(--radius-lg);
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(251, 191, 36, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-card__rating {
+        color: var(--neutral-950);
+    }
+}
+
+/* ============================================
+   TAGS - Modern Chips
+   ============================================ */
+.feed-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+}
+
+.feed-card__tag {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--primary-700);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(14, 165, 233, 0.12) 100%);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    transition: all var(--transition-fast);
+}
+
+.feed-card__tag:hover {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(14, 165, 233, 0.2) 100%);
+    border-color: rgba(14, 165, 233, 0.3);
+    transform: translateY(-1px);
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-card__tag {
+        color: var(--primary-300);
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(14, 165, 233, 0.18) 100%);
+        border-color: rgba(14, 165, 233, 0.25);
+    }
+
+    .feed-card__tag:hover {
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(14, 165, 233, 0.28) 100%);
+        border-color: rgba(14, 165, 233, 0.4);
+    }
+}
+
+/* Review Text */
+.feed-card__review {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-top: auto;
+    /* Push to bottom if flex stretch, else normal flow */
+    white-space: pre-wrap;
+}
+
+/* ============================================
+   ACTIONS FOOTER - Modern Interactive Buttons
+   ============================================ */
+.feed-card__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-card__actions {
+        border-top-color: rgba(255, 255, 255, 0.08);
+    }
+}
+
+.feed-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 8px 16px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.feed-action::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(14, 165, 233, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s;
+}
+
+.feed-action:hover::before {
+    width: 200px;
+    height: 200px;
+}
+
+.feed-action:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary-400);
+    color: var(--primary-600);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.15);
+}
+
+.feed-action:active {
+    transform: translateY(0);
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-action {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .feed-action:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--primary-500);
+        color: var(--primary-400);
+    }
+}
+
+.feed-action--active {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+    border-color: var(--error-400);
+    color: var(--error-700);
+}
+
+.feed-action--active:hover {
+    background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+    border-color: var(--error-500);
+    color: var(--error-800);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-action--active {
+        background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%);
+        border-color: var(--error-600);
+        color: var(--error-100);
+    }
+
+    .feed-action--active:hover {
+        background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+        border-color: var(--error-500);
+        color: white;
+    }
+}
+
+.feed-action-icon {
+    font-size: 1.2em;
+    position: relative;
+    z-index: 1;
+}
+
+.feed-action--share {
+    margin-left: auto;
+}
+
+/* Watchlist button in feed actions */
+.ml-auto {
+    margin-left: auto;
+}
+
+.justify-end {
+    justify-content: flex-end;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .feed-container {
+        padding: var(--space-4);
+    }
+
+    .feed-card__content {
+        flex-direction: column;
+    }
+
+    .feed-card__poster-wrapper {
+        width: 100%;
+        max-width: 120px;
+        margin-bottom: var(--space-2);
+    }
+}

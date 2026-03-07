@@ -1,0 +1,102 @@
+/* ============================================
+   FEED PAGE - Modern Layout
+   ============================================ */
+.feed-page {
+    min-height: 100vh;
+    padding: var(--space-12) 0 var(--space-8);
+}
+
+.feed-page__header {
+    margin-bottom: var(--space-10);
+    text-align: center;
+}
+
+.feed-page__welcome {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-3xl);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.05),
+        0 4px 6px -2px rgba(0, 0, 0, 0.03);
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-page__welcome {
+        background: rgba(23, 23, 23, 0.6);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+.feed-page__greeting {
+    text-align: left;
+}
+
+.feed-page__greeting h1 {
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    margin-bottom: var(--space-2);
+    line-height: var(--leading-tight);
+}
+
+.feed-page__greeting p {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+}
+
+@media (max-width: 640px) {
+    .feed-page__welcome {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-5);
+    }
+
+    .feed-page__greeting {
+        text-align: center;
+    }
+
+    .feed-page__greeting h1 {
+        font-size: var(--text-2xl);
+    }
+}
+
+.feed-page__content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.feed-empty {
+    text-align: center;
+    padding: var(--wh-space-16) var(--wh-space-6);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.feed-empty__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: var(--wh-radius-full);
+    background: var(--wh-bg-tertiary);
+    color: var(--wh-primary);
+    margin-bottom: var(--wh-space-6);
+}
+
+.feed-empty h2 {
+    font-size: var(--wh-font-size-2xl);
+    margin-bottom: var(--wh-space-3);
+}
+
+.feed-empty p {
+    font-size: var(--wh-font-size-lg);
+    color: var(--wh-text-tertiary);
+    max-width: 500px;
+    margin: 0 auto;
+}

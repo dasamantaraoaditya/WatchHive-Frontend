@@ -1,0 +1,56 @@
+/* Donation Button Styles */
+.donation-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    /* Very light glass */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    color: var(--text-secondary, #999);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.donation-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+    color: #FFDD00;
+    /* Coffee yellow highlights */
+    border-color: rgba(255, 221, 0, 0.3);
+}
+
+.donation-icon {
+    font-size: 1.25rem;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+@media (max-width: 640px) {
+    .donation-button {
+        bottom: 5rem;
+        /* Above safe area/nav */
+        right: 1.25rem;
+        padding: 0;
+        width: 48px;
+        height: 48px;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .donation-text {
+        display: none;
+    }
+
+    /* Tooltip on mobile tap/hover optional, but icon is clear */
+}

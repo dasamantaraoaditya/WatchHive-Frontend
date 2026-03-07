@@ -1,0 +1,470 @@
+/* ============================================
+   MINDLENS - Modern Psyche Dashboard
+   ============================================ */
+
+.mindlens-page {
+    min-height: 100vh;
+    padding: var(--space-12) 0;
+    position: relative;
+    overflow: hidden;
+    /* Sophisticated deep background - blends with app theme but adds depth */
+    background: radial-gradient(circle at 100% 0%, var(--primary-900) 0%, var(--bg-primary) 50%, var(--bg-primary) 100%);
+}
+
+.mindlens-page::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -10%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, transparent 70%);
+    filter: blur(80px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    .mindlens-page {
+        background: radial-gradient(circle at 100% 0%, #1e1b4b 0%, var(--bg-primary) 70%, var(--bg-primary) 100%);
+    }
+}
+
+.mindlens-header {
+    text-align: center;
+    margin-bottom: var(--space-16);
+    position: relative;
+    z-index: 10;
+}
+
+.mindlens-title {
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: 800;
+    margin-bottom: var(--space-3);
+    background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-700) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.03em;
+}
+
+.mindlens-subtitle {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    max-width: 650px;
+    margin: 0 auto;
+    font-weight: 500;
+    line-height: var(--leading-relaxed);
+}
+
+/* ============================================
+   GRID & CARDS
+   ============================================ */
+.mindlens-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--space-8);
+    position: relative;
+    z-index: 10;
+}
+
+/* Redesigned Glass Card - Aligned with Feed Cards */
+.ml-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius-3xl);
+    padding: var(--space-8);
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 15px -3px rgba(0, 0, 0, 0.05),
+        inset 0 0 20px rgba(255, 255, 255, 0.5);
+    transition: all var(--transition-base);
+}
+
+@media (prefers-color-scheme: dark) {
+    .ml-card {
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.3),
+            inset 0 0 20px rgba(255, 255, 255, 0.02);
+    }
+}
+
+.ml-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary-300);
+}
+
+.ml-card h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-8);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.ml-card h3::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1.25em;
+    background: var(--primary-500);
+    border-radius: var(--radius-full);
+}
+
+/* ============================================
+   SECTIONS
+   ============================================ */
+.ml-mood-section {
+    grid-column: span 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.ml-themes-section {
+    grid-column: span 7;
+}
+
+.ml-insights-section {
+    grid-column: span 12;
+}
+
+.ml-time-section {
+    grid-column: span 12;
+}
+
+/* Soul Persona Styling */
+.full-width {
+    grid-column: span 12;
+}
+
+.ml-persona-section {
+    position: relative;
+    overflow: hidden;
+    padding: var(--space-10);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.persona-content {
+    position: relative;
+    z-index: 2;
+}
+
+.persona-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-6);
+}
+
+.persona-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+}
+
+.persona-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radius-3xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.persona-info {
+    flex: 1;
+}
+
+.persona-name {
+    font-family: var(--font-display);
+    font-size: var(--text-4xl);
+    font-weight: 800;
+    margin-bottom: var(--space-3);
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.persona-description {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 800px;
+}
+
+.persona-visual-accent {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 40%;
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .persona-main {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-6);
+    }
+
+    .persona-icon {
+        width: 100px;
+        height: 100px;
+        font-size: 50px;
+    }
+
+    .persona-name {
+        font-size: var(--text-2xl);
+    }
+
+    .persona-description {
+        font-size: var(--text-base);
+    }
+}
+
+/* Mood Visualization */
+.mood-ring-container {
+    position: relative;
+    width: 240px;
+    height: 240px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: var(--space-6) 0;
+}
+
+.mood-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    filter: blur(25px);
+    opacity: 0.4;
+    animation: rotateMood 15s linear infinite;
+}
+
+.mood-text {
+    position: relative;
+    z-index: 2;
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--space-4);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: var(--shadow-xl), inset 0 0 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+    .mood-text {
+        background: rgba(15, 23, 42, 0.8);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+}
+
+@keyframes rotateMood {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Theme Bars */
+.theme-bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.theme-item {
+    display: grid;
+    grid-template-columns: 140px 1fr 50px;
+    align-items: center;
+    gap: var(--space-6);
+}
+
+.theme-label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+.theme-bar-bg {
+    height: 12px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+}
+
+.theme-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-400), var(--primary-600));
+    border-radius: var(--radius-full);
+    width: 0%;
+    transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.theme-score {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--primary-600);
+}
+
+@media (prefers-color-scheme: dark) {
+    .theme-score {
+        color: var(--primary-400);
+    }
+}
+
+/* Insights List */
+.insights-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-6);
+}
+
+.insight-item {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    padding: var(--space-6);
+    border-radius: var(--radius-2xl);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+    .insight-item {
+        background: rgba(30, 41, 59, 0.4);
+        border-color: rgba(56, 189, 248, 0.2);
+    }
+}
+
+.insight-item::before {
+    content: 'i';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-family: serif;
+    font-style: italic;
+    font-size: 80px;
+    font-weight: 900;
+    opacity: 0.05;
+    color: var(--primary-500);
+}
+
+.highlight {
+    color: var(--primary-600);
+    font-weight: 700;
+    background: rgba(14, 165, 233, 0.1);
+    padding: 2px 6px;
+    border-radius: var(--radius-md);
+}
+
+@media (prefers-color-scheme: dark) {
+    .highlight {
+        color: var(--primary-300);
+        background: rgba(56, 189, 248, 0.15);
+    }
+}
+
+/* Chronobiology bars */
+.ml-time-section .flex {
+    align-items: flex-end;
+}
+
+.time-bar {
+    background: linear-gradient(to top, var(--primary-500), var(--primary-300));
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    opacity: 0.7;
+    transition: all 0.5s ease;
+}
+
+.time-bar:hover {
+    opacity: 1;
+    transform: scaleX(1.1);
+}
+
+/* Loading & States */
+.ml-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+}
+
+.mindlens-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--bg-tertiary);
+    border-top: 4px solid var(--primary-500);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: var(--space-6);
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+    .mindlens-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+    }
+
+    .ml-mood-section,
+    .ml-themes-section {
+        width: 100%;
+    }
+
+    .theme-item {
+        grid-template-columns: 100px 1fr 40px;
+        gap: var(--space-3);
+    }
+}

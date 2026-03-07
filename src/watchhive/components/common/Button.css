@@ -1,0 +1,296 @@
+/* ============================================
+   WatchHive Button System — Consistent Hierarchy
+   ============================================
+   
+   Variants:
+   - primary  : Gradient indigo/purple CTA — "Add Entry", "Save", "Get Started"
+   - secondary: Subtle grey fill — general-purpose, low emphasis
+   - outline  : Bordered, no fill — medium emphasis actions
+   - ghost    : Transparent, text-only — minimal emphasis (nav items, utility)
+   - danger   : Red destructive — "Delete", "Remove"
+   
+   ============================================ */
+
+/* ── Base button reset ── */
+.wh-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s ease;
+
+    /* Default = md */
+    padding: 0.55rem 1.15rem;
+    font-size: 0.875rem;
+}
+
+.wh-button:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+/* ============================================
+   VARIANT: PRIMARY (the hero CTA)
+   ============================================ */
+
+.wh-button--primary {
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.wh-button--primary:hover:not(:disabled) {
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+}
+
+.wh-button--primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+}
+
+/* ============================================
+   VARIANT: SECONDARY (quiet, everyday actions)
+   ============================================ */
+
+.wh-button--secondary {
+    color: #374151;
+    background: #f3f4f6;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+.wh-button--secondary:hover:not(:disabled) {
+    background: #e5e7eb;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.wh-button--secondary:active:not(:disabled) {
+    background: #d1d5db;
+}
+
+@media (prefers-color-scheme: dark) {
+    .wh-button--secondary {
+        color: #e5e7eb;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .wh-button--secondary:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+}
+
+/* ============================================
+   VARIANT: OUTLINE (medium emphasis)
+   ============================================ */
+
+.wh-button--outline {
+    color: #6366f1;
+    background: transparent;
+    border-color: #6366f1;
+}
+
+.wh-button--outline:hover:not(:disabled) {
+    background: rgba(99, 102, 241, 0.06);
+    border-color: #4f46e5;
+    color: #4f46e5;
+}
+
+.wh-button--outline:active:not(:disabled) {
+    background: rgba(99, 102, 241, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wh-button--outline {
+        color: #818cf8;
+        border-color: #818cf8;
+    }
+
+    .wh-button--outline:hover:not(:disabled) {
+        color: #a5b4fc;
+        border-color: #a5b4fc;
+        background: rgba(99, 102, 241, 0.12);
+    }
+}
+
+/* ============================================
+   VARIANT: GHOST (minimal, utility buttons)
+   ============================================ */
+
+.wh-button--ghost {
+    color: #6b7280;
+    background: transparent;
+    border-color: transparent;
+}
+
+.wh-button--ghost:hover:not(:disabled) {
+    color: #374151;
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.wh-button--ghost:active:not(:disabled) {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wh-button--ghost {
+        color: #9ca3af;
+    }
+
+    .wh-button--ghost:hover:not(:disabled) {
+        color: #e5e7eb;
+        background: rgba(255, 255, 255, 0.06);
+    }
+}
+
+/* ============================================
+   VARIANT: DANGER (destructive actions)
+   ============================================ */
+
+.wh-button--danger {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.15);
+}
+
+.wh-button--danger:hover:not(:disabled) {
+    color: #fff;
+    background: #ef4444;
+    border-color: #ef4444;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.wh-button--danger:active:not(:disabled) {
+    background: #dc2626;
+    box-shadow: 0 1px 4px rgba(239, 68, 68, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+    .wh-button--danger {
+        color: #f87171;
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.15);
+    }
+
+    .wh-button--danger:hover:not(:disabled) {
+        color: #fff;
+        background: #ef4444;
+        border-color: #ef4444;
+    }
+}
+
+/* ============================================
+   SIZES
+   ============================================ */
+
+.wh-button--sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 8px;
+    gap: 0.3rem;
+}
+
+.wh-button--md {
+    padding: 0.55rem 1.15rem;
+    font-size: 0.875rem;
+}
+
+.wh-button--lg {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    gap: 0.5rem;
+}
+
+/* ============================================
+   STATES
+   ============================================ */
+
+.wh-button:disabled,
+.wh-button--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.wh-button--full {
+    display: flex;
+    width: 100%;
+}
+
+/* ── Loading ── */
+.wh-button--loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.wh-button__spinner {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.3rem;
+}
+
+.wh-spinner {
+    width: 16px;
+    height: 16px;
+    animation: wh-spin 0.7s linear infinite;
+}
+
+.wh-spinner__circle {
+    stroke: currentColor;
+    stroke-dasharray: 42;
+    stroke-dashoffset: 14;
+    stroke-linecap: round;
+}
+
+.wh-button__text--loading {
+    opacity: 0.7;
+}
+
+@keyframes wh-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   MOBILE
+   ============================================ */
+
+@media (max-width: 640px) {
+    .wh-button--sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.78rem;
+    }
+
+    .wh-button--md {
+        padding: 0.55rem 1rem;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .wh-button {
+        transition: none;
+    }
+
+    .wh-button:hover:not(:disabled) {
+        transform: none;
+    }
+}
