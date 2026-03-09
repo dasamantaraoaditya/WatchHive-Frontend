@@ -1,13 +1,30 @@
 import React, { useEffect } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { Link } from 'react-router-dom';
 import './NotificationsPage.css';
 
 const NotificationsPage: React.FC = () => {
-    const { notifications, loading, fetchNotifications, markAsRead, markAllAsRead, acceptFollowRequest, rejectFollowRequest } = useNotifications();
+    const {
+        notifications,
+        loading,
+        hasMore,
+        fetchNotifications,
+        fetchMore,
+        markAsRead,
+        markAllAsRead,
+        acceptFollowRequest,
+        rejectFollowRequest
+    } = useNotifications();
+
+    const { observerTarget } = useInfiniteScroll({
+        onLoadMore: fetchMore,
+        hasMore,
+        isLoading: loading,
+    });
 
     useEffect(() => {
-        fetchNotifications();
+        fetchNotifications(1);
     }, [fetchNotifications]);
 
     const getNotificationMessage = (n: any) => {
@@ -56,7 +73,7 @@ const NotificationsPage: React.FC = () => {
             <div className="notifications-header">
                 <h1>Notifications</h1>
                 <div className="header-actions">
-                    <button className="refresh-btn" onClick={fetchNotifications}>Refresh</button>
+                    <button className="refresh-btn" onClick={() => fetchNotifications(1)}>Refresh</button>
                     {notifications.length > 0 && (
                         <button className="mark-all-btn" onClick={markAllAsRead}>Mark all as read</button>
                     )}
@@ -124,6 +141,12 @@ const NotificationsPage: React.FC = () => {
                                 )}
                             </div>
                         ))}
+                        <div ref={observerTarget} style={{ height: '20px', margin: '20px 0' }} />
+                        {loading && notifications.length > 0 && (
+                            <div className="text-center py-4" style={{ color: 'var(--text-secondary)' }}>
+                                Loading more activity...
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

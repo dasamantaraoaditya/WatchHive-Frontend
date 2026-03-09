@@ -16,7 +16,7 @@ export interface FeedResponse {
 
 export const feedApi = {
     // Fetch paginated feed
-    getFeed: async (page = 1, limit = 20): Promise<FeedResponse> => {
+    getFeed: async (page = 1, limit = 10): Promise<FeedResponse> => {
         // apiClient.get returns response.data directly based on api.ts implementation
         return apiClient.get('/feed', { params: { page, limit } });
     }

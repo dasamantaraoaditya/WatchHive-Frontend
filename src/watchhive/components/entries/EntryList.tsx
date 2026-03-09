@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { MovieCardSkeleton, ErrorState, EmptyState, Button, WatchlistButton } from '../common';
+import { MovieCardSkeleton, ErrorState, EmptyState, WatchlistButton } from '../common';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import './EntryList.css';
 
 interface EntryListProps {
@@ -283,7 +284,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     const [error, setError] = useState<string | null>(null);
     const [pagination, setPagination] = useState({
         total: 0,
-        limit: 20,
+        limit: 10,
         offset: 0,
         hasMore: false,
     });
@@ -306,6 +307,19 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
         }
     }, [filters]);
 
+    const handleLoadMore = useCallback(() => {
+        if (pagination.hasMore && !isLoading) {
+            loadEntries({ offset: pagination.offset + pagination.limit });
+        }
+    }, [pagination, isLoading, loadEntries]);
+
+    const { observerTarget } = useInfiniteScroll({
+        onLoadMore: handleLoadMore,
+        hasMore: pagination.hasMore,
+        isLoading,
+        enabled: !error,
+    });
+
     useEffect(() => {
         loadEntries();
     }, [loadEntries]);
@@ -320,9 +334,6 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
         }
     };
 
-    const handleLoadMore = () => {
-        loadEntries({ offset: pagination.offset + pagination.limit });
-    };
 
     // Initial Loading State: show grid of skeletons
     if (isLoading && entries.length === 0) {
@@ -378,18 +389,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                 ))}
             </div>
 
-            {pagination.hasMore && (
-                <div className="wh-grid-footer">
-                    <Button
-                        variant="secondary"
-                        onClick={handleLoadMore}
-                        disabled={isLoading}
-                        className="wh-grid-load-more"
-                    >
-                        {isLoading ? 'Loading More...' : 'Load More'}
-                    </Button>
-                </div>
-            )}
+            <div ref={observerTarget} style={{ height: '20px', margin: '20px 0' }} />
         </div>
     );
 };

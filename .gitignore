@@ -35,3 +35,4 @@ logs
 # Coverage directory
 coverage/
 *.lcov
+.vercel

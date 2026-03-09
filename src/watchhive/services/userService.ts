@@ -52,9 +52,12 @@ export const userService = {
         return response.following;
     },
 
-    async searchUsers(query: string): Promise<User[]> {
-        const response: any = await apiClient.get(`/users/search?q=${encodeURIComponent(query)}`);
-        return response.users || [];
+    async searchUsers(query: string, page = 1, limit = 10): Promise<{ users: User[], hasMore: boolean }> {
+        const response: any = await apiClient.get(`/users/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
+        return {
+            users: response.users || [],
+            hasMore: response.hasMore || false
+        };
     },
 };
 

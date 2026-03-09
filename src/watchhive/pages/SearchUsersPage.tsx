@@ -5,6 +5,8 @@ import userService from '../services/userService';
 import { Avatar, Button, Skeleton, ErrorState, EmptyState } from '../components/common';
 import './SearchUsersPage.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import { useCallback } from 'react';
 
 export const SearchUsersPage: React.FC = () => {
     const isOnline = useOnlineStatus();
@@ -12,12 +14,14 @@ export const SearchUsersPage: React.FC = () => {
     const [results, setResults] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(false);
 
     // Debounce search
     useEffect(() => {
         const timer = setTimeout(() => {
             if (query.trim()) {
-                handleSearch();
+                handleSearch(1);
             } else {
                 setResults([]);
                 setLoading(false);
@@ -26,25 +30,33 @@ export const SearchUsersPage: React.FC = () => {
         return () => clearTimeout(timer);
     }, [query]);
 
-    const handleSearch = async () => {
+    const handleSearch = useCallback(async (pageNum = 1) => {
         if (!query.trim()) return;
         setLoading(true);
         setError(null);
         try {
-            // Note: userService.searchUsers should ideally return User[]
-            // Assuming current userService returns direct array or object with users
-            // Let's assume it returns { users: User[] } or just User[]
-            // Based on previous code: await userService.searchUsers(query) -> users
-            const users = await userService.searchUsers(query);
-            // Ensure users is array
-            setResults(Array.isArray(users) ? users : []);
+            const { users, hasMore: more } = await userService.searchUsers(query, pageNum, 10);
+            if (pageNum === 1) {
+                setResults(users);
+            } else {
+                setResults(prev => [...prev, ...users]);
+            }
+            setHasMore(more);
+            setPage(pageNum);
         } catch (err: any) {
             console.error('Search failed:', err);
             setError('Failed to fetch users. Please try again.');
         } finally {
             setLoading(false);
         }
-    };
+    }, [query]);
+
+    const { observerTarget } = useInfiniteScroll({
+        onLoadMore: () => handleSearch(page + 1),
+        hasMore,
+        isLoading: loading,
+        enabled: isOnline && !error,
+    });
 
     const handleFollowToggle = async (user: User) => {
         // Optimistic update
@@ -98,7 +110,7 @@ export const SearchUsersPage: React.FC = () => {
 
                 {error && (
                     <div className="py-8">
-                        <ErrorState message={error} onRetry={handleSearch} />
+                        <ErrorState message={error} onRetry={() => handleSearch(1)} />
                     </div>
                 )}
 
@@ -154,6 +166,14 @@ export const SearchUsersPage: React.FC = () => {
                             </Button>
                         </div>
                     ))}
+                    {/* Infinite Scroll Anchor */}
+                    <div ref={observerTarget} style={{ height: '20px', margin: '20px 0' }} />
+
+                    {loading && results.length > 0 && (
+                        <div className="text-center py-4" style={{ color: 'var(--text-secondary)' }}>
+                            Searching for more users...
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -27,7 +27,7 @@ interface NotificationsResponse {
 }
 
 export const notificationsService = {
-    getNotifications: async (page = 1, limit = 20) => {
+    getNotifications: async (page = 1, limit = 10) => {
         return await api.get<NotificationsResponse>(`/notifications?page=${page}&limit=${limit}`);
     },
 

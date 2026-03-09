@@ -56,7 +56,7 @@ export interface GetEntriesParams {
     rating?: number;
     tag?: string;
     search?: string;
-    limit?: number;
+    limit?: number; // Default should be 10
     offset?: number;
     sortBy?: 'watchedAt' | 'createdAt' | 'rating' | 'title';
     order?: 'asc' | 'desc';

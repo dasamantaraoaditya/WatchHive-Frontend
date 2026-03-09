@@ -7,7 +7,9 @@ interface NotificationContextType {
     notifications: Notification[];
     unreadCount: number;
     loading: boolean;
-    fetchNotifications: () => Promise<void>;
+    hasMore: boolean;
+    fetchNotifications: (page?: number) => Promise<void>;
+    fetchMore: () => Promise<void>;
     markAsRead: (id: string) => Promise<void>;
     markAllAsRead: () => Promise<void>;
     acceptFollowRequest: (requestId: string, notificationId: string) => Promise<void>;
@@ -20,21 +22,38 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
+    const [page, setPage] = useState(1);
     const { user } = useAuth();
 
-    const fetchNotifications = useCallback(async () => {
+    const fetchNotifications = useCallback(async (pageNum = 1) => {
         if (!user) return;
         setLoading(true);
         try {
-            const data = await notificationsService.getNotifications();
-            setNotifications(data.notifications);
+            const data = await notificationsService.getNotifications(pageNum);
+            if (pageNum === 1) {
+                setNotifications(data.notifications);
+            } else {
+                setNotifications(prev => [...prev, ...data.notifications]);
+            }
             setUnreadCount(data.unreadCount);
+            setHasMore(data.pagination.page * data.pagination.limit < data.unreadCount + data.notifications.length); // Simple heuristic or use total if available
+            // Better: notificationsService response has pagination, but let's check hasMore
+            // If we got fewer than limit, hasMore = false.
+            setHasMore(data.notifications.length === data.pagination.limit);
+            setPage(pageNum);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
         } finally {
             setLoading(false);
         }
     }, [user]);
+
+    const fetchMore = useCallback(async () => {
+        if (hasMore && !loading) {
+            await fetchNotifications(page + 1);
+        }
+    }, [hasMore, loading, page, fetchNotifications]);
 
     const markAsRead = async (id: string) => {
         try {
@@ -96,7 +115,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             notifications,
             unreadCount,
             loading,
+            hasMore,
             fetchNotifications,
+            fetchMore,
             markAsRead,
             markAllAsRead,
             acceptFollowRequest,

@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts';
 import { feedApi, FeedItem } from '../services/feed.service';
 import { FeedCard } from '../components/feed/FeedCard';
-import { Avatar, FeedCardSkeleton, ErrorState, EmptyState, Button } from '../components/common';
+import { Avatar, FeedCardSkeleton, ErrorState, EmptyState } from '../components/common';
 import './FeedPage.css';
 import '../components/feed/Feed.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 
 export const FeedPage: React.FC = () => {
     const { user } = useAuth();
@@ -58,6 +59,13 @@ export const FeedPage: React.FC = () => {
             setLoading(false);
         }
     }, []);
+
+    const { observerTarget } = useInfiniteScroll({
+        onLoadMore: () => nextPage && fetchFeed(nextPage),
+        hasMore,
+        isLoading: loading || initialLoading,
+        enabled: isOnline && !error,
+    });
 
     useEffect(() => {
         if (isOnline) {
@@ -125,18 +133,8 @@ export const FeedPage: React.FC = () => {
                         </>
                     )}
 
-                    {/* Load More Button */}
-                    {!loading && !initialLoading && hasMore && nextPage && !error && (
-                        <div className="text-center mt-8 mb-12">
-                            <Button
-                                variant="secondary"
-                                onClick={() => fetchFeed(nextPage)}
-                                className="px-8"
-                            >
-                                Load More
-                            </Button>
-                        </div>
-                    )}
+                    {/* Infinite Scroll Anchor */}
+                    <div ref={observerTarget} style={{ height: '20px', margin: '20px 0' }} />
 
                     {/* Empty State */}
                     {!loading && !initialLoading && items.length === 0 && !error && (
