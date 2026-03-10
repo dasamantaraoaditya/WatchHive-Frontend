@@ -8,22 +8,22 @@ const TMDB_IMG = 'https://image.tmdb.org/t/p';
 
 /* Curated list of iconic/popular movie posters (TMDb poster paths) */
 const SHOWCASE_POSTERS = [
-    { path: '/d5NXSklXo0qyIYkgV94XAgMIckC.jpg', title: 'Dune: Part Two' },
-    { path: '/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg', title: 'Deadpool & Wolverine' },
-    { path: '/kDp1vUBnMpe8ak4rjgl3cLELqjU.jpg', title: 'Interstellar' },
-    { path: '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', title: 'The Shawshank Redemption' },
-    { path: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg', title: 'The Godfather' },
-    { path: '/z1p34vh7dEOnLDmyCrlUVLuoDzd.jpg', title: 'The Matrix' },
-    { path: '/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg', title: 'Lord of the Rings' },
-    { path: '/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', title: 'Fight Club' },
-    { path: '/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg', title: 'Joker' },
-    { path: '/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg', title: 'The Avengers' },
-    { path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', title: 'Inception' },
-    { path: '/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg', title: 'Pulp Fiction' },
-    { path: '/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg', title: 'Parasite' },
-    { path: '/6CoRTJTmijhBLJTUNoVSUNxZMEI.jpg', title: 'Oppenheimer' },
-    { path: '/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg', title: 'Spirited Away' },
-    { path: '/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg', title: 'Avatar' },
+    { title: "Dune: Part Two", path: "/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" },
+    { title: "Deadpool & Wolverine", path: "/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg" },
+    { title: "Interstellar", path: "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
+    { title: "The Shawshank Redemption", path: "/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg" },
+    { title: "The Godfather", path: "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg" },
+    { title: "The Matrix", path: "/p96dm7sCMn4VYAStA6siNz30G1r.jpg" },
+    { title: "Lord of the Rings: The Fellowship of the Ring", path: "/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg" },
+    { title: "Fight Club", path: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg" },
+    { title: "Joker", path: "/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg" },
+    { title: "The Avengers", path: "/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg" },
+    { title: "Inception", path: "/xlaY2zyzMfkhk0HSC5VUwzoZPU1.jpg" },
+    { title: "Pulp Fiction", path: "/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg" },
+    { title: "Parasite", path: "/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" },
+    { title: "Oppenheimer", path: "/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" },
+    { title: "Spirited Away", path: "/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg" },
+    { title: "Avatar", path: "/gKY6q7SjCkAU6FqvqWybDYgUKIF.jpg" },
 ];
 
 /* Split posters into rows for the dual-direction scroll */
