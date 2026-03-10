@@ -192,6 +192,11 @@ export const LoginPage: React.FC = () => {
                             Sign up
                         </Link>
                     </p>
+                    <p className="auth-footer-text mt-4">
+                        <Link to="/watch-hive/privacy" className="auth-footer-link secondary">
+                            Privacy Policy
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>

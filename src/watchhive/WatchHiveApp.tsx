@@ -5,7 +5,7 @@ import { Navbar } from './components/layout';
 import { DonationButton, OfflineBanner } from './components/common';
 import { WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage } from './pages';
+import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage } from './pages';
 import './index.css';
 
 // Protected Route Component
@@ -158,6 +158,11 @@ const AppRoutes: React.FC = () => {
                             <LandingPage />
                         )
                     }
+                />
+
+                <Route
+                    path="/watch-hive/privacy"
+                    element={<PrivacyPolicyPage />}
                 />
 
                 {/* Default Redirect */}

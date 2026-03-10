@@ -373,6 +373,7 @@ export const LandingPage: React.FC = () => {
                     <div className="lp-footer__links">
                         <Link to="/watch-hive/login">Sign In</Link>
                         <Link to="/watch-hive/signup">Sign Up</Link>
+                        <Link to="/watch-hive/privacy">Privacy Policy</Link>
                     </div>
                 </div>
             </footer>

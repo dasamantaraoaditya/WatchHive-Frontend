@@ -232,6 +232,12 @@ export const SignupPage: React.FC = () => {
                                 {isLoading ? 'Creating account...' : 'Sign Up'}
                             </button>
                         </div>
+                        <p className="auth-terms-text">
+                            By signing up, you agree to our{' '}
+                            <Link to="/watch-hive/privacy" className="auth-link">
+                                Privacy Policy
+                            </Link>
+                        </p>
                     </form>
                 </div>
 
