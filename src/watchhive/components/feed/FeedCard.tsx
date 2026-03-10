@@ -169,10 +169,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             <span className="feed-action-icon">💬</span>
                             <span>{commentCount}</span>
                         </button>
-                        <button className="feed-action feed-action--share">
-                            <span className="feed-action-icon">↗</span>
-                            <span>Share</span>
-                        </button>
+
                         {!item.data?.isWatched && targetTmdbId && (
                             <div className="ml-auto">
                                 <WatchlistButton tmdbId={targetTmdbId} />
