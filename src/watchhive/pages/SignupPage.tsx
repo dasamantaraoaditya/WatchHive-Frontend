@@ -109,9 +109,11 @@ export const SignupPage: React.FC = () => {
             <div className="auth-container">
                 {/* Header */}
                 <div className="auth-header">
-                    <div className="auth-logo">
-                        <img src={whLogo} alt="WatchHive" className="auth-logo-img" />
-                    </div>
+                    <Link to="/watch-hive" className="auth-logo-link">
+                        <div className="auth-logo">
+                            <img src={whLogo} alt="WatchHive" className="auth-logo-img" />
+                        </div>
+                    </Link>
                     <h1 className="auth-title">Create Account</h1>
                     <p className="auth-subtitle">
                         Join WatchHive to track and share your movie journey

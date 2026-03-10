@@ -89,9 +89,11 @@ export const LoginPage: React.FC = () => {
             <div className="auth-container">
                 {/* Header */}
                 <div className="auth-header">
-                    <div className="auth-logo">
-                        <img src={whLogo} alt="WatchHive" className="auth-logo-img" />
-                    </div>
+                    <Link to="/watch-hive" className="auth-logo-link">
+                        <div className="auth-logo">
+                            <img src={whLogo} alt="WatchHive" className="auth-logo-img" />
+                        </div>
+                    </Link>
                     <h1 className="auth-title">Welcome Back</h1>
                     <p className="auth-subtitle">
                         Sign in to continue tracking your favorite movies and shows
