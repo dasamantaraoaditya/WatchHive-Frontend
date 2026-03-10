@@ -10,16 +10,33 @@ interface AvatarProps {
     showBorder?: boolean;
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+const getApiBase = () => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+    if (baseUrl) return baseUrl;
+
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (apiUrl && apiUrl.includes('/api/v1')) {
+        return apiUrl.split('/api/v1')[0];
+    }
+    return 'http://localhost:5001';
+};
+
+const API_BASE = getApiBase();
 
 function resolveAvatarUrl(src: string | null | undefined): string | null {
     if (!src) return null;
+
     // If it's already a full URL (e.g. Google profile pic), return as-is
     if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
         return src;
     }
-    // Otherwise it's a relative path from our server
-    return `${API_BASE}${src}`;
+
+    // Otherwise it's a relative path from our server.
+    // Ensure we don't end up with double slashes or missing slashes
+    const cleanBase = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+    const cleanSrc = src.startsWith('/') ? src : `/${src}`;
+
+    return `${cleanBase}${cleanSrc}`;
 }
 
 function getInitials(name: string): string {

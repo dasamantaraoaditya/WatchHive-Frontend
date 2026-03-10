@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Card, Avatar, WatchlistButton } from '../common';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
+import whLogo from '../../assets/images/watchhive-logo.png';
 import './Feed.css';
 
 interface FeedCardProps {
@@ -35,9 +36,12 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const displayName = isSuggestion ? (item.reason || 'Trending Now') : (entryData?.user?.displayName || username);
     const userId = !isSuggestion ? entryData?.user?.id : null;
 
+    // Support both profilePictureUrl and avatarUrl (defensive)
+    const userAvatar = entryData?.user?.profilePictureUrl || entryData?.user?.avatarUrl;
+
     const avatarUrl = isSuggestion
-        ? '/watchhive_logo.png' // Ensure logo exists or use empty as fallback
-        : (entryData?.user?.profilePictureUrl || undefined);
+        ? null // Suggestions don't have user avatars
+        : (userAvatar || undefined);
 
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
@@ -81,8 +85,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                 <div className="feed-card__header">
                     <Link to={userId ? `/watch-hive/profile/${userId}` : '#'}>
                         <Avatar
-                            src={avatarUrl}
-                            name={username}
+                            src={isSuggestion ? whLogo : avatarUrl}
+                            name={isSuggestion ? 'WatchHive' : username}
                             size="md"
                             showBorder={false}
                         />
