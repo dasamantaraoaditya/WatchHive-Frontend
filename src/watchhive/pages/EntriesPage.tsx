@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Entry } from '../services/entries.service';
 import { EntryForm } from '../components/entries/EntryForm';
 import { EntryList } from '../components/entries/EntryList';
@@ -8,6 +9,18 @@ export const EntriesPage: React.FC = () => {
     const [showForm, setShowForm] = useState(false);
     const [editingEntry, setEditingEntry] = useState<Entry | undefined>(undefined);
     const [refreshKey, setRefreshKey] = useState(0);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // Handle auto-open form from navigation state
+    useEffect(() => {
+        if (location.state?.openForm) {
+            setShowForm(true);
+            setEditingEntry(undefined);
+            // Clear the state so it doesn't re-open on refresh
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state, navigate, location.pathname]);
 
     const handleSuccess = () => {
         setShowForm(false);
