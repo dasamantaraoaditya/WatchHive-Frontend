@@ -107,9 +107,6 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                         <span className="watchlist-card__rating">⭐ {rating}</span>
                     )}
                 </div>
-                <span className={`watchlist-badge watchlist-badge--${mediaType}`}>
-                    {mediaType === 'tv' ? 'TV' : 'Movie'}
-                </span>
             </div>
         </div>
     );
