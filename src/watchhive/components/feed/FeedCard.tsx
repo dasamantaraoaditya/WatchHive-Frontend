@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FeedItem } from '../../services/feed.service';
 import { useTmdbDetails } from '../../hooks/useTmdbDetails';
 import { Link } from 'react-router-dom';
-import { Card, Avatar, WatchlistButton } from '../common';
+import { Avatar, WatchlistButton } from '../common';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
 import whLogo from '../../assets/images/watchhive-logo.png';
@@ -71,118 +71,133 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         }
     };
 
+    const actionText = isSuggestion ? 'recommends' : (entryData?.review ? 'reviewed' : 'just watched');
+
     return (
         <>
-            <Card variant="glass" className={`feed-card ${isSuggestion ? 'feed-card--suggestion' : ''} mb-6`}>
-                {/* Suggestion Badge */}
+            <div className={`feed-card glass group ${isSuggestion ? 'feed-card--suggestion' : ''}`}>
+                {/* Suggestion Badge (Optional: if we want to keep it explicitly visual outside the text) */}
                 {isSuggestion && (
-                    <div className="suggestion-badge">
-                        <span>✨ Recommended for You</span>
+                    <div className="absolute -top-3 left-6 bg-primary text-background-dark text-xs font-bold px-3 py-1 rounded-full border border-primary/20 shadow-sm z-10">
+                        ✨ Recommended for You
                     </div>
                 )}
 
-                {/* Header */}
-                <div className="feed-card__header">
-                    <Link to={userId ? `/watch-hive/profile/${userId}` : '#'}>
-                        <Avatar
-                            src={isSuggestion ? whLogo : avatarUrl}
-                            name={isSuggestion ? 'WatchHive' : username}
-                            size="md"
-                            showBorder={false}
-                        />
-                    </Link>
-                    <div className="feed-card__user-info">
-                        {isSuggestion ? (
-                            <span className="feed-card__username">{displayName}</span>
-                        ) : (
-                            <Link to={`/watch-hive/profile/${userId}`} className="feed-card__username">
-                                {displayName}
-                            </Link>
-                        )}
-                        <div className="feed-card__meta">
-                            <Link to={userId ? `/watch-hive/profile/${userId}` : '#'} className="feed-card__handle">
-                                @{username}
-                            </Link>
-                            <span className="feed-card__dot">•</span>
-                            <span>{timestamp}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="feed-card__content">
-                    {posterUrl && (
-                        <div className="feed-card__poster-wrapper">
-                            <img
-                                src={posterUrl}
-                                alt={title}
-                                className="feed-card__poster"
-                                loading="lazy"
+                {/* Header: Avatar, Name & Action */}
+                <div className="feed-card-header">
+                    <div className="feed-card-avatar-wrapper ring-2 ring-primary ring-offset-4 ring-offset-background-dark">
+                        <Link to={userId ? `/watch-hive/profile/${userId}` : '#'}>
+                            <Avatar
+                                src={isSuggestion ? whLogo : avatarUrl}
+                                name={isSuggestion ? 'WatchHive' : username}
+                                size="md"
+                                showBorder={false}
                             />
-                        </div>
-                    )}
-
-                    <div className="feed-card__details">
-                        <div className="feed-card__title-row">
-                            <h3 className="feed-card__title">{title}</h3>
-                            {rating && (
-                                <span className="feed-card__rating">
-                                    <span className="text-yellow-400 mr-1">★</span>
-                                    {Number(rating).toFixed(1)}
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Tags */}
-                        {!isSuggestion && entryData.tags && entryData.tags.length > 0 && (
-                            <div className="feed-card__tags">
-                                {entryData.tags.map((tag: string, i: number) => (
-                                    <span key={i} className="feed-card__tag">#{tag}</span>
-                                ))}
-                            </div>
-                        )}
-
-                        <div className="feed-card__review">
-                            {review ? (
-                                <p>{review}</p>
-                            ) : (
-                                <i className="text-secondary opacity-75">No review provided.</i>
-                            )}
+                        </Link>
+                    </div>
+                    
+                    <div className="feed-card-header-info">
+                        <div className="flex items-center justify-between w-full">
+                            <p className="feed-card-header-text">
+                                {isSuggestion ? (
+                                    <span className="font-semibold text-slate-100">{displayName}</span>
+                                ) : (
+                                    <Link to={`/watch-hive/profile/${userId}`} className="font-semibold text-slate-100 hover:text-primary transition-colors">
+                                        {displayName}
+                                    </Link>
+                                )}
+                                {' '}
+                                <span className="text-secondary font-normal">{actionText}</span>
+                                {' '}
+                                <span className="font-medium text-slate-200">{title}</span>
+                            </p>
+                            <span className="feed-card-time">{timestamp}</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Actions */}
-                {!isSuggestion && (
-                    <div className="feed-card__actions">
-                        <button
-                            className={`feed-action ${isLiked ? 'feed-action--active' : ''}`}
-                            onClick={handleLike}
-                        >
-                            <span className="feed-action-icon">{isLiked ? '❤️' : '🤍'}</span>
-                            <span>{likeCount}</span>
-                        </button>
-                        <button
-                            className="feed-action"
-                            onClick={() => setShowComments(true)}
-                        >
-                            <span className="feed-action-icon">💬</span>
-                            <span>{commentCount}</span>
-                        </button>
+                {/* Content: Poster Image */}
+                {posterUrl && (
+                    <div className="feed-card-poster-container">
+                        <div className="feed-card-poster-gradient"></div>
+                        <img
+                            src={posterUrl}
+                            alt={title}
+                            className="feed-card-poster-img"
+                            loading="lazy"
+                        />
+                        <div className="feed-card-poster-badges">
+                            {rating && (
+                                <div className="feed-card-rating">
+                                    <span className="material-symbols-outlined text-primary text-xl">grade</span>
+                                    <span className="font-bold text-white text-lg">{Number(rating).toFixed(1)}</span>
+                                </div>
+                            )}
+                            
+                            {/* Tags (if any exist) */}
+                            {!isSuggestion && entryData?.tags && entryData.tags.length > 0 && (
+                                <div className="feed-card-tags">
+                                    {entryData.tags.slice(0, 2).map((tag: string, i: number) => (
+                                        <span key={i} className="feed-card-tag">#{tag}</span>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
 
-                        {!item.data?.isWatched && targetTmdbId && (
-                            <div className="ml-auto">
-                                <WatchlistButton tmdbId={targetTmdbId} />
-                            </div>
+                {/* Review / MindLens Insight Section */}
+                {review && (
+                    <div className="feed-card-insight-box">
+                        <span className="material-symbols-outlined text-primary text-xl mt-0.5">psychology</span>
+                        <div>
+                            <p className="insight-title">
+                                {isSuggestion ? 'Why you might like this' : (entryData?.review ? 'Review' : 'MindLens Insight')}
+                            </p>
+                            <p className="insight-text">"{review}"</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Actions Bar */}
+                <div className="feed-card-actions-bar">
+                    <div className="flex gap-6">
+                        {!isSuggestion && (
+                            <>
+                                <button
+                                    className={`action-btn ${isLiked ? 'action-btn--liked' : ''}`}
+                                    onClick={handleLike}
+                                >
+                                    <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'fill-1' : ''}`}>favorite</span>
+                                    <span className="text-sm font-medium">{likeCount}</span>
+                                </button>
+                                <button
+                                    className="action-btn"
+                                    onClick={() => setShowComments(true)}
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">chat_bubble</span>
+                                    <span className="text-sm font-medium">{commentCount}</span>
+                                </button>
+                            </>
+                        )}
+                        {isSuggestion && (
+                            <button className="action-btn">
+                                <span className="material-symbols-outlined text-[20px]">thumb_up</span>
+                                <span className="text-sm font-medium">Show more like this</span>
+                            </button>
                         )}
                     </div>
-                )}
-                {isSuggestion && targetTmdbId && (
-                    <div className="feed-card__actions justify-end">
-                        {!item.data?.isWatched && <WatchlistButton tmdbId={targetTmdbId} />}
+                    
+                    <div className="flex items-center gap-4">
+                        <button className="icon-only-btn" title="Share via WatchHive">
+                            <span className="material-symbols-outlined text-[20px]">share</span>
+                        </button>
+                        {!item.data?.isWatched && targetTmdbId && (
+                            <WatchlistButton tmdbId={targetTmdbId} />
+                        )}
                     </div>
-                )}
-            </Card>
+                </div>
+            </div>
 
             {/* Comments Modal */}
             {!isSuggestion && entryData && (

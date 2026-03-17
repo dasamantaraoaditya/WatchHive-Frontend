@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts';
-import { Navbar } from './components/layout';
+import { Sidebar } from './components/layout';
 import { DonationButton, OfflineBanner } from './components/common';
 import { WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -67,10 +67,12 @@ const AppRoutes: React.FC = () => {
     const { isAuthenticated } = useAuth();
 
     return (
-        <>
+        <div className="app-layout">
             <OfflineBanner />
-            {isAuthenticated && <Navbar />}
-            <Routes>
+            {isAuthenticated && <Sidebar />}
+            {/* Main content area needs to be pushed to the right to accommodate the 256px wide fixed sidebar */}
+            <main className={`app-main ${isAuthenticated ? 'app-main--with-sidebar' : ''}`}>
+                <Routes>
                 {/* Public Routes */}
                 <Route
                     path="/watch-hive/login"
@@ -169,7 +171,8 @@ const AppRoutes: React.FC = () => {
                 <Route path="*" element={<Navigate to="/watch-hive" replace />} />
             </Routes>
             <DonationButton />
-        </>
+            </main>
+        </div>
     );
 };
 

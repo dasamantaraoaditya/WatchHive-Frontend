@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts';
+
 import { feedApi, FeedItem } from '../services/feed.service';
 import { FeedCard } from '../components/feed/FeedCard';
 import { Avatar, FeedCardSkeleton, ErrorState, EmptyState } from '../components/common';
@@ -10,7 +10,6 @@ import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 
 export const FeedPage: React.FC = () => {
-    const { user } = useAuth();
     const isOnline = useOnlineStatus();
 
     // State
@@ -90,24 +89,19 @@ export const FeedPage: React.FC = () => {
     }
 
     return (
-        <div className="feed-page">
-            <div className="container">
-                <div className="feed-page__header">
-                    <div className="feed-page__welcome">
-                        <Avatar
-                            src={user?.profilePictureUrl}
-                            name={user?.displayName || user?.username || '?'}
-                            size="lg"
-                            showBorder
-                        />
-                        <div className="feed-page__greeting">
-                            <h1>
-                                Welcome, <span className="gradient-text">{user?.displayName || user?.username}</span>
-                            </h1>
-                            <p>Here's what's happening in your cinema world.</p>
-                        </div>
+        <div className="feed-page-layout">
+            <div className="feed-page-main">
+                <header className="feed-page-header glass-header">
+                    <h2>The Hive Feed</h2>
+                    <div className="feed-page-header-actions">
+                        <button className="icon-btn" title="Notifications">
+                            <span className="material-symbols-outlined">notifications</span>
+                        </button>
+                        <button className="icon-btn" title="Filter Settings">
+                            <span className="material-symbols-outlined">tune</span>
+                        </button>
                     </div>
-                </div>
+                </header>
 
                 <div className="feed-container">
                     {/* Error State (Dismissable or retryable) */}
@@ -154,6 +148,63 @@ export const FeedPage: React.FC = () => {
                 </div>
             </div>
 
+            {/* Right Sidebar Widgets */}
+            <aside className="feed-right-sidebar pr-6">
+                <div className="search-widget relative">
+                    <span className="material-symbols-outlined search-icon">search</span>
+                    <input type="text" placeholder="Explore the hive..." className="search-input" />
+                </div>
+
+                <section className="widget-section">
+                    <div className="widget-header">
+                        <h3>
+                            <span className="material-symbols-outlined text-primary leading-none">trending_up</span>
+                            Trending in Hive
+                        </h3>
+                    </div>
+                    <div className="widget-content">
+                        <div className="trending-item">
+                            <p className="trending-context">Trending in Sci-Fi</p>
+                            <p className="trending-title">#DuneTwo</p>
+                            <p className="trending-stats">12.4k Buzzes</p>
+                        </div>
+                        <div className="trending-item">
+                            <p className="trending-context">Psychology</p>
+                            <p className="trending-title">The Satoshi Kon Legacy</p>
+                            <p className="trending-stats">8.1k Buzzes</p>
+                        </div>
+                        <div className="trending-item">
+                            <p className="trending-context">Music</p>
+                            <p className="trending-title">Organic House Mixes</p>
+                            <p className="trending-stats">2.9k Buzzes</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="widget-section">
+                    <h3 className="mb-4 font-bold text-slate-100">Suggested Follows</h3>
+                    <div className="widget-content">
+                        <div className="suggestion-item">
+                            <Avatar src={null} name="Lila Moon" size="sm" />
+                            <div className="suggestion-info">
+                                <p className="suggestion-name">Lila Moon</p>
+                                <p className="suggestion-role">Film Analyst</p>
+                            </div>
+                            <button className="btn-follow">Follow</button>
+                        </div>
+                        <div className="suggestion-item">
+                            <Avatar src={null} name="Zen Master" size="sm" />
+                            <div className="suggestion-info">
+                                <p className="suggestion-name">Zen Master</p>
+                                <p className="suggestion-role">Meditation Guide</p>
+                            </div>
+                            <button className="btn-follow-outline">Follow</button>
+                        </div>
+                    </div>
+                    <button className="btn-show-more">Show more</button>
+                </section>
+            </aside>
+
             {/* Quick Add Floating Action Button */}
             <Link
                 to="/watch-hive/entries"
@@ -161,10 +212,9 @@ export const FeedPage: React.FC = () => {
                 className="quick-add-fab"
                 title="Quick Add Entry"
             >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
+                <div className="fab-glow"></div>
+                <span className="material-symbols-outlined text-3xl font-bold">add_reaction</span>
+                <div className="fab-tooltip">Add to Hive</div>
             </Link>
         </div>
     );
