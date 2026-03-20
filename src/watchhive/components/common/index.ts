@@ -9,3 +9,5 @@ export * from './EmptyState';
 export * from './OfflineBanner';
 export * from './WatchlistButton';
 export * from './HiveDatePicker';
+export * from './Modal';
+export * from './BadgeModal';

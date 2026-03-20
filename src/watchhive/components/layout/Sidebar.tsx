@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts';
-import { Avatar } from '../common';
+import { Avatar, BadgeModal } from '../common';
 import whLogo from '../../assets/images/watchhive-logo.png';
 import './Sidebar.css';
 
 export const Sidebar: React.FC = () => {
     const { user, isAuthenticated, logout } = useAuth();
+    const [isBadgeModalOpen, setIsBadgeModalOpen] = React.useState(false);
     const location = useLocation();
 
     if (!isAuthenticated) return null;
@@ -50,11 +51,41 @@ export const Sidebar: React.FC = () => {
                 
                 <div className="wh-sidebar__bottom">
                     <div className="wh-sidebar__honey-level">
-                        <p className="wh-sidebar__honey-title">Honey level</p>
-                        <div className="wh-sidebar__progress-bar">
-                            <div className="wh-sidebar__progress-fill" style={{ width: '72%' }}></div>
+                        <div className="wh-sidebar__honey-header">
+                            <p className="wh-sidebar__honey-title">Honey level {user?.level || 1}</p>
+                            <button 
+                                className="wh-sidebar__honey-hint"
+                                title="🐝 Hive Mastery Info"
+                                onClick={() => setIsBadgeModalOpen(true)}
+                            >
+                                <div className="wh-sidebar__honey-hint-bg"></div>
+                                <span className="material-symbols-outlined wh-sidebar__honey-hint-icon">
+                                    auto_awesome
+                                </span>
+                            </button>
                         </div>
-                        <p className="wh-sidebar__honey-text">720 XP until next swarm</p>
+                        
+                        {(() => {
+                            const level = user?.level || 1;
+                            const xp = user?.xp || 0;
+                            const xpAtCurrent = Math.floor(100 * Math.pow(level - 1, 1.5));
+                            const xpAtNext = Math.floor(100 * Math.pow(level, 1.5));
+                            const progress = xpAtNext > xpAtCurrent 
+                                ? Math.min(100, Math.max(0, ((xp - xpAtCurrent) / (xpAtNext - xpAtCurrent)) * 100))
+                                : 0;
+                            const remaining = xpAtNext - xp;
+
+                            return (
+                                <>
+                                    <div className="wh-sidebar__progress-bar">
+                                        <div className="wh-sidebar__progress-fill" style={{ width: `${progress}%` }}></div>
+                                    </div>
+                                    <p className="wh-sidebar__honey-text">
+                                        {remaining > 0 ? `${remaining} XP until next swarm` : 'Maximum Level Reached! 👑'}
+                                    </p>
+                                </>
+                            );
+                        })()}
                     </div>
                     
                     <div className="wh-sidebar__user">
@@ -73,6 +104,12 @@ export const Sidebar: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            <BadgeModal 
+                isOpen={isBadgeModalOpen} 
+                onClose={() => setIsBadgeModalOpen(false)} 
+                userBadges={user?.badges || []} 
+            />
         </aside>
     );
 };

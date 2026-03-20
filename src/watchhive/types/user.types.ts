@@ -8,6 +8,9 @@ export interface User {
     profilePictureUrl: string | null;
     location: string | null;
     isPrivate: boolean;
+    xp: number;
+    level: number;
+    badges: Badge[];
     createdAt: string;
     updatedAt: string;
     isFollowing?: boolean;
@@ -16,6 +19,14 @@ export interface User {
         following: number;
         entries: number;
     };
+}
+
+export interface Badge {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    unlockedAt: string;
 }
 
 export interface UserStats {

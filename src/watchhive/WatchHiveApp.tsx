@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts';
-import { Sidebar } from './components/layout';
-import { DonationButton, OfflineBanner } from './components/common';
+import { Sidebar, QuickAddFAB } from './components/layout';
+import { DonationButton, OfflineBanner, Modal } from './components/common';
+import { EntryForm } from './components/entries/EntryForm';
 import { WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage } from './pages';
@@ -65,6 +66,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 // App Routes Component
 const AppRoutes: React.FC = () => {
     const { isAuthenticated } = useAuth();
+    const [isQuickAddOpen, setIsQuickAddOpen] = React.useState(false);
 
     return (
         <div className="app-layout">
@@ -170,7 +172,25 @@ const AppRoutes: React.FC = () => {
                 {/* Default Redirect */}
                 <Route path="*" element={<Navigate to="/watch-hive" replace />} />
             </Routes>
-            <DonationButton />
+                
+                {isAuthenticated && (
+                    <>
+                        <QuickAddFAB onClick={() => setIsQuickAddOpen(true)} />
+                        
+                        <Modal 
+                            isOpen={isQuickAddOpen} 
+                            onClose={() => setIsQuickAddOpen(false)}
+                            title="Log your latest watch"
+                        >
+                            <EntryForm 
+                                onSuccess={() => setIsQuickAddOpen(false)} 
+                                onCancel={() => setIsQuickAddOpen(false)} 
+                            />
+                        </Modal>
+                    </>
+                )}
+                
+                <DonationButton />
             </main>
         </div>
     );

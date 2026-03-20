@@ -254,17 +254,6 @@ export const FeedPage: React.FC = () => {
                 </section>
             </aside>
 
-            {/* Quick Add Floating Action Button */}
-            <Link
-                to="/watch-hive/entries"
-                state={{ openForm: true }}
-                className="quick-add-fab"
-                title="Quick Add Entry"
-            >
-                <div className="fab-glow"></div>
-                <span className="material-symbols-outlined text-3xl font-bold">add_reaction</span>
-                <div className="fab-tooltip">Add to Hive</div>
-            </Link>
         </div>
     );
 };

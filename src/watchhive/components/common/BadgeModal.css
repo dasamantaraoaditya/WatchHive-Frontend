@@ -1,0 +1,195 @@
+/* ============================================
+   WatchHive Badge Modal
+   ============================================ */
+
+.wh-badge-modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    background: rgba(45, 41, 38, 0.4);
+    backdrop-filter: blur(8px);
+    animation: fadeIn var(--transition-base) ease-out;
+}
+
+.wh-badge-modal__container {
+    background: var(--neutral-0);
+    width: 92%;
+    max-width: 380px;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    border: 1px solid var(--border-light);
+    animation: slideUp 0.3s ease-out;
+    position: relative;
+    z-index: 10000;
+}
+
+.wh-badge-modal__header {
+    padding: var(--space-6);
+    background: var(--neutral-0);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wh-badge-modal__title {
+    font-size: var(--text-lg);
+    font-weight: var(--font-extrabold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.wh-badge-modal__subtitle {
+    font-size: 0.7rem;
+    font-weight: var(--font-medium);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+.wh-badge-modal__close {
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-full);
+    border: none;
+    background: var(--neutral-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.wh-badge-modal__close:hover {
+    background: var(--neutral-200);
+    color: var(--text-primary);
+}
+
+.wh-badge-modal__content {
+    padding: var(--space-6);
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.wh-badge-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+}
+
+.wh-badge-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-base);
+}
+
+.wh-badge-item--earned {
+    background: var(--primary-50);
+    border-color: var(--primary-200);
+}
+
+.wh-badge-item--locked {
+    background: var(--neutral-50);
+    opacity: 0.7;
+}
+
+.wh-badge-item__icon-box {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wh-badge-item__icon-box--earned {
+    background: var(--primary-500);
+    color: var(--neutral-0);
+    box-shadow: 0 4px 10px rgba(255, 183, 0, 0.2);
+}
+
+.wh-badge-item__icon-box--locked {
+    background: var(--neutral-200);
+    color: var(--neutral-400);
+}
+
+.wh-badge-item__details {
+    flex: 1;
+}
+
+.wh-badge-item__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+.wh-badge-item__name {
+    font-size: var(--text-sm);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.wh-badge-item__name--locked {
+    color: var(--text-tertiary);
+}
+
+.wh-badge-item__tag {
+    font-size: 0.6rem;
+    font-weight: var(--font-bold);
+    color: var(--primary-600);
+    background: var(--neutral-0);
+    padding: 1px 6px;
+    border-radius: var(--radius-full);
+}
+
+.wh-badge-item__description {
+    font-size: 0.8rem;
+    line-height: normal;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.wh-badge-item__description--locked {
+    color: var(--text-tertiary);
+}
+
+.wh-badge-modal__footer {
+    padding: var(--space-4);
+    background: var(--neutral-50);
+    border-top: 1px solid var(--border-light);
+    text-align: center;
+}
+
+.wh-badge-modal__footer-text {
+    font-size: 0.65rem;
+    font-weight: var(--font-bold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0;
+}
+
+.wh-badge-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+}
+
+/* Animations (Reuse from index.css or define here) */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
