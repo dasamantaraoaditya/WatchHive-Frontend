@@ -72,6 +72,32 @@ export const ProfilePage: React.FC = () => {
         }
     };
 
+    const handleInvite = async () => {
+        const inviteUrl = `${window.location.origin}/signup?ref=${user.username}`;
+        const inviteText = `Join me on WatchHive! Check out my cinematic journey and let's build our movie hive together. 🐝🎥`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'WatchHive Invite',
+                    text: inviteText,
+                    url: inviteUrl,
+                });
+            } catch (err) {
+                console.log('Share failed or canceled', err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(`${inviteText} ${inviteUrl}`);
+                setSuccessMsg('Invite link copied to clipboard!');
+                setTimeout(() => setSuccessMsg(null), 3000);
+            } catch (err) {
+                console.error('Failed to copy link', err);
+                setError('Failed to copy link');
+            }
+        }
+    };
+
     const handleRemoveAvatar = async () => {
         setError(null); setSuccessMsg(null); setUploading(true);
         try {
@@ -163,6 +189,18 @@ export const ProfilePage: React.FC = () => {
                             <span className="text-lg font-black text-[#2D2926] group-hover:text-[#ffb700] transition-colors">{stats?.followingCount || 0}</span>
                             <span className="text-[9px] font-bold uppercase tracking-widest text-[#2D2926]/40 group-hover:text-[#2D2926]">Following</span>
                         </div>
+
+                        {/* Invite Hub */}
+                        <div className="w-px h-8 bg-[#ffb700]/10 mx-2 hidden md:block"></div>
+                        <button 
+                            onClick={handleInvite}
+                            className="flex flex-col items-center group/invite transition-transform active:scale-95"
+                        >
+                            <div className="w-9 h-9 rounded-xl bg-[#ffb700]/5 flex items-center justify-center text-[#ffb700] border border-[#ffb700]/10 group-hover/invite:bg-[#ffb700] group-hover/invite:text-white group-hover/invite:border-[#ffb700] transition-all">
+                                <span className="material-symbols-outlined text-lg">share</span>
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-[#ffb700] mt-1.5 opacity-0 group-hover/invite:opacity-100 transition-opacity">Invite</span>
+                        </button>
                     </div>
                 </main>
             </div>

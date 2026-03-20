@@ -14,34 +14,28 @@
 
 /* Primary state (Add) */
 .wh-button--primary.watchlist-btn {
-    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%) !important;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    background: #ffb700 !important;
+    box-shadow: 0 4px 12px rgba(255, 183, 0, 0.2);
     border: none !important;
+    color: white !important;
 }
 
 .wh-button--primary.watchlist-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(14, 165, 233, 0.4);
-    filter: brightness(1.1);
+    box-shadow: 0 6px 15px rgba(255, 183, 0, 0.3);
+    filter: brightness(1.05);
 }
 
 /* Secondary state (In List) */
 .wh-button--secondary.watchlist-btn {
-    background: rgba(14, 165, 233, 0.1) !important;
-    color: var(--primary-600) !important;
-    border: 1px solid rgba(14, 165, 233, 0.3) !important;
+    background: rgba(255, 183, 0, 0.1) !important;
+    color: #ffb700 !important;
+    border: 1px solid rgba(255, 183, 0, 0.3) !important;
     backdrop-filter: blur(8px);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wh-button--secondary.watchlist-btn {
-        background: rgba(14, 165, 233, 0.15) !important;
-        color: var(--primary-300) !important;
-    }
-}
-
 .wh-button--secondary.watchlist-btn:hover {
-    background: rgba(14, 165, 233, 0.2) !important;
+    background: rgba(255, 183, 0, 0.15) !important;
 }
 
 /* Variant Icon (Used in feeds usually) */
@@ -61,24 +55,24 @@
 }
 
 .watchlist-btn-icon:hover {
-    background: var(--bg-secondary);
-    border-color: var(--primary-400);
-    color: var(--primary-600);
+    background: white;
+    border-color: #ffb700;
+    color: #ffb700;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(14, 165, 233, 0.15);
+    box-shadow: 0 4px 12px rgba(255, 183, 0, 0.15);
 }
 
 .watchlist-btn-icon.active {
-    background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+    background: #ffb700;
     color: white;
     border: none;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 183, 0, 0.25);
 }
 
 .watchlist-btn-icon.active:hover {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-    transform: translateY(-2px) rotate(90deg);
+    background: #e3a300;
+    box-shadow: 0 4px 12px rgba(227, 163, 0, 0.3);
+    transform: translateY(-2px);
 }
 
 @media (prefers-color-scheme: dark) {

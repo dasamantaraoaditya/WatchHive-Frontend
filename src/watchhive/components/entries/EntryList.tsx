@@ -152,24 +152,28 @@ const EntryCard: React.FC<{
 
                 {/* Hover Actions (Edit/Delete/Watchlist) */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                    <WatchlistButton tmdbId={entry.tmdbId} variant="icon" className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-[#ffb700] hover:text-[#2D2926] transition-all flex items-center justify-center border border-white/20" />
+                    <WatchlistButton 
+                        tmdbId={entry.tmdbId} 
+                        variant="icon" 
+                        className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md text-[#2D2926]/40 hover:text-[#ffb700] hover:bg-white hover:scale-105 transition-all flex items-center justify-center border border-[#ffb700]/10 shadow-sm" 
+                    />
                     
                     {onEdit && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onEdit(entry); }}
-                            className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-blue-500 transition-all flex items-center justify-center border border-white/20 shadow-sm"
+                            className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md text-[#2D2926]/40 hover:text-[#ffb700] hover:bg-white hover:scale-105 transition-all flex items-center justify-center border border-[#ffb700]/10 shadow-sm"
                             title="Edit entry"
                         >
-                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                            <span className="material-symbols-outlined text-[18px]">edit_note</span>
                         </button>
                     )}
                     {onDelete && (
                         <button
                             onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
-                            className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-rose-500 transition-all flex items-center justify-center border border-white/20 shadow-sm"
+                            className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md text-[#2D2926]/40 hover:text-rose-500 hover:bg-rose-50 hover:scale-105 transition-all flex items-center justify-center border border-[#ffb700]/10 shadow-sm"
                             title="Delete entry"
                         >
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                            <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
                         </button>
                     )}
                 </div>
@@ -204,14 +208,14 @@ const EntryCard: React.FC<{
                 )}
 
                 {/* Meta Row: Date & Location */}
-                <div className="flex items-center gap-4 text-[13px] font-semibold text-[#2D2926]/50">
-                    <span className="flex items-center gap-1.5 whitespace-nowrap">
-                        <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                <div className="flex items-center gap-4 text-[13px] font-bold text-[#2D2926]/30">
+                    <span className="flex items-center gap-1.5 whitespace-nowrap group/meta hover:text-[#ffb700] transition-colors">
+                        <span className="material-symbols-outlined text-[18px] text-[#ffb700]/60">calendar_today</span>
                         {formatDate(entry.watchedAt)}
                     </span>
                     {entry.watchLocation && (
-                        <span className="flex items-center gap-1.5 truncate">
-                            <span className="material-symbols-outlined text-[16px]">location_on</span>
+                        <span className="flex items-center gap-1.5 truncate group/meta hover:text-[#ffb700] transition-colors">
+                            <span className="material-symbols-outlined text-[18px] text-[#ffb700]/60">distance</span>
                             <span className="truncate">{entry.watchLocation}</span>
                         </span>
                     )}
