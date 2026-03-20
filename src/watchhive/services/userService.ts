@@ -63,6 +63,10 @@ export const userService = {
         const response: any = await apiClient.get('/users/suggested');
         return response.users || [];
     },
+
+    async getDetailedStats(days = 30, type?: string): Promise<any> {
+        return apiClient.get('/stats/detailed', { params: { days, type } });
+    },
 };
 
 export default userService;
