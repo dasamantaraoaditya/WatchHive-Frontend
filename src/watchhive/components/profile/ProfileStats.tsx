@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { userService } from '../../services';
 
 interface StatsData {
@@ -7,8 +7,12 @@ interface StatsData {
         averageRating: number;
         daysAnalyzed: number;
     };
-    timeSeries: { date: string; count: number }[];
-    genreBreakdown: { name: string; count: number }[];
+    timeSeries: { 
+        date: string; 
+        count: number; 
+        items?: { id: string; title: string; type: string; rating?: string }[] 
+    }[];
+    availableGenres: string[];
     typeBreakdown: { name: string; count: number }[];
 }
 
@@ -17,13 +21,18 @@ export const ProfileStats: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [days, setDays] = useState(30);
     const [type, setType] = useState<string>('');
+    const [genre, setGenre] = useState<string>('');
+    const [minRating, setMinRating] = useState<number>(0);
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
+
+    const [hoveredDay, setHoveredDay] = useState<number | null>(null);
+    const tooltipRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchStats = async () => {
             setLoading(true);
             try {
-                const res = await userService.getDetailedStats(days, type || undefined);
+                const res = await userService.getDetailedStats(days, type || undefined, genre || undefined, minRating || undefined);
                 setData(res);
             } catch (err) {
                 console.error('Failed to fetch stats:', err);
@@ -32,7 +41,7 @@ export const ProfileStats: React.FC = () => {
             }
         };
         fetchStats();
-    }, [days, type]);
+    }, [days, type, genre, minRating]);
 
     if (loading && !data) {
         return (
@@ -49,19 +58,25 @@ export const ProfileStats: React.FC = () => {
                 <div className="w-20 h-20 rounded-[28px] bg-[#ffb700]/5 flex items-center justify-center mb-6 border border-[#ffb700]/10">
                     <span className="material-symbols-outlined text-4xl text-[#ffb700]/30">analytics</span>
                 </div>
-                <h3 className="text-xl font-black text-[#2D2926] tracking-tight mb-2">Not Enough Data</h3>
-                <p className="text-[#2D2926]/40 font-bold max-w-[300px] text-sm leading-relaxed">
-                    Watch more content and log your entries to see your personalized cinematic analytics!
+                <h3 className="text-xl font-black text-[#2D2926] tracking-tight mb-2">Filters Too Strict?</h3>
+                <p className="text-[#2D2926]/40 font-bold max-w-[300px] text-sm leading-relaxed mb-6">
+                    We couldn't find any watches matching your current filters. Try relaxing them!
                 </p>
+                <button 
+                    onClick={() => { setType(''); setGenre(''); setMinRating(0); setDays(30); }}
+                    className="px-6 py-2.5 bg-[#ffb700] text-white text-[10px] font-black rounded-xl uppercase tracking-widest"
+                >
+                    Clear All Filters
+                </button>
             </div>
         );
     }
 
     // --- CHART CALCULATIONS ---
     const maxCount = Math.max(...data.timeSeries.map(d => d.count), 1);
-    const chartHeight = 200;
-    const chartWidth = 800;
-    const padding = 20;
+    const chartHeight = 250;
+    const chartWidth = 900;
+    const padding = 40;
 
     const getX = (index: number) => (index / (data.timeSeries.length - 1)) * (chartWidth - padding * 2) + padding;
     const getY = (count: number) => chartHeight - ((count / maxCount) * (chartHeight - padding * 2) + padding);
@@ -69,90 +84,128 @@ export const ProfileStats: React.FC = () => {
     const linePath = data.timeSeries.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d.count)}`).join(' ');
     const areaPath = `${linePath} L ${getX(data.timeSeries.length - 1)} ${chartHeight} L ${getX(0)} ${chartHeight} Z`;
 
-    const genreMax = Math.max(...data.genreBreakdown.map(g => g.count), 1);
-
     return (
         <div className="flex flex-col gap-8 animate-[fade-in_0.5s_ease-out]">
             
-            {/* Filter Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-white/50 p-4 rounded-[24px] border border-[#ffb700]/10">
-                <div className="flex items-center gap-2">
+            {/* Unified Filter Toolbar */}
+            <div className="flex flex-wrap items-center gap-4 bg-white border border-[#ffb700]/10 p-5 rounded-[28px] shadow-sm">
+                <div className="flex items-center gap-2 mr-4">
                     {[7, 30, 90].map(d => (
                         <button 
                             key={d}
                             onClick={() => setDays(d)}
-                            className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${days === d ? 'bg-[#ffb700] text-white shadow-md shadow-[#ffb700]/20' : 'bg-white text-[#2D2926]/40 hover:text-[#2D2926] border border-[#ffb700]/10'}`}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === d ? 'bg-[#ffb700] text-white shadow-md' : 'bg-[#FFF9F0] text-[#2D2926]/40 hover:text-[#2D2926]'}`}
                         >
-                            {d} Days
+                            {d}d
                         </button>
                     ))}
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                     <select 
                         value={type} 
                         onChange={(e) => setType(e.target.value)}
-                        className="bg-white border border-[#ffb700]/10 rounded-xl px-4 py-2 text-[11px] font-black uppercase tracking-widest text-[#2D2926] focus:outline-none focus:border-[#ffb700]"
+                        className="bg-[#FFF9F0] border border-[#ffb700]/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#2D2926] outline-none"
                     >
                         <option value="">All Types</option>
-                        <option value="MOVIE">Movies</option>
-                        <option value="TV_SHOW">TV Shows</option>
+                        <option value="MOVIE">Movies Only</option>
+                        <option value="TV_SHOW">TV Only</option>
                     </select>
 
-                    <div className="flex bg-white border border-[#ffb700]/10 rounded-xl p-1">
-                        <button 
-                            onClick={() => setChartType('line')}
-                            className={`p-1.5 rounded-lg transition-all ${chartType === 'line' ? 'bg-[#ffb700]/10 text-[#ffb700]' : 'text-[#2D2926]/30 hover:text-[#2D2926]'}`}
-                        >
-                            <span className="material-symbols-outlined text-[20px]">show_chart</span>
-                        </button>
-                        <button 
-                            onClick={() => setChartType('bar')}
-                            className={`p-1.5 rounded-lg transition-all ${chartType === 'bar' ? 'bg-[#ffb700]/10 text-[#ffb700]' : 'text-[#2D2926]/30 hover:text-[#2D2926]'}`}
-                        >
-                            <span className="material-symbols-outlined text-[20px]">bar_chart</span>
-                        </button>
-                    </div>
+                    <select 
+                        value={genre} 
+                        onChange={(e) => setGenre(e.target.value)}
+                        className="bg-[#FFF9F0] border border-[#ffb700]/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#2D2926] outline-none max-w-[150px]"
+                    >
+                        <option value="">All Genres</option>
+                        {data.availableGenres.map(g => <option key={g} value={g}>{g}</option>)}
+                    </select>
+
+                    <select 
+                        value={minRating} 
+                        onChange={(e) => setMinRating(Number(e.target.value))}
+                        className="bg-[#FFF9F0] border border-[#ffb700]/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#2D2926] outline-none"
+                    >
+                        <option value="0">Any Rating</option>
+                        {[9, 8, 7, 6, 5].map(r => <option key={r} value={r}>{r}+ Stars</option>)}
+                    </select>
+                </div>
+
+                <div className="flex ml-auto bg-[#FFF9F0] border border-[#ffb700]/10 rounded-xl p-1">
+                    <button 
+                        onClick={() => setChartType('line')}
+                        className={`p-1.5 rounded-lg transition-all ${chartType === 'line' ? 'bg-white shadow-sm text-[#ffb700]' : 'text-[#2D2926]/20 hover:text-[#2D2926]'}`}
+                    >
+                        <span className="material-symbols-outlined text-[18px]">show_chart</span>
+                    </button>
+                    <button 
+                        onClick={() => setChartType('bar')}
+                        className={`p-1.5 rounded-lg transition-all ${chartType === 'bar' ? 'bg-white shadow-sm text-[#ffb700]' : 'text-[#2D2926]/20 hover:text-[#2D2926]'}`}
+                    >
+                        <span className="material-symbols-outlined text-[18px]">bar_chart</span>
+                    </button>
                 </div>
             </div>
 
-            {/* High Impact Trend Card */}
-            <div className="bg-white rounded-[32px] border border-[#ffb700]/10 shadow-sm p-8 relative overflow-hidden group">
-                <div className="flex items-center justify-between mb-8">
+            {/* Interactive Graph Card */}
+            <div className="bg-white rounded-[40px] border border-[#ffb700]/10 shadow-md p-8 relative overflow-hidden group min-h-[450px]">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div>
-                        <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Viewing Progress</h3>
-                        <p className="text-[11px] font-bold text-[#2D2926]/30 uppercase tracking-[0.2em] mt-1">Activity over designated period</p>
+                        <h3 className="text-2xl font-black text-[#2D2926] tracking-tighter">Activity Stream</h3>
+                        <p className="text-[11px] font-bold text-[#2D2926]/30 uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
+                            {genre ? `${genre} •` : ''} {data.summary.totalCount} LOGS FOUND
+                        </p>
                     </div>
-                    <div className="text-right">
-                        <span className="text-4xl font-black text-[#ffb700]">{data.summary.totalCount}</span>
-                        <p className="text-[9px] font-black text-[#2D2926]/40 uppercase tracking-widest">Total Logs</p>
+                    
+                    <div className="flex items-center gap-6">
+                        <div className="flex flex-col items-end">
+                             <span className="text-2xl font-black text-[#ffb700]">{data.summary.averageRating}</span>
+                             <span className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest">Avg rating</span>
+                        </div>
+                        <div className="w-px h-8 bg-[#ffb700]/10"></div>
+                        <div className="flex flex-col items-end">
+                             <span className="text-2xl font-black text-[#2D2926]">{data.summary.totalCount}</span>
+                             <span className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest">Total watched</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="w-full overflow-hidden">
-                    <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto overflow-visible">
+                <div className="relative w-full overflow-visible">
+                    <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-auto overflow-visible cursor-crosshair">
                         <defs>
                             <linearGradient id="chartGradient" x1="0%" x2="0%" y1="0%" y2="100%">
-                                <stop offset="0%" style={{ stopColor: '#ffb700', stopOpacity: 0.2 }} />
+                                <stop offset="0%" style={{ stopColor: '#ffb700', stopOpacity: 0.15 }} />
                                 <stop offset="100%" style={{ stopColor: '#ffb700', stopOpacity: 0 }} />
                             </linearGradient>
                         </defs>
                         
                         {/* Grid Lines */}
-                        <line x1="0" y1={chartHeight} x2={chartWidth} y2={chartHeight} stroke="#ffb700" strokeOpacity="0.1" />
-                        <line x1="0" y1="0" x2={chartWidth} y2="0" stroke="#ffb700" strokeOpacity="0.05" />
+                        <line x1={padding} y1={chartHeight} x2={chartWidth - padding} y2={chartHeight} stroke="#ffb700" strokeOpacity="0.1" strokeWidth="2" />
+                        {[0, 0.25, 0.5, 0.75, 1].map(v => (
+                            <line key={v} x1={padding} y1={chartHeight - (v * (chartHeight - padding * 2) + padding)} x2={chartWidth - padding} y2={chartHeight - (v * (chartHeight - padding * 2) + padding)} stroke="#ffb700" strokeOpacity="0.03" strokeDasharray="4 4" />
+                        ))}
 
                         {chartType === 'line' ? (
                             <>
                                 <path d={areaPath} fill="url(#chartGradient)" className="transition-all duration-700 ease-out" />
-                                <path d={linePath} fill="none" stroke="#ffb700" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="transition-all duration-700 ease-out" />
-                                {data.timeSeries.filter((_, i) => i % (Math.ceil(days / 10)) === 0).map((d, i) => (
-                                    <circle key={i} cx={getX(data.timeSeries.indexOf(d))} cy={getY(d.count)} r="6" fill="white" stroke="#ffb700" strokeWidth="3" />
+                                <path d={linePath} fill="none" stroke="#ffb700" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" className="transition-all duration-700 ease-out" />
+                                {data.timeSeries.filter(d => d.count > 0).map((d, i) => (
+                                    <circle 
+                                        key={i} 
+                                        cx={getX(data.timeSeries.indexOf(d))} 
+                                        cy={getY(d.count)} 
+                                        r={hoveredDay === data.timeSeries.indexOf(d) ? "10" : "6"} 
+                                        fill="white" 
+                                        stroke="#ffb700" 
+                                        strokeWidth="4" 
+                                        className="transition-all cursor-pointer z-20"
+                                        onMouseEnter={() => setHoveredDay(data.timeSeries.indexOf(d))}
+                                    />
                                 ))}
                             </>
                         ) : (
                             data.timeSeries.map((d, i) => {
-                                const barWidth = (chartWidth / data.timeSeries.length) * 0.8;
+                                const barWidth = (chartWidth / data.timeSeries.length) * 0.7;
                                 const h = (d.count / maxCount) * (chartHeight - padding * 2);
                                 return (
                                     <rect 
@@ -161,73 +214,71 @@ export const ProfileStats: React.FC = () => {
                                         y={chartHeight - h}
                                         width={barWidth}
                                         height={h}
-                                        fill="#ffb700"
-                                        rx="4"
-                                        className="transition-all duration-500 ease-out opacity-80 hover:opacity-100"
+                                        fill={hoveredDay === i ? "#ffb700" : "#ffb700cc"}
+                                        rx="6"
+                                        className="transition-all cursor-pointer"
+                                        onMouseEnter={() => setHoveredDay(i)}
                                     />
                                 );
                             })
                         )}
-                    </svg>
-                </div>
-            </div>
 
-            {/* Grid for Distribution Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                {/* Genre Dominance */}
-                <div className="bg-white rounded-[32px] border border-[#ffb700]/10 shadow-sm p-8">
-                    <h3 className="text-lg font-black text-[#2D2926] tracking-tight mb-6 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[#ffb700]">category</span>
-                        Genre Dominance
-                    </h3>
-                    <div className="space-y-5">
-                        {data.genreBreakdown.map((g, i) => (
-                            <div key={i} className="space-y-2">
-                                <div className="flex justify-between items-end">
-                                    <span className="text-[13px] font-black text-[#2D2926]/70 tracking-tight">{g.name}</span>
-                                    <span className="text-[11px] font-black text-[#ffb700]">{g.count} logs</span>
+                        {/* Hover Detection Overlay */}
+                        {data.timeSeries.map((_, i) => (
+                             <rect 
+                                key={i}
+                                x={getX(i) - (chartWidth / data.timeSeries.length) / 2}
+                                y={0}
+                                width={chartWidth / data.timeSeries.length}
+                                height={chartHeight}
+                                fill="transparent"
+                                onMouseEnter={() => setHoveredDay(i)}
+                             />
+                        ))}
+                    </svg>
+
+                    {/* Tooltip Card */}
+                    {hoveredDay !== null && data.timeSeries[hoveredDay] && data.timeSeries[hoveredDay].count > 0 && (
+                        <div 
+                            className="absolute z-50 pointer-events-none transition-all animate-[fade-in_0.2s_ease-out]"
+                            style={{ 
+                                left: `${(getX(hoveredDay) / chartWidth) * 100}%`,
+                                top: `${(getY(data.timeSeries[hoveredDay].count) / chartHeight) * 100}%`,
+                                transform: 'translate(-50%, -110%)'
+                            }}
+                        >
+                            <div className="bg-[#2D2926] text-white p-4 rounded-2xl shadow-2xl min-w-[200px] border border-white/10">
+                                <p className="text-[10px] font-black text-[#ffb700] uppercase tracking-widest mb-2 border-b border-white/5 pb-2">
+                                    {new Date(data.timeSeries[hoveredDay].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </p>
+                                <div className="space-y-3 mt-3 max-h-[150px] overflow-y-auto no-scrollbar">
+                                    {data.timeSeries[hoveredDay].items?.map((item, idx) => (
+                                        <div key={idx} className="flex flex-col">
+                                            <span className="text-[13px] font-black leading-tight truncate">{item.title}</span>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{item.type === 'MOVIE' ? 'Movie' : 'TV'}</span>
+                                                {item.rating && (
+                                                    <span className="text-[9px] font-black text-[#ffb700]">★ {item.rating}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="h-3 w-full bg-[#FFF9F0] rounded-full overflow-hidden border border-[#ffb700]/5">
-                                    <div 
-                                        className="h-full bg-[#ffb700] rounded-full transition-all duration-1000 ease-out" 
-                                        style={{ width: `${(g.count / genreMax) * 100}%` }}
-                                    ></div>
+                                <div className="mt-3 pt-2 border-t border-white/5 flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-white/40 uppercase">Day's Total</span>
+                                    <span className="text-[12px] font-black">{data.timeSeries[hoveredDay].count}</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                            <div className="w-4 h-4 bg-[#2D2926] rotate-45 absolute -bottom-2 left-1/2 -ml-2"></div>
+                        </div>
+                    )}
                 </div>
 
-                {/* Mixed Stats Grid */}
-                <div className="flex flex-col gap-8">
-                    {/* Tiny Summary Card */}
-                    <div className="bg-gradient-to-br from-[#ffb700] to-orange-400 rounded-[32px] p-8 text-white shadow-lg shadow-[#ffb700]/20">
-                        <div className="flex justify-between items-start">
-                             <div>
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-70">Average Rating</p>
-                                <h4 className="text-4xl font-black mt-1">{data.summary.averageRating}<span className="text-xl opacity-60">/10</span></h4>
-                             </div>
-                             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center">
-                                <span className="material-symbols-outlined">star_rate</span>
-                             </div>
-                        </div>
-                    </div>
-
-                    {/* Type Breakdown */}
-                    <div className="bg-white rounded-[32px] border border-[#ffb700]/10 shadow-sm p-8 flex-1">
-                        <h3 className="text-[12px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-6">Content DNA</h3>
-                        <div className="flex flex-wrap gap-4">
-                            {data.typeBreakdown.map((t, i) => (
-                                <div key={i} className="flex-1 min-w-[120px] p-4 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/10 flex flex-col items-center">
-                                    <span className="text-2xl font-black text-[#2D2926]">{t.count}</span>
-                                    <span className="text-[9px] font-black text-[#ffb700] uppercase tracking-widest mt-1">{t.name === 'MOVIE' ? 'Movies' : 'TV Shows'}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
+                <p className="text-center text-[10px] font-black text-[#2D2926]/20 uppercase tracking-[0.3em] mt-12 pb-4">
+                    Hover over chart points to inspect watched titles
+                </p>
             </div>
+            
         </div>
     );
 };

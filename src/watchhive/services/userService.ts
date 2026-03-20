@@ -64,8 +64,8 @@ export const userService = {
         return response.users || [];
     },
 
-    async getDetailedStats(days = 30, type?: string): Promise<any> {
-        return apiClient.get('/stats/detailed', { params: { days, type } });
+    async getDetailedStats(days = 30, type?: string, genre?: string, minRating?: number): Promise<any> {
+        return apiClient.get('/stats/detailed', { params: { days, type, genre, minRating } });
     },
 };
 
