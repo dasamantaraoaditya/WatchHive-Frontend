@@ -213,23 +213,23 @@ export const FeedPage: React.FC = () => {
                 </section>
 
                 <section className="widget-section">
-                    <h3 className="mb-4 font-bold text-slate-100">Suggested Follows</h3>
+                    <h3 className="mb-4 font-bold text-[#2D2926]">Suggested Follows</h3>
                     <div className="widget-content">
                         {loadingSuggestions ? (
-                            <p className="text-sm text-slate-400 mb-2">Finding people for you...</p>
+                            <p className="text-sm text-[#2D2926]/50 mb-2">Finding people for you...</p>
                         ) : suggestedUsers.length > 0 ? (
                             suggestedUsers.map(user => (
                                 <div className="suggestion-item" key={user.id}>
                                     <Avatar src={user.profilePictureUrl || null} name={user.displayName || user.username} size="sm" />
                                     <div className="suggestion-info">
                                         <p className="suggestion-name">{user.displayName || user.username}</p>
-                                        <p className="suggestion-role text-xs text-slate-400 line-clamp-1">{user.bio ? user.bio : 'Movie Fan'}</p>
+                                        <p className="suggestion-role text-xs text-[#2D2926]/40 line-clamp-1">{user.bio ? user.bio : 'Movie Fan'}</p>
                                     </div>
                                     <button className="btn-follow" onClick={() => handleFollow(user.id)}>Follow</button>
                                 </div>
                             ))
                         ) : (
-                            <p className="text-sm text-slate-400 mb-2">No suggestions right now.</p>
+                            <p className="text-sm text-[#2D2926]/50 mb-2">No suggestions right now.</p>
                         )}
                     </div>
                     <button className="btn-show-more">Show more</button>
