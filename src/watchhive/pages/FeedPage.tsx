@@ -23,6 +23,8 @@ export const FeedPage: React.FC = () => {
     const [hasMore, setHasMore] = useState(true);
     const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
     const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+    const [trendingItems, setTrendingItems] = useState<any[]>([]);
+    const [loadingTrending, setLoadingTrending] = useState(true);
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -40,6 +42,24 @@ export const FeedPage: React.FC = () => {
             }
         };
         fetchSuggestions();
+    }, [isOnline]);
+
+    useEffect(() => {
+        const fetchTrending = async () => {
+            if (!isOnline) {
+                setLoadingTrending(false);
+                return;
+            }
+            try {
+                const res = await feedApi.getTrending();
+                setTrendingItems(res.trending || []);
+            } catch (err) {
+                console.error('Failed to load trending items', err);
+            } finally {
+                setLoadingTrending(false);
+            }
+        };
+        fetchTrending();
     }, [isOnline]);
 
     const handleFollow = async (userId: string) => {
@@ -194,21 +214,19 @@ export const FeedPage: React.FC = () => {
                         </h3>
                     </div>
                     <div className="widget-content">
-                        <div className="trending-item">
-                            <p className="trending-context">Trending in Sci-Fi</p>
-                            <p className="trending-title">#DuneTwo</p>
-                            <p className="trending-stats">12.4k Buzzes</p>
-                        </div>
-                        <div className="trending-item">
-                            <p className="trending-context">Psychology</p>
-                            <p className="trending-title">The Satoshi Kon Legacy</p>
-                            <p className="trending-stats">8.1k Buzzes</p>
-                        </div>
-                        <div className="trending-item">
-                            <p className="trending-context">Music</p>
-                            <p className="trending-title">Organic House Mixes</p>
-                            <p className="trending-stats">2.9k Buzzes</p>
-                        </div>
+                        {loadingTrending ? (
+                            <p className="text-sm text-slate-400 mb-2">Calculating buzz...</p>
+                        ) : trendingItems.length > 0 ? (
+                            trendingItems.map((item, index) => (
+                                <div className="trending-item" key={index}>
+                                    <p className="trending-context">{item.context}</p>
+                                    <p className="trending-title">{item.title}</p>
+                                    <p className="trending-stats">{item.buzzes.toLocaleString()} Buzzes</p>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-slate-400 mb-2">No trending topics right now.</p>
+                        )}
                     </div>
                 </section>
 
