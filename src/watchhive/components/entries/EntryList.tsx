@@ -107,11 +107,21 @@ const EntryCard: React.FC<{
     };
 
     const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
+        const date = new Date(dateString);
+        const formattedDate = date.toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
             year: 'numeric',
         });
+        
+        // Only show time if it's not exactly midnight (common default for legacy data)
+        // Or actually, just show it always now that we track it.
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+        
+        return `${formattedDate} at ${formattedTime}`;
     };
 
     const ti = getTypeInfo(entry.type);

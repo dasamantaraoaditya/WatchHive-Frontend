@@ -8,3 +8,4 @@ export * from './ErrorState';
 export * from './EmptyState';
 export * from './OfflineBanner';
 export * from './WatchlistButton';
+export * from './HiveDatePicker';

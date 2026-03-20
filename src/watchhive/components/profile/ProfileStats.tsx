@@ -10,10 +10,11 @@ interface StatsData {
     timeSeries: { 
         date: string; 
         count: number; 
-        items?: { id: string; title: string; type: string; rating?: string }[] 
+        items?: { id: string; title: string; type: string; rating?: string; watchedAt?: string }[] 
     }[];
     availableGenres: string[];
     typeBreakdown: { name: string; count: number }[];
+    viewingRhythm: { hour: number; label: string; count: number }[];
 }
 
 export const ProfileStats: React.FC = () => {
@@ -26,7 +27,6 @@ export const ProfileStats: React.FC = () => {
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
 
     const [hoveredDay, setHoveredDay] = useState<number | null>(null);
-
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -83,6 +83,8 @@ export const ProfileStats: React.FC = () => {
 
     const linePath = data.timeSeries.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d.count)}`).join(' ');
     const areaPath = `${linePath} L ${getX(data.timeSeries.length - 1)} ${chartHeight} L ${getX(0)} ${chartHeight} Z`;
+
+    const rhythmMax = Math.max(...data.viewingRhythm.map(r => r.count), 1);
 
     return (
         <div className="flex flex-col gap-8 animate-[fade-in_0.5s_ease-out]">
@@ -257,8 +259,19 @@ export const ProfileStats: React.FC = () => {
                                             <span className="text-[13px] font-black leading-tight truncate">{item.title}</span>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{item.type === 'MOVIE' ? 'Movie' : 'TV'}</span>
+                                                {item.watchedAt && (
+                                                    <>
+                                                        <span className="text-[9px] font-black text-white/20">•</span>
+                                                        <span className="text-[9px] font-bold text-[#ffb700] uppercase">
+                                                            {new Date(item.watchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
+                                                    </>
+                                                )}
                                                 {item.rating && (
-                                                    <span className="text-[9px] font-black text-[#ffb700]">★ {item.rating}</span>
+                                                    <>
+                                                        <span className="text-[9px] font-black text-white/20">•</span>
+                                                        <span className="text-[9px] font-black text-[#ffb700]">★ {item.rating}</span>
+                                                    </>
                                                 )}
                                             </div>
                                         </div>
@@ -277,6 +290,58 @@ export const ProfileStats: React.FC = () => {
                 <p className="text-center text-[10px] font-black text-[#2D2926]/20 uppercase tracking-[0.3em] mt-12 pb-4">
                     Hover over chart points to inspect watched titles
                 </p>
+            </div>
+
+            {/* Viewing Rhythm (Time of Day Distribution) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-2 bg-white rounded-[40px] border border-[#ffb700]/10 shadow-sm p-8">
+                    <h3 className="text-lg font-black text-[#2D2926] tracking-tight mb-8 flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#ffb700]">timer</span>
+                        Viewing Rhythm
+                    </h3>
+                    <div className="flex items-end justify-between gap-2 h-40 px-4">
+                        {data.viewingRhythm.map((r, i) => {
+                            const h = (r.count / rhythmMax) * 100;
+                            return (
+                                <div key={i} className="flex-1 flex flex-col items-center gap-3 group">
+                                    <div className="relative w-full flex flex-col items-center justify-end h-full">
+                                        <div 
+                                            className="w-full max-w-[40px] bg-[#FFF9F0] border border-[#ffb700]/10 rounded-xl transition-all duration-1000 group-hover:bg-[#ffb700]/20" 
+                                            style={{ height: `${Math.max(h, 4)}%` }}
+                                        >
+                                            {h > 0 && <div className="absolute top-0 left-0 right-0 -mt-6 text-[10px] font-black text-[#ffb700] text-center">{r.count}</div>}
+                                        </div>
+                                    </div>
+                                    <span className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest text-center leading-tight h-8">
+                                        {r.label}<br/>
+                                        {r.hour}:00
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-[#2D2926] to-black rounded-[40px] p-8 text-white relative overflow-hidden shadow-xl shadow-[#2D2926]/20">
+                    <div className="relative z-10">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Most Active Slot</p>
+                        <h4 className="text-3xl font-black mb-6">
+                            {data.viewingRhythm.reduce((prev, current) => (prev.count > current.count) ? prev : current).label}
+                        </h4>
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 border border-white/10">
+                                <span className="material-symbols-outlined text-[#ffb700]">schedule</span>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Typical Start</span>
+                                    <span className="text-sm font-black">
+                                        {data.viewingRhythm.reduce((prev, current) => (prev.count > current.count) ? prev : current).hour}:30
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#ffb700] rounded-full blur-[80px] opacity-20"></div>
+                </div>
             </div>
             
         </div>

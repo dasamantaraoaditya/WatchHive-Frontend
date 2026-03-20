@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { entriesApi, CreateEntryData, Entry } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
+import { HiveDatePicker } from '../common/HiveDatePicker';
 
 interface EntryFormProps {
     entry?: Entry;
@@ -21,61 +22,130 @@ interface TmdbResult {
 }
 
 /* ── Star Rating Component (Tailwind Modified) ── */
+/* ── Premium Fractional Star Component ── */
+const FractionalStar: React.FC<{ fill: number; size: number; active: boolean }> = ({ fill, size, active }) => {
+    const id = React.useId();
+    // Use the branding color for filled parts, and a subtle dark for empty parts
+    const strokeColor = active ? '#ffb700' : 'rgba(45, 41, 38, 0.2)';
+    
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" className="drop-shadow-sm transition-transform hover:scale-110">
+            <defs>
+                <linearGradient id={id} x1="0" x2="100%" y1="0" y2="0">
+                    <stop offset={`${fill * 100}%`} stopColor="#ffb700" />
+                    <stop offset={`${fill * 100}%`} stopColor="transparent" />
+                </linearGradient>
+            </defs>
+            <path 
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" 
+                fill={`url(#${id})`}
+                stroke={strokeColor}
+                strokeWidth={active ? "1" : "1.5"}
+                strokeLinejoin="round"
+            />
+        </svg>
+    );
+};
+
+/* ── Sophisticated Rating Component ── */
 const StarRating: React.FC<{
     value: number | undefined; 
     onChange: (v: number | undefined) => void;
     disabled?: boolean;
 }> = ({ value, onChange, disabled }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
     const [hoverValue, setHoverValue] = useState<number | null>(null);
-    const display = hoverValue ?? (value ?? 0);
+    
+    const displayValue = hoverValue ?? (value ?? 0);
+
+    const calculateRating = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!containerRef.current) return 0;
+        const rect = containerRef.current.getBoundingClientRect();
+        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+        const x = clientX - rect.left;
+        const width = rect.width;
+        
+        // Map 0-width to 0-10 rating, clamped
+        const rawRating = (x / width) * 10;
+        // Round to 1 decimal place
+        return Math.max(0, Math.min(10, Math.round(rawRating * 10) / 10));
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (disabled) return;
+        setHoverValue(calculateRating(e));
+    };
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (disabled) return;
+        const newRating = calculateRating(e);
+        // If clicking the same exact value, toggle off
+        if (value === newRating) onChange(undefined);
+        else onChange(newRating);
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = parseFloat(e.target.value);
+        if (isNaN(val)) {
+            onChange(undefined);
+        } else {
+            onChange(Math.max(0, Math.min(10, Math.round(val * 10) / 10)));
+        }
+    };
 
     return (
-        <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Rating">
-            <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => {
-                    const starValue = star * 2;
-                    const filled = display >= starValue;
-                    const half = !filled && display >= starValue - 1;
-
+        <div className="flex flex-wrap items-center gap-6" role="radiogroup" aria-label="Rating">
+            {/* The Interactive Star Row */}
+            <div 
+                ref={containerRef}
+                className="flex items-center gap-1 cursor-crosshair py-2"
+                onMouseMove={handleMouseMove}
+                onMouseLeave={() => setHoverValue(null)}
+                onClick={handleClick}
+            >
+                {[0, 1, 2, 3, 4].map((i) => {
+                    // Each star represents 2 points (0-2, 2-4, 4-6, 6-8, 8-10)
+                    const starStart = i * 2;
+                    const starFill = Math.max(0, Math.min(1, (displayValue - starStart) / 2));
+                    
                     return (
-                        <button
-                            key={star}
-                            type="button"
-                            className="relative w-10 h-10 md:w-12 md:h-12 flex items-center justify-center cursor-pointer transition-transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed group focus:outline-none"
-                            disabled={disabled}
-                            onClick={() => {
-                                if (value === starValue) { onChange(undefined); } 
-                                else { onChange(starValue); }
-                            }}
-                            onMouseEnter={() => setHoverValue(starValue)}
-                            onMouseLeave={() => setHoverValue(null)}
-                            aria-label={`${star} star${star > 1 ? 's' : ''}`}
-                        >
-                            <svg viewBox="0 0 24 24" className={`w-8 h-8 md:w-10 md:h-10 transition-colors pointer-events-none drop-shadow-sm ${filled ? 'fill-[#ffb700] stroke-[#ffb700]' : half ? 'fill-transparent stroke-[#ffb700] text-[#ffb700]' : 'fill-transparent stroke-[#2D2926]/20'}`} strokeWidth={filled ? "0" : "1.5"}>
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                {half && (
-                                    <path fill="currentColor" stroke="none" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77V2z" transform="scale(-1,1) translate(-24,0)" />
-                                )}
-                            </svg>
-                        </button>
+                        <FractionalStar 
+                            key={i} 
+                            fill={starFill} 
+                            size={40} 
+                            active={displayValue > starStart} 
+                        />
                     );
                 })}
             </div>
-            <span className="text-[#2D2926]/50 font-bold ml-2 w-20 text-center uppercase tracking-widest text-[10px] bg-red-100/0">
-                {display > 0 ? `${display}/10` : 'Not rated'}
-            </span>
+            
+            {/* The High-Precision Numeric Control */}
+            <div className="flex items-center gap-2 bg-gradient-to-br from-[#FFF9F0] to-white border border-[#ffb700]/20 px-4 py-2 rounded-2xl shadow-sm">
+                <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    value={value ?? ''}
+                    onChange={handleInputChange}
+                    disabled={disabled}
+                    className="w-14 bg-transparent text-[#ffb700] font-black text-xl outline-none border-none p-0 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0.0"
+                />
+                <span className="text-[#2D2926]/40 font-black text-xs uppercase tracking-widest">/ 10</span>
+            </div>
         </div>
     );
 };
 
 /* ── Watch location quick picks ── */
 const LOCATION_PRESETS = [
-    { label: '🎬 Cinema', value: 'Cinema' },
-    { label: '🏠 Home', value: 'Home' },
-    { label: '📺 Netflix', value: 'Netflix' },
-    { label: '🟢 Hotstar', value: 'Hotstar' },
-    { label: '🔵 Prime', value: 'Prime Video' },
-    { label: '🍎 Apple TV', value: 'Apple TV+' },
+    { label: 'Cinema', value: 'Cinema', icon: 'theater_comedy' },
+    { label: 'Home', value: 'Home', icon: 'home' },
+    { label: 'Netflix', value: 'Netflix', icon: 'cast' },
+    { label: 'Disney+', value: 'Disney+', icon: 'vpk' },
+    { label: 'Prime', value: 'Prime Video', icon: 'live_tv' },
+    { label: 'Mobile', value: 'On the Go', icon: 'smartphone' },
 ];
 
 export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel }) => {
@@ -86,7 +156,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
         tmdbId: entry?.tmdbId || 0,
         title: entry?.title || '',
         type: entry?.type || 'MOVIE',
-        watchedAt: entry?.watchedAt ? new Date(entry.watchedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        watchedAt: entry?.watchedAt 
+            ? new Date(entry.watchedAt).toISOString().slice(0, 16) 
+            : new Date().toISOString().slice(0, 16),
         rating: entry?.rating || undefined,
         review: entry?.review || '',
         tags: entry?.tags || [],
@@ -321,16 +393,11 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
 
                     {/* ── Step 3: When ── */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="flex flex-col gap-3">
-                            <label className="text-sm font-bold uppercase tracking-widest text-[#2D2926]/50">{(isEditing) ? '2' : '3'}. When did you experience it?</label>
-                            <input
-                                type="date"
-                                name="watchedAt"
+                            <HiveDatePicker
+                                label={(isEditing) ? '2. When did you experience it?' : '3. When did you experience it?'}
                                 value={formData.watchedAt}
-                                onChange={(e) => setFormData((prev) => ({ ...prev, watchedAt: e.target.value }))}
-                                className="w-full px-4 py-3 bg-[#FFF9F0]/50 border-2 border-[#ffb700]/20 outline-none focus:border-[#ffb700] rounded-xl text-[#2D2926] font-bold"
+                                onChange={(val: string) => setFormData((prev) => ({ ...prev, watchedAt: val || new Date().toISOString().slice(0, 16) }))}
                             />
-                        </div>
 
                         <div className="flex flex-col justify-end pb-1">
                             <label className="flex items-center gap-3 cursor-pointer group w-max outline-none focus:ring-4 focus:ring-[#ffb700]/10 rounded-xl p-2">
@@ -366,16 +433,19 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
                             {/* Watch Location */}
                             <div className="flex flex-col gap-3">
                                 <label className="text-sm font-bold uppercase tracking-widest text-[#2D2926]/50">Where were you?</label>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                                     {LOCATION_PRESETS.map((l) => (
                                         <button
                                             key={l.value}
                                             type="button"
-                                            className={`px-4 py-2 border rounded-xl font-bold text-sm transition-all focus:outline-none 
-                                            ${formData.watchLocation === l.value ? 'bg-[#ffb700] text-white border-[#ffb700] shadow-md' : 'bg-white border-[#ffb700]/20 text-[#2D2926]/70 hover:border-[#ffb700]/50 hover:bg-[#FFF9F0]'}`}
+                                            className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all group/loc
+                                            ${formData.watchLocation === l.value ? 'bg-[#ffb700] text-white border-[#ffb700] shadow-md scale-[1.02]' : 'bg-white border-[#ffb700]/10 text-[#2D2926]/40 hover:border-[#ffb700]/30 hover:bg-[#FFF9F0]'}`}
                                             onClick={() => setFormData((prev) => ({ ...prev, watchLocation: prev.watchLocation === l.value ? '' : l.value }))}
                                         >
-                                            {l.label}
+                                            <span className={`material-symbols-outlined text-2xl transition-transform group-hover/loc:scale-110 ${formData.watchLocation === l.value ? 'text-white' : 'text-[#ffb700]/60'}`}>
+                                                {l.icon}
+                                            </span>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">{l.label}</span>
                                         </button>
                                     ))}
                                 </div>
