@@ -13,17 +13,17 @@
    ============================================ */
 :root {
     /* === Colors === */
-    /* Primary Brand Colors */
-    --primary-50: #f0f9ff;
-    --primary-100: #e0f2fe;
-    --primary-200: #bae6fd;
-    --primary-300: #7dd3fc;
-    --primary-400: #38bdf8;
-    --primary-500: #0ea5e9;
-    --primary-600: #0284c7;
-    --primary-700: #0369a1;
-    --primary-800: #075985;
-    --primary-900: #0c4a6e;
+    /* Primary Brand Colors (Honey Gold) */
+    --primary-50: #fffbea;
+    --primary-100: #fff5c4;
+    --primary-200: #ffeb89;
+    --primary-300: #ffda40;
+    --primary-400: #ffc70b;
+    --primary-500: #ffb700;
+    --primary-600: #e59700;
+    --primary-700: #bf7100;
+    --primary-800: #995700;
+    --primary-900: #7e4600;
 
     /* Neutral Colors */
     --neutral-0: #ffffff;
@@ -59,7 +59,7 @@
     --info-600: #2563eb;
 
     /* === Typography === */
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-display: 'Manrope', var(--font-sans);
 
     /* Font Sizes - Fluid Typography */
@@ -176,11 +176,11 @@
     /* 1280px */
 
     /* === Theme-Specific === */
-    --bg-primary: var(--neutral-0);
-    --bg-secondary: var(--neutral-50);
+    --bg-primary: #FFF9F0;
+    --bg-secondary: rgba(255, 255, 255, 0.3);
     --bg-tertiary: var(--neutral-100);
 
-    --text-primary: var(--neutral-900);
+    --text-primary: #2D2926;
     --text-secondary: var(--neutral-600);
     --text-tertiary: var(--neutral-500);
     --text-inverse: var(--neutral-0);
@@ -189,8 +189,8 @@
     --border-medium: var(--neutral-300);
     --border-dark: var(--neutral-400);
 
-    --accent-primary: var(--primary-600);
-    --accent-hover: var(--primary-700);
+    --accent-primary: var(--primary-500);
+    --accent-hover: var(--primary-600);
     --accent-light: var(--primary-50);
 }
 

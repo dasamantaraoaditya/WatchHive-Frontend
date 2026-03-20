@@ -94,9 +94,9 @@ export const FeedPage: React.FC = () => {
                 <header className="feed-page-header glass-header">
                     <h2>The Hive Feed</h2>
                     <div className="feed-page-header-actions">
-                        <button className="icon-btn" title="Notifications">
+                        <Link to="/watch-hive/notifications" className="icon-btn" title="Notifications">
                             <span className="material-symbols-outlined">notifications</span>
-                        </button>
+                        </Link>
                         <button className="icon-btn" title="Filter Settings">
                             <span className="material-symbols-outlined">tune</span>
                         </button>

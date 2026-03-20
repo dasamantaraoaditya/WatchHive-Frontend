@@ -3,7 +3,6 @@ import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.serv
 import apiClient from '../../services/api.js';
 import { MovieCardSkeleton, ErrorState, EmptyState, WatchlistButton } from '../common';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
-import './EntryList.css';
 
 interface EntryListProps {
     onEdit?: (entry: Entry) => void;
@@ -11,7 +10,6 @@ interface EntryListProps {
     readOnly?: boolean;
 }
 
-/* ── TMDb detail cache ── */
 interface TmdbDetails {
     poster_path: string | null;
     overview: string;
@@ -26,35 +24,35 @@ interface TmdbDetails {
 
 const tmdbCache = new Map<string, TmdbDetails>();
 
-/* ── Inline star display (read-only) ── */
 const MiniStars: React.FC<{ rating: number }> = ({ rating }) => {
     return (
-        <div className="wh-grid-stars" title={`${rating}/10`}>
+        <div className="flex items-center gap-[2px]" title={`${rating}/10`}>
             {[1, 2, 3, 4, 5].map((star) => {
                 const starValue = star * 2;
                 const filled = rating >= starValue;
                 const half = !filled && rating >= starValue - 1;
+                
                 return (
-                    <svg key={star} viewBox="0 0 24 24" className="wh-grid-star-icon">
-                        <path
-                            className={`wh-grid-star-path ${filled ? 'wh-grid-star--filled' : ''}`}
-                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                        />
-                        {half && (
-                            <path
-                                className="wh-grid-star--half"
-                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77V2z"
-                                transform="scale(-1,1) translate(-24,0)"
-                            />
+                    <span key={star} className="relative w-3.5 h-3.5 sm:w-4 sm:h-4">
+                        <span className="material-symbols-outlined absolute inset-0 text-[#2D2926]/10 text-[14px] sm:text-[16px] overflow-hidden" style={{ fontVariationSettings: "'FILL' 1" }}>grade</span>
+                        {(filled || half) && (
+                            <span 
+                                className="material-symbols-outlined absolute inset-0 text-[#ffb700] text-[14px] sm:text-[16px] overflow-hidden drop-shadow-sm" 
+                                style={{ 
+                                    fontVariationSettings: "'FILL' 1",
+                                    width: half ? '50%' : '100%'
+                                }}
+                            >
+                                grade
+                            </span>
                         )}
-                    </svg>
+                    </span>
                 );
             })}
         </div>
     );
 };
 
-/* ── Single Grid Card ── */
 const EntryCard: React.FC<{
     entry: Entry;
     onEdit?: (entry: Entry) => void;
@@ -89,7 +87,7 @@ const EntryCard: React.FC<{
                 tmdbCache.set(cacheKey, parsed);
                 setDetails(parsed);
             } catch {
-                // Silently fail — card still works without poster
+                // Silently fail
             }
         };
         fetchDetails();
@@ -101,10 +99,10 @@ const EntryCard: React.FC<{
 
     const getTypeInfo = (type: string) => {
         switch (type) {
-            case 'MOVIE': return { emoji: '🎬', label: 'Movie', cls: 'movie' };
-            case 'TV_SHOW': return { emoji: '📺', label: 'TV Series', cls: 'tv_show' };
-            case 'EPISODE': return { emoji: '📼', label: 'Episode', cls: 'episode' };
-            default: return { emoji: '', label: type, cls: '' };
+            case 'MOVIE': return { emoji: '🎬', label: 'Movie', color: 'bg-indigo-500' };
+            case 'TV_SHOW': return { emoji: '📺', label: 'TV Series', color: 'bg-blue-500' };
+            case 'EPISODE': return { emoji: '📼', label: 'Episode', color: 'bg-emerald-500' };
+            default: return { emoji: '🎞️', label: type, color: 'bg-gray-500' };
         }
     };
 
@@ -118,166 +116,142 @@ const EntryCard: React.FC<{
 
     const ti = getTypeInfo(entry.type);
     const year = details?.release_date?.slice(0, 4) || details?.first_air_date?.slice(0, 4);
-    const tmdbRating = details?.vote_average;
 
     return (
-        <div className="wh-grid-card">
-            {/* Poster area */}
-            <div className="wh-grid-card__poster">
+        <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm border border-[#ffb700]/10 hover:shadow-xl hover:border-[#ffb700]/30 transition-all duration-300">
+            {/* Poster Section */}
+            <div className="relative aspect-[2/3] w-full bg-[#FFF9F0] overflow-hidden">
                 {posterUrl && !imgError ? (
                     <img
                         src={posterUrl}
                         alt={entry.title}
-                        className="wh-grid-card__img"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                         onError={() => setImgError(true)}
                     />
                 ) : (
-                    <div className="wh-grid-card__poster-placeholder">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                            <path d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                        </svg>
+                    <div className="absolute inset-0 flex items-center justify-center text-[#2D2926]/10">
+                        <span className="material-symbols-outlined text-6xl">movie</span>
                     </div>
                 )}
+                
+                {/* Gradient Overlay for Actions & Badges */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#2D2926]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                {/* Hover overlay with actions */}
-                <div className="wh-grid-card__overlay">
-                    <div className="wh-grid-card__overlay-actions">
-                        <WatchlistButton tmdbId={entry.tmdbId} variant="icon" className="wh-grid-card__action-btn" />
-                        {onEdit && (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onEdit(entry); }}
-                                className="wh-grid-card__action-btn wh-grid-card__action-btn--edit"
-                                title="Edit entry"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                </svg>
-                            </button>
-                        )}
-                        {onDelete && (
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
-                                className="wh-grid-card__action-btn wh-grid-card__action-btn--delete"
-                                title="Delete entry"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                                </svg>
-                            </button>
-                        )}
-                    </div>
-
-                    {/* TMDb rating badge on overlay */}
-                    {tmdbRating != null && tmdbRating > 0 && (
-                        <div className="wh-grid-card__tmdb-badge">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg>
-                            {tmdbRating.toFixed(1)}
-                        </div>
-                    )}
-
-                    {/* Overview on overlay */}
-                    {details?.overview && (
-                        <p className="wh-grid-card__overview">{details.overview}</p>
-                    )}
-                </div>
-
-                {/* Badges on poster */}
-                <div className="wh-grid-card__poster-badges">
-                    <span className={`wh-grid-card__type-badge wh-grid-card__type-badge--${ti.cls}`}>
+                {/* Top Badges */}
+                <div className="absolute top-3 left-3 flex gap-2 z-10">
+                    <span className={`${ti.color} text-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm backdrop-blur-md bg-opacity-90`}>
                         {ti.emoji} {ti.label}
                     </span>
                     {entry.isRewatch && (
-                        <span className="wh-grid-card__rewatch-badge">🔄</span>
+                        <span className="bg-[#2D2926]/60 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg">
+                            🔄 Rewatch
+                        </span>
                     )}
                 </div>
+
+                {/* Hover Actions (Edit/Delete/Watchlist) */}
+                <div className="absolute top-3 right-3 flex flex-col gap-2 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                    <WatchlistButton tmdbId={entry.tmdbId} variant="icon" className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-[#ffb700] hover:text-[#2D2926] transition-all flex items-center justify-center border border-white/20" />
+                    
+                    {onEdit && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onEdit(entry); }}
+                            className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-blue-500 transition-all flex items-center justify-center border border-white/20 shadow-sm"
+                            title="Edit entry"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
+                            className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-rose-500 transition-all flex items-center justify-center border border-white/20 shadow-sm"
+                            title="Delete entry"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    )}
+                </div>
+
+                {/* Bottom Overlay Text */}
+                {details?.overview && (
+                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                        <p className="text-white/90 text-[13px] leading-snug line-clamp-3 italic shadow-sm">
+                            "{details.overview}"
+                        </p>
+                    </div>
+                )}
             </div>
 
-            {/* Info area */}
-            <div className="wh-grid-card__info">
-                <h3 className="wh-grid-card__title" title={entry.title}>
-                    {entry.title}
-                    {year && <span className="wh-grid-card__year">({year})</span>}
-                </h3>
+            {/* Info Section */}
+            <div className="p-4 sm:p-5 flex flex-col flex-1 gap-3 relative">
+                
+                {/* Title & Year */}
+                <div className="min-h-[48px]">
+                    <h3 className="text-lg font-black text-[#2D2926] leading-tight line-clamp-2" title={entry.title}>
+                        {entry.title}
+                        {year && <span className="ml-2 font-semibold text-[#2D2926]/40 text-sm">({year})</span>}
+                    </h3>
+                </div>
 
-                {/* User rating */}
+                {/* Rating */}
                 {entry.rating && (
-                    <div className="wh-grid-card__rating">
+                    <div className="flex items-center gap-2">
                         <MiniStars rating={entry.rating} />
-                        <span className="wh-grid-card__rating-num">{entry.rating}/10</span>
+                        <span className="text-sm font-bold text-[#2D2926]/70">{entry.rating}/10</span>
                     </div>
                 )}
 
-                {/* Meta row */}
-                <div className="wh-grid-card__meta">
-                    <span className="wh-grid-card__date">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" />
-                            <path d="M16 2v4M8 2v4M3 10h18" />
-                        </svg>
+                {/* Meta Row: Date & Location */}
+                <div className="flex items-center gap-4 text-[13px] font-semibold text-[#2D2926]/50">
+                    <span className="flex items-center gap-1.5 whitespace-nowrap">
+                        <span className="material-symbols-outlined text-[16px]">calendar_month</span>
                         {formatDate(entry.watchedAt)}
                     </span>
                     {entry.watchLocation && (
-                        <span className="wh-grid-card__location">
-                            <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                            </svg>
-                            {entry.watchLocation}
+                        <span className="flex items-center gap-1.5 truncate">
+                            <span className="material-symbols-outlined text-[16px]">location_on</span>
+                            <span className="truncate">{entry.watchLocation}</span>
                         </span>
                     )}
                 </div>
 
-                {/* Genres (from TMDb) */}
-                {details?.genres && details.genres.length > 0 && (
-                    <div className="wh-grid-card__genres">
-                        {details.genres.slice(0, 3).map((g) => (
-                            <span key={g} className="wh-grid-card__genre-chip">{g}</span>
-                        ))}
-                    </div>
-                )}
-
-                {/* Tags */}
+                {/* Embedded Tags */}
                 {entry.tags && entry.tags.length > 0 && (
-                    <div className="wh-grid-card__tags">
+                    <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
                         {entry.tags.map((tag: string) => (
-                            <span key={tag} className="wh-grid-card__tag">#{tag}</span>
+                            <span key={tag} className="text-[11px] font-bold text-[#ffb700] bg-[#ffb700]/10 px-2 py-0.5 rounded-md hover:bg-[#ffb700]/20 transition-colors cursor-default truncate max-w-[120px]">
+                                #{tag}
+                            </span>
                         ))}
                     </div>
                 )}
+            </div>
 
-                {/* Engagement row */}
-                <div className="wh-grid-card__engagement">
-                    <span className="wh-grid-card__stat">
-                        <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                        </svg>
+            {/* Engagement Footer */}
+            <div className="px-5 py-3 border-t border-[#ffb700]/10 flex items-center justify-between text-[13px] font-bold text-[#2D2926]/40 bg-[#FFF9F0]/50">
+                <div className="flex items-center gap-4">
+                    <span className="flex items-center gap-1 hover:text-[#ffb700] transition-colors cursor-pointer" title="Likes">
+                        <span className="material-symbols-outlined text-[16px]">favorite</span>
                         {entry._count.likes}
                     </span>
-                    <span className="wh-grid-card__stat">
-                        <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-                        </svg>
+                    <span className="flex items-center gap-1 hover:text-blue-500 transition-colors cursor-pointer" title="Comments">
+                        <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
                         {entry._count.comments}
                     </span>
-                    {details?.runtime && (
-                        <span className="wh-grid-card__stat wh-grid-card__stat--runtime">
-                            🕐 {Math.floor(details.runtime / 60)}h {details.runtime % 60}m
-                        </span>
-                    )}
-                    {details?.number_of_seasons && (
-                        <span className="wh-grid-card__stat wh-grid-card__stat--runtime">
-                            📺 {details.number_of_seasons} season{details.number_of_seasons > 1 ? 's' : ''}
-                        </span>
-                    )}
                 </div>
+                {details?.runtime && (
+                    <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[16px]">schedule</span>
+                        {Math.floor(details.runtime / 60)}h {details.runtime % 60}m
+                    </span>
+                )}
             </div>
         </div>
     );
 };
 
-/* ── Main EntryList Grid ── */
 export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly }) => {
     const [entries, setEntries] = useState<Entry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -334,28 +308,17 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
         }
     };
 
-
-    // Initial Loading State: show grid of skeletons
     if (isLoading && entries.length === 0) {
         return (
-            <div className="wh-grid-container">
-                <div className="wh-grid-header">
-                    <h2>Watch History</h2>
-                </div>
-                <div className="wh-grid">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                        <div key={i} className="wh-grid-card-skeleton-wrapper">
-                            <MovieCardSkeleton />
-                        </div>
-                    ))}
-                </div>
+            <div className="w-full flex justify-center py-20">
+                <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#ffb700]/20 border-t-[#ffb700]"></div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="py-12 flex justify-center">
+            <div className="py-12 flex justify-center w-full">
                 <ErrorState message={error} onRetry={() => loadEntries()} />
             </div>
         );
@@ -363,22 +326,24 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
 
     if (entries.length === 0) {
         return (
-            <EmptyState
-                title="No entries found"
-                message={typeof filters?.search === 'string' ? `No results for "${filters.search}"` : "Start logging your watch history!"}
-                icon={<span>🎬</span>}
-            />
+            <div className="py-20 w-full flex justify-center">
+                <EmptyState
+                    title="No entries found"
+                    message={typeof filters?.search === 'string' ? `No results for "${filters.search}"` : "Start logging your watch history!"}
+                    icon={<span className="text-5xl drop-shadow-sm">🎬</span>}
+                />
+            </div>
         );
     }
 
     return (
-        <div className="wh-grid-container">
-            <div className="wh-grid-header">
-                <h2>Watch History</h2>
-                <span className="wh-grid-count">{pagination.total} {pagination.total === 1 ? 'title' : 'titles'}</span>
+        <div className="w-full flex gap-4 flex-col">
+            <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-black text-[#2D2926]">Watch History</h2>
+                <span className="text-sm font-bold bg-[#ffb700]/10 text-[#ffb700] px-3 py-1 rounded-full">{pagination.total} {pagination.total === 1 ? 'title' : 'titles'}</span>
             </div>
 
-            <div className="wh-grid">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 {entries.map((entry) => (
                     <EntryCard
                         key={entry.id}
@@ -389,7 +354,14 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                 ))}
             </div>
 
-            <div ref={observerTarget} style={{ height: '20px', margin: '20px 0' }} />
+            <div ref={observerTarget} className="h-4 w-full mt-4" />
+            
+            {isLoading && entries.length > 0 && (
+                <div className="flex justify-center items-center py-6 gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#ffb700]"></div>
+                    <span className="text-sm font-bold text-[#2D2926]/40">Fetching older entries...</span>
+                </div>
+            )}
         </div>
     );
 };

@@ -12,7 +12,8 @@ interface FeedCardProps {
     item: FeedItem;
 }
 
-const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
+const TMDB_POSTER_IMG = 'https://image.tmdb.org/t/p/w500';
+const TMDB_BACKDROP_IMG = 'https://image.tmdb.org/t/p/w780';
 
 export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const isSuggestion = item.type === 'SUGGESTION';
@@ -29,8 +30,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const { details } = useTmdbDetails(entryData?.tmdbId, entryData?.type);
 
     const title = isSuggestion ? (item.data.title || item.data.name) : entryData.title;
-    const posterPath = isSuggestion ? item.data.poster_path : details?.poster_path;
-    const posterUrl = posterPath ? `${TMDB_IMG}${posterPath}` : null;
+    
+    // Choose cinematic landscape backdrop if available; otherwise fallback to poster
+    const backdropPathRaw = isSuggestion ? item.data.backdrop_path : details?.backdrop_path;
+    const posterPathRaw = isSuggestion ? item.data.poster_path : details?.poster_path;
+    
+    const posterUrl = backdropPathRaw 
+        ? `${TMDB_BACKDROP_IMG}${backdropPathRaw}`
+        : (posterPathRaw ? `${TMDB_POSTER_IMG}${posterPathRaw}` : null);
 
     const username = isSuggestion ? 'WatchHive Suggestion' : (entryData?.user?.username || 'User');
     const displayName = isSuggestion ? (item.reason || 'Trending Now') : (entryData?.user?.displayName || username);
@@ -45,7 +52,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
-    const timestamp = !isSuggestion ? new Date(entryData.createdAt).toLocaleDateString() : 'Just Now';
+    
+    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM"
+    const timestamp = !isSuggestion 
+        ? new Date(entryData.createdAt).toLocaleString(undefined, { 
+            month: 'short', day: 'numeric', year: 'numeric', 
+            hour: 'numeric', minute: '2-digit' 
+          }).replace(',', ' at')
+        : 'Just Now';
 
     const handleLike = async () => {
         if (isSuggestion || !entryData) return;
@@ -100,18 +114,18 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         <div className="flex items-center justify-between w-full">
                             <p className="feed-card-header-text">
                                 {isSuggestion ? (
-                                    <span className="font-semibold text-slate-100">{displayName}</span>
+                                    <span className="font-bold text-[#2D2926]">{displayName}</span>
                                 ) : (
-                                    <Link to={`/watch-hive/profile/${userId}`} className="font-semibold text-slate-100 hover:text-primary transition-colors">
+                                    <Link to={`/watch-hive/profile/${userId}`} className="font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors">
                                         {displayName}
                                     </Link>
                                 )}
                                 {' '}
-                                <span className="text-secondary font-normal">{actionText}</span>
+                                <span className="text-[#2D2926]/70 font-medium">{actionText}</span>
                                 {' '}
-                                <span className="font-medium text-slate-200">{title}</span>
+                                <span className="font-extrabold text-[#2D2926]">{title}</span>
                             </p>
-                            <span className="feed-card-time">{timestamp}</span>
+                            <span className="feed-card-time text-[#2D2926]/50">{timestamp}</span>
                         </div>
                     </div>
                 </div>

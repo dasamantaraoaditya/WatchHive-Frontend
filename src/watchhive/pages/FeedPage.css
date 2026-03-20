@@ -88,7 +88,14 @@
     flex-direction: column;
     gap: 2rem;
     border-left: 1px solid rgba(255, 183, 0, 0.1);
-    background: var(--bg-primary);
+    background: rgba(255, 255, 255, 0.3); /* bg-white/30 */
+    backdrop-filter: blur(12px);
+}
+
+@media (prefers-color-scheme: dark) {
+    .feed-right-sidebar {
+        background: var(--bg-primary);
+    }
 }
 
 @media (max-width: 1100px) {

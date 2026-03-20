@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts';
 import { Avatar } from '../common';
+import whLogo from '../../assets/images/watchhive-logo.png';
 import './Sidebar.css';
 
 export const Sidebar: React.FC = () => {
@@ -18,7 +19,7 @@ export const Sidebar: React.FC = () => {
                 <div className="wh-sidebar__top">
                     <div className="wh-sidebar__brand">
                         <div className="wh-sidebar__logo">
-                            <span className="material-symbols-outlined font-bold">hive</span>
+                            <img src={whLogo} alt="WatchHive Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
                         <h1 className="wh-sidebar__title">WatchHive</h1>
                     </div>
@@ -26,23 +27,23 @@ export const Sidebar: React.FC = () => {
                     <nav className="wh-sidebar__nav">
                         <Link to="/watch-hive/feed" className={`wh-sidebar__link ${isActive('/watch-hive/feed') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined fill-1">home</span>
-                            <span className="font-medium">Home</span>
+                            <span className="font-semibold">Home</span>
                         </Link>
                         <Link to="/watch-hive/mindlens" className={`wh-sidebar__link ${isActive('/watch-hive/mindlens') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined">psychology</span>
-                            <span className="font-medium">MindLens</span>
+                            <span className="font-semibold">MindLens</span>
                         </Link>
                         <Link to="/watch-hive/profile" className={`wh-sidebar__link ${isActive('/watch-hive/profile') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined">person</span>
-                            <span className="font-medium">Profile</span>
+                            <span className="font-semibold">Profile</span>
                         </Link>
                         <Link to="/watch-hive/search" className={`wh-sidebar__link ${isActive('/watch-hive/search') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined">search</span>
-                            <span className="font-medium">Search</span>
+                            <span className="font-semibold">Search</span>
                         </Link>
                         <Link to="/watch-hive/entries" className={`wh-sidebar__link ${isActive('/watch-hive/entries') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined">add_reaction</span>
-                            <span className="font-medium">Entries</span>
+                            <span className="font-semibold">Entries</span>
                         </Link>
                     </nav>
                 </div>

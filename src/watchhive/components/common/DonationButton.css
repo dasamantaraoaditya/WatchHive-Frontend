@@ -1,7 +1,7 @@
 /* Donation Button Styles */
 .donation-button {
     position: fixed;
-    bottom: 2rem;
+    bottom: 7.5rem; /* Lifted above the Quick Add FAB */
     right: 2rem;
     z-index: 1000;
     display: flex;
