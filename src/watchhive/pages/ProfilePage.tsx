@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts';
 import { userService } from '../services';
 import { FollowListModal, WatchlistGrid, ProfileStats } from '../components/profile';
+import { entriesApi, Entry } from '../services/entries.service';
+import { EntryCard } from '../components/entries/EntryList'; // Need to export EntryCard or replicate it
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser } = useAuth();
@@ -14,12 +16,30 @@ export const ProfilePage: React.FC = () => {
     
     // UI Tabs State
     const [activeTab, setActiveTab] = useState<'watchlist' | 'stats'>('watchlist');
+    const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
+    const [isWatchingLoading, setIsWatchingLoading] = useState(false);
 
     useEffect(() => {
         if (user) {
             userService.getFollowStats(user.id).then(setStats).catch(console.error);
+            fetchWatching();
         }
     }, [user?.id]);
+
+    const fetchWatching = async () => {
+        if (!user) return;
+        setIsWatchingLoading(true);
+        try {
+            const response = await entriesApi.getEntries({ userId: user.id, isWatching: true, limit: 10 });
+            // Direct param might not work if backend isn't ready, fallback to client filtering
+            const filtered = response.entries.filter(e => e.isWatching);
+            setWatchingEntries(filtered);
+        } catch (err) {
+            console.error('Failed to fetch watching entries', err);
+        } finally {
+            setIsWatchingLoading(false);
+        }
+    };
 
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [bioText, setBioText] = useState(user?.bio || '');
@@ -214,6 +234,39 @@ export const ProfilePage: React.FC = () => {
                         <div className={`mb-6 p-3 rounded-xl text-[11px] font-black text-center border animate-[slide-down_0.3s_ease-out] ${error ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}>
                             {error || successMsg}
                         </div>
+                    )}
+
+                    {/* Currently Watching Section */}
+                    {watchingEntries.length > 0 && (
+                        <section className="mb-10 animate-[fade-in_0.5s_ease-out]">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-[13px] font-black uppercase tracking-[0.2em] text-[#2D2926]/40 flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                    Currently Watching
+                                </h2>
+                                {isWatchingLoading ? (
+                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-500/20 border-t-green-500"></div>
+                                ) : (
+                                    <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-md uppercase tracking-widest">{watchingEntries.length} Active Sessions</span>
+                                )}
+                            </div>
+                            <div className="flex gap-6 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2 mask-linear-r">
+                                {watchingEntries.map(entry => (
+                                    <div key={entry.id} className="min-w-[280px] md:min-w-[320px] shrink-0 transform transition-transform hover:scale-[1.01]">
+                                        <EntryCard 
+                                            entry={entry} 
+                                            onEdit={() => {/* Add edit logic if needed */}} 
+                                            onDelete={async (id) => {
+                                                if (window.confirm('Remove this session?')) {
+                                                    await entriesApi.deleteEntry(id);
+                                                    fetchWatching();
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
                     )}
 
                     <div className="flex items-center justify-between mb-6">

@@ -163,6 +163,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
         review: entry?.review || '',
         tags: entry?.tags || [],
         isRewatch: entry?.isRewatch || false,
+        isWatching: entry?.isWatching || false,
         watchLocation: entry?.watchLocation || '',
     });
 
@@ -399,7 +400,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
                                 onChange={(val: string) => setFormData((prev) => ({ ...prev, watchedAt: val || new Date().toISOString().slice(0, 16) }))}
                             />
 
-                        <div className="flex flex-col justify-end pb-1">
+                        <div className="flex flex-col sm:flex-row gap-6">
                             <label className="flex items-center gap-3 cursor-pointer group w-max outline-none focus:ring-4 focus:ring-[#ffb700]/10 rounded-xl p-2">
                                 <div className="relative">
                                     <input
@@ -410,7 +411,20 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
                                     />
                                     <div className="w-14 h-7 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#ffb700] after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner"></div>
                                 </div>
-                                <span className="font-extrabold text-[#2D2926] group-hover:text-[#ffb700] transition-colors uppercase tracking-widest text-sm">Designate as Rewatch</span>
+                                <span className="font-extrabold text-[#2D2926] group-hover:text-[#ffb700] transition-colors uppercase tracking-widest text-sm">Rewatch</span>
+                            </label>
+
+                            <label className="flex items-center gap-3 cursor-pointer group w-max outline-none focus:ring-4 focus:ring-[#ffb700]/10 rounded-xl p-2">
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.isWatching}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, isWatching: e.target.checked }))}
+                                        className="sr-only peer" 
+                                    />
+                                    <div className="w-14 h-7 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#22c55e] after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner"></div>
+                                </div>
+                                <span className="font-extrabold text-[#2D2926] group-hover:text-[#22c55e] transition-colors uppercase tracking-widest text-sm">Currently Watching</span>
                             </label>
                         </div>
                     </div>

@@ -12,6 +12,7 @@ export interface Entry {
     review: string | null;
     tags: string[];
     isRewatch: boolean;
+    isWatching?: boolean;
     watchLocation: string | null;
     createdAt: string;
     updatedAt: string;
@@ -36,6 +37,7 @@ export interface CreateEntryData {
     review?: string;
     tags?: string[];
     isRewatch?: boolean;
+    isWatching?: boolean;
     watchLocation?: string;
 }
 
@@ -47,6 +49,7 @@ export interface UpdateEntryData {
     review?: string;
     tags?: string[];
     isRewatch?: boolean;
+    isWatching?: boolean;
     watchLocation?: string;
 }
 
@@ -55,6 +58,7 @@ export interface GetEntriesParams {
     type?: 'MOVIE' | 'TV_SHOW' | 'EPISODE';
     rating?: number;
     tag?: string;
+    isWatching?: boolean;
     search?: string;
     limit?: number; // Default should be 10
     offset?: number;

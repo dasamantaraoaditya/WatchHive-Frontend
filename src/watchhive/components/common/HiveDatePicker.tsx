@@ -155,67 +155,57 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                            className="absolute top-full left-0 right-0 mt-3 z-50 bg-white border border-[#ffb700]/20 rounded-[32px] shadow-2xl overflow-hidden p-6"
+                            className="absolute top-full left-0 mt-3 z-50 bg-white border border-[#ffb700]/20 rounded-[32px] shadow-2xl overflow-hidden p-8 min-w-[500px]"
                         >
-                            <div className="flex flex-col md:flex-row gap-8">
+                            <div className="flex items-start gap-10">
                                 {/* Date Section */}
-                                <div className="flex-1 min-w-[280px]">
+                                <div className="flex-1">
                                     {renderHeader()}
                                     {renderDays()}
                                 </div>
 
-                                {/* Divider */}
-                                <div className="hidden md:block w-px bg-[#ffb700]/5" />
+                                {/* Modern Vertical Divider */}
+                                <div className="w-[2px] self-stretch bg-gradient-to-b from-transparent via-[#ffb700]/10 to-transparent" />
 
-                                {/* Time Section */}
-                                <div className="flex flex-col gap-6 w-full md:w-32">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/30 text-center">Set Time</h4>
+                                {/* Time Section - Optimized for clarity and size */}
+                                <div className="flex flex-col items-center gap-8 w-48">
+                                    <h4 className="text-[11px] font-black uppercase tracking-[0.25em] text-[#ffb700]">Select Time</h4>
                                     
-                                    <div className="flex flex-row md:flex-col items-center justify-center gap-4">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <span className="text-[9px] font-black text-[#ffb700] uppercase">Hour</span>
+                                    <div className="flex items-center justify-center gap-3">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <span className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest">Hour</span>
                                             <input 
                                                 type="number" 
                                                 min="0" max="23" 
-                                                value={hours}
-                                                onChange={(e) => handleTimeChange('h', parseInt(e.target.value) || 0)}
-                                                className="w-14 h-14 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/10 flex items-center justify-center text-center text-xl font-black text-[#2D2926] focus:border-[#ffb700] outline-none"
+                                                value={hours < 10 ? `0${hours}` : hours}
+                                                onChange={(e) => handleTimeChange('h', Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
+                                                className="w-20 h-24 rounded-3xl bg-[#FFF9F0] border-2 border-[#ffb700]/10 flex items-center justify-center text-center text-3xl font-black text-[#2D2926] focus:border-[#ffb700] focus:bg-white outline-none transition-all"
                                             />
                                         </div>
-                                        <div className="text-2xl font-black text-[#ffb700]/20">:</div>
-                                        <div className="flex flex-col items-center gap-2">
-                                            <span className="text-[9px] font-black text-[#ffb700] uppercase">Min</span>
+                                        <div className="text-3xl font-black text-[#ffb700] animate-pulse">:</div>
+                                        <div className="flex flex-col items-center gap-3">
+                                            <span className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest">Min</span>
                                             <input 
                                                 type="number" 
                                                 min="0" max="59" 
-                                                value={minutes}
-                                                onChange={(e) => handleTimeChange('m', parseInt(e.target.value) || 0)}
-                                                className="w-14 h-14 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/10 flex items-center justify-center text-center text-xl font-black text-[#2D2926] focus:border-[#ffb700] outline-none"
+                                                value={minutes < 10 ? `0${minutes}` : minutes}
+                                                onChange={(e) => handleTimeChange('m', Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                                                className="w-20 h-24 rounded-3xl bg-[#FFF9F0] border-2 border-[#ffb700]/10 flex items-center justify-center text-center text-3xl font-black text-[#2D2926] focus:border-[#ffb700] focus:bg-white outline-none transition-all"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="mt-auto hidden md:block">
+                                    <div className="w-full pt-4">
                                          <button 
                                             type="button"
                                             onClick={handleConfirm}
-                                            className="w-full py-3 bg-[#ffb700] text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-[#ffb700]/20"
+                                            className="w-full py-4 bg-[#ffb700] text-white rounded-[20px] font-black text-[11px] uppercase tracking-[0.2em] hover:scale-[1.05] active:scale-[0.95] transition-all shadow-xl shadow-[#ffb700]/20 flex items-center justify-center gap-2 group"
                                         >
-                                            Done
+                                            Confirm
+                                            <span className="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                                         </button>
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Mobile Footer */}
-                            <div className="mt-6 md:hidden">
-                                <button 
-                                    type="button"
-                                    onClick={handleConfirm}
-                                    className="w-full py-4 bg-[#ffb700] text-white rounded-2xl font-black text-xs uppercase tracking-widest"
-                                >
-                                    Confirm Date & Time
-                                </button>
                             </div>
                         </motion.div>
                     </>

@@ -53,7 +53,7 @@ const MiniStars: React.FC<{ rating: number }> = ({ rating }) => {
     );
 };
 
-const EntryCard: React.FC<{
+export const EntryCard: React.FC<{
     entry: Entry;
     onEdit?: (entry: Entry) => void;
     onDelete?: (id: string) => void;
@@ -158,10 +158,32 @@ const EntryCard: React.FC<{
                             🔄 Rewatch
                         </span>
                     )}
+                    {entry.isWatching && (
+                        <span className="bg-green-500 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg animate-pulse shadow-lg shadow-green-500/20">
+                            👀 Watching
+                        </span>
+                    )}
                 </div>
 
                 {/* Hover Actions (Edit/Delete/Watchlist) */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                    {entry.isWatching && (
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    await entriesApi.updateEntry(entry.id, { isWatching: false });
+                                    window.location.reload(); // Quickest way to refresh for now
+                                } catch (err) {
+                                    alert('Failed to mark as watched');
+                                }
+                            }}
+                            className="w-9 h-9 rounded-xl bg-green-500 text-white hover:bg-green-600 hover:scale-110 transition-all flex items-center justify-center border border-green-400 shadow-lg shadow-green-500/20"
+                            title="Mark as Watched"
+                        >
+                            <span className="material-symbols-outlined text-[20px] font-black">check_circle</span>
+                        </button>
+                    )}
                     <WatchlistButton 
                         tmdbId={entry.tmdbId} 
                         variant="icon" 
