@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { User } from '../types/user.types';
 import userService from '../services/userService';
-import { Avatar, Skeleton, ErrorState, EmptyState } from '../components/common';
+import { Avatar, ErrorState, EmptyState } from '../components/common';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 

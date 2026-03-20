@@ -30,12 +30,12 @@ const POSTER_ROW_2 = SHOWCASE_POSTERS.slice(8, 16);
 
 /* ── Feature showcase data ── */
 const showcaseFeatures = [
-    { icon: 'search', title: 'Instant Discoveries', desc: 'TMDb-powered search pulls any movie or series to your fingertips in milliseconds.' },
-    { icon: 'star_rate', title: 'Personal Ratings', desc: 'Log exact star ratings, dates, and locations to build your ultimate cinema diary.' },
-    { icon: 'forum', title: 'Hive Discussion', desc: 'Dive into reviews, comment on friends\' entries, and find like-minded cinephiles.' },
-    { icon: 'apps', title: 'Stunning Grids', desc: 'View your watch history laid out in beautiful, infinite glassmorphism posters.' },
-    { icon: 'playlist_add_check', title: 'Watchlists', desc: 'Save what to watch next and build queues spanning genres and decades.' },
-    { icon: 'label', title: 'Custom Tags', desc: 'Invent your own tags to group and organize films creatively.' },
+    { icon: 'psychology', title: 'MindLens Analytics', desc: 'Unlock deep psychological and cinematic insights based on your unique watching habits.' },
+    { icon: 'dynamic_feed', title: 'The Hive Feed', desc: 'Scroll through a vibrant social feed to see what your friends are watching and reviewing in real-time.' },
+    { icon: 'library_add', title: 'Cinematic Entries', desc: 'Log exact star ratings, dates, and locations to build an infinite glassmorphism grid of your watch history.' },
+    { icon: 'live_tv', title: 'Currently Watching', desc: 'Easily track television series you are actively binging and seamlessly continue where you left off.' },
+    { icon: 'group_add', title: 'Find Friends', desc: 'Search for friends, follow their profiles, and engage in meaningful discussions in the comment sections.' },
+    { icon: 'bookmark_added', title: 'Watchlists & Tags', desc: 'Organize your upcoming queue and invent custom tracking tags to filter your entire collection.' },
 ];
 
 function useReveal(threshold = 0.15) {
@@ -59,12 +59,10 @@ function useReveal(threshold = 0.15) {
 }
 
 export const LandingPage: React.FC = () => {
-    const [scrollY, setScrollY] = useState(0);
     const [navSolid, setNavSolid] = useState(false);
 
     useEffect(() => {
         const handler = () => {
-            setScrollY(window.scrollY);
             setNavSolid(window.scrollY > 60);
         };
         window.addEventListener('scroll', handler, { passive: true });

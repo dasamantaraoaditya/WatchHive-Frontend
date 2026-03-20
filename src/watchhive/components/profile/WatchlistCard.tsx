@@ -95,7 +95,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                         disabled={marking}
                         title="Mark as Watched"
                     >
-                        {marking ? '⏳' : '✅ Watched'}
+                        {marking ? '🐝' : '🍯 Hive It'}
                     </button>
                 </div>
             </div>

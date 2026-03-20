@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { MovieCardSkeleton, ErrorState, EmptyState, WatchlistButton } from '../common';
+import { ErrorState, EmptyState, WatchlistButton } from '../common';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
 interface EntryListProps {

@@ -98,15 +98,15 @@
 
 /* Buttons and Badges */
 .watchlist-mark-btn {
-    background: var(--success-500);
+    background: #ffb700;
     color: white;
     border: none;
     padding: 8px 16px;
     border-radius: var(--radius-full);
     font-size: var(--text-xs);
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 4px 12px rgba(255, 183, 0, 0.3);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -116,7 +116,7 @@
 }
 
 .watchlist-mark-btn:hover {
-    background: var(--success-600);
+    filter: brightness(1.1);
     transform: scale(1.05);
 }
 

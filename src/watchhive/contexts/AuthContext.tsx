@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService } from '../services';
+import { authService, userService } from '../services';
 import { AuthContextType, LoginCredentials, RegisterData, AuthResponse } from '../types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -10,19 +10,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     useEffect(() => {
         // Check if user is already logged in
-        const checkAuth = () => {
+        const checkAuth = async () => {
             const isAuth = authService.isAuthenticated();
             if (!isAuth) {
                 setIsLoading(false);
                 return;
             }
 
-            // If we have a token, we consider the user authenticated
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
+            try {
+                // Always sync with backend on load to get fresh stats/data
+                const freshUser = await userService.getMe();
+                setUser(freshUser);
+                localStorage.setItem('user', JSON.stringify(freshUser));
+            } catch (error) {
+                console.error('Failed to sync user data on load', error);
+                // Fallback to stored user if API fails
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    setUser(JSON.parse(storedUser));
+                }
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
 
         checkAuth();

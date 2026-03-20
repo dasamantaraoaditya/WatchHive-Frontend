@@ -1,4 +1,5 @@
-// Authentication related types
+import { User } from './user.types';
+
 export interface LoginCredentials {
     email: string;
     password: string;
@@ -16,25 +17,19 @@ export interface GoogleLoginData {
 }
 
 export interface AuthResponse {
-    user: {
-        id: string;
-        username: string;
-        email: string;
-        displayName: string | null;
-        profilePictureUrl: string | null;
-    };
+    user: User;
     accessToken: string;
     refreshToken: string;
     isNewUser?: boolean;
 }
 
 export interface AuthContextType {
-    user: AuthResponse['user'] | null;
+    user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (credentials: LoginCredentials) => Promise<void>;
     register: (data: RegisterData) => Promise<void>;
     googleLogin: (idToken: string) => Promise<void>;
     logout: () => void;
-    updateUser: (user: AuthResponse['user']) => void;
+    updateUser: (user: User) => void;
 }
