@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 import { feedApi, FeedItem } from '../services/feed.service';
+import { userService } from '../services/userService';
+import { User } from '../types';
 import { FeedCard } from '../components/feed/FeedCard';
 import { Avatar, FeedCardSkeleton, ErrorState, EmptyState } from '../components/common';
 import './FeedPage.css';
@@ -19,6 +21,35 @@ export const FeedPage: React.FC = () => {
     const [initialLoading, setInitialLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(true);
+    const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
+    const [loadingSuggestions, setLoadingSuggestions] = useState(true);
+
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (!isOnline) {
+                setLoadingSuggestions(false);
+                return;
+            }
+            try {
+                const users = await userService.getSuggestedUsers();
+                setSuggestedUsers(users);
+            } catch (err) {
+                console.error('Failed to load suggested users', err);
+            } finally {
+                setLoadingSuggestions(false);
+            }
+        };
+        fetchSuggestions();
+    }, [isOnline]);
+
+    const handleFollow = async (userId: string) => {
+        try {
+            await userService.followUser(userId);
+            setSuggestedUsers(prev => prev.filter(u => u.id !== userId));
+        } catch (err) {
+            console.error('Failed to follow user', err);
+        }
+    };
 
     const fetchFeed = useCallback(async (pageNum: number) => {
         if (!pageNum) return;
@@ -184,22 +215,22 @@ export const FeedPage: React.FC = () => {
                 <section className="widget-section">
                     <h3 className="mb-4 font-bold text-slate-100">Suggested Follows</h3>
                     <div className="widget-content">
-                        <div className="suggestion-item">
-                            <Avatar src={null} name="Lila Moon" size="sm" />
-                            <div className="suggestion-info">
-                                <p className="suggestion-name">Lila Moon</p>
-                                <p className="suggestion-role">Film Analyst</p>
-                            </div>
-                            <button className="btn-follow">Follow</button>
-                        </div>
-                        <div className="suggestion-item">
-                            <Avatar src={null} name="Zen Master" size="sm" />
-                            <div className="suggestion-info">
-                                <p className="suggestion-name">Zen Master</p>
-                                <p className="suggestion-role">Meditation Guide</p>
-                            </div>
-                            <button className="btn-follow-outline">Follow</button>
-                        </div>
+                        {loadingSuggestions ? (
+                            <p className="text-sm text-slate-400 mb-2">Finding people for you...</p>
+                        ) : suggestedUsers.length > 0 ? (
+                            suggestedUsers.map(user => (
+                                <div className="suggestion-item" key={user.id}>
+                                    <Avatar src={user.profilePictureUrl || null} name={user.displayName || user.username} size="sm" />
+                                    <div className="suggestion-info">
+                                        <p className="suggestion-name">{user.displayName || user.username}</p>
+                                        <p className="suggestion-role text-xs text-slate-400 line-clamp-1">{user.bio ? user.bio : 'Movie Fan'}</p>
+                                    </div>
+                                    <button className="btn-follow" onClick={() => handleFollow(user.id)}>Follow</button>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-slate-400 mb-2">No suggestions right now.</p>
+                        )}
                     </div>
                     <button className="btn-show-more">Show more</button>
                 </section>

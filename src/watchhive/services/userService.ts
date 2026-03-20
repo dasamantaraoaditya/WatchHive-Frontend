@@ -59,6 +59,10 @@ export const userService = {
             hasMore: response.hasMore || false
         };
     },
+    async getSuggestedUsers(): Promise<User[]> {
+        const response: any = await apiClient.get('/users/suggested');
+        return response.users || [];
+    },
 };
 
 export default userService;
