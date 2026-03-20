@@ -12,6 +12,7 @@ export interface MindLensData {
         name: string;
         description: string;
         icon: string;
+        imageUrl?: string;
         color: string;
     };
     timeDistribution?: {

@@ -142,7 +142,11 @@ export const MindLensPage: React.FC = () => {
                             <div className="relative z-10 flex flex-col items-center text-center">
                                 <div className="w-32 h-32 rounded-full p-1 mb-6" style={{ background: `linear-gradient(to bottom, ${data.persona.color}60, transparent)` }}>
                                     <div className="w-full h-full rounded-full bg-[#F5E6D3] flex items-center justify-center overflow-hidden border-2 border-white shadow-inner">
-                                        <span className="text-6xl drop-shadow-md">{data.persona.icon}</span>
+                                        {data.persona.imageUrl ? (
+                                            <img src={data.persona.imageUrl} alt={data.persona.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <span className="text-6xl drop-shadow-md">{data.persona.icon}</span>
+                                        )}
                                     </div>
                                 </div>
                                 <h3 className="text-xs font-bold uppercase tracking-[0.2em] mb-2" style={{ color: data.persona.color }}>Soul Persona</h3>
