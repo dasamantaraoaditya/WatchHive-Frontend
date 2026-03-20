@@ -21,6 +21,7 @@ export interface MindLensData {
         night: number;
     };
     insights?: string[];
+    aesthetics?: string[];
     generatedAt?: string;
 }
 

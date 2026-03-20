@@ -106,6 +106,17 @@ export const MindLensPage: React.FC = () => {
 
     const moodTheme = getMoodTheme(data.userProfile?.primaryMood);
 
+    const AESTHETICS_MAP: Record<string, { bg: string, textClass: string, extra?: React.ReactNode }> = {
+        'Noir': { bg: 'bg-[#2D241E]', textClass: 'text-[#F5E6D3]' },
+        'Amber': { bg: 'bg-gradient-to-br from-[#ffb700] to-[#ffb700]/60 shadow-sm', textClass: 'text-[#2D241E]' },
+        'Concrete': { bg: 'bg-[#D2CBC2]', textClass: 'text-[#2D241E]/60' },
+        'Forest': { bg: 'bg-[#8da08d]', textClass: 'text-white' },
+        'Grit': { bg: 'bg-white relative overflow-hidden', textClass: 'text-[#2D241E] relative', extra: <div className="absolute inset-0 bg-[#ffb700]/10 blur-xl"></div> },
+        'Void': { bg: 'bg-[#121212]', textClass: 'text-[#F5E6D3]/50' },
+        'Neon': { bg: 'bg-gradient-to-tr from-purple-500 to-pink-500 shadow-md', textClass: 'text-white' },
+        'Pastel': { bg: 'bg-[#FDF2F8]', textClass: 'text-[#2D241E]/80' }
+    };
+
     return (
         <div className="flex-1 overflow-y-auto bg-[#FFF9F0] font-display text-[#2D241E] min-h-full">
             <header className="h-16 border-b border-[#F5E6D3] flex items-center justify-between px-8 sticky top-0 bg-[#FFF9F0]/80 backdrop-blur-md z-10 hidden md:flex">
@@ -270,26 +281,17 @@ export const MindLensPage: React.FC = () => {
                         <button className="px-5 py-2 text-[10px] font-bold border border-[#F5E6D3] rounded-lg hover:bg-[#F5E6D3] transition-colors uppercase tracking-widest text-[#2D241E]">Generate New Map</button>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {/* Static Mock Mood Squares until backend supports aesthetic arrays */}
-                        <div className="aspect-square rounded-2xl bg-[#2D241E] border border-[#F5E6D3] p-4 flex flex-col justify-end">
-                            <span className="text-[10px] text-[#F5E6D3] font-bold uppercase tracking-widest">Noir</span>
-                        </div>
-                        <div className="aspect-square rounded-2xl bg-gradient-to-br from-[#ffb700] to-[#ffb700]/60 border border-[#F5E6D3] p-4 flex flex-col justify-end shadow-sm">
-                            <span className="text-[10px] text-[#2D241E] font-bold uppercase tracking-widest">Amber</span>
-                        </div>
-                        <div className="aspect-square rounded-2xl bg-[#D2CBC2] border border-[#F5E6D3] p-4 flex flex-col justify-end">
-                            <span className="text-[10px] text-[#2D241E]/60 font-bold uppercase tracking-widest">Concrete</span>
-                        </div>
-                        <div className="aspect-square rounded-2xl bg-[#8da08d] border border-[#F5E6D3] p-4 flex flex-col justify-end">
-                            <span className="text-[10px] text-white font-bold uppercase tracking-widest">Forest</span>
-                        </div>
-                        <div className="aspect-square rounded-2xl bg-white border border-[#F5E6D3] p-4 flex flex-col justify-end relative overflow-hidden">
-                            <div className="absolute inset-0 bg-[#ffb700]/10 blur-xl"></div>
-                            <span className="text-[10px] text-[#2D241E] font-bold uppercase tracking-widest relative">Grit</span>
-                        </div>
-                        <div className="aspect-square rounded-2xl bg-[#121212] border border-[#F5E6D3] p-4 flex flex-col justify-end">
-                            <span className="text-[10px] text-[#F5E6D3]/50 font-bold uppercase tracking-widest">Void</span>
-                        </div>
+                        {data.aesthetics && data.aesthetics.length > 0 ? data.aesthetics.map((aes, i) => {
+                            const style = AESTHETICS_MAP[aes] || AESTHETICS_MAP['Void'];
+                            return (
+                                <div key={i} className={`aspect-square rounded-2xl border border-[#F5E6D3] p-4 flex flex-col justify-end ${style.bg}`}>
+                                    {style.extra && style.extra}
+                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${style.textClass}`}>{aes}</span>
+                                </div>
+                            );
+                        }) : (
+                            <p className="text-sm text-[#2D241E]/60 col-span-full">Gathering more entry data to construct your map...</p>
+                        )}
                     </div>
                 </div>
                 
