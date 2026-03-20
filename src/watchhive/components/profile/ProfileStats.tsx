@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { userService } from '../../services';
 
 interface StatsData {
@@ -26,7 +26,7 @@ export const ProfileStats: React.FC = () => {
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
 
     const [hoveredDay, setHoveredDay] = useState<number | null>(null);
-    const tooltipRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
         const fetchStats = async () => {
