@@ -12,7 +12,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({ onClick }) => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             whileHover={{ scale: 1.1, rotate: 5 }}
             whileTap={{ scale: 0.9, rotate: -5 }}
-            className="fixed bottom-8 right-8 z-[1500]"
+            className="fixed bottom-24 md:bottom-8 right-8 z-[1500]"
         >
             {/* Subtle Pulse Rings */}
             <div className="absolute inset-0 rounded-full bg-[#ffb700]/20 animate-ping" />

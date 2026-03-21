@@ -1,0 +1,65 @@
+/* ============================================
+   WatchHive Bottom Navigation (Mobile)
+   ============================================ */
+
+.wh-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 183, 0, 0.1);
+    padding-bottom: env(safe-area-inset-bottom);
+    display: none; /* Hidden on desktop by default */
+}
+
+@media (prefers-color-scheme: dark) {
+    .wh-bottom-nav {
+        background: rgba(10, 10, 10, 0.8);
+        border-top: 1px solid rgba(255, 183, 0, 0.15);
+    }
+}
+
+.wh-bottom-nav__content {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 4rem; /* 64px */
+}
+
+.wh-bottom-nav__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    color: var(--text-tertiary);
+    text-decoration: none;
+    flex: 1;
+    height: 100%;
+    transition: all var(--transition-base);
+}
+
+.wh-bottom-nav__link .material-symbols-outlined {
+    font-size: 1.5rem;
+}
+
+.wh-bottom-nav__label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.wh-bottom-nav__link--active {
+    color: var(--accent-primary);
+}
+
+/* Visibility Control */
+@media (max-width: 768px) {
+    .wh-bottom-nav {
+        display: block;
+    }
+}

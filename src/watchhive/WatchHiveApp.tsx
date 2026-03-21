@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts';
-import { Sidebar, QuickAddFAB } from './components/layout';
+import { Sidebar, QuickAddFAB, BottomNav } from './components/layout';
 import { DonationButton, OfflineBanner, Modal } from './components/common';
 import { EntryForm } from './components/entries/EntryForm';
 import { WatchlistProvider } from './contexts/WatchlistContext';
@@ -189,6 +189,8 @@ const AppRoutes: React.FC = () => {
                         </Modal>
                     </>
                 )}
+                
+                {isAuthenticated && <BottomNav />}
                 
                 <DonationButton />
             </main>

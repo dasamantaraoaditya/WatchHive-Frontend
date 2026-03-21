@@ -278,7 +278,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
 
     return (
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
-            <div className="bg-white border border-[#ffb700]/20 shadow-sm rounded-3xl p-6 md:p-10">
+            <div className="bg-white border border-[#ffb700]/20 shadow-sm rounded-3xl p-4 md:p-10">
                 <div className="flex flex-col gap-2 mb-8 border-b border-[#ffb700]/10 pb-6">
                     <h2 className="text-3xl font-black text-[#2D2926] flex items-center gap-3">
                         {isEditing ? <span className="text-[#ffb700] material-symbols-outlined text-[32px]">edit</span> : <span className="text-[#ffb700] material-symbols-outlined text-[32px]">movie</span>}

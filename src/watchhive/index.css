@@ -270,6 +270,7 @@ body {
 @media (max-width: 768px) {
     .app-main--with-sidebar {
         margin-left: 0;
+        padding-bottom: 5rem; /* Space for bottom nav */
     }
 }
 

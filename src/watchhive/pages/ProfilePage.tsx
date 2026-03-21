@@ -160,7 +160,7 @@ export const ProfilePage: React.FC = () => {
                             <h1 className="text-xl font-black tracking-tight leading-none">{user.displayName || user.username}</h1>
                             <p className="text-[12px] font-bold text-[#ffb700] mt-1">@{user.username}</p>
                             {user.profilePictureUrl && (
-                                <button onClick={handleRemoveAvatar} className="text-[9px] font-black text-rose-500 uppercase tracking-widest mt-1 hover:text-rose-700">Delete Photo</button>
+                                <button onClick={handleRemoveAvatar} className="text-[9px] font-black text-rose-500 uppercase tracking-widest mt-3 md:mt-1 hover:text-rose-700">Delete Photo</button>
                             )}
                         </div>
                     </div>
@@ -190,7 +190,7 @@ export const ProfilePage: React.FC = () => {
                     </div>
 
                     {/* Dynamic Stats Row */}
-                    <div className="flex items-center gap-4 md:gap-8 shrink-0">
+                    <div className="flex items-center justify-around w-full md:w-auto md:justify-start gap-2 md:gap-8 shrink-0 pt-2 md:pt-0 border-t border-[#ffb700]/10 md:border-t-0">
                         <div className="flex flex-col items-center">
                             <span className="text-lg font-black text-[#ffb700]">{user._count?.entries || 0}</span>
                             <span className="text-[9px] font-bold uppercase tracking-widest text-[#2D2926]/40">Watches</span>

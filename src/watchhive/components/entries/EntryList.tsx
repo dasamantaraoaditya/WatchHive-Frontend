@@ -379,7 +379,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                 <span className="text-sm font-bold bg-[#ffb700]/10 text-[#ffb700] px-3 py-1 rounded-full">{pagination.total} {pagination.total === 1 ? 'title' : 'titles'}</span>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 {entries.map((entry) => (
                     <EntryCard
                         key={entry.id}
