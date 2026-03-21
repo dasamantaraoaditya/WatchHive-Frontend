@@ -87,6 +87,16 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
     const actionText = isSuggestion ? 'recommends' : (entryData?.review ? 'reviewed' : 'just watched');
 
+    const releaseYear = (details?.release_date || details?.first_air_date || '').substring(0, 4);
+    const runtime = details?.runtime || (details?.episode_run_time && details.episode_run_time[0]);
+    const genreText = details?.genres?.map((g: any) => g.name).slice(0, 2).join(', ');
+
+    const metaItems = [];
+    if (releaseYear) metaItems.push(releaseYear);
+    if (genreText) metaItems.push(genreText);
+    if (runtime) metaItems.push(`${runtime}m`);
+    const metadataString = metaItems.join(' • ');
+
     return (
         <>
             <div className={`feed-card glass group ${isSuggestion ? 'feed-card--suggestion' : ''}`}>
@@ -110,22 +120,29 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         </Link>
                     </div>
                     
-                    <div className="feed-card-header-info">
-                        <div className="flex items-center justify-between w-full">
-                            <p className="feed-card-header-text">
-                                {isSuggestion ? (
-                                    <span className="font-bold text-[#2D2926]">{displayName}</span>
-                                ) : (
-                                    <Link to={`/watch-hive/profile/${userId}`} className="font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors">
-                                        {displayName}
-                                    </Link>
+                    <div className="feed-card-header-info flex-1 min-w-0 pr-2">
+                        <div className="flex items-start justify-between w-full">
+                            <div className="flex flex-col min-w-0 mr-4">
+                                <p className="feed-card-header-text">
+                                    {isSuggestion ? (
+                                        <span className="font-bold text-[#2D2926]">{displayName}</span>
+                                    ) : (
+                                        <Link to={`/watch-hive/profile/${userId}`} className="font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors">
+                                            {displayName}
+                                        </Link>
+                                    )}
+                                    {' '}
+                                    <span className="text-[#2D2926]/70 font-medium">{actionText}</span>
+                                    {' '}
+                                    <span className="font-extrabold text-[#2D2926]">{title}</span>
+                                </p>
+                                {metadataString && (
+                                    <p className="text-xs text-[#2D2926]/50 mt-0.5 font-semibold">
+                                        {metadataString}
+                                    </p>
                                 )}
-                                {' '}
-                                <span className="text-[#2D2926]/70 font-medium">{actionText}</span>
-                                {' '}
-                                <span className="font-extrabold text-[#2D2926]">{title}</span>
-                            </p>
-                            <span className="feed-card-time text-[#2D2926]/50">{timestamp}</span>
+                            </div>
+                            <span className="feed-card-time text-[#2D2926]/50 shrink-0 whitespace-nowrap mt-1">{timestamp}</span>
                         </div>
                     </div>
                 </div>
