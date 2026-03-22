@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 720">
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffb700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff9500;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="540" height="720" fill="url(#grad3)"/>
+  
+  <!-- Movie film reel -->
+  <circle cx="270" cy="200" r="100" fill="white" opacity="0.2"/>
+  <circle cx="270" cy="200" r="90" fill="none" stroke="white" stroke-width="8" opacity="0.4"/>
+  
+  <!-- Film strip -->
+  <rect x="160" y="120" width="24" height="24" fill="white" opacity="0.8"/>
+  <rect x="200" y="120" width="24" height="24" fill="white" opacity="0.8"/>
+  <rect x="316" y="120" width="24" height="24" fill="white" opacity="0.8"/>
+  <rect x="356" y="120" width="24" height="24" fill="white" opacity="0.8"/>
+  
+  <!-- Bee -->
+  <ellipse cx="270" cy="300" rx="40" ry="50" fill="black"/>
+  <!-- Bee stripes -->
+  <ellipse cx="270" cy="270" rx="40" ry="14" fill="#ffb700"/>
+  <ellipse cx="270" cy="310" rx="40" ry="14" fill="#ffb700"/>
+  <!-- Bee wings -->
+  <ellipse cx="200" cy="295" rx="28" ry="45" fill="white" opacity="0.7"/>
+  <ellipse cx="340" cy="295" rx="28" ry="45" fill="white" opacity="0.7"/>
+  <!-- Bee head -->
+  <circle cx="270" cy="220" r="20" fill="black"/>
+  <!-- Bee eyes -->
+  <circle cx="257" cy="213" r="5" fill="white"/>
+  <circle cx="283" cy="213" r="5" fill="white"/>
+  <!-- Antenna -->
+  <path d="M 270 200 Q 245 160 235 135" stroke="black" stroke-width="3" fill="none"/>
+  <path d="M 270 200 Q 295 160 305 135" stroke="black" stroke-width="3" fill="none"/>
+  
+  <!-- App title -->
+  <text x="270" y="450" font-family="Inter, sans-serif" font-size="60" font-weight="bold" fill="white" text-anchor="middle">WatchHive</text>
+  <text x="270" y="510" font-family="Inter, sans-serif" font-size="24" fill="white" opacity="0.9" text-anchor="middle">Track Your Watch List</text>
+</svg>
