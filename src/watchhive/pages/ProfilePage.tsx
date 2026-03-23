@@ -4,6 +4,7 @@ import { userService } from '../services';
 import { FollowListModal, WatchlistGrid, ProfileStats } from '../components/profile';
 import { entriesApi, Entry } from '../services/entries.service';
 import { EntryCard } from '../components/entries/EntryList';
+import { BeeLoader } from '../components/common';
 
 
 export const ProfilePage: React.FC = () => {
@@ -294,7 +295,7 @@ export const ProfilePage: React.FC = () => {
                                     Active Sessions
                                 </h3>
                                 <div className="flex gap-2">
-                                    {isWatchingLoading && <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#ffb700]/20 border-t-[#ffb700]"></div>}
+                                    {isWatchingLoading && <BeeLoader size="small" message="" className="py-0" />}
                                 </div>
                             </div>
                             

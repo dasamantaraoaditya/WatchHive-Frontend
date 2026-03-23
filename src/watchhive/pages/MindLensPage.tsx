@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { mindLensApi, MindLensData } from '../services/mindlens.service';
 import { useAuth } from '../contexts';
+import { BeeLoader } from '../components/common';
 
-// Optional: you can keep importing Button or just use raw tailwind for empty state
 import { Link } from 'react-router-dom';
 
 export const MindLensPage: React.FC = () => {
@@ -55,8 +55,7 @@ export const MindLensPage: React.FC = () => {
     if (isLoading) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-[#FFF9F0]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffb700] mb-4"></div>
-                <p className="text-[#2D241E]/60 font-medium font-display">Analyzing your viewing psyche...</p>
+                <BeeLoader size="medium" message="Analyzing your viewing psyche..." />
             </div>
         );
     }

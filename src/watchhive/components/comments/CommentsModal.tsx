@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Avatar } from '../common';
+import { Avatar, BeeLoader } from '../common';
 import { interactionService, Comment } from '../../services/interaction.service';
 import { useAuth } from '../../contexts';
 
@@ -89,9 +89,8 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, e
                 {/* Body / Comments List */}
                 <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center py-10 gap-3">
-                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ffb700]"></div>
-                            <p className="font-bold text-[#2D2926]/40">Loading discussion...</p>
+                        <div className="flex flex-col items-center justify-center py-10">
+                            <BeeLoader size="small" message="Loading discussion..." />
                         </div>
                     ) : comments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-center">

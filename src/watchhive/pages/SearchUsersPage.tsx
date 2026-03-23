@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { User } from '../types/user.types';
 import userService from '../services/userService';
-import { Avatar, ErrorState, EmptyState } from '../components/common';
+import { Avatar, ErrorState, EmptyState, BeeLoader } from '../components/common';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 
@@ -219,9 +219,8 @@ export const SearchUsersPage: React.FC = () => {
                     <div ref={observerTarget} className="h-4 w-full" />
 
                     {loading && results.length > 0 && (
-                        <div className="text-center py-6 font-bold text-[#2D2926]/40 flex items-center justify-center gap-3">
-                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#ffb700]"></div>
-                            Searching the hive for more...
+                        <div className="py-6">
+                            <BeeLoader size="small" message="Searching the hive for more..." />
                         </div>
                     )}
                 </div>
