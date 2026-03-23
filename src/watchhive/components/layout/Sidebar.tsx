@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts';
-import { Avatar, BadgeModal } from '../common';
+import { Avatar, BadgeModal, InstallPromptButton } from '../common';
 import whLogo from '../../assets/images/watchhive-logo.png';
 import './Sidebar.css';
 
@@ -50,6 +50,9 @@ export const Sidebar: React.FC = () => {
                 </div>
                 
                 <div className="wh-sidebar__bottom">
+                    <div className="mb-4">
+                        <InstallPromptButton />
+                    </div>
                     <div className="wh-sidebar__honey-level">
                         <div className="wh-sidebar__honey-header">
                             <p className="wh-sidebar__honey-title">Honey level {user?.level || 1}</p>

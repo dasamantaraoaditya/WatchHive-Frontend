@@ -4,8 +4,8 @@
   "description": "Track every movie, anime, K-drama, and TV series you watch. Rate, review, and discover with a community of fellow watchers.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#6366f1",
+  "background_color": "#FFF9F0",
+  "theme_color": "#ffb700",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

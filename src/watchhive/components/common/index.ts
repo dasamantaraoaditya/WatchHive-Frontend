@@ -12,3 +12,4 @@ export * from './HiveDatePicker';
 export * from './Modal';
 export * from './BadgeModal';
 export * from './BeeLoader';
+export * from './InstallPromptButton';

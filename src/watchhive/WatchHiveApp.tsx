@@ -185,6 +185,7 @@ const AppRoutes: React.FC = () => {
                             <EntryForm 
                                 onSuccess={() => setIsQuickAddOpen(false)} 
                                 onCancel={() => setIsQuickAddOpen(false)} 
+                                isModal={true}
                             />
                         </Modal>
                     </>

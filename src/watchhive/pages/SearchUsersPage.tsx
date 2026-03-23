@@ -94,10 +94,10 @@ export const SearchUsersPage: React.FC = () => {
             <main className="max-w-4xl mx-auto w-full px-4 py-8 flex flex-col gap-8">
                 
                 {/* Search Header Container */}
-                <div className="flex flex-col items-center justify-center text-center gap-6 py-4 md:py-10">
+                <div className="flex flex-col items-center justify-center text-center gap-4 md:gap-6 py-2 md:py-10">
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-black text-[#2D2926] tracking-tight mb-3">Discover the <span className="text-[#ffb700]">Hive</span></h1>
-                        <p className="text-[#2D2926]/60 text-lg md:text-xl font-medium max-w-lg mx-auto">Find friends, critics, and fellow curators sharing their cinematic journeys.</p>
+                        <h1 className="text-3xl md:text-5xl font-black text-[#2D2926] tracking-tight mb-2 md:mb-3">Discover the <span className="text-[#ffb700]">Hive</span></h1>
+                        <p className="text-[#2D2926]/60 text-base md:text-xl font-medium max-w-lg mx-auto">Find friends, critics, and fellow curators sharing their cinematic journeys.</p>
                     </div>
 
                     <div className="w-full max-w-2xl relative group mt-4">

@@ -236,6 +236,8 @@ html {
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -246,7 +248,12 @@ body {
     color: var(--text-primary);
     background-color: var(--bg-primary);
     min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile */
     overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    padding-top: env(safe-area-inset-top);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
 }
 
 .app-layout {
@@ -270,7 +277,7 @@ body {
 @media (max-width: 768px) {
     .app-main--with-sidebar {
         margin-left: 0;
-        padding-bottom: 5rem; /* Space for bottom nav */
+        padding-bottom: calc(5rem + env(safe-area-inset-bottom));
     }
 }
 
@@ -747,5 +754,93 @@ select:focus-visible {
     h2,
     h3 {
         page-break-after: avoid;
+    }
+}
+
+/* ============================================
+   13. MOBILE-FIRST ENHANCEMENTS
+   ============================================ */
+
+/* Disable hover styles on touch devices */
+@media (hover: none) and (pointer: coarse) {
+    a:hover {
+        text-decoration: none;
+        color: var(--accent-primary);
+    }
+
+    button:hover {
+        filter: none;
+        transform: none;
+    }
+}
+
+/* Touch-friendly targets */
+@media (max-width: 768px) {
+    button,
+    a,
+    [role="button"],
+    input[type="submit"],
+    input[type="button"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    input,
+    textarea,
+    select {
+        font-size: 16px !important; /* Prevent iOS zoom on focus */
+    }
+
+    /* Tighter headings for mobile */
+    h1 { font-size: clamp(1.75rem, 1.5rem + 1.25vw, 2.25rem); }
+    h2 { font-size: clamp(1.5rem, 1.3rem + 1vw, 1.875rem); }
+    h3 { font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem); }
+
+    /* Hide scrollbars on mobile for cleaner look */
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    * {
+        scrollbar-width: none;
+    }
+}
+
+/* Pull-to-refresh container */
+.pull-to-refresh {
+    position: relative;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* No-scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Horizontal scroll strip (for trending, tags, etc.) */
+.scroll-strip {
+    display: flex;
+    overflow-x: auto;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+.scroll-strip > * {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+}
+
+/* Active press state for mobile */
+@media (hover: none) {
+    .tap-active:active {
+        transform: scale(0.97);
+        opacity: 0.8;
+        transition: transform 0.1s ease, opacity 0.1s ease;
     }
 }

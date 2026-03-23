@@ -136,10 +136,20 @@ export const ProfilePage: React.FC = () => {
     return (
         <div className="flex h-screen w-full flex-col bg-[#FFF9F0] font-sans text-slate-900 overflow-hidden">
             
+            {/* Mobile Header */}
+            <header className="sticky top-0 z-40 w-full border-b border-[#ffb700]/20 bg-[#FFF9F0]/90 backdrop-blur-md px-4 py-3 md:hidden">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-extrabold tracking-tight text-[#2D2926]">Profile</h2>
+                    <button onClick={handleInvite} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#ffb700]/10 text-[#ffb700] active:scale-90 transition-transform">
+                        <span className="material-symbols-outlined text-[20px]">share</span>
+                    </button>
+                </div>
+            </header>
+
             {/* Main Content Area */}
             <div className="flex-1 w-full overflow-y-auto overflow-x-hidden relative">
                 
-                <main className="max-w-5xl mx-auto w-full px-4 py-8 flex flex-col gap-8 md:px-8">
+                <main className="max-w-5xl mx-auto w-full px-4 py-4 md:py-8 flex flex-col gap-6 md:gap-8 md:px-8">
                     
                     {/* Alerts (Toast-like) */}
                     {(error || successMsg) && (
@@ -251,28 +261,25 @@ export const ProfilePage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Navigation Tabs (From HTML) */}
-                    <div className="flex border-b border-slate-200 gap-6 md:gap-8 mt-2 overflow-x-auto no-scrollbar">
+                    {/* Navigation Tabs — horizontal scroll on mobile */}
+                    <div className="flex border-b border-slate-200 gap-0 md:gap-8 mt-2 overflow-x-auto no-scrollbar scroll-strip" style={{ scrollSnapType: 'x mandatory' }}>
                         <button 
                             onClick={() => setActiveTab('watching')}
-                            className={`pb-4 px-2 font-bold whitespace-nowrap transition-colors relative ${activeTab === 'watching' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`pb-3 md:pb-4 px-4 md:px-2 font-bold whitespace-nowrap transition-colors relative text-sm md:text-base scroll-snap-align-start ${activeTab === 'watching' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             Currently Watching
-                            {activeTab === 'watching' && <span className="absolute -top-1 -right-2 flex h-2 w-2 rounded-full bg-[#ffb700]"></span>}
                         </button>
                         <button 
                             onClick={() => setActiveTab('watchlist')}
-                            className={`pb-4 px-2 font-bold whitespace-nowrap transition-colors relative ${activeTab === 'watchlist' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`pb-3 md:pb-4 px-4 md:px-2 font-bold whitespace-nowrap transition-colors relative text-sm md:text-base scroll-snap-align-start ${activeTab === 'watchlist' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             Watchlist
-                            {activeTab === 'watchlist' && <span className="absolute -top-1 -right-2 flex h-2 w-2 rounded-full bg-[#ffb700]"></span>}
                         </button>
                         <button 
                             onClick={() => setActiveTab('stats')}
-                            className={`pb-4 px-2 font-bold whitespace-nowrap transition-colors relative ${activeTab === 'stats' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
+                            className={`pb-3 md:pb-4 px-4 md:px-2 font-bold whitespace-nowrap transition-colors relative text-sm md:text-base scroll-snap-align-start ${activeTab === 'stats' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
                         >
                             Insights
-                            {activeTab === 'stats' && <span className="absolute -top-1 -right-2 flex h-2 w-2 rounded-full bg-[#ffb700]"></span>}
                         </button>
                     </div>
 

@@ -318,3 +318,63 @@
 .quick-add-fab:hover .fab-tooltip {
     opacity: 1;
 }
+
+/* ============================================
+   MOBILE OVERRIDES
+   ============================================ */
+@media (max-width: 768px) {
+    .feed-page-layout {
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .feed-page-header {
+        padding: 0.75rem 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+
+    .feed-page-header h2 {
+        font-size: 1.125rem;
+    }
+
+    .icon-btn {
+        width: 2.75rem;
+        height: 2.75rem;
+        background: rgba(255, 183, 0, 0.08);
+        border: 1px solid rgba(255, 183, 0, 0.1);
+    }
+
+    .icon-btn:active {
+        transform: scale(0.9);
+        background: rgba(255, 183, 0, 0.2);
+    }
+
+    .feed-container {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .feed-page-main {
+        max-width: 100%;
+    }
+
+    /* FAB repositioned above bottom nav */
+    .quick-add-fab {
+        bottom: calc(5.5rem + env(safe-area-inset-bottom));
+        right: 1rem;
+        width: 3.5rem;
+        height: 3.5rem;
+        box-shadow: 0 6px 24px rgba(255, 183, 0, 0.35);
+    }
+
+    .quick-add-fab .material-symbols-outlined {
+        font-size: 1.5rem;
+    }
+
+    .fab-tooltip {
+        display: none;
+    }
+}

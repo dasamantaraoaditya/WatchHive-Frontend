@@ -222,3 +222,52 @@
         /* Green glow */
     }
 }
+
+/* ============================================
+   MOBILE TOUCH OVERRIDES
+   ============================================ */
+@media (hover: none) and (pointer: coarse) {
+    /* Always show action overlays on touch devices */
+    .watchlist-card__overlay {
+        opacity: 1;
+    }
+
+    .watchlist-card__hover-action {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Disable hover transform on cards */
+    .watchlist-card:hover {
+        transform: none;
+    }
+
+    .watchlist-card:hover .watchlist-card__poster {
+        transform: none;
+    }
+
+    .watchlist-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+
+    .watchlist-mark-btn:hover {
+        filter: none;
+        transform: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .watchlist-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: var(--space-3);
+    }
+
+    .watchlist-card__info {
+        padding: var(--space-2) var(--space-2) var(--space-3);
+    }
+
+    .watchlist-card__title {
+        font-size: 0.8rem;
+    }
+}
