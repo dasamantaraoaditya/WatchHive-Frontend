@@ -6,7 +6,7 @@ import { DonationButton, OfflineBanner, Modal } from './components/common';
 import { EntryForm } from './components/entries/EntryForm';
 import { WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage } from './pages';
+import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage } from './pages';
 import './index.css';
 
 // Protected Route Component
@@ -139,6 +139,14 @@ const AppRoutes: React.FC = () => {
                     element={
                         <ProtectedRoute>
                             <MindLensPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/watch-hive/stacks"
+                    element={
+                        <ProtectedRoute>
+                            <CinematicStacksPage />
                         </ProtectedRoute>
                     }
                 />

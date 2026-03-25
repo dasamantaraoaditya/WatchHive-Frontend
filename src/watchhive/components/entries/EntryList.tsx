@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import { ErrorState, EmptyState, WatchlistButton, BeeLoader } from '../common';
+import { StackButton } from '../stacks/StackButton';
 import '../profile/Profile.css';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
@@ -150,6 +151,10 @@ export const EntryCard: React.FC<{
                         tmdbId={entry.tmdbId} 
                         variant="icon" 
                         className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm" 
+                    />
+                    <StackButton 
+                        tmdbId={entry.tmdbId}
+                        mediaType={entry.type === 'TV_SHOW' ? 'tv' : 'movie'}
                     />
                     {onEdit && (
                         <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm" title="Edit">

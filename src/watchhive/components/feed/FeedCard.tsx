@@ -3,6 +3,7 @@ import { FeedItem } from '../../services/feed.service';
 import { useTmdbDetails } from '../../hooks/useTmdbDetails';
 import { Link } from 'react-router-dom';
 import { Avatar, WatchlistButton } from '../common';
+import { StackButton } from '../stacks/StackButton';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
 import whLogo from '../../assets/images/watchhive-logo.png';
@@ -224,7 +225,10 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             <span className="material-symbols-outlined text-[20px]">share</span>
                         </button>
                         {!item.data?.isWatched && targetTmdbId && (
-                            <WatchlistButton tmdbId={targetTmdbId} />
+                            <div className="flex items-center gap-2">
+                                <WatchlistButton tmdbId={targetTmdbId} variant="icon" className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm" />
+                                <StackButton tmdbId={targetTmdbId} mediaType={isSuggestion ? (item.data.media_type || 'movie') : (entryData?.type?.toLowerCase() === 'movie' ? 'movie' : 'tv')} />
+                            </div>
                         )}
                     </div>
                 </div>

@@ -75,18 +75,6 @@
     transform: translateY(-2px);
 }
 
-@media (prefers-color-scheme: dark) {
-    .watchlist-btn-icon {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .watchlist-btn-icon:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: var(--primary-500);
-        color: var(--primary-400);
-    }
-}
 
 .wh-spinner-sm {
     width: 14px;

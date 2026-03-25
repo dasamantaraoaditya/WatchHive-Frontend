@@ -17,12 +17,6 @@
     box-shadow: 0 -4px 20px -5px rgba(0, 0, 0, 0.05);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wh-bottom-nav {
-        background: rgba(10, 10, 10, 0.85);
-        border-top: 1px solid rgba(255, 183, 0, 0.1);
-    }
-}
 
 .wh-bottom-nav__content {
     display: flex;

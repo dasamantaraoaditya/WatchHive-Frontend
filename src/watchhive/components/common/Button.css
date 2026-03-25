@@ -80,18 +80,6 @@
     background: #d1d5db;
 }
 
-@media (prefers-color-scheme: dark) {
-    .wh-button--secondary {
-        color: #e5e7eb;
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .wh-button--secondary:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.12);
-        border-color: rgba(255, 255, 255, 0.12);
-    }
-}
 
 /* ============================================
    VARIANT: OUTLINE (medium emphasis)
@@ -113,18 +101,6 @@
     background: rgba(99, 102, 241, 0.12);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wh-button--outline {
-        color: #818cf8;
-        border-color: #818cf8;
-    }
-
-    .wh-button--outline:hover:not(:disabled) {
-        color: #a5b4fc;
-        border-color: #a5b4fc;
-        background: rgba(99, 102, 241, 0.12);
-    }
-}
 
 /* ============================================
    VARIANT: GHOST (minimal, utility buttons)
@@ -145,16 +121,6 @@
     background: rgba(0, 0, 0, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wh-button--ghost {
-        color: #9ca3af;
-    }
-
-    .wh-button--ghost:hover:not(:disabled) {
-        color: #e5e7eb;
-        background: rgba(255, 255, 255, 0.06);
-    }
-}
 
 /* ============================================
    VARIANT: DANGER (destructive actions)
@@ -178,19 +144,6 @@
     box-shadow: 0 1px 4px rgba(239, 68, 68, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wh-button--danger {
-        color: #f87171;
-        background: rgba(239, 68, 68, 0.1);
-        border-color: rgba(239, 68, 68, 0.15);
-    }
-
-    .wh-button--danger:hover:not(:disabled) {
-        color: #fff;
-        background: #ef4444;
-        border-color: #ef4444;
-    }
-}
 
 /* ============================================
    SIZES

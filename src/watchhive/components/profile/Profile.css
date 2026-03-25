@@ -201,28 +201,6 @@
     padding-bottom: var(--space-4);
 }
 
-/* Dark Mode Overrides */
-@media (prefers-color-scheme: dark) {
-    .watchlist-card {
-        background: rgba(255, 255, 255, 0.03);
-        border-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .watchlist-card:hover {
-        background: rgba(255, 255, 255, 0.06);
-        border-color: var(--primary-500);
-    }
-
-    .watchlist-card__no-poster {
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .watchlist-mark-btn {
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-        /* Green glow */
-    }
-}
-
 /* ============================================
    MOBILE TOUCH OVERRIDES
    ============================================ */

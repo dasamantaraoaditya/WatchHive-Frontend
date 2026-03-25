@@ -194,28 +194,6 @@
     --accent-light: var(--primary-50);
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg-primary: var(--neutral-950);
-        --bg-secondary: var(--neutral-900);
-        --bg-tertiary: var(--neutral-800);
-
-        --text-primary: var(--neutral-50);
-        --text-secondary: var(--neutral-400);
-        --text-tertiary: var(--neutral-500);
-        --text-inverse: var(--neutral-900);
-
-        --border-light: var(--neutral-800);
-        --border-medium: var(--neutral-700);
-        --border-dark: var(--neutral-600);
-
-        --accent-primary: var(--primary-500);
-        --accent-hover: var(--primary-400);
-        --accent-light: var(--primary-900);
-    }
-}
-
 /* ============================================
    3. RESET & BASE STYLES
    ============================================ */
@@ -425,13 +403,6 @@ small {
 ::selection {
     background-color: var(--primary-200);
     color: var(--primary-900);
-}
-
-@media (prefers-color-scheme: dark) {
-    ::selection {
-        background-color: var(--primary-700);
-        color: var(--neutral-50);
-    }
 }
 
 /* ============================================
