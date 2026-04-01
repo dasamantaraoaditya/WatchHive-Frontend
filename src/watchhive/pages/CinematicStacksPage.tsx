@@ -165,7 +165,7 @@ export const CinematicStacksPage: React.FC = () => {
     }
 
     return (
-        <div className="flex-grow flex flex-col min-h-screen bg-transparent p-4 md:p-8 pb-32 max-w-5xl mx-auto">
+        <div className="stacks-page p-4 pt-24 md:pt-8 md:p-8 min-h-screen pb-24 max-w-5xl mx-auto">
             
             {/* Immersive Search Overlay */}
             <AnimatePresence>
@@ -243,10 +243,10 @@ export const CinematicStacksPage: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            <header className="mb-12">
-                <div className="flex items-center justify-between gap-4 mb-4">
+            <header className="mb-6 md:mb-12">
+                <div className="flex gap-4 mb-4 items-center justify-between">
                     <div className="flex-1 min-w-0 pr-4">
-                        <h1 className="text-3xl md:text-5xl font-black text-[#2D2926] leading-none mb-2 tracking-tight truncate">
+                        <h1 className="text-2xl md:text-5xl font-black text-[#2D2926] leading-none mb-1 md:mb-2 tracking-tight truncate">
                             My <span className="text-[#ffb700]">Rankings</span>
                         </h1>
                         <p className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.3em] truncate">
@@ -271,7 +271,7 @@ export const CinematicStacksPage: React.FC = () => {
             </header>
 
             {/* Stacks Selector - Card Based */}
-            <div className="flex gap-4 overflow-x-auto pb-6 no-scrollbar mb-8 -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar mb-4 -mx-4 px-4 md:mx-0 md:px-0">
                 {lists.map(list => (
                     <motion.div
                         key={list.id}

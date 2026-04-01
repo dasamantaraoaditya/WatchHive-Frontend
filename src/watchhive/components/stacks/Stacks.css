@@ -217,38 +217,47 @@
    ============================================ */
 @media (max-width: 640px) {
     .stack-card {
-        padding: 1rem 1.25rem;
-        min-width: 120px;
+        padding: 0.5rem 0.75rem;
+        min-width: 80px;
+        border-radius: var(--radius-xl);
+    }
+    .stack-card__name {
+        font-size: 0.65rem;
     }
 
     .ranked-item-card {
-        gap: 0.75rem;
-        padding: 0.5rem 0.75rem;
+        gap: 0.5rem;
+        padding: 0.35rem 0.5rem;
+        border-radius: var(--radius-xl);
     }
 
     .ranked-item__poster-wrap {
-        width: 48px;
-        height: 72px;
+        width: 36px;
+        height: 54px;
+        border-radius: var(--radius-md);
     }
 
     .ranked-item__rank {
-        width: 28px;
-        height: 28px;
-        font-size: 0.875rem;
-        left: -8px;
+        width: 20px;
+        height: 20px;
+        font-size: 0.65rem;
+        left: -4px;
+        border-width: 1px;
     }
 
     .ranked-item__title {
-        font-size: 0.875rem;
-        margin-bottom: 0.125rem;
+        font-size: 0.75rem;
+        margin-bottom: 0;
     }
 
     .ranked-item__meta {
-        font-size: 8px;
+        font-size: 0.55rem;
+        gap: 0.25rem;
     }
 
     .ranked-item__badge {
-        font-size: 8px;
-        padding: 2px 4px;
+        font-size: 0.5rem;
+        padding: 1px 4px;
     }
 }
+
