@@ -63,6 +63,15 @@ export const listsApi = {
     reorderStack: async (listId: string, items: { tmdbId: number; orderIndex: number }[]): Promise<void> => {
         await apiClient.patch(`/lists/${listId}/reorder`, { items });
     },
+
+    // Aliases for the default watchlist
+    addToWatchlist: async (listId: string, tmdbId: number, mediaType?: 'movie' | 'tv'): Promise<ListItem> => {
+        return await listsApi.addToStack(listId, tmdbId, mediaType);
+    },
+
+    removeFromWatchlist: async (listId: string, tmdbId: number): Promise<void> => {
+        return await listsApi.removeFromStack(listId, tmdbId);
+    }
 };
 
 export default listsApi;

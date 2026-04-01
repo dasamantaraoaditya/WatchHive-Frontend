@@ -21,7 +21,7 @@ export const WatchlistGrid: React.FC = () => {
         );
     }
 
-    if (!watchlist || watchlist.items.length === 0) {
+    if (!watchlist || (watchlist.items || []).length === 0) {
         return (
             <div className="py-8 text-center text-secondary">
                 <EmptyState
@@ -35,7 +35,7 @@ export const WatchlistGrid: React.FC = () => {
 
     return (
         <div className="watchlist-grid">
-            {watchlist.items.map((item) => (
+            {(watchlist.items || []).map((item) => (
                 <WatchlistCard
                     key={item.id}
                     tmdbId={item.tmdbId}
