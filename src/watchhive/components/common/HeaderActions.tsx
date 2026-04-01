@@ -47,7 +47,7 @@ export const HeaderActions: React.FC = () => {
                             <span className="text-[10px] uppercase font-bold text-[#2D2926]/40 tracking-widest truncate w-full text-center">@{user?.username}</span>
                         </div>
                         <div className="p-2 flex flex-col gap-1">
-                            <Link to={`/watch-hive/users/${user?.id}`} className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors">
+                            <Link to="/watch-hive/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors">
                                 <span className="material-symbols-outlined text-[18px] text-[#ffb700]">person</span>
                                 View My Profile
                             </Link>
