@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Reorder, AnimatePresence, motion } from 'framer-motion';
 import { listsApi, List, ListItem } from '../services/lists.service';
 import { RankedItem } from '../components/stacks/RankedItem';
-import { BeeLoader, ErrorState, Modal } from '../components/common';
+import { BeeLoader, ErrorState, Modal, HeaderActions } from '../components/common';
 import apiClient from '../services/api';
 import '../components/stacks/Stacks.css';
 
@@ -253,20 +253,23 @@ export const CinematicStacksPage: React.FC = () => {
                             Forge your personal movie legends
                         </p>
                     </div>
-                    <motion.button 
-                        whileHover={{ scale: 1.05, rotate: 2 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => lists.length < 5 ? setIsCreateModalOpen(true) : null}
-                        disabled={lists.length >= 5}
-                        className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all ${
-                            lists.length >= 5 
-                                ? 'bg-[#2D2926]/20 text-[#2D2926]/30 cursor-not-allowed' 
-                                : 'bg-[#2D2926] text-white cursor-pointer'
-                        }`}
-                        title={lists.length >= 5 ? 'Maximum 5 rankings reached' : 'New Ranking'}
-                    >
-                        <span className="material-symbols-outlined text-3xl">add_box</span>
-                    </motion.button>
+                    <div className="flex gap-2 sm:gap-4 items-center">
+                        <motion.button 
+                            whileHover={{ scale: 1.05, rotate: 2 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => lists.length < 5 ? setIsCreateModalOpen(true) : null}
+                            disabled={lists.length >= 5}
+                            className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all ${
+                                lists.length >= 5 
+                                    ? 'bg-[#2D2926]/20 text-[#2D2926]/30 cursor-not-allowed' 
+                                    : 'bg-[#2D2926] text-white cursor-pointer'
+                            }`}
+                            title={lists.length >= 5 ? 'Maximum 5 rankings reached' : 'New Ranking'}
+                        >
+                            <span className="material-symbols-outlined text-xl md:text-3xl">add_box</span>
+                        </motion.button>
+                        <HeaderActions />
+                    </div>
                 </div>
             </header>
 

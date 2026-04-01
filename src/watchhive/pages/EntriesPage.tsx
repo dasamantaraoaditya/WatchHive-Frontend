@@ -5,7 +5,7 @@ import { EntryForm } from '../components/entries/EntryForm';
 import { EntryList, EntryCard } from '../components/entries/EntryList';
 import { useAuth } from '../contexts';
 import { WatchlistGrid, ProfileStats } from '../components/profile';
-import { BeeLoader } from '../components/common';
+import { BeeLoader, HeaderActions } from '../components/common';
 
 export const EntriesPage: React.FC = () => {
     const [showForm, setShowForm] = useState(false);
@@ -79,6 +79,7 @@ export const EntriesPage: React.FC = () => {
                         <div className="text-[#ffb700]"><span className="material-symbols-outlined text-3xl">history</span></div>
                         <h2 className="text-xl font-extrabold tracking-tight text-[#2D2926]">Activity</h2>
                     </div>
+                    <HeaderActions />
                 </div>
             </header>
 
