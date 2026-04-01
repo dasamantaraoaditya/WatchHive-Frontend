@@ -55,7 +55,7 @@ export const StackButton: React.FC<StackButtonProps> = ({
             <button
                 className={`w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm transition-colors ${className}`}
                 onClick={handleOpen}
-                title="Add to Stack"
+                title="Add to Rankings"
             >
                 <span className="material-symbols-outlined text-[18px]">playlist_add</span>
             </button>
@@ -63,7 +63,7 @@ export const StackButton: React.FC<StackButtonProps> = ({
             <Modal
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
-                title="Add to Ranking Stack"
+                title="Add to a Ranking"
             >
                 <div className="p-2">
                     {isLoading ? (
@@ -90,16 +90,16 @@ export const StackButton: React.FC<StackButtonProps> = ({
                         </div>
                     ) : (
                         <div className="py-8 text-center">
-                            <p className="text-sm font-bold text-[#2D2926]/40 mb-4">No ranking stacks found.</p>
+                            <p className="text-sm font-bold text-[#2D2926]/40 mb-4">No rankings yet. Create one first!</p>
                             <button
                                 onClick={() => {
                                     setIsOpen(false);
                                     // Navigate to stacks page?
-                                    window.location.href = '/watch-hive/stacks';
+                                    window.location.href = '/watch-hive/rankings';
                                 }}
                                 className="bg-[#2D2926] text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest"
                             >
-                                Go to Stacks
+                                Go to Rankings
                             </button>
                         </div>
                     )}

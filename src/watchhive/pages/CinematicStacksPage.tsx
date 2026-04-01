@@ -51,7 +51,7 @@ export const CinematicStacksPage: React.FC = () => {
             }
         } catch (err) {
             console.error('Failed to load lists:', err);
-            setError('Failed to load your stacks');
+            setError('Failed to load your rankings');
             setIsLoading(false);
         }
     }, [currentList]);
@@ -258,7 +258,7 @@ export const CinematicStacksPage: React.FC = () => {
                 <div className="flex items-center justify-between gap-4 mb-4">
                     <div>
                         <h1 className="text-3xl md:text-5xl font-black text-[#2D2926] leading-none mb-2 tracking-tight">
-                            Cinematic <span className="text-[#ffb700]">Stacks</span>
+                            My <span className="text-[#ffb700]">Rankings</span>
                         </h1>
                         <p className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.3em]">
                             Forge your personal movie legends
@@ -269,7 +269,7 @@ export const CinematicStacksPage: React.FC = () => {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setIsCreateModalOpen(true)}
                         className="w-14 h-14 bg-[#2D2926] text-white rounded-2xl flex items-center justify-center shadow-2xl transition-all"
-                        title="New Stack"
+                        title="New Ranking"
                     >
                         <span className="material-symbols-outlined text-3xl">add_box</span>
                     </motion.button>
@@ -288,7 +288,7 @@ export const CinematicStacksPage: React.FC = () => {
                     >
                         <span className="stack-card__name truncate">{list.name}</span>
                         <div className="flex items-center justify-between">
-                            <span className="stack-card__count">{items.length} titles</span>
+                            <span className="stack-card__count">{currentList?.id === list.id ? items.length : '—'} titles</span>
                             {currentList?.id === list.id && (
                                 <span className="material-symbols-outlined text-[14px] text-[#ffb700]">verified</span>
                             )}
@@ -368,16 +368,16 @@ export const CinematicStacksPage: React.FC = () => {
                             <div className="stacks-empty-hero">
                                 <span className="stacks-empty-icon">🏔️</span>
                                 <h3 className="text-xl font-black text-[#2D2926] mb-2">
-                                    {activeGenre ? `No ${activeGenre} titles found` : 'Your stack is pure potential'}
+                                    {activeGenre ? `No ${activeGenre} titles found` : 'Your ranking is pure potential'}
                                 </h3>
                                 <p className="text-xs font-bold text-[#2D2926]/40 max-w-[280px] leading-relaxed">
-                                    Add your first movie to start forging this legend.
+                                    Add your first movie or show to start building this ranking.
                                 </p>
                                 <button 
                                     onClick={() => setIsSearchOpen(true)}
                                     className="mt-8 bg-[#ffb700] text-[#2D2926] font-black px-8 py-4 rounded-2xl shadow-xl hover:scale-105 transition-all text-xs uppercase tracking-widest active:scale-95"
                                 >
-                                    Add Your First Legend
+                                    Add to This Ranking
                                 </button>
                             </div>
                         )}
@@ -403,15 +403,15 @@ export const CinematicStacksPage: React.FC = () => {
                  <div className="flex-grow flex items-center justify-center">
                     <div className="text-center max-w-sm px-6">
                         <span className="text-6xl mb-8 block grayscale opacity-40">🐝</span>
-                        <h2 className="text-2xl font-black text-[#2D2926] mb-4">No stacks in the hive yet</h2>
+                        <h2 className="text-2xl font-black text-[#2D2926] mb-4">No rankings yet</h2>
                         <p className="text-sm font-bold text-[#2D2926]/40 mb-8 leading-relaxed">
-                            Create your first ranking stack to start curating your cinematic masterpieces.
+                            Create your first ranking to start curating your all-time favourites.
                         </p>
                         <button 
                             onClick={() => setIsCreateModalOpen(true)}
                             className="w-full bg-[#2D2926] text-white py-5 rounded-3xl font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-black transition-all active:scale-95"
                         >
-                            Build Your First Stack
+                            Build Your First Ranking
                         </button>
                     </div>
                  </div>
@@ -423,18 +423,18 @@ export const CinematicStacksPage: React.FC = () => {
             <Modal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
-                title="Forge a New Stack"
+                title="Create New Ranking"
             >
                 <div className="flex flex-col gap-8 p-2">
                     <div className="flex flex-col gap-3">
                         <label className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] px-1">
-                            Name of the Legend
+                            Name of the Ranking
                         </label>
                         <input
                             type="text"
                             value={newStackName}
                             onChange={(e) => setNewStackName(e.target.value)}
-                            placeholder="e.g., The Midnight Classics..."
+                            placeholder="e.g., All-Time Legends, Guilty Pleasures..."
                             className="w-full p-6 rounded-3xl bg-[#ffb700]/5 border-2 border-[#ffb700]/10 font-bold text-lg text-[#2D2926] placeholder:text-[#2D2926]/10 focus:outline-none focus:border-[#ffb700] transition-all"
                             autoFocus
                             onKeyDown={(e) => e.key === 'Enter' && handleCreateStack()}
@@ -445,7 +445,7 @@ export const CinematicStacksPage: React.FC = () => {
                         disabled={!newStackName.trim() || isCreating}
                         className="w-full bg-[#2D2926] text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all disabled:opacity-30 flex items-center justify-center gap-3 active:scale-[0.98]"
                     >
-                        {isCreating ? <BeeLoader size="small" /> : 'Forge Stack'}
+                        {isCreating ? <BeeLoader size="small" /> : 'Create Ranking'}
                     </button>
                 </div>
             </Modal>

@@ -119,13 +119,15 @@ const AppRoutes: React.FC = () => {
                     }
                 />
                 <Route
-                    path="/watch-hive/stacks"
+                    path="/watch-hive/rankings"
                     element={
                         <ProtectedRoute>
                             <CinematicStacksPage />
                         </ProtectedRoute>
                     }
                 />
+                {/* Backward compat redirect */}
+                <Route path="/watch-hive/stacks" element={<Navigate to="/watch-hive/rankings" replace />} />
 
                 <Route
                     path="/watch-hive/notifications"

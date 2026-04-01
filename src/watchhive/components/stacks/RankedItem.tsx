@@ -5,6 +5,8 @@ import apiClient from '../../services/api';
 import './Stacks.css';
 
 interface TmdbDetails {
+    title?: string;
+    name?: string;
     poster_path: string | null;
     overview: string;
     vote_average: number;
@@ -37,6 +39,8 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
                 const endpoint = item.mediaType === 'tv' ? 'tv' : 'movie';
                 const data: any = await apiClient.get(`/tmdb/${endpoint}/${item.tmdbId}`);
                 const parsed: TmdbDetails = {
+                    title: data.title,
+                    name: data.name,
                     poster_path: data.poster_path,
                     overview: data.overview || '',
                     vote_average: data.vote_average || 0,
@@ -106,7 +110,7 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
                     {year && <span className="text-[10px] font-bold text-[#2D2926]/30">{year}</span>}
                 </div>
                 <h4 className="ranked-item__title">
-                    {item.title || 'Loading...'}
+                    {details?.title || details?.name || item.title || 'Unknown Title'}
                 </h4>
                 <div className="ranked-item__meta">
                     {details?.genres?.[0] && <span>{details.genres[0]}</span>}

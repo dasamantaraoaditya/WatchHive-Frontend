@@ -42,9 +42,9 @@ export const Sidebar: React.FC = () => {
                             <span className="material-symbols-outlined">add_reaction</span>
                             <span className="font-semibold">Entries</span>
                         </Link>
-                        <Link to="/watch-hive/stacks" className={`wh-sidebar__link ${isActive('/watch-hive/stacks') ? 'wh-sidebar__link--active' : ''}`}>
-                            <span className="material-symbols-outlined">view_list</span>
-                            <span className="font-semibold">Stacks</span>
+                        <Link to="/watch-hive/rankings" className={`wh-sidebar__link ${isActive('/watch-hive/rankings') ? 'wh-sidebar__link--active' : ''}`}>
+                            <span className="material-symbols-outlined">format_list_numbered</span>
+                            <span className="font-semibold">Rankings</span>
                         </Link>
                     </nav>
                 </div>
