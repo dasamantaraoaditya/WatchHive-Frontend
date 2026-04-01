@@ -16,6 +16,14 @@ export const Modal: React.FC<ModalProps> = ({
     children, 
     maxWidth = 'max-w-2xl' 
 }) => {
+    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     // Scroll lock
     useEffect(() => {
         if (isOpen) {
@@ -41,20 +49,33 @@ export const Modal: React.FC<ModalProps> = ({
 
                     {/* Modal Content */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ 
                             type: 'spring', 
-                            damping: 25, 
-                            stiffness: 300 
+                            damping: 30, 
+                            stiffness: 300,
+                            mass: 0.8
                         }}
-                        className={`relative w-full ${maxWidth} bg-white rounded-[40px] shadow-2xl shadow-black/20 flex flex-col max-h-[90vh] overflow-hidden border border-[#ffb700]/10`}
+                        className={`
+                            relative w-full ${maxWidth} bg-white 
+                            flex flex-col max-h-[92vh] overflow-hidden border border-[#ffb700]/10
+                            ${isMobile 
+                                ? 'rounded-t-[32px] rounded-b-none mt-auto' 
+                                : 'rounded-[40px] shadow-2xl shadow-black/20 m-4'
+                            }
+                        `}
                     >
+                        {/* Mobile Handle */}
+                        <div className="md:hidden flex justify-center pt-3 pb-1">
+                            <div className="w-12 h-1.5 bg-[#2D2926]/10 rounded-full" />
+                        </div>
+
                         {/* Header */}
-                        <div className="flex items-center justify-between px-8 py-6 bg-[#FFF9F0]/80 backdrop-blur-sm border-b border-[#ffb700]/10">
+                        <div className={`flex items-center justify-between px-6 py-4 md:px-8 md:py-6 bg-[#FFF9F0]/80 backdrop-blur-sm border-b border-[#ffb700]/10`}>
                             {title && (
-                                <h3 className="text-2xl font-black text-[#2D2926] tracking-tight">
+                                <h3 className="text-xl md:text-2xl font-black text-[#2D2926] tracking-tight">
                                     {title}
                                 </h3>
                             )}
@@ -67,7 +88,7 @@ export const Modal: React.FC<ModalProps> = ({
                         </div>
 
                         {/* Body */}
-                        <div className="flex-1 overflow-y-auto p-8 no-scrollbar bg-white">
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8 no-scrollbar bg-white">
                             {children}
                         </div>
                     </motion.div>

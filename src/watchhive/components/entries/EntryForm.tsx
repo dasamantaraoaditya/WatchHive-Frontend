@@ -7,6 +7,7 @@ interface EntryFormProps {
     entry?: Entry;
     onSuccess?: (entry: Entry) => void;
     onCancel?: () => void;
+    isModal?: boolean;
 }
 
 interface TmdbResult {
@@ -148,8 +149,15 @@ const LOCATION_PRESETS = [
     { label: 'Mobile', value: 'On the Go', icon: 'smartphone' },
 ];
 
-export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel }) => {
+export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel, isModal = false }) => {
     const isEditing = !!entry;
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // ── Form state ──
     const [formData, setFormData] = useState<CreateEntryData>({
@@ -277,17 +285,19 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
     const hasSelection = formData.tmdbId > 0 && formData.title.length > 0;
 
     return (
-        <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
-            <div className="bg-white border border-[#ffb700]/20 shadow-sm rounded-3xl p-4 md:p-10">
-                <div className="flex flex-col gap-2 mb-8 border-b border-[#ffb700]/10 pb-6">
-                    <h2 className="text-3xl font-black text-[#2D2926] flex items-center gap-3">
-                        {isEditing ? <span className="text-[#ffb700] material-symbols-outlined text-[32px]">edit</span> : <span className="text-[#ffb700] material-symbols-outlined text-[32px]">movie</span>}
-                        {isEditing ? 'Edit Existing Entry' : 'Log your latest Watch'}
-                    </h2>
-                    <p className="text-[#2D2926]/50 font-medium">
-                        {isEditing ? 'Update the details below to ensure historical accuracy.' : 'Search the global hive database, rate it, and add to your collection.'}
-                    </p>
-                </div>
+        <div className={`w-full ${!isModal ? 'max-w-4xl mx-auto py-4 md:py-8' : ''}`}>
+            <div className={`${!isModal ? 'bg-white border border-[#ffb700]/20 shadow-sm rounded-3xl p-4 md:p-10' : 'p-0'}`}>
+                {!isModal && (
+                    <div className="flex flex-col gap-2 mb-8 border-b border-[#ffb700]/10 pb-6">
+                        <h2 className="text-3xl font-black text-[#2D2926] flex items-center gap-3">
+                            {isEditing ? <span className="text-[#ffb700] material-symbols-outlined text-[32px]">edit</span> : <span className="text-[#ffb700] material-symbols-outlined text-[32px]">movie</span>}
+                            {isEditing ? 'Edit Existing Entry' : 'Log your latest Watch'}
+                        </h2>
+                        <p className="text-[#2D2926]/50 font-medium">
+                            {isEditing ? 'Update the details below to ensure historical accuracy.' : 'Search the global hive database, rate it, and add to your collection.'}
+                        </p>
+                    </div>
+                )}
 
                 {error && (
                     <div className="bg-red-100 text-red-700 border border-red-200 font-bold p-4 rounded-xl mb-8 flex items-center gap-2">
@@ -296,12 +306,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+                <form onSubmit={handleSubmit} className={`flex flex-col ${isMobile ? 'gap-6' : 'gap-8'}`}>
                     
                     {/* ── Step 1: Search & Select ── */}
                     {!isEditing && (
                         <div className="flex flex-col gap-3">
-                            <label className="text-sm font-bold uppercase tracking-widest text-[#2D2926]/50">1. What did you watch?</label>
+                            <label className="text-xs font-black uppercase tracking-[0.2em] text-[#2D2926]/40">1. What did you watch?</label>
                             <div className="relative" ref={searchRef}>
                                 <div className="relative flex items-center">
                                     <span className="material-symbols-outlined absolute left-4 text-[#ffb700] text-[24px]">search</span>
@@ -517,7 +527,10 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
                     )}
 
                     {/* ── Actions ── */}
-                    <div className="flex flex-col sm:flex-row items-center justify-end gap-4 border-t border-[#ffb700]/20 pt-8 mt-4">
+                    <div className={`
+                        flex flex-col sm:flex-row items-center justify-end gap-4 border-t border-[#ffb700]/20 pt-8 mt-4
+                        ${isMobile && isModal ? 'pb-10' : ''}
+                    `}>
                         {onCancel && (
                             <button type="button" onClick={onCancel} className="w-full sm:w-auto px-8 py-3.5 bg-transparent text-[#2D2926]/60 font-bold tracking-widest uppercase hover:bg-[#2D2926]/5 rounded-xl transition-all disabled:opacity-50 focus:outline-none" disabled={isLoading}>
                                 Abandon Setup
@@ -525,7 +538,10 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
                         )}
                         <button
                             type="submit"
-                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-10 py-3.5 bg-[#ffb700] text-white font-black text-lg rounded-xl hover:brightness-105 shadow-[0_4px_20px_-4px_rgba(255,183,0,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+                            className={`
+                                w-full sm:w-auto flex items-center justify-center gap-2 px-10 py-4 bg-[#ffb700] text-white font-black text-lg rounded-2xl hover:brightness-105 shadow-[0_8px_30px_-10px_rgba(255,183,0,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none
+                                ${isMobile ? 'order-first' : ''}
+                            `}
                             disabled={isLoading || (!isEditing && !hasSelection)}
                         >
                             {isLoading ? (

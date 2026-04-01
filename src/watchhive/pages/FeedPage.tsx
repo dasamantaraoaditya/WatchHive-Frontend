@@ -5,7 +5,7 @@ import { feedApi, FeedItem } from '../services/feed.service';
 import { userService } from '../services/userService';
 import { User } from '../types';
 import { FeedCard } from '../components/feed/FeedCard';
-import { Avatar, FeedCardSkeleton, ErrorState, EmptyState } from '../components/common';
+import { Avatar, FeedCardSkeleton, ErrorState, EmptyState, BeeLoader } from '../components/common';
 import './FeedPage.css';
 import '../components/feed/Feed.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
@@ -201,10 +201,7 @@ export const FeedPage: React.FC = () => {
 
             {/* Right Sidebar Widgets */}
             <aside className="feed-right-sidebar pr-6">
-                <div className="search-widget relative">
-                    <span className="material-symbols-outlined search-icon">search</span>
-                    <input type="text" placeholder="Explore the hive..." className="search-input" />
-                </div>
+
 
                 <section className="widget-section">
                     <div className="widget-header">
@@ -215,7 +212,7 @@ export const FeedPage: React.FC = () => {
                     </div>
                     <div className="widget-content">
                         {loadingTrending ? (
-                            <p className="text-sm text-slate-400 mb-2">Calculating buzz...</p>
+                            <BeeLoader size="small" message="Calculating buzz..." />
                         ) : trendingItems.length > 0 ? (
                             trendingItems.map((item, index) => (
                                 <div className="trending-item" key={index}>
@@ -234,7 +231,7 @@ export const FeedPage: React.FC = () => {
                     <h3 className="mb-4 font-bold text-[#2D2926]">Suggested Follows</h3>
                     <div className="widget-content">
                         {loadingSuggestions ? (
-                            <p className="text-sm text-[#2D2926]/50 mb-2">Finding people for you...</p>
+                            <BeeLoader size="small" message="Finding people for you..." className="py-2" />
                         ) : suggestedUsers.length > 0 ? (
                             suggestedUsers.map(user => (
                                 <div className="suggestion-item" key={user.id}>

@@ -1,0 +1,60 @@
+.bee-loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    gap: 1rem;
+}
+
+.bee-loader-small {
+    padding: 0.5rem;
+    gap: 0.5rem;
+}
+
+.bee-loader-small .bee-emoji {
+    font-size: 1.5rem;
+}
+
+.bee-loader-medium .bee-emoji {
+    font-size: 3rem;
+}
+
+.bee-loader-large .bee-emoji {
+    font-size: 5rem;
+}
+
+.bee-animation-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: float 2s ease-in-out infinite;
+}
+
+.bee-emoji {
+    display: inline-block;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    position: relative;
+    z-index: 10;
+}
+
+.bee-message {
+    color: #ffb700;
+    font-weight: bold;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    animation: pulse-text 2s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+    100% { transform: translateY(0px) rotate(-5deg); }
+}
+
+@keyframes pulse-text {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}

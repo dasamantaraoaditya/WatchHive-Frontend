@@ -33,14 +33,8 @@
 }
 
 .glass-header {
-    background: rgba(28, 25, 16, 0.7);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(12px);
-}
-
-@media (prefers-color-scheme: light) {
-    .glass-header {
-        background: rgba(255, 255, 255, 0.85);
-    }
 }
 
 .feed-page-header h2 {
@@ -92,11 +86,6 @@
     backdrop-filter: blur(12px);
 }
 
-@media (prefers-color-scheme: dark) {
-    .feed-right-sidebar {
-        background: var(--bg-primary);
-    }
-}
 
 @media (max-width: 1100px) {
     .feed-right-sidebar {
@@ -116,8 +105,8 @@
 
 .search-input {
     width: 100%;
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 183, 0, 0.1);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
     border-radius: var(--radius-xl);
     padding: 0.625rem 1rem 0.625rem 2.5rem;
     font-size: 0.875rem;
@@ -128,13 +117,6 @@
 .search-input:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(255, 183, 0, 0.2);
-}
-
-@media (prefers-color-scheme: light) {
-    .search-input {
-        background: var(--bg-secondary);
-        border: 1px solid var(--border-light);
-    }
 }
 
 /* Widget Sections */
@@ -317,4 +299,64 @@
 
 .quick-add-fab:hover .fab-tooltip {
     opacity: 1;
+}
+
+/* ============================================
+   MOBILE OVERRIDES
+   ============================================ */
+@media (max-width: 768px) {
+    .feed-page-layout {
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .feed-page-header {
+        padding: 0.75rem 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+    }
+
+    .feed-page-header h2 {
+        font-size: 1.125rem;
+    }
+
+    .icon-btn {
+        width: 2.75rem;
+        height: 2.75rem;
+        background: rgba(255, 183, 0, 0.08);
+        border: 1px solid rgba(255, 183, 0, 0.1);
+    }
+
+    .icon-btn:active {
+        transform: scale(0.9);
+        background: rgba(255, 183, 0, 0.2);
+    }
+
+    .feed-container {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .feed-page-main {
+        max-width: 100%;
+    }
+
+    /* FAB repositioned above bottom nav */
+    .quick-add-fab {
+        bottom: calc(5.5rem + env(safe-area-inset-bottom));
+        right: 1rem;
+        width: 3.5rem;
+        height: 3.5rem;
+        box-shadow: 0 6px 24px rgba(255, 183, 0, 0.35);
+    }
+
+    .quick-add-fab .material-symbols-outlined {
+        font-size: 1.5rem;
+    }
+
+    .fab-tooltip {
+        display: none;
+    }
 }

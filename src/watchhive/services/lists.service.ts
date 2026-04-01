@@ -1,5 +1,7 @@
 import apiClient from './api.js';
 
+export type ListType = 'WATCHLIST' | 'RANKING_STACK' | 'COLLECTION';
+
 export interface ListItem {
     id: string;
     listId: string;
@@ -7,6 +9,12 @@ export interface ListItem {
     mediaType?: string;
     orderIndex: number;
     addedAt: string;
+    // Metadata from entries (if joined)
+    localRating?: string;
+    localReview?: string;
+    tags?: string[];
+    watchedAt?: string;
+    title?: string;
 }
 
 export interface List {
@@ -14,23 +22,46 @@ export interface List {
     userId: string;
     name: string;
     description?: string;
+    type: ListType;
     isPublic: boolean;
     createdAt: string;
     updatedAt: string;
+    items?: ListItem[];
+}
+
+export interface RankedListResponse {
+    list: List;
     items: ListItem[];
 }
 
 export const listsApi = {
+    getLists: async (): Promise<List[]> => {
+        return await apiClient.get<List[]>('/lists');
+    },
+
+    createList: async (data: Partial<List>): Promise<List> => {
+        return await apiClient.post<List>('/lists', data);
+    },
+
     getWatchlist: async (): Promise<List> => {
         return await apiClient.get<List>('/lists/watchlist');
     },
 
-    addToWatchlist: async (listId: string, tmdbId: number, mediaType: 'movie' | 'tv' = 'movie'): Promise<ListItem> => {
+    getRankedList: async (listId: string, filters?: { genre?: string }): Promise<RankedListResponse> => {
+        const query = filters?.genre ? `?genre=${filters.genre}` : '';
+        return await apiClient.get<RankedListResponse>(`/lists/${listId}/ranked${query}`);
+    },
+
+    addToStack: async (listId: string, tmdbId: number, mediaType: 'movie' | 'tv' = 'movie'): Promise<ListItem> => {
         return await apiClient.post<ListItem>(`/lists/${listId}/items`, { tmdbId, mediaType });
     },
 
-    removeFromWatchlist: async (listId: string, tmdbId: number): Promise<void> => {
+    removeFromStack: async (listId: string, tmdbId: number): Promise<void> => {
         await apiClient.delete(`/lists/${listId}/items/${tmdbId}`);
+    },
+
+    reorderStack: async (listId: string, items: { tmdbId: number; orderIndex: number }[]): Promise<void> => {
+        await apiClient.patch(`/lists/${listId}/reorder`, { items });
     },
 };
 

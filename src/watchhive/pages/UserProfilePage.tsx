@@ -5,6 +5,7 @@ import userService from '../services/userService';
 import EntryList from '../components/entries/EntryList';
 import { FollowListModal } from '../components/profile/FollowListModal';
 import { useAuth } from '../contexts';
+import { BeeLoader } from '../components/common';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -61,8 +62,7 @@ export const UserProfilePage: React.FC = () => {
 
     if (loading) return (
          <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-[#FFF9F0]">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffb700] mb-4"></div>
-            <p className="text-[#2D2926]/60 font-medium font-display">Loading User Profile...</p>
+            <BeeLoader size="medium" message="Loading User Profile..." />
         </div>
     );
 
