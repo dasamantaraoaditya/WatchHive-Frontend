@@ -109,11 +109,11 @@ export const Navbar: React.FC = () => {
                     {isAuthenticated && <NotificationBell />}
                     {isAuthenticated ? (
                         <div className="wh-nav__profile" ref={profileRef} id="nav-profile">
-                            <button
+                            {/* Avatar + name → direct link to profile */}
+                            <Link
+                                to="/watch-hive/profile"
                                 className="wh-nav__profile-trigger"
-                                onClick={() => setProfileOpen((p) => !p)}
-                                aria-expanded={profileOpen}
-                                aria-haspopup="true"
+                                style={{ textDecoration: 'none' }}
                                 id="nav-profile-trigger"
                             >
                                 <Avatar
@@ -124,6 +124,16 @@ export const Navbar: React.FC = () => {
                                 <span className="wh-nav__profile-name">
                                     {user?.displayName || user?.username}
                                 </span>
+                            </Link>
+                            {/* Chevron → opens dropdown for Sign Out etc. */}
+                            <button
+                                className="wh-nav__chevron-btn"
+                                onClick={() => setProfileOpen((p) => !p)}
+                                aria-expanded={profileOpen}
+                                aria-haspopup="true"
+                                aria-label="Open account menu"
+                                id="nav-profile-chevron"
+                            >
                                 <svg
                                     className={`wh-nav__chevron ${profileOpen ? 'wh-nav__chevron--open' : ''}`}
                                     viewBox="0 0 16 16"
