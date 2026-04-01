@@ -245,11 +245,11 @@ export const CinematicStacksPage: React.FC = () => {
 
             <header className="mb-12">
                 <div className="flex items-center justify-between gap-4 mb-4">
-                    <div>
-                        <h1 className="text-3xl md:text-5xl font-black text-[#2D2926] leading-none mb-2 tracking-tight">
+                    <div className="flex-1 min-w-0 pr-4">
+                        <h1 className="text-3xl md:text-5xl font-black text-[#2D2926] leading-none mb-2 tracking-tight truncate">
                             My <span className="text-[#ffb700]">Rankings</span>
                         </h1>
-                        <p className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.3em]">
+                        <p className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.3em] truncate">
                             Forge your personal movie legends
                         </p>
                     </div>
@@ -331,7 +331,7 @@ export const CinematicStacksPage: React.FC = () => {
                                         whileHover={{ scale: 1.01 }}
                                         whileTap={{ scale: 0.99 }}
                                         onClick={() => setIsSearchOpen(true)}
-                                        className={`w-full mt-4 pl-4 flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed transition-all ${
+                                        className={`relative w-full mt-4 pl-4 sm:pl-4 flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border-2 border-dashed transition-all ${
                                             items.length === 0
                                                 ? 'border-[#ffb700] bg-[#ffb700]/5 hover:bg-[#ffb700]/10'
                                                 : 'border-[#2D2926]/10 bg-transparent hover:border-[#ffb700]/40 hover:bg-[#ffb700]/5'

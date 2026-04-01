@@ -120,7 +120,7 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
             </div>
 
             {/* Actions Panel */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3">
                 {rating && (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ffb700]/5 rounded-xl border border-[#ffb700]/10">
                         <span className="text-xs">⭐</span>
@@ -134,19 +134,19 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
                             whileHover={{ scale: 1.1, color: '#ef4444' }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => onRemove(item.tmdbId)}
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-[#2D2926]/10 hover:bg-red-50 transition-colors"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/10 hover:bg-red-50 transition-colors"
                             title="Remove from stack"
                         >
-                            <span className="material-symbols-outlined text-[20px]">delete_sweep</span>
+                            <span className="material-symbols-outlined text-[18px] sm:text-[20px]">delete_sweep</span>
                         </motion.button>
                     )}
                     
                     <motion.div
                         onPointerDown={(e) => dragControls.start(e)}
                         whileHover={{ color: '#ffb700' }}
-                        className="drag-handle w-10 h-10 rounded-full flex items-center justify-center text-[#2D2926]/10"
+                        className="drag-handle w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/10"
                     >
-                        <span className="material-symbols-outlined text-[22px]">drag_indicator</span>
+                        <span className="material-symbols-outlined text-[20px] sm:text-[22px]">drag_indicator</span>
                     </motion.div>
                 </div>
             </div>
