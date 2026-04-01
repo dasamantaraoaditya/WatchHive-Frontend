@@ -170,10 +170,6 @@ export const FeedPage: React.FC = () => {
                         <Link to="/watch-hive/notifications" className="icon-btn" title="Notifications">
                             <span className="material-symbols-outlined">notifications</span>
                         </Link>
-                        <button className="icon-btn" title="Filter Settings">
-                            <span className="material-symbols-outlined">tune</span>
-                        </button>
-
                         {/* Profile Avatar Dropdown */}
                         <div className="feed-profile-dropdown" ref={profileRef}>
                             <button
