@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Reorder, AnimatePresence, motion } from 'framer-motion';
 import { listsApi, List, ListItem } from '../services/lists.service';
 import { RankedItem } from '../components/stacks/RankedItem';
@@ -23,9 +23,7 @@ export const CinematicStacksPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
-    // Filters
-    const [activeGenre, setActiveGenre] = useState<string | null>(null);
-    
+
     // UI Modals
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newStackName, setNewStackName] = useState('');
@@ -62,7 +60,6 @@ export const CinematicStacksPage: React.FC = () => {
             const response = await listsApi.getRankedList(listId);
             setCurrentList(response.list);
             setItems(response.items);
-            setActiveGenre(null);
         } catch (err) {
             setError('Failed to load ranked items');
         } finally {
@@ -115,7 +112,6 @@ export const CinematicStacksPage: React.FC = () => {
     };
 
     const handleReorder = async (newItems: ListItem[]) => {
-        if (activeGenre) return;
         setItems(newItems);
         try {
             const reorderData = newItems.map((item, index) => ({
@@ -159,14 +155,6 @@ export const CinematicStacksPage: React.FC = () => {
         }
     };
 
-    const filteredItems = useMemo(() => {
-        if (!activeGenre) return items;
-        return items.filter(item => 
-            item.tags?.some(t => t.toLowerCase() === activeGenre.toLowerCase())
-        );
-    }, [items, activeGenre]);
-
-    const genres = ['Action', 'Drama', 'Comedy', 'Sci-Fi', 'Horror', 'Romance', 'Documentary', 'Anime'];
 
     if (isLoading && lists.length === 0) {
         return (
@@ -306,45 +294,6 @@ export const CinematicStacksPage: React.FC = () => {
             {currentList && (
                 <div className="flex flex-col gap-8">
                     
-                    {/* Filter & Toolbar Area */}
-                    <div className="flex flex-col gap-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2">
-                                <button
-                                    onClick={() => setActiveGenre(null)}
-                                    className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                                        !activeGenre ? 'bg-[#ffb700] text-white shadow-xl scale-105' : 'bg-white/40 text-[#2D2926]/30 hover:bg-white'
-                                    }`}
-                                >
-                                    All Genres
-                                </button>
-                                {genres.map(genre => (
-                                    <button
-                                        key={genre}
-                                        onClick={() => setActiveGenre(genre)}
-                                        className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${
-                                            activeGenre === genre ? 'bg-[#ffb700] text-white shadow-xl scale-105' : 'bg-white/40 text-[#2D2926]/30 hover:bg-white'
-                                        }`}
-                                    >
-                                        {genre}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {activeGenre && (
-                             <motion.div 
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                className="flex items-center gap-3 bg-[#ffb700]/10 border border-[#ffb700]/20 p-4 rounded-2xl"
-                            >
-                                <span className="material-symbols-outlined text-[#ffb700]">info</span>
-                                <p className="text-[10px] font-black text-[#ffb700] uppercase tracking-widest m-0">
-                                    Reordering is locked while "{activeGenre}" filter is active.
-                                </p>
-                            </motion.div>
-                        )}
-                    </div>
 
                     {/* Rankings List */}
                     <div className="flex-grow">
@@ -355,15 +304,15 @@ export const CinematicStacksPage: React.FC = () => {
                         ) : (
                             <>
                                 {/* Ranked items list */}
-                                {filteredItems.length > 0 && (
+                                {items.length > 0 && (
                                     <Reorder.Group
                                         axis="y"
-                                        values={filteredItems}
+                                        values={items}
                                         onReorder={handleReorder}
                                         className="flex flex-col gap-4 pl-4"
                                     >
                                         <AnimatePresence mode="popLayout" initial={false}>
-                                            {filteredItems.map((item) => (
+                                            {items.map((item) => (
                                                 <RankedItem
                                                     key={`${currentList.id}-${item.tmdbId}`}
                                                     item={item}
@@ -375,8 +324,7 @@ export const CinematicStacksPage: React.FC = () => {
                                     </Reorder.Group>
                                 )}
 
-                                {/* Inline Add Item card — shown when < 10 items and no genre filter active */}
-                                {!activeGenre && items.length < 10 && (
+                                {items.length < 10 && (
                                     <motion.button
                                         initial={{ opacity: 0, y: 8 }}
                                         animate={{ opacity: 1, y: 0 }}
@@ -413,8 +361,7 @@ export const CinematicStacksPage: React.FC = () => {
                                     </motion.button>
                                 )}
 
-                                {/* At limit notice */}
-                                {items.length >= 10 && !activeGenre && (
+                                {items.length >= 10 && (
                                     <div className="mt-4 pl-4 flex items-center gap-3 p-4 rounded-2xl bg-[#ffb700]/5 border border-[#ffb700]/20">
                                         <span className="material-symbols-outlined text-[#ffb700]">info</span>
                                         <p className="text-[10px] font-black text-[#ffb700] uppercase tracking-widest">
