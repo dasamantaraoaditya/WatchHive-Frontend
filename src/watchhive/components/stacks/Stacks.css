@@ -227,22 +227,25 @@
 
     .ranked-item-card {
         gap: 0.5rem;
-        padding: 0.35rem 0.5rem;
+        padding: 0.5rem;
         border-radius: var(--radius-xl);
+        flex-wrap: wrap; /* Allows wrapping if extremely squeezed */
     }
 
     .ranked-item__poster-wrap {
-        width: 36px;
-        height: 54px;
+        width: 44px;
+        height: 66px;
         border-radius: var(--radius-md);
     }
 
     .ranked-item__rank {
-        width: 20px;
-        height: 20px;
-        font-size: 0.65rem;
-        left: -4px;
-        border-width: 1px;
+        width: 22px;
+        height: 22px;
+        font-size: 0.70rem;
+        left: 0;
+        top: 0;
+        transform: translate(-30%, -30%);
+        border-width: 1.5px;
     }
 
     .ranked-item__title {

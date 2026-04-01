@@ -249,7 +249,7 @@ export const CinematicStacksPage: React.FC = () => {
                         <h1 className="text-2xl md:text-5xl font-black text-[#2D2926] leading-none mb-1 md:mb-2 tracking-tight truncate">
                             My <span className="text-[#ffb700]">Rankings</span>
                         </h1>
-                        <p className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.3em] truncate">
+                        <p className="text-[9px] md:text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] md:tracking-[0.3em] truncate">
                             Forge your personal movie legends
                         </p>
                     </div>
@@ -312,7 +312,7 @@ export const CinematicStacksPage: React.FC = () => {
                                         axis="y"
                                         values={items}
                                         onReorder={handleReorder}
-                                        className="flex flex-col gap-4 pl-4"
+                                        className="flex flex-col gap-4 px-1 md:px-0"
                                     >
                                         <AnimatePresence mode="popLayout" initial={false}>
                                             {items.map((item) => (
@@ -334,7 +334,7 @@ export const CinematicStacksPage: React.FC = () => {
                                         whileHover={{ scale: 1.01 }}
                                         whileTap={{ scale: 0.99 }}
                                         onClick={() => setIsSearchOpen(true)}
-                                        className={`relative w-full mt-4 pl-4 sm:pl-4 flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border-2 border-dashed transition-all ${
+                                        className={`relative w-full mt-4 flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl border-2 border-dashed transition-all ${
                                             items.length === 0
                                                 ? 'border-[#ffb700] bg-[#ffb700]/5 hover:bg-[#ffb700]/10'
                                                 : 'border-[#2D2926]/10 bg-transparent hover:border-[#ffb700]/40 hover:bg-[#ffb700]/5'
@@ -344,20 +344,20 @@ export const CinematicStacksPage: React.FC = () => {
                                         <div className={`ranked-item__rank opacity-40`}>
                                             {items.length + 1}
                                         </div>
-                                        <div className={`w-10 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                                        <div className={`w-8 h-12 md:w-10 md:h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
                                             items.length === 0 ? 'bg-[#ffb700]/20' : 'bg-[#2D2926]/5'
                                         }`}>
-                                            <span className={`material-symbols-outlined text-2xl ${
+                                            <span className={`material-symbols-outlined text-xl md:text-2xl ${
                                                 items.length === 0 ? 'text-[#ffb700]' : 'text-[#2D2926]/20'
                                             }`}>add</span>
                                         </div>
-                                        <div className="text-left">
-                                            <p className={`text-sm font-black ${
-                                                items.length === 0 ? 'text-[#ffb700]' : 'text-[#2D2926]/30'
+                                        <div className="text-left min-w-0 pr-2">
+                                            <p className={`text-xs md:text-sm font-black truncate ${
+                                                items.length === 0 ? 'text-[#ffb700]' : 'text-[#2D2926]/40'
                                             }`}>
                                                 {items.length === 0 ? 'Add your first title' : 'Add another title'}
                                             </p>
-                                            <p className="text-[10px] font-bold text-[#2D2926]/20 uppercase tracking-widest">
+                                            <p className="text-[8px] md:text-[10px] font-bold text-[#2D2926]/30 uppercase tracking-[0.1em] md:tracking-widest whitespace-nowrap">
                                                 {10 - items.length} slot{10 - items.length !== 1 ? 's' : ''} remaining
                                             </p>
                                         </div>

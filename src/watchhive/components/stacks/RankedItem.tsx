@@ -78,7 +78,7 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
                 zIndex: 50,
                 rotate: 1
             }}
-            className="ranked-item-card group"
+            className="ranked-item-card group flex w-full"
         >
             {/* Rank Indicator */}
             <div className="ranked-item__rank">
@@ -101,15 +101,14 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
                 )}
             </div>
 
-            {/* Content Area */}
-            <div className="ranked-item__content">
+            <div className="ranked-item__content min-w-0 pr-2">
                 <div className="flex items-center gap-2 mb-1">
-                    <span className="ranked-item__badge">
+                    <span className="ranked-item__badge flex-shrink-0">
                         {item.mediaType === 'tv' ? 'TV' : 'Film'}
                     </span>
-                    {year && <span className="text-[10px] font-bold text-[#2D2926]/30">{year}</span>}
+                    {year && <span className="text-[10px] font-bold text-[#2D2926]/30 flex-shrink-0">{year}</span>}
                 </div>
-                <h4 className="ranked-item__title">
+                <h4 className="ranked-item__title truncate w-full">
                     {details?.title || details?.name || item.title || 'Unknown Title'}
                 </h4>
                 <div className="ranked-item__meta">
@@ -120,21 +119,21 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
             </div>
 
             {/* Actions Panel */}
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 ml-auto flex-shrink-0">
                 {rating && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#ffb700]/5 rounded-xl border border-[#ffb700]/10">
+                    <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#ffb700]/5 rounded-xl border border-[#ffb700]/10">
                         <span className="text-xs">⭐</span>
                         <span className="text-xs font-black text-[#ffb700] leading-none">{rating}</span>
                     </div>
                 )}
                 
-                <div className="flex items-center">
+                <div className="flex items-center gap-0.5 sm:gap-1">
                     {onRemove && (
                         <motion.button
                             whileHover={{ scale: 1.1, color: '#ef4444' }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => onRemove(item.tmdbId)}
-                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/10 hover:bg-red-50 transition-colors"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/20 hover:bg-red-50 hover:text-red-500 transition-colors"
                             title="Remove from stack"
                         >
                             <span className="material-symbols-outlined text-[18px] sm:text-[20px]">delete_sweep</span>
