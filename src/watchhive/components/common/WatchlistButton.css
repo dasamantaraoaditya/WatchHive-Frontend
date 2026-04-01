@@ -49,6 +49,7 @@
     background: var(--bg-tertiary);
     border: 1px solid var(--border-light);
     color: var(--text-secondary);
+    font-size: 24px; /* Default size for icon, overridden by tailwind text- sizes */
     cursor: pointer;
     transition: all var(--transition-base);
     box-shadow: var(--shadow-sm);

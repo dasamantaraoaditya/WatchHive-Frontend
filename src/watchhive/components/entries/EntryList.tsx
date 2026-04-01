@@ -149,7 +149,7 @@ export const EntryCard: React.FC<{
                     <WatchlistButton 
                         tmdbId={entry.tmdbId} 
                         variant="icon" 
-                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm" 
+                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm text-[16px]" 
                     />
 
                     {onEdit && (

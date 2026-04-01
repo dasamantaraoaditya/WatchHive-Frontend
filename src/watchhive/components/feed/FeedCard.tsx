@@ -122,7 +122,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     
                     <div className="feed-card-header-info flex-1 min-w-0 pr-2">
                         <div className="flex items-start justify-between w-full">
-                            <div className="flex flex-col min-w-0">
+                            <div className="flex flex-col min-w-[0] pr-2">
                                 <p className="feed-card-header-text">
                                     {isSuggestion ? (
                                         <span className="font-bold text-[#2D2926]">{displayName}</span>
@@ -142,6 +142,13 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     </p>
                                 )}
                             </div>
+                            
+                            {!isSuggestion && (
+                                <div className="text-right flex-shrink-0 flex flex-col justify-center border-l border-[#2D2926]/5 pl-3">
+                                    <span className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Seen at</span>
+                                    <span className="text-[11px] font-bold text-[#2D2926]/50 whitespace-nowrap">{timestamp}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -189,10 +196,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     </div>
                 )}
 
-                {/* Timestamp — below image, above actions */}
-                {!isSuggestion && (
-                    <p className="feed-card-timestamp">{timestamp}</p>
-                )}
+
 
                 {/* Actions Bar */}
                 <div className="feed-card-actions-bar">
@@ -229,7 +233,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         </button>
                         {!item.data?.isWatched && targetTmdbId && (
                             <div className="flex items-center gap-2">
-                                <WatchlistButton tmdbId={targetTmdbId} variant="icon" className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm" />
+                                <WatchlistButton tmdbId={targetTmdbId} variant="icon" className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm text-[20px]" />
                             </div>
                         )}
                     </div>
