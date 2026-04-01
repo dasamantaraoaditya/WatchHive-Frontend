@@ -140,6 +140,7 @@ export const CinematicStacksPage: React.FC = () => {
 
     const handleCreateStack = async () => {
         if (!newStackName.trim()) return;
+        if (lists.length >= 5) return; // Max 5 rankings
         setIsCreating(true);
         try {
             const newList = await listsApi.createList({
@@ -152,7 +153,7 @@ export const CinematicStacksPage: React.FC = () => {
             setIsCreateModalOpen(false);
             setNewStackName('');
         } catch (err) {
-            alert('Failed to create stack');
+            alert('Failed to create ranking');
         } finally {
             setIsCreating(false);
         }
@@ -267,9 +268,14 @@ export const CinematicStacksPage: React.FC = () => {
                     <motion.button 
                         whileHover={{ scale: 1.05, rotate: 2 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="w-14 h-14 bg-[#2D2926] text-white rounded-2xl flex items-center justify-center shadow-2xl transition-all"
-                        title="New Ranking"
+                        onClick={() => lists.length < 5 ? setIsCreateModalOpen(true) : null}
+                        disabled={lists.length >= 5}
+                        className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all ${
+                            lists.length >= 5 
+                                ? 'bg-[#2D2926]/20 text-[#2D2926]/30 cursor-not-allowed' 
+                                : 'bg-[#2D2926] text-white cursor-pointer'
+                        }`}
+                        title={lists.length >= 5 ? 'Maximum 5 rankings reached' : 'New Ranking'}
                     >
                         <span className="material-symbols-outlined text-3xl">add_box</span>
                     </motion.button>
@@ -288,7 +294,7 @@ export const CinematicStacksPage: React.FC = () => {
                     >
                         <span className="stack-card__name truncate">{list.name}</span>
                         <div className="flex items-center justify-between">
-                            <span className="stack-card__count">{currentList?.id === list.id ? items.length : '—'} titles</span>
+                            <span className="stack-card__count">{currentList?.id === list.id ? `${items.length}/10` : '— /10'}</span>
                             {currentList?.id === list.id && (
                                 <span className="material-symbols-outlined text-[14px] text-[#ffb700]">verified</span>
                             )}
@@ -346,58 +352,82 @@ export const CinematicStacksPage: React.FC = () => {
                             <div className="py-20 flex justify-center">
                                 <BeeLoader size="medium" />
                             </div>
-                        ) : filteredItems.length > 0 ? (
-                            <Reorder.Group
-                                axis="y"
-                                values={filteredItems}
-                                onReorder={handleReorder}
-                                className="flex flex-col gap-4 pl-4" // Left padding for rank badge
-                            >
-                                <AnimatePresence mode="popLayout" initial={false}>
-                                    {filteredItems.map((item) => (
-                                        <RankedItem
-                                            key={`${currentList.id}-${item.tmdbId}`}
-                                            item={item}
-                                            rank={items.indexOf(item) + 1} 
-                                            onRemove={handleRemove}
-                                        />
-                                    ))}
-                                </AnimatePresence>
-                            </Reorder.Group>
                         ) : (
-                            <div className="stacks-empty-hero">
-                                <span className="stacks-empty-icon">🏔️</span>
-                                <h3 className="text-xl font-black text-[#2D2926] mb-2">
-                                    {activeGenre ? `No ${activeGenre} titles found` : 'Your ranking is pure potential'}
-                                </h3>
-                                <p className="text-xs font-bold text-[#2D2926]/40 max-w-[280px] leading-relaxed">
-                                    Add your first movie or show to start building this ranking.
-                                </p>
-                                <button 
-                                    onClick={() => setIsSearchOpen(true)}
-                                    className="mt-8 bg-[#ffb700] text-[#2D2926] font-black px-8 py-4 rounded-2xl shadow-xl hover:scale-105 transition-all text-xs uppercase tracking-widest active:scale-95"
-                                >
-                                    Add to This Ranking
-                                </button>
-                            </div>
+                            <>
+                                {/* Ranked items list */}
+                                {filteredItems.length > 0 && (
+                                    <Reorder.Group
+                                        axis="y"
+                                        values={filteredItems}
+                                        onReorder={handleReorder}
+                                        className="flex flex-col gap-4 pl-4"
+                                    >
+                                        <AnimatePresence mode="popLayout" initial={false}>
+                                            {filteredItems.map((item) => (
+                                                <RankedItem
+                                                    key={`${currentList.id}-${item.tmdbId}`}
+                                                    item={item}
+                                                    rank={items.indexOf(item) + 1}
+                                                    onRemove={handleRemove}
+                                                />
+                                            ))}
+                                        </AnimatePresence>
+                                    </Reorder.Group>
+                                )}
+
+                                {/* Inline Add Item card — shown when < 10 items and no genre filter active */}
+                                {!activeGenre && items.length < 10 && (
+                                    <motion.button
+                                        initial={{ opacity: 0, y: 8 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        whileHover={{ scale: 1.01 }}
+                                        whileTap={{ scale: 0.99 }}
+                                        onClick={() => setIsSearchOpen(true)}
+                                        className={`w-full mt-4 pl-4 flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed transition-all ${
+                                            items.length === 0
+                                                ? 'border-[#ffb700] bg-[#ffb700]/5 hover:bg-[#ffb700]/10'
+                                                : 'border-[#2D2926]/10 bg-transparent hover:border-[#ffb700]/40 hover:bg-[#ffb700]/5'
+                                        }`}
+                                    >
+                                        {/* Rank number placeholder */}
+                                        <div className={`ranked-item__rank opacity-40`}>
+                                            {items.length + 1}
+                                        </div>
+                                        <div className={`w-10 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                                            items.length === 0 ? 'bg-[#ffb700]/20' : 'bg-[#2D2926]/5'
+                                        }`}>
+                                            <span className={`material-symbols-outlined text-2xl ${
+                                                items.length === 0 ? 'text-[#ffb700]' : 'text-[#2D2926]/20'
+                                            }`}>add</span>
+                                        </div>
+                                        <div className="text-left">
+                                            <p className={`text-sm font-black ${
+                                                items.length === 0 ? 'text-[#ffb700]' : 'text-[#2D2926]/30'
+                                            }`}>
+                                                {items.length === 0 ? 'Add your first title' : 'Add another title'}
+                                            </p>
+                                            <p className="text-[10px] font-bold text-[#2D2926]/20 uppercase tracking-widest">
+                                                {10 - items.length} slot{10 - items.length !== 1 ? 's' : ''} remaining
+                                            </p>
+                                        </div>
+                                    </motion.button>
+                                )}
+
+                                {/* At limit notice */}
+                                {items.length >= 10 && !activeGenre && (
+                                    <div className="mt-4 pl-4 flex items-center gap-3 p-4 rounded-2xl bg-[#ffb700]/5 border border-[#ffb700]/20">
+                                        <span className="material-symbols-outlined text-[#ffb700]">info</span>
+                                        <p className="text-[10px] font-black text-[#ffb700] uppercase tracking-widest">
+                                            Ranking full — max 10 titles per ranking
+                                        </p>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
             )}
 
-            {/* Floating "Add Item" Action Button */}
-            {currentList && (
-                <motion.button 
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    whileHover={{ scale: 1.1, rotate: 10 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setIsSearchOpen(true)}
-                    className="fixed bottom-24 right-6 md:right-12 w-16 h-16 bg-[#ffb700] text-[#2D2926] rounded-full flex items-center justify-center shadow-2xl z-[500] border-4 border-white"
-                >
-                    <span className="material-symbols-outlined text-3xl font-black">playlist_add</span>
-                </motion.button>
-            )}
 
             {!currentList && !isLoading && (
                  <div className="flex-grow flex items-center justify-center">
@@ -439,6 +469,9 @@ export const CinematicStacksPage: React.FC = () => {
                             autoFocus
                             onKeyDown={(e) => e.key === 'Enter' && handleCreateStack()}
                         />
+                        <p className="text-[10px] font-bold text-[#2D2926]/30 px-1">
+                            {lists.length}/5 rankings used
+                        </p>
                     </div>
                     <button
                         onClick={handleCreateStack}
