@@ -123,7 +123,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     
                     <div className="feed-card-header-info flex-1 min-w-0 pr-2">
                         <div className="flex items-start justify-between w-full">
-                            <div className="flex flex-col min-w-0 mr-4">
+                            <div className="flex flex-col min-w-0">
                                 <p className="feed-card-header-text">
                                     {isSuggestion ? (
                                         <span className="font-bold text-[#2D2926]">{displayName}</span>
@@ -143,7 +143,6 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     </p>
                                 )}
                             </div>
-                            <span className="feed-card-time text-[#2D2926]/50 shrink-0 whitespace-nowrap mt-1">{timestamp}</span>
                         </div>
                     </div>
                 </div>
@@ -189,6 +188,11 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             <p className="insight-text">"{review}"</p>
                         </div>
                     </div>
+                )}
+
+                {/* Timestamp — below image, above actions */}
+                {!isSuggestion && (
+                    <p className="feed-card-timestamp">{timestamp}</p>
                 )}
 
                 {/* Actions Bar */}
