@@ -1,10 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import WatchHiveApp from './watchhive/WatchHiveApp';
-import { registerServiceWorker, setupInstallPrompt } from './serviceWorkerRegistration';
-
-// Register Service Worker for PWA support
-registerServiceWorker();
+import { setupInstallPrompt } from './serviceWorkerRegistration';
 
 // Setup the install prompt for "Add to Home Screen"
 setupInstallPrompt();

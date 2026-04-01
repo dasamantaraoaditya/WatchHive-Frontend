@@ -37,3 +37,4 @@ logs
 coverage/
 *.lcov
 .vercel
+test-results/*
