@@ -45,7 +45,117 @@
 
 .feed-page-header-actions {
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ── Profile Dropdown ── */
+.feed-profile-dropdown {
+    position: relative;
+}
+
+.feed-profile-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 2px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.feed-profile-trigger:hover {
+    box-shadow: 0 0 0 3px rgba(255, 183, 0, 0.35);
+    transform: scale(1.05);
+}
+
+.feed-profile-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 200px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 183, 0, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(45, 41, 38, 0.12);
+    overflow: hidden;
+    z-index: 100;
+    animation: feedMenuIn 0.18s ease;
+}
+
+@keyframes feedMenuIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.feed-profile-menu__header {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.feed-profile-menu__name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #2D2926;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.feed-profile-menu__email {
+    font-size: 0.75rem;
+    color: rgba(45, 41, 38, 0.45);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.feed-profile-menu__divider {
+    height: 1px;
+    background: rgba(255, 183, 0, 0.15);
+    margin: 0;
+}
+
+.feed-profile-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #2D2926;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.feed-profile-menu__item:hover {
+    background: rgba(255, 183, 0, 0.08);
+}
+
+.feed-profile-menu__item .material-symbols-outlined {
+    font-size: 18px;
+    color: #ffb700;
+}
+
+.feed-profile-menu__item--danger {
+    color: #dc2626;
+}
+
+.feed-profile-menu__item--danger .material-symbols-outlined {
+    color: #dc2626;
+}
+
+.feed-profile-menu__item--danger:hover {
+    background: rgba(220, 38, 38, 0.06);
 }
 
 .icon-btn {

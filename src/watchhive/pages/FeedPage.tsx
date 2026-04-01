@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { feedApi, FeedItem } from '../services/feed.service';
 import { userService } from '../services/userService';
@@ -10,9 +10,31 @@ import './FeedPage.css';
 import '../components/feed/Feed.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import { useAuth } from '../contexts';
 
 export const FeedPage: React.FC = () => {
     const isOnline = useOnlineStatus();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const [profileOpen, setProfileOpen] = useState(false);
+    const profileRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+                setProfileOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const handleLogout = () => {
+        setProfileOpen(false);
+        logout();
+        navigate('/watch-hive/login');
+    };
 
     // State
     const [items, setItems] = useState<FeedItem[]>([]);
@@ -151,6 +173,48 @@ export const FeedPage: React.FC = () => {
                         <button className="icon-btn" title="Filter Settings">
                             <span className="material-symbols-outlined">tune</span>
                         </button>
+
+                        {/* Profile Avatar Dropdown */}
+                        <div className="feed-profile-dropdown" ref={profileRef}>
+                            <button
+                                className="feed-profile-trigger"
+                                onClick={() => setProfileOpen(p => !p)}
+                                title="My Account"
+                                aria-label="Open profile menu"
+                            >
+                                <Avatar
+                                    src={user?.profilePictureUrl}
+                                    name={user?.displayName || user?.username || '?'}
+                                    size="sm"
+                                />
+                            </button>
+
+                            {profileOpen && (
+                                <div className="feed-profile-menu">
+                                    <div className="feed-profile-menu__header">
+                                        <span className="feed-profile-menu__name">{user?.displayName || user?.username}</span>
+                                        <span className="feed-profile-menu__email">{user?.email}</span>
+                                    </div>
+                                    <div className="feed-profile-menu__divider" />
+                                    <Link
+                                        to="/watch-hive/profile"
+                                        className="feed-profile-menu__item"
+                                        onClick={() => setProfileOpen(false)}
+                                    >
+                                        <span className="material-symbols-outlined">person</span>
+                                        View My Profile
+                                    </Link>
+                                    <div className="feed-profile-menu__divider" />
+                                    <button
+                                        className="feed-profile-menu__item feed-profile-menu__item--danger"
+                                        onClick={handleLogout}
+                                    >
+                                        <span className="material-symbols-outlined">logout</span>
+                                        Sign Out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </header>
 
