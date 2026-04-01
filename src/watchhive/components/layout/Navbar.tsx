@@ -91,16 +91,6 @@ export const Navbar: React.FC = () => {
                             </svg>
                             Entries
                         </Link>
-                        <Link
-                            to="/watch-hive/profile"
-                            className={`wh-nav__link ${isActive('/watch-hive/profile') ? 'wh-nav__link--active' : ''}`}
-                            id="nav-link-profile"
-                        >
-                            <svg className="wh-nav__link-icon" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                            </svg>
-                            Profile
-                        </Link>
                     </div>
                 )}
 
@@ -244,12 +234,6 @@ export const Navbar: React.FC = () => {
                         className={`wh-nav__mobile-link ${isActive('/watch-hive/entries') ? 'wh-nav__mobile-link--active' : ''}`}
                     >
                         Entries
-                    </Link>
-                    <Link
-                        to="/watch-hive/profile"
-                        className={`wh-nav__mobile-link ${isActive('/watch-hive/profile') ? 'wh-nav__mobile-link--active' : ''}`}
-                    >
-                        Profile
                     </Link>
                     <div className="wh-nav__mobile-divider" />
                     <button className="wh-nav__mobile-link wh-nav__mobile-link--danger" onClick={handleLogout}>
