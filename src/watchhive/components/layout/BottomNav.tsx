@@ -15,6 +15,7 @@ export const BottomNav: React.FC = () => {
         { path: '/watch-hive/feed', icon: 'home', label: 'Home', fill: true },
         { path: '/watch-hive/mindlens', icon: 'psychology', label: 'MindLens' },
         { path: '/watch-hive/entries', icon: 'add_reaction', label: 'Entries' },
+        { path: '/watch-hive/stacks', icon: 'view_list', label: 'Stacks' },
         { path: '/watch-hive/search', icon: 'search', label: 'Search' },
         { path: '/watch-hive/profile', icon: 'person', label: 'Profile' },
     ];

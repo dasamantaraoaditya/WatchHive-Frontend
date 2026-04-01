@@ -46,6 +46,10 @@ export const Sidebar: React.FC = () => {
                             <span className="material-symbols-outlined">add_reaction</span>
                             <span className="font-semibold">Entries</span>
                         </Link>
+                        <Link to="/watch-hive/stacks" className={`wh-sidebar__link ${isActive('/watch-hive/stacks') ? 'wh-sidebar__link--active' : ''}`}>
+                            <span className="material-symbols-outlined">view_list</span>
+                            <span className="font-semibold">Stacks</span>
+                        </Link>
                     </nav>
                 </div>
                 
