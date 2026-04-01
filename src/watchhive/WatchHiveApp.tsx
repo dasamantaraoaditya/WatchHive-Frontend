@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav } from './components/layout';
-import { DonationButton, OfflineBanner, Modal } from './components/common';
+import { DonationButton, OfflineBanner, Modal, BeeLoader } from './components/common';
 import { EntryForm } from './components/entries/EntryForm';
 import { WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -16,19 +16,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     if (isLoading) {
         return (
             <div className="loading-screen">
-                <div className="loading-spinner">
-                    <svg className="wh-spinner" viewBox="0 0 24 24">
-                        <circle
-                            className="wh-spinner__circle"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            fill="none"
-                            strokeWidth="3"
-                        />
-                    </svg>
-                </div>
-                <p>Loading...</p>
+                <BeeLoader size="large" message="Loading your hive..." />
             </div>
         );
     }
@@ -43,19 +31,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (isLoading) {
         return (
             <div className="loading-screen">
-                <div className="loading-spinner">
-                    <svg className="wh-spinner" viewBox="0 0 24 24">
-                        <circle
-                            className="wh-spinner__circle"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            fill="none"
-                            strokeWidth="3"
-                        />
-                    </svg>
-                </div>
-                <p>Loading...</p>
+                <BeeLoader size="large" message="Loading your hive..." />
             </div>
         );
     }
