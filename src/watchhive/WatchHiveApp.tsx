@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav } from './components/layout';
-import { DonationButton, OfflineBanner, Modal, BeeLoader } from './components/common';
+import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner } from './components/common';
 import { EntryForm } from './components/entries/EntryForm';
 import { WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';

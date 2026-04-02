@@ -14,4 +14,5 @@ export * from './Modal';
 export * from './BadgeModal';
 export * from './BeeLoader';
 export * from './InstallPromptButton';
+export * from './InstallPromptBanner';
 export * from './MovieDetailsModal';
