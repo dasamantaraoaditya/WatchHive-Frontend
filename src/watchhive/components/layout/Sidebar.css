@@ -18,12 +18,6 @@
     /* transition: all var(--transition-base); */
 }
 
-@media (prefers-color-scheme: dark) {
-    .wh-sidebar {
-        background: var(--bg-primary); /* Uses dark background variable */
-        border-right: 1px solid rgba(255, 183, 0, 0.1); /* Primary/10 from Stitch */
-    }
-}
 
 .wh-sidebar__content {
     display: flex;
@@ -90,11 +84,6 @@
     color: var(--accent-primary);
 }
 
-@media (prefers-color-scheme: dark) {
-    .wh-sidebar__link--active {
-        background: rgba(255, 183, 0, 0.15);
-    }
-}
 
 .wh-sidebar__link .material-symbols-outlined {
     font-size: 1.25rem;

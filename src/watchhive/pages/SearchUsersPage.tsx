@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { User } from '../types/user.types';
 import userService from '../services/userService';
-import { Avatar, ErrorState, EmptyState } from '../components/common';
+import { Avatar, ErrorState, EmptyState, BeeLoader } from '../components/common';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 
@@ -94,10 +94,10 @@ export const SearchUsersPage: React.FC = () => {
             <main className="max-w-4xl mx-auto w-full px-4 py-8 flex flex-col gap-8">
                 
                 {/* Search Header Container */}
-                <div className="flex flex-col items-center justify-center text-center gap-6 py-4 md:py-10">
+                <div className="flex flex-col items-center justify-center text-center gap-4 md:gap-6 py-2 md:py-10">
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-black text-[#2D2926] tracking-tight mb-3">Discover the <span className="text-[#ffb700]">Hive</span></h1>
-                        <p className="text-[#2D2926]/60 text-lg md:text-xl font-medium max-w-lg mx-auto">Find friends, critics, and fellow curators sharing their cinematic journeys.</p>
+                        <h1 className="text-3xl md:text-5xl font-black text-[#2D2926] tracking-tight mb-2 md:mb-3">Discover the <span className="text-[#ffb700]">Hive</span></h1>
+                        <p className="text-[#2D2926]/60 text-base md:text-xl font-medium max-w-lg mx-auto">Find friends, critics, and fellow curators sharing their cinematic journeys.</p>
                     </div>
 
                     <div className="w-full max-w-2xl relative group mt-4">
@@ -219,9 +219,8 @@ export const SearchUsersPage: React.FC = () => {
                     <div ref={observerTarget} className="h-4 w-full" />
 
                     {loading && results.length > 0 && (
-                        <div className="text-center py-6 font-bold text-[#2D2926]/40 flex items-center justify-center gap-3">
-                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#ffb700]"></div>
-                            Searching the hive for more...
+                        <div className="py-6">
+                            <BeeLoader size="small" message="Searching the hive for more..." />
                         </div>
                     )}
                 </div>

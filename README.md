@@ -1,6 +1,6 @@
 # WatchHive Frontend
 
-A modern React + Vite single-page application for the WatchHive social movie tracking platform. Deployed to **AWS S3 + CloudFront**.
+A modern React + Vite single-page application for the WatchHive social movie tracking platform. Deployed on **Vercel** (frontend) and **Railway** (backend).
 
 ## Tech Stack
 
@@ -35,9 +35,7 @@ VITE_GOOGLE_CLIENT_ID=your-google-client-id
 
 ## Deployment
 
-The production build (`dist/`) is deployed to **AWS S3** and served via **CloudFront**.
+- **Frontend**: Deployed automatically on [Vercel](https://vercel.com) on push to `main`.
+- **Backend**: Deployed on [Railway](https://railway.app).
 
-```bash
-npm run build
-aws s3 sync dist/ s3://your-bucket-name --delete
-```
+The `vercel.json` handles SPA rewrites so all routes serve `index.html`.

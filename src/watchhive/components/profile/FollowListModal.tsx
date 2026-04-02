@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../types/user.types';
 import userService from '../../services/userService';
-import { Avatar } from '../common';
+import { Avatar, BeeLoader } from '../common';
 import { Link } from 'react-router-dom';
 
 interface FollowListModalProps {
@@ -63,9 +63,8 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto p-2 bg-[#FFF9F0]/50 no-scrollbar">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-12 gap-3">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-r-2 border-[#ffb700]"></div>
-                            <span className="text-sm font-bold text-[#2D2926]/50">Loading users...</span>
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <BeeLoader size="small" message="Loading users..." />
                         </div>
                     ) : users.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 px-6 text-center gap-3">

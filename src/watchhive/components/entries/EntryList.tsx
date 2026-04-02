@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { ErrorState, EmptyState, WatchlistButton } from '../common';
+import { ErrorState, EmptyState, WatchlistButton, BeeLoader } from '../common';
+import { StackButton } from '../stacks/StackButton';
+import '../profile/Profile.css';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
 interface EntryListProps {
@@ -24,34 +26,7 @@ interface TmdbDetails {
 
 const tmdbCache = new Map<string, TmdbDetails>();
 
-const MiniStars: React.FC<{ rating: number }> = ({ rating }) => {
-    return (
-        <div className="flex items-center gap-[2px]" title={`${rating}/10`}>
-            {[1, 2, 3, 4, 5].map((star) => {
-                const starValue = star * 2;
-                const filled = rating >= starValue;
-                const half = !filled && rating >= starValue - 1;
-                
-                return (
-                    <span key={star} className="relative w-3.5 h-3.5 sm:w-4 sm:h-4">
-                        <span className="material-symbols-outlined absolute inset-0 text-[#2D2926]/10 text-[14px] sm:text-[16px] overflow-hidden" style={{ fontVariationSettings: "'FILL' 1" }}>grade</span>
-                        {(filled || half) && (
-                            <span 
-                                className="material-symbols-outlined absolute inset-0 text-[#ffb700] text-[14px] sm:text-[16px] overflow-hidden drop-shadow-sm" 
-                                style={{ 
-                                    fontVariationSettings: "'FILL' 1",
-                                    width: half ? '50%' : '100%'
-                                }}
-                            >
-                                grade
-                            </span>
-                        )}
-                    </span>
-                );
-            })}
-        </div>
-    );
-};
+
 
 export const EntryCard: React.FC<{
     entry: Entry;
@@ -126,163 +101,134 @@ export const EntryCard: React.FC<{
 
     const ti = getTypeInfo(entry.type);
     const year = details?.release_date?.slice(0, 4) || details?.first_air_date?.slice(0, 4);
+    const runtime = details?.runtime ? `${details.runtime}m` : null;
+    const primaryGenre = details?.genres?.[0];
+
+    const metaItems = [];
+    if (year) metaItems.push(year);
+    if (primaryGenre) metaItems.push(primaryGenre);
+    if (runtime) metaItems.push(runtime);
+    const metadataString = metaItems.join(' • ');
 
     return (
-        <div className="group flex flex-col bg-white rounded-3xl overflow-hidden shadow-sm border border-[#ffb700]/10 hover:shadow-xl hover:border-[#ffb700]/30 transition-all duration-300">
-            {/* Poster Section */}
-            <div className="relative aspect-[2/3] w-full bg-[#FFF9F0] overflow-hidden">
+        <div className="watchlist-card group relative">
+            <div className="watchlist-card__poster-wrapper">
                 {posterUrl && !imgError ? (
                     <img
                         src={posterUrl}
                         alt={entry.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="watchlist-card__poster"
                         loading="lazy"
                         onError={() => setImgError(true)}
                     />
                 ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-[#2D2926]/10">
-                        <span className="material-symbols-outlined text-6xl">movie</span>
+                    <div className="watchlist-card__no-poster">
+                        <span className="material-symbols-outlined text-4xl mb-2 text-[#2D2926]/20">movie</span>
                     </div>
                 )}
                 
-                {/* Gradient Overlay for Actions & Badges */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#2D2926]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                {/* Top Badges */}
-                <div className="absolute top-3 left-3 flex gap-2 z-10">
-                    <span className={`${ti.color} text-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm backdrop-blur-md bg-opacity-90`}>
-                        {ti.emoji} {ti.label}
-                    </span>
-                    {entry.isRewatch && (
-                        <span className="bg-[#2D2926]/60 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg">
-                            🔄 Rewatch
-                        </span>
-                    )}
-                    {entry.isWatching && (
-                        <span className="bg-green-500 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-lg animate-pulse shadow-lg shadow-green-500/20">
-                            👀 Watching
-                        </span>
-                    )}
-                </div>
-
-                {/* Hover Actions (Edit/Delete/Watchlist) */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                {/* Top Actions Overlay */}
+                <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                     {entry.isWatching && (
                         <button
                             onClick={async (e) => {
                                 e.stopPropagation();
                                 try {
-                                    await entriesApi.updateEntry(entry.id, { isWatching: false });
-                                    window.location.reload(); // Quickest way to refresh for now
-                                } catch (err) {
-                                    alert('Failed to mark as watched');
-                                }
+                                    await entriesApi.updateEntry(entry.id, { 
+                                        isWatching: false,
+                                        completedAt: new Date().toISOString()
+                                    });
+                                    window.location.reload();
+                                } catch (err) { }
                             }}
-                            className="w-9 h-9 rounded-xl bg-green-500 text-white hover:bg-green-600 hover:scale-110 transition-all flex items-center justify-center border border-green-400 shadow-lg shadow-green-500/20"
+                            className="w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 flex items-center justify-center shadow-lg"
                             title="Mark as Watched"
                         >
-                            <span className="material-symbols-outlined text-[20px] font-black">check_circle</span>
+                            <span className="material-symbols-outlined text-[16px]">check</span>
                         </button>
                     )}
                     <WatchlistButton 
                         tmdbId={entry.tmdbId} 
                         variant="icon" 
-                        className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md text-[#2D2926]/40 hover:text-[#ffb700] hover:bg-white hover:scale-105 transition-all flex items-center justify-center border border-[#ffb700]/10 shadow-sm" 
+                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm" 
                     />
-                    
+                    <StackButton 
+                        tmdbId={entry.tmdbId}
+                        mediaType={entry.type === 'TV_SHOW' ? 'tv' : 'movie'}
+                    />
                     {onEdit && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onEdit(entry); }}
-                            className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md text-[#2D2926]/40 hover:text-[#ffb700] hover:bg-white hover:scale-105 transition-all flex items-center justify-center border border-[#ffb700]/10 shadow-sm"
-                            title="Edit entry"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">edit_note</span>
+                        <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm" title="Edit">
+                            <span className="material-symbols-outlined text-[16px]">edit</span>
                         </button>
                     )}
                     {onDelete && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
-                            className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md text-[#2D2926]/40 hover:text-rose-500 hover:bg-rose-50 hover:scale-105 transition-all flex items-center justify-center border border-[#ffb700]/10 shadow-sm"
-                            title="Delete entry"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
+                        <button onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-red-500 flex items-center justify-center shadow-sm" title="Delete">
+                            <span className="material-symbols-outlined text-[16px]">delete</span>
                         </button>
                     )}
                 </div>
 
-                {/* Bottom Overlay Text */}
-                {details?.overview && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-10">
-                        <p className="text-white/90 text-[13px] leading-snug line-clamp-3 italic shadow-sm">
-                            "{details.overview}"
-                        </p>
+                {/* Hover Action for Watching Sessions */}
+                {entry.isWatching && (
+                    <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 z-10">
+                        <button
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                    await entriesApi.updateEntry(entry.id, { 
+                                        isWatching: false,
+                                        completedAt: new Date().toISOString()
+                                    });
+                                    window.location.reload();
+                                } catch (err) { }
+                            }}
+                            className="w-full py-2 bg-green-500 text-white rounded-lg font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                            Complete Session
+                        </button>
                     </div>
                 )}
+
+                {/* Left Badges Overlay */}
+                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                    <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90`}>
+                        {ti.emoji}
+                    </span>
+                    {entry.isRewatch && <span className="bg-[#2D2926]/60 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-0.5 rounded">🔄</span>}
+                </div>
             </div>
 
-            {/* Info Section */}
-            <div className="p-4 sm:p-5 flex flex-col flex-1 gap-3 relative">
-                
-                {/* Title & Year */}
-                <div className="min-h-[48px]">
-                    <h3 className="text-lg font-black text-[#2D2926] leading-tight line-clamp-2" title={entry.title}>
-                        {entry.title}
-                        {year && <span className="ml-2 font-semibold text-[#2D2926]/40 text-sm">({year})</span>}
-                    </h3>
-                </div>
-
-                {/* Rating */}
-                {entry.rating && (
-                    <div className="flex items-center gap-2">
-                        <MiniStars rating={entry.rating} />
-                        <span className="text-sm font-bold text-[#2D2926]/70">{entry.rating}/10</span>
-                    </div>
-                )}
-
-                {/* Meta Row: Date & Location */}
-                <div className="flex items-center gap-4 text-[13px] font-bold text-[#2D2926]/30">
-                    <span className="flex items-center gap-1.5 whitespace-nowrap group/meta hover:text-[#ffb700] transition-colors">
-                        <span className="material-symbols-outlined text-[18px] text-[#ffb700]/60">calendar_today</span>
-                        {formatDate(entry.watchedAt)}
-                    </span>
-                    {entry.watchLocation && (
-                        <span className="flex items-center gap-1.5 truncate group/meta hover:text-[#ffb700] transition-colors">
-                            <span className="material-symbols-outlined text-[18px] text-[#ffb700]/60">distance</span>
-                            <span className="truncate">{entry.watchLocation}</span>
-                        </span>
-                    )}
-                </div>
-
-                {/* Embedded Tags */}
-                {entry.tags && entry.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-                        {entry.tags.map((tag: string) => (
-                            <span key={tag} className="text-[11px] font-bold text-[#ffb700] bg-[#ffb700]/10 px-2 py-0.5 rounded-md hover:bg-[#ffb700]/20 transition-colors cursor-default truncate max-w-[120px]">
-                                #{tag}
+            <div className="watchlist-card__info gap-1 p-3 flex flex-col h-full">
+                <h4 className="watchlist-card__title text-[13px] leading-tight" title={entry.title}>
+                    {entry.title}
+                </h4>
+                <div className="text-[10px] text-[#2D2926]/40 font-bold mb-1.5 flex items-center justify-between">
+                    <span>{formatDate(entry.watchedAt).split(' at')[0]}</span>
+                    <div className="flex items-center gap-2 text-[#2D2926]/50">
+                        {entry._count?.likes !== undefined && (
+                            <span className="flex items-center gap-0.5" title={`${entry._count.likes} likes`}>
+                                <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                                {entry._count.likes}
                             </span>
-                        ))}
+                        )}
+                        {entry._count?.comments !== undefined && (
+                            <span className="flex items-center gap-0.5" title={`${entry._count.comments} comments`}>
+                                <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>chat_bubble</span>
+                                {entry._count.comments}
+                            </span>
+                        )}
                     </div>
-                )}
-            </div>
-
-            {/* Engagement Footer */}
-            <div className="px-5 py-3 border-t border-[#ffb700]/10 flex items-center justify-between text-[13px] font-bold text-[#2D2926]/40 bg-[#FFF9F0]/50">
-                <div className="flex items-center gap-4">
-                    <span className="flex items-center gap-1 hover:text-[#ffb700] transition-colors cursor-pointer" title="Likes">
-                        <span className="material-symbols-outlined text-[16px]">favorite</span>
-                        {entry._count.likes}
-                    </span>
-                    <span className="flex items-center gap-1 hover:text-blue-500 transition-colors cursor-pointer" title="Comments">
-                        <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
-                        {entry._count.comments}
-                    </span>
                 </div>
-                {details?.runtime && (
-                    <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[16px]">schedule</span>
-                        {Math.floor(details.runtime / 60)}h {details.runtime % 60}m
-                    </span>
+                {details?.overview && (
+                    <p className="text-[11px] text-[#2D2926]/60 line-clamp-2 leading-relaxed mb-2 mt-0.5" title={details.overview}>
+                        {details.overview}
+                    </p>
                 )}
+                <div className="watchlist-card__meta text-[11px] font-bold mt-auto text-[#2D2926]/60 flex items-center justify-between w-full">
+                    <span className="truncate flex-1" title={metadataString}>{metadataString || '-'}</span>
+                    {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
+                </div>
             </div>
         </div>
     );
@@ -347,7 +293,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     if (isLoading && entries.length === 0) {
         return (
             <div className="w-full flex justify-center py-20">
-                <div className="animate-spin rounded-full h-10 w-10 border-4 border-[#ffb700]/20 border-t-[#ffb700]"></div>
+                <BeeLoader size="large" message="Loading your hive..." />
             </div>
         );
     }
@@ -379,7 +325,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                 <span className="text-sm font-bold bg-[#ffb700]/10 text-[#ffb700] px-3 py-1 rounded-full">{pagination.total} {pagination.total === 1 ? 'title' : 'titles'}</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="watchlist-grid">
                 {entries.map((entry) => (
                     <EntryCard
                         key={entry.id}
@@ -394,8 +340,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
             
             {isLoading && entries.length > 0 && (
                 <div className="flex justify-center items-center py-6 gap-3">
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#ffb700]"></div>
-                    <span className="text-sm font-bold text-[#2D2926]/40">Fetching older entries...</span>
+                    <BeeLoader size="small" message="Fetching older entries..." />
                 </div>
             )}
         </div>

@@ -201,24 +201,51 @@
     padding-bottom: var(--space-4);
 }
 
-/* Dark Mode Overrides */
-@media (prefers-color-scheme: dark) {
-    .watchlist-card {
-        background: rgba(255, 255, 255, 0.03);
-        border-color: rgba(255, 255, 255, 0.08);
+/* ============================================
+   MOBILE TOUCH OVERRIDES
+   ============================================ */
+@media (hover: none) and (pointer: coarse) {
+    /* Always show action overlays on touch devices */
+    .watchlist-card__overlay {
+        opacity: 1;
     }
 
+    .watchlist-card__hover-action {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Disable hover transform on cards */
     .watchlist-card:hover {
-        background: rgba(255, 255, 255, 0.06);
-        border-color: var(--primary-500);
+        transform: none;
     }
 
-    .watchlist-card__no-poster {
-        background: rgba(255, 255, 255, 0.05);
+    .watchlist-card:hover .watchlist-card__poster {
+        transform: none;
     }
 
-    .watchlist-mark-btn {
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-        /* Green glow */
+    .watchlist-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+
+    .watchlist-mark-btn:hover {
+        filter: none;
+        transform: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .watchlist-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: var(--space-3);
+    }
+
+    .watchlist-card__info {
+        padding: var(--space-2) var(--space-2) var(--space-3);
+    }
+
+    .watchlist-card__title {
+        font-size: 0.8rem;
     }
 }

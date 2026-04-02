@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { Link, useNavigate } from 'react-router-dom';
+import { BeeLoader } from '../components/common';
 
 const NotificationsPage: React.FC = () => {
     const navigate = useNavigate();
@@ -104,9 +105,8 @@ const NotificationsPage: React.FC = () => {
 
             <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-4">
                 {loading && notifications.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4 opacity-50">
-                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ffb700]"></div>
-                        <p className="font-bold text-[#2D2926]/50">Loading your activity...</p>
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                        <BeeLoader size="small" message="Loading your activity..." />
                     </div>
                 ) : notifications.length === 0 ? (
                      <div className="flex flex-col items-center justify-center py-24 text-center px-4 bg-white rounded-3xl border border-[#ffb700]/10 shadow-sm mt-4">
@@ -183,9 +183,8 @@ const NotificationsPage: React.FC = () => {
                         <div ref={observerTarget} className="h-4 w-full mt-4" />
                         
                         {loading && notifications.length > 0 && (
-                            <div className="flex justify-center items-center py-6 gap-3">
-                                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#ffb700]"></div>
-                                <span className="text-sm font-bold text-[#2D2926]/40">Fetching more activity...</span>
+                            <div className="flex justify-center items-center py-6">
+                                <BeeLoader size="small" message="Fetching more activity..." />
                             </div>
                         )}
                     </div>

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { mindLensApi, MindLensData } from '../services/mindlens.service';
 import { useAuth } from '../contexts';
+import { BeeLoader } from '../components/common';
 
-// Optional: you can keep importing Button or just use raw tailwind for empty state
 import { Link } from 'react-router-dom';
 
 export const MindLensPage: React.FC = () => {
@@ -55,8 +55,7 @@ export const MindLensPage: React.FC = () => {
     if (isLoading) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-[#FFF9F0]">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#ffb700] mb-4"></div>
-                <p className="text-[#2D241E]/60 font-medium font-display">Analyzing your viewing psyche...</p>
+                <BeeLoader size="medium" message="Analyzing your viewing psyche..." />
             </div>
         );
     }
@@ -119,6 +118,14 @@ export const MindLensPage: React.FC = () => {
 
     return (
         <div className="flex-1 overflow-y-auto bg-[#FFF9F0] font-display text-[#2D241E] min-h-full">
+            {/* Mobile Header */}
+            <header className="sticky top-0 z-40 w-full border-b border-[#ffb700]/20 bg-[#FFF9F0]/90 backdrop-blur-md px-4 py-3 md:hidden">
+                <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[#ffb700] text-2xl">psychology</span>
+                    <h2 className="text-lg font-extrabold tracking-tight text-[#2D2926]">MindLens</h2>
+                </div>
+            </header>
+
             <header className="h-16 border-b border-[#F5E6D3] flex items-center justify-between px-8 sticky top-0 bg-[#FFF9F0]/80 backdrop-blur-md z-10 hidden md:flex">
                 <h2 className="text-sm font-semibold text-[#2D241E]/50">MindLens Analytics Platform</h2>
                 <div className="flex items-center gap-4">

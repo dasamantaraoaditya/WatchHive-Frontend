@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { userService } from '../../services';
+import { BeeLoader } from '../common';
 
 interface StatsData {
     summary: {
@@ -45,9 +46,8 @@ export const ProfileStats: React.FC = () => {
 
     if (loading && !data) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 animate-pulse">
-                <div className="w-16 h-16 rounded-full border-4 border-[#ffb700]/20 border-t-[#ffb700] animate-spin mb-4"></div>
-                <p className="text-[12px] font-black text-[#ffb700] uppercase tracking-widest">Parsing Hive History...</p>
+            <div className="flex flex-col items-center justify-center py-20">
+                <BeeLoader size="small" message="Parsing Hive History..." />
             </div>
         );
     }

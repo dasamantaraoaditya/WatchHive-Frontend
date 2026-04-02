@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts';
-import { Avatar, BadgeModal } from '../common';
+import { Avatar, BadgeModal, InstallPromptButton } from '../common';
 import whLogo from '../../assets/images/watchhive-logo.png';
 import './Sidebar.css';
 
@@ -34,6 +34,10 @@ export const Sidebar: React.FC = () => {
                             <span className="material-symbols-outlined">psychology</span>
                             <span className="font-semibold">MindLens</span>
                         </Link>
+                        <Link to="/watch-hive/stacks" className={`wh-sidebar__link ${isActive('/watch-hive/stacks') ? 'wh-sidebar__link--active' : ''}`}>
+                            <span className="material-symbols-outlined">view_list</span>
+                            <span className="font-semibold">Stacks</span>
+                        </Link>
                         <Link to="/watch-hive/profile" className={`wh-sidebar__link ${isActive('/watch-hive/profile') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined">person</span>
                             <span className="font-semibold">Profile</span>
@@ -50,6 +54,9 @@ export const Sidebar: React.FC = () => {
                 </div>
                 
                 <div className="wh-sidebar__bottom">
+                    <div className="mb-4">
+                        <InstallPromptButton />
+                    </div>
                     <div className="wh-sidebar__honey-level">
                         <div className="wh-sidebar__honey-header">
                             <p className="wh-sidebar__honey-title">Honey level {user?.level || 1}</p>

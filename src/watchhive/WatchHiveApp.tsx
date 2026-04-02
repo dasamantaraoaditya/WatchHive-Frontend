@@ -6,7 +6,7 @@ import { DonationButton, OfflineBanner, Modal, InstallPromptBanner } from './com
 import { EntryForm } from './components/entries/EntryForm';
 import { WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage } from './pages';
+import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage } from './pages';
 import './index.css';
 
 // Protected Route Component
@@ -143,6 +143,14 @@ const AppRoutes: React.FC = () => {
                             </ProtectedRoute>
                         }
                     />
+                    <Route
+                        path="/watch-hive/stacks"
+                        element={
+                            <ProtectedRoute>
+                                <CinematicStacksPage />
+                            </ProtectedRoute>
+                        }
+                    />
 
                     <Route
                         path="/watch-hive/notifications"
@@ -186,6 +194,7 @@ const AppRoutes: React.FC = () => {
                             <EntryForm
                                 onSuccess={() => setIsQuickAddOpen(false)}
                                 onCancel={() => setIsQuickAddOpen(false)}
+                                isModal={true}
                             />
                         </Modal>
                     </>

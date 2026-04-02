@@ -13,6 +13,8 @@ export interface Entry {
     tags: string[];
     isRewatch: boolean;
     isWatching?: boolean;
+    startedAt?: string;
+    completedAt?: string;
     watchLocation: string | null;
     createdAt: string;
     updatedAt: string;
@@ -38,6 +40,8 @@ export interface CreateEntryData {
     tags?: string[];
     isRewatch?: boolean;
     isWatching?: boolean;
+    startedAt?: string;
+    completedAt?: string;
     watchLocation?: string;
 }
 
@@ -50,6 +54,8 @@ export interface UpdateEntryData {
     tags?: string[];
     isRewatch?: boolean;
     isWatching?: boolean;
+    startedAt?: string;
+    completedAt?: string;
     watchLocation?: string;
 }
 
