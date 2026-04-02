@@ -47,6 +47,7 @@ const AppRoutes: React.FC = () => {
     return (
         <div className="app-layout">
             <OfflineBanner />
+            <InstallPromptBanner />
             {isAuthenticated && <Sidebar />}
             {/* Main content area needs to be pushed to the right to accommodate the 256px wide fixed sidebar */}
             <main className={`app-main ${isAuthenticated ? 'app-main--with-sidebar' : ''}`}>
@@ -162,23 +163,23 @@ const AppRoutes: React.FC = () => {
                 {isAuthenticated && (
                     <>
                         <QuickAddFAB onClick={() => setIsQuickAddOpen(true)} />
-                        
-                        <Modal 
-                            isOpen={isQuickAddOpen} 
+
+                        <Modal
+                            isOpen={isQuickAddOpen}
                             onClose={() => setIsQuickAddOpen(false)}
                             title="Log your latest watch"
                         >
-                            <EntryForm 
-                                onSuccess={() => setIsQuickAddOpen(false)} 
-                                onCancel={() => setIsQuickAddOpen(false)} 
+                            <EntryForm
+                                onSuccess={() => setIsQuickAddOpen(false)}
+                                onCancel={() => setIsQuickAddOpen(false)}
                                 isModal={true}
                             />
                         </Modal>
                     </>
                 )}
-                
+
                 {isAuthenticated && <BottomNav />}
-                
+
                 <DonationButton />
             </main>
         </div>
