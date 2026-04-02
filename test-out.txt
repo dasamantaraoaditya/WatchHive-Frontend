@@ -1,0 +1,33 @@
+
+Running 1 test using 1 worker
+
+  Γ£ÿ  1 tests\install-prompt.spec.ts:4:5 ΓÇ║ PWA Install Prompt Banner ΓÇ║ should appear when beforeinstallprompt is fired and disappear when dismissed (6.3s)
+
+
+  1) tests\install-prompt.spec.ts:4:5 ΓÇ║ PWA Install Prompt Banner ΓÇ║ should appear when beforeinstallprompt is fired and disappear when dismissed 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('text=Install WatchHive App')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('text=Install WatchHive App')[22m
+
+
+      21 |         // The banner should now be visible
+      22 |         const installBanner = page.locator('text=Install WatchHive App');
+    > 23 |         await expect(installBanner).toBeVisible();
+         |                                     ^
+      24 |
+      25 |         // The banner should contain the install button
+      26 |         const installButton = page.locator('button:has-text("Install Now")');
+        at C:\Users\dasam\source\repos\WatchHive-Frontend\tests\install-prompt.spec.ts:23:37
+
+    Error Context: test-results\tests-install-prompt-PWA-I-dc091-nd-disappear-when-dismissed\error-context.md
+
+  1 failed
+    tests\install-prompt.spec.ts:4:5 ΓÇ║ PWA Install Prompt Banner ΓÇ║ should appear when beforeinstallprompt is fired and disappear when dismissed 

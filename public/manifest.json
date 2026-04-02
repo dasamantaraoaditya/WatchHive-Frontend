@@ -2,11 +2,11 @@
   "name": "WatchHive",
   "short_name": "watchhive",
   "description": "Track every movie, anime, K-drama, and TV series you watch. Rate, review, and discover with a community of fellow watchers.",
-  "start_url": "/",
+  "start_url": "/watch-hive/feed",
   "scope": "/",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#ffb700",
+  "orientation": "portrait",
+  "background_color": "#fff",
   "theme_color": "#ffb700",
   "icons": [
     {

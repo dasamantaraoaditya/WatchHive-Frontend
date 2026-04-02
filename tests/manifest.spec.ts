@@ -17,9 +17,11 @@ test('verify PWA manifest, splash screen settings, and take screenshot', async (
   // 3. Verify Splash Screen and Name properties
   expect(manifest.name).toBe('WatchHive');
   expect(manifest.short_name).toBe('watchhive');
-  expect(manifest.background_color).toBe('#ffb700');
+  expect(manifest.background_color).toBe('#fff');
   expect(manifest.theme_color).toBe('#ffb700');
   expect(manifest.display).toBe('standalone');
+  expect(manifest.start_url).toBe('/watch-hive/feed');
+  expect(manifest.orientation).toBe('portrait');
 
   // 4. Verify Icons existence
   expect(manifest.icons.length).toBeGreaterThan(0);
