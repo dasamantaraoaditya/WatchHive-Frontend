@@ -75,10 +75,10 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
         // Optimistic
         const tempId = `temp-${Date.now()}`;
-        const previousItems = targetList.items;
+        const previousItems = targetList.items || [];
         setWatchlist({
             ...targetList,
-            items: [...targetList.items, {
+            items: [...(targetList.items || []), {
                 id: tempId,
                 tmdbId,
                 mediaType,
@@ -92,7 +92,7 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             const newItem = await listsApi.addToWatchlist(targetList.id, tmdbId, mediaType);
             setWatchlist(prev => prev ? {
                 ...prev,
-                items: prev.items.map(i => i.id === tempId ? newItem : i)
+                items: (prev.items || []).map(i => i.id === tempId ? newItem : i)
             } : null);
         } catch (error) {
             console.error('Failed to add to watchlist', error);
@@ -105,10 +105,10 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const removeFromList = async (tmdbId: number) => {
         if (!watchlist || !isAuthenticated) return;
 
-        const previousItems = watchlist.items;
+        const previousItems = watchlist.items || [];
         setWatchlist({
             ...watchlist,
-            items: watchlist.items.filter(i => i.tmdbId !== tmdbId)
+            items: (watchlist.items || []).filter(i => i.tmdbId !== tmdbId)
         });
 
         try {
@@ -122,7 +122,7 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     const isInWatchlist = (tmdbId: number) => {
-        return watchlist?.items.some(i => Number(i.tmdbId) === Number(tmdbId)) || false;
+        return (watchlist?.items || []).some(i => Number(i.tmdbId) === Number(tmdbId)) || false;
     };
 
     return (

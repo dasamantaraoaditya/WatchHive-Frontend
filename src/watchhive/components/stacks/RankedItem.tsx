@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Reorder, useDragControls } from 'framer-motion';
+import { Reorder, useDragControls, motion } from 'framer-motion';
 import { ListItem } from '../../services/lists.service';
-import apiClient from '../../services/api.js';
+import apiClient from '../../services/api';
+import './Stacks.css';
 
 interface TmdbDetails {
+    title?: string;
+    name?: string;
     poster_path: string | null;
     overview: string;
     vote_average: number;
@@ -36,6 +39,8 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
                 const endpoint = item.mediaType === 'tv' ? 'tv' : 'movie';
                 const data: any = await apiClient.get(`/tmdb/${endpoint}/${item.tmdbId}`);
                 const parsed: TmdbDetails = {
+                    title: data.title,
+                    name: data.name,
                     poster_path: data.poster_path,
                     overview: data.overview || '',
                     vote_average: data.vote_average || 0,
@@ -64,62 +69,84 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
             value={item}
             dragListener={false}
             dragControls={dragControls}
-            className="flex items-center gap-4 p-3 bg-white/50 backdrop-blur-md border border-white/20 rounded-2xl shadow-sm hover:shadow-md transition-shadow group"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            whileDrag={{ 
+                scale: 1.02, 
+                boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
+                zIndex: 50,
+                rotate: 1
+            }}
+            className="ranked-item-card group flex w-full"
         >
             {/* Rank Indicator */}
-            <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-[#ffb700] text-[#2D2926] font-black rounded-full shadow-inner text-sm">
-                #{rank}
+            <div className="ranked-item__rank">
+                {rank}
             </div>
 
-            {/* Poster */}
-            <div className="w-16 h-24 bg-[#2D2926]/5 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
+            {/* Poster Wrap */}
+            <div className="ranked-item__poster-wrap">
                 {posterUrl && !imgError ? (
                     <img
                         src={posterUrl}
                         alt={item.title || 'Movie'}
-                        className="w-full h-full object-cover"
+                        className="ranked-item__poster"
                         onError={() => setImgError(true)}
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#2D2926]/20">
-                        <span className="material-symbols-outlined">movie</span>
+                    <div className="w-full h-full flex items-center justify-center text-[#2D2926]/20 bg-[#f8f8f8]">
+                        <span className="material-symbols-outlined text-3xl">movie_edit</span>
                     </div>
                 )}
             </div>
 
-            {/* Title & Info */}
-            <div className="flex-grow min-w-0">
-                <h4 className="font-bold text-[#2D2926] truncate text-sm mb-0.5">
-                    {item.title || 'Loading...'}
-                </h4>
-                <div className="flex items-center gap-2 text-[10px] font-bold text-[#2D2926]/40">
-                    {year && <span>{year}</span>}
-                    {year && details?.genres?.[0] && <span>•</span>}
-                    {details?.genres?.[0] && <span className="truncate">{details.genres[0]}</span>}
+            <div className="ranked-item__content min-w-0 pr-2">
+                <div className="flex items-center gap-2 mb-1">
+                    <span className="ranked-item__badge flex-shrink-0">
+                        {item.mediaType === 'tv' ? 'TV' : 'Film'}
+                    </span>
+                    {year && <span className="text-[10px] font-bold text-[#2D2926]/30 flex-shrink-0">{year}</span>}
                 </div>
-                {rating && (
-                    <div className="flex items-center gap-1 mt-1">
-                        <span className="text-[10px] text-[#ffb700]">⭐</span>
-                        <span className="text-[10px] font-black text-[#ffb700]">{rating}</span>
-                    </div>
-                )}
+                <h4 className="ranked-item__title truncate w-full">
+                    {details?.title || details?.name || item.title || 'Unknown Title'}
+                </h4>
+                <div className="ranked-item__meta">
+                    {details?.genres?.[0] && <span>{details.genres[0]}</span>}
+                    {details?.genres?.[0] && details?.genres?.[1] && <span>•</span>}
+                    {details?.genres?.[1] && <span>{details.genres[1]}</span>}
+                </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2">
-                {onRemove && (
-                    <button
-                        onClick={() => onRemove(item.tmdbId)}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-[#2D2926]/20 hover:text-red-500 transition-colors"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">close</span>
-                    </button>
+            {/* Actions Panel */}
+            <div className="flex items-center gap-1.5 sm:gap-3 ml-auto flex-shrink-0">
+                {rating && (
+                    <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#ffb700]/5 rounded-xl border border-[#ffb700]/10">
+                        <span className="text-xs">⭐</span>
+                        <span className="text-xs font-black text-[#ffb700] leading-none">{rating}</span>
+                    </div>
                 )}
-                <div
-                    onPointerDown={(e) => dragControls.start(e)}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-[#2D2926]/20 cursor-grab active:cursor-grabbing hover:text-[#ffb700] transition-colors"
-                >
-                    <span className="material-symbols-outlined text-[20px]">drag_indicator</span>
+                
+                <div className="flex items-center gap-0.5 sm:gap-1">
+                    {onRemove && (
+                        <motion.button
+                            whileHover={{ scale: 1.1, color: '#ef4444' }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => onRemove(item.tmdbId)}
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/20 hover:bg-red-50 hover:text-red-500 transition-colors"
+                            title="Remove from stack"
+                        >
+                            <span className="material-symbols-outlined text-[18px] sm:text-[20px]">delete_sweep</span>
+                        </motion.button>
+                    )}
+                    
+                    <motion.div
+                        onPointerDown={(e) => dragControls.start(e)}
+                        whileHover={{ color: '#ffb700' }}
+                        className="drag-handle w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/10"
+                    >
+                        <span className="material-symbols-outlined text-[20px] sm:text-[22px]">drag_indicator</span>
+                    </motion.div>
                 </div>
             </div>
         </Reorder.Item>

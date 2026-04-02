@@ -57,6 +57,15 @@
     flex-shrink: 0;
 }
 
+.feed-card-timestamp {
+    font-size: 0.72rem;
+    color: rgba(45, 41, 38, 0.4);
+    font-weight: 500;
+    padding: 0 1rem 0.5rem;
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+
 /* ── Poster Image ── */
 .feed-card-poster-container {
     position: relative;

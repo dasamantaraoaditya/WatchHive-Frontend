@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts';
 import { userService } from '../services';
-import { FollowListModal, WatchlistGrid, ProfileStats } from '../components/profile';
-import { entriesApi, Entry } from '../services/entries.service';
-import { EntryCard } from '../components/entries/EntryList';
-import { BeeLoader } from '../components/common';
+import { FollowListModal } from '../components/profile';
 
 
 export const ProfilePage: React.FC = () => {
@@ -16,32 +13,11 @@ export const ProfilePage: React.FC = () => {
     const [stats, setStats] = useState<{ followersCount: number; followingCount: number } | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
     
-    // UI Tabs State
-    const [activeTab, setActiveTab] = useState<'watching' | 'watchlist' | 'stats'>('watching');
-    const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
-    const [isWatchingLoading, setIsWatchingLoading] = useState(false);
-
     useEffect(() => {
         if (user) {
             userService.getFollowStats(user.id).then(setStats).catch(console.error);
-            fetchWatching();
         }
     }, [user?.id]);
-
-    const fetchWatching = async () => {
-        if (!user) return;
-        setIsWatchingLoading(true);
-        try {
-            const response = await entriesApi.getEntries({ userId: user.id, isWatching: true, limit: 10 });
-            // Direct param might not work if backend isn't ready, fallback to client filtering
-            const filtered = response.entries.filter(e => e.isWatching);
-            setWatchingEntries(filtered);
-        } catch (err) {
-            console.error('Failed to fetch watching entries', err);
-        } finally {
-            setIsWatchingLoading(false);
-        }
-    };
 
     const [isEditingBio, setIsEditingBio] = useState(false);
     const [bioText, setBioText] = useState(user?.bio || '');
@@ -261,95 +237,6 @@ export const ProfilePage: React.FC = () => {
 
                         </div>
                     </div>
-
-                    {/* Navigation Tabs — horizontal scroll on mobile */}
-                    <div className="flex border-b border-slate-200 gap-0 md:gap-8 mt-2 overflow-x-auto no-scrollbar scroll-strip" style={{ scrollSnapType: 'x mandatory' }}>
-                        <button 
-                            onClick={() => setActiveTab('watching')}
-                            className={`pb-3 md:pb-4 px-4 md:px-2 font-bold whitespace-nowrap transition-colors relative text-sm md:text-base scroll-snap-align-start ${activeTab === 'watching' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            Currently Watching
-                        </button>
-                        <button 
-                            onClick={() => setActiveTab('watchlist')}
-                            className={`pb-3 md:pb-4 px-4 md:px-2 font-bold whitespace-nowrap transition-colors relative text-sm md:text-base scroll-snap-align-start ${activeTab === 'watchlist' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            Watchlist
-                        </button>
-                        <button 
-                            onClick={() => setActiveTab('stats')}
-                            className={`pb-3 md:pb-4 px-4 md:px-2 font-bold whitespace-nowrap transition-colors relative text-sm md:text-base scroll-snap-align-start ${activeTab === 'stats' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
-                        >
-                            Insights
-                        </button>
-                    </div>
-
-                    {/* Section Visibility Based on Tabs */}
-
-                    {/* Section: Currently Watching (From HTML Recent Activity style) */}
-                    {activeTab === 'watching' && (
-                        <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-slate-800">
-                                    <span className="material-symbols-outlined text-[#ffb700]">history</span>
-                                    Active Sessions
-                                </h3>
-                                <div className="flex gap-2">
-                                    {isWatchingLoading && <BeeLoader size="small" message="" className="py-0" />}
-                                </div>
-                            </div>
-                            
-                             {watchingEntries.length === 0 ? (
-                                <div className="text-center py-16 text-slate-500 bg-white border border-slate-100 rounded-xl font-medium shadow-sm">No active sessions. Start watching something!</div>
-                            ) : (
-                                <div className="watchlist-grid">
-                                    {watchingEntries.map(entry => (
-                                        <EntryCard 
-                                            key={entry.id} 
-                                            entry={entry}
-                                            onDelete={async (id) => {
-                                                if (window.confirm('Remove from currently watching?')) {
-                                                    await entriesApi.deleteEntry(id);
-                                                    fetchWatching();
-                                                }
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </section>
-                    )}
-
-                    {/* Section: Watchlist Grid (Using our Watchlist Grid component) */}
-                    {activeTab === 'watchlist' && (
-                        <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-slate-800">
-                                    <span className="material-symbols-outlined text-[#ffb700]">bookmark</span>
-                                    Watchlist: Saved for Later
-                                </h3>
-                                <a className="text-sm text-[#ffb700] hover:underline font-bold" href="#">View All</a>
-                            </div>
-                            <div className="w-full">
-                                <WatchlistGrid />
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Section: Stats (Using our ProfileStats component) */}
-                    {activeTab === 'stats' && (
-                        <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-slate-800">
-                                    <span className="material-symbols-outlined text-[#ffb700]">analytics</span>
-                                    Hive Analytics
-                                </h3>
-                            </div>
-                            <div className="w-full bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-                                <ProfileStats />
-                            </div>
-                        </section>
-                    )}
 
                 </main>
             </div>

@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 
 import { feedApi, FeedItem } from '../services/feed.service';
 import { userService } from '../services/userService';
 import { User } from '../types';
 import { FeedCard } from '../components/feed/FeedCard';
-import { Avatar, FeedCardSkeleton, ErrorState, EmptyState, BeeLoader } from '../components/common';
+import { Avatar, FeedCardSkeleton, ErrorState, EmptyState, BeeLoader, HeaderActions } from '../components/common';
 import './FeedPage.css';
 import '../components/feed/Feed.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
@@ -142,16 +141,9 @@ export const FeedPage: React.FC = () => {
     return (
         <div className="feed-page-layout">
             <div className="feed-page-main">
-                <header className="feed-page-header glass-header">
+                <header className="feed-page-header glass-header flex items-center justify-between">
                     <h2>The Hive Feed</h2>
-                    <div className="feed-page-header-actions">
-                        <Link to="/watch-hive/notifications" className="icon-btn" title="Notifications">
-                            <span className="material-symbols-outlined">notifications</span>
-                        </Link>
-                        <button className="icon-btn" title="Filter Settings">
-                            <span className="material-symbols-outlined">tune</span>
-                        </button>
-                    </div>
+                    <HeaderActions />
                 </header>
 
                 <div className="feed-container">

@@ -34,14 +34,6 @@ export const Sidebar: React.FC = () => {
                             <span className="material-symbols-outlined">psychology</span>
                             <span className="font-semibold">MindLens</span>
                         </Link>
-                        <Link to="/watch-hive/stacks" className={`wh-sidebar__link ${isActive('/watch-hive/stacks') ? 'wh-sidebar__link--active' : ''}`}>
-                            <span className="material-symbols-outlined">view_list</span>
-                            <span className="font-semibold">Stacks</span>
-                        </Link>
-                        <Link to="/watch-hive/profile" className={`wh-sidebar__link ${isActive('/watch-hive/profile') ? 'wh-sidebar__link--active' : ''}`}>
-                            <span className="material-symbols-outlined">person</span>
-                            <span className="font-semibold">Profile</span>
-                        </Link>
                         <Link to="/watch-hive/search" className={`wh-sidebar__link ${isActive('/watch-hive/search') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined">search</span>
                             <span className="font-semibold">Search</span>
@@ -49,6 +41,10 @@ export const Sidebar: React.FC = () => {
                         <Link to="/watch-hive/entries" className={`wh-sidebar__link ${isActive('/watch-hive/entries') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined">add_reaction</span>
                             <span className="font-semibold">Entries</span>
+                        </Link>
+                        <Link to="/watch-hive/rankings" className={`wh-sidebar__link ${isActive('/watch-hive/rankings') ? 'wh-sidebar__link--active' : ''}`}>
+                            <span className="material-symbols-outlined">format_list_numbered</span>
+                            <span className="font-semibold">Rankings</span>
                         </Link>
                     </nav>
                 </div>

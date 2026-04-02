@@ -91,16 +91,6 @@ export const Navbar: React.FC = () => {
                             </svg>
                             Entries
                         </Link>
-                        <Link
-                            to="/watch-hive/profile"
-                            className={`wh-nav__link ${isActive('/watch-hive/profile') ? 'wh-nav__link--active' : ''}`}
-                            id="nav-link-profile"
-                        >
-                            <svg className="wh-nav__link-icon" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                            </svg>
-                            Profile
-                        </Link>
                     </div>
                 )}
 
@@ -109,11 +99,11 @@ export const Navbar: React.FC = () => {
                     {isAuthenticated && <NotificationBell />}
                     {isAuthenticated ? (
                         <div className="wh-nav__profile" ref={profileRef} id="nav-profile">
-                            <button
+                            {/* Avatar + name → direct link to profile */}
+                            <Link
+                                to="/watch-hive/profile"
                                 className="wh-nav__profile-trigger"
-                                onClick={() => setProfileOpen((p) => !p)}
-                                aria-expanded={profileOpen}
-                                aria-haspopup="true"
+                                style={{ textDecoration: 'none' }}
                                 id="nav-profile-trigger"
                             >
                                 <Avatar
@@ -124,6 +114,16 @@ export const Navbar: React.FC = () => {
                                 <span className="wh-nav__profile-name">
                                     {user?.displayName || user?.username}
                                 </span>
+                            </Link>
+                            {/* Chevron → opens dropdown for Sign Out etc. */}
+                            <button
+                                className="wh-nav__chevron-btn"
+                                onClick={() => setProfileOpen((p) => !p)}
+                                aria-expanded={profileOpen}
+                                aria-haspopup="true"
+                                aria-label="Open account menu"
+                                id="nav-profile-chevron"
+                            >
                                 <svg
                                     className={`wh-nav__chevron ${profileOpen ? 'wh-nav__chevron--open' : ''}`}
                                     viewBox="0 0 16 16"
@@ -234,12 +234,6 @@ export const Navbar: React.FC = () => {
                         className={`wh-nav__mobile-link ${isActive('/watch-hive/entries') ? 'wh-nav__mobile-link--active' : ''}`}
                     >
                         Entries
-                    </Link>
-                    <Link
-                        to="/watch-hive/profile"
-                        className={`wh-nav__mobile-link ${isActive('/watch-hive/profile') ? 'wh-nav__mobile-link--active' : ''}`}
-                    >
-                        Profile
                     </Link>
                     <div className="wh-nav__mobile-divider" />
                     <button className="wh-nav__mobile-link wh-nav__mobile-link--danger" onClick={handleLogout}>

@@ -183,6 +183,23 @@
     transform: rotate(180deg);
 }
 
+.wh-nav__chevron-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #9ca3af;
+    transition: background 0.15s ease;
+}
+
+.wh-nav__chevron-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
 /* ============================================
    PROFILE DROPDOWN
    ============================================ */

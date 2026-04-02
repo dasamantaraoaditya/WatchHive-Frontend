@@ -48,15 +48,13 @@ export const WatchlistButton: React.FC<WatchlistButtonProps> = ({
                 aria-label={inList ? "Remove from Watchlist" : "Add to Watchlist"}
             >
                 {inList ? (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+                    <span className="material-symbols-outlined w-full h-full flex items-center justify-center text-inherit" style={{ fontVariationSettings: "'FILL' 1" }}>
+                        bookmark_added
+                    </span>
                 ) : (
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z" />
-                        <path d="M12 8v6M9 11h6" />
-                    </svg>
+                    <span className="material-symbols-outlined w-full h-full flex items-center justify-center text-inherit">
+                        bookmark_add
+                    </span>
                 )}
             </button>
         );
