@@ -51,11 +51,12 @@
 }
 
 .wh-bottom-nav__label {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0;
     opacity: 0.8;
+    line-height: 1;
 }
 
 .wh-bottom-nav__link--active {

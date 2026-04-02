@@ -165,7 +165,34 @@ export const CinematicStacksPage: React.FC = () => {
     }
 
     return (
-        <div className="stacks-page p-4 pt-24 md:pt-8 md:p-8 min-h-screen pb-24 max-w-5xl mx-auto">
+        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#FFF9F0] font-display text-[#2D2926]">
+            {/* Sticky Mobile Header — matches Entries page pattern */}
+            <header className="sticky top-0 z-40 w-full border-b border-[#ffb700]/20 bg-[#FFF9F0]/90 backdrop-blur-md px-4 py-3 md:hidden">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="text-[#ffb700]"><span className="material-symbols-outlined text-2xl">format_list_numbered</span></div>
+                        <h2 className="text-lg font-extrabold tracking-tight text-[#2D2926]">Rankings</h2>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <motion.button
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => lists.length < 5 ? setIsCreateModalOpen(true) : null}
+                            disabled={lists.length >= 5}
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                                lists.length >= 5
+                                    ? 'bg-[#2D2926]/20 text-[#2D2926]/30 cursor-not-allowed'
+                                    : 'bg-[#2D2926] text-white cursor-pointer'
+                            }`}
+                            title={lists.length >= 5 ? 'Maximum 5 rankings reached' : 'New Ranking'}
+                        >
+                            <span className="material-symbols-outlined text-lg">add_box</span>
+                        </motion.button>
+                        <HeaderActions />
+                    </div>
+                </div>
+            </header>
+
+            <div className="stacks-page p-4 pt-4 md:pt-8 md:p-8 pb-24 max-w-5xl mx-auto w-full">
             
             {/* Immersive Search Overlay */}
             <AnimatePresence>
@@ -243,30 +270,31 @@ export const CinematicStacksPage: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            <header className="mb-6 md:mb-12">
+            {/* Desktop Header — hidden on mobile since we have the sticky bar */}
+            <header className="hidden md:block mb-6 md:mb-12">
                 <div className="flex gap-4 mb-4 items-center justify-between">
                     <div className="flex-1 min-w-0 pr-4">
-                        <h1 className="text-2xl md:text-5xl font-black text-[#2D2926] leading-none mb-1 md:mb-2 tracking-tight truncate">
+                        <h1 className="text-5xl font-black text-[#2D2926] leading-none mb-2 tracking-tight truncate">
                             My <span className="text-[#ffb700]">Rankings</span>
                         </h1>
-                        <p className="text-[9px] md:text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] md:tracking-[0.3em] truncate">
+                        <p className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.3em] truncate">
                             Forge your personal movie legends
                         </p>
                     </div>
-                    <div className="flex gap-2 sm:gap-4 items-center">
+                    <div className="flex gap-4 items-center">
                         <motion.button 
                             whileHover={{ scale: 1.05, rotate: 2 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => lists.length < 5 ? setIsCreateModalOpen(true) : null}
                             disabled={lists.length >= 5}
-                            className={`w-10 h-10 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all ${
+                            className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all ${
                                 lists.length >= 5 
                                     ? 'bg-[#2D2926]/20 text-[#2D2926]/30 cursor-not-allowed' 
                                     : 'bg-[#2D2926] text-white cursor-pointer'
                             }`}
                             title={lists.length >= 5 ? 'Maximum 5 rankings reached' : 'New Ranking'}
                         >
-                            <span className="material-symbols-outlined text-xl md:text-3xl">add_box</span>
+                            <span className="material-symbols-outlined text-3xl">add_box</span>
                         </motion.button>
                         <HeaderActions />
                     </div>
@@ -432,6 +460,7 @@ export const CinematicStacksPage: React.FC = () => {
                     </button>
                 </div>
             </Modal>
+            </div>
         </div>
     );
 };
