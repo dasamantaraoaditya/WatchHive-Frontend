@@ -3,6 +3,7 @@ import { useNotifications } from '../contexts/NotificationContext';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { Link, useNavigate } from 'react-router-dom';
 import { BeeLoader } from '../components/common';
+import { useUI } from '../contexts';
 
 const NotificationsPage: React.FC = () => {
     const navigate = useNavigate();
@@ -17,6 +18,13 @@ const NotificationsPage: React.FC = () => {
         acceptFollowRequest,
         rejectFollowRequest
     } = useNotifications();
+
+    const { setPageTitle, setPageIcon } = useUI();
+
+    useEffect(() => {
+        setPageTitle('Notifications');
+        setPageIcon('notifications');
+    }, [setPageTitle, setPageIcon]);
 
     const { observerTarget } = useInfiniteScroll({
         onLoadMore: fetchMore,
@@ -72,36 +80,36 @@ const NotificationsPage: React.FC = () => {
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#FFF9F0] font-sans text-[#2D2926]">
             
-            <header className="sticky top-0 z-40 w-full border-b border-[#ffb700]/20 bg-[#FFF9F0]/90 backdrop-blur-md px-4 sm:px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between px-4 py-2 bg-white/50 border-b border-[#ffb700]/10">
+                <div className="flex items-center gap-2">
                     <button 
                         onClick={() => navigate(-1)} 
-                        className="p-2 -ml-2 rounded-full hover:bg-[#ffb700]/10 text-[#2D2926] transition-colors flex items-center justify-center"
+                        className="p-2 rounded-full hover:bg-[#ffb700]/10 text-[#2D2926] transition-colors flex items-center justify-center"
                         title="Go back"
                     >
-                        <span className="material-symbols-outlined text-[24px]">arrow_back</span>
+                        <span className="material-symbols-outlined text-[20px]">arrow_back</span>
                     </button>
-                    <h1 className="text-2xl font-black tracking-tight text-[#2D2926]">Notifications</h1>
+                    <span className="text-xs font-bold text-[#2D2926]/40 uppercase tracking-widest">Back</span>
                 </div>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <button 
                         onClick={() => fetchNotifications(1)} 
                         className="p-2 rounded-full hover:bg-[#ffb700]/10 text-[#2D2926] transition-colors flex items-center justify-center"
                         title="Refresh"
                     >
-                        <span className="material-symbols-outlined text-[20px]">refresh</span>
+                        <span className="material-symbols-outlined text-[18px]">refresh</span>
                     </button>
                     {notifications.length > 0 && (
                          <button 
                             onClick={markAllAsRead} 
-                            className="bg-[#2D2926] hover:bg-[#2D2926]/90 text-white font-bold py-2 px-4 rounded-full text-xs shadow-sm transition-all"
+                            className="bg-[#2D2926] hover:bg-black text-white font-bold py-1.5 px-3 rounded-xl text-[10px] uppercase tracking-wider transition-all"
                         >
                              Mark all read
                          </button>
                     )}
                 </div>
-            </header>
+            </div>
 
             <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-6 sm:py-8 flex flex-col gap-4">
                 {loading && notifications.length === 0 ? (

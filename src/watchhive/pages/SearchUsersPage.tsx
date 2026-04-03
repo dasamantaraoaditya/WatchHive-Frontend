@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from '../types/user.types';
 import userService from '../services/userService';
-import { Avatar, ErrorState, EmptyState, BeeLoader, HeaderActions, MovieDetailsModal } from '../components/common';
+import { Avatar, ErrorState, EmptyState, BeeLoader, MovieDetailsModal } from '../components/common';
+import { useUI } from '../contexts';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import apiClient from '../services/api';
@@ -22,6 +23,13 @@ interface TmdbResult {
 type SearchMode = 'users' | 'movies';
 
 export const SearchUsersPage: React.FC = () => {
+    const { setPageTitle, setPageIcon } = useUI();
+
+    useEffect(() => {
+        setPageTitle('Explore');
+        setPageIcon('explore');
+    }, [setPageTitle, setPageIcon]);
+
     const isOnline = useOnlineStatus();
     const [searchMode, setSearchMode] = useState<SearchMode>('movies'); // Default to movies as requested
     const [query, setQuery] = useState('');
@@ -118,15 +126,6 @@ export const SearchUsersPage: React.FC = () => {
     return (
         <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-[#FFF9F0] font-display text-[#2D2926]">
             
-            <header className="sticky top-0 z-40 w-full border-b border-[#ffb700]/20 bg-[#FFF9F0]/90 backdrop-blur-md px-6 py-3 md:hidden">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="text-[#ffb700]"><span className="material-symbols-outlined text-3xl">search</span></div>
-                        <h2 className="text-xl font-extrabold tracking-tight text-[#2D2926]">Search</h2>
-                    </div>
-                    <HeaderActions />
-                </div>
-            </header>
 
             <main className="max-w-4xl mx-auto w-full px-4 py-8 flex flex-col gap-8 pb-32">
                 

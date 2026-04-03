@@ -8,6 +8,9 @@ export interface User {
     profilePictureUrl: string | null;
     location: string | null;
     isPrivate: boolean;
+    showWatchEntries: boolean;
+    showCurrentlyWatching: boolean;
+    showWatchlist: boolean;
     xp: number;
     level: number;
     badges: Badge[];
@@ -43,4 +46,7 @@ export interface UpdateUserData {
     bio?: string;
     location?: string;
     isPrivate?: boolean;
+    showWatchEntries?: boolean;
+    showCurrentlyWatching?: boolean;
+    showWatchlist?: boolean;
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts';
-import { Sidebar, QuickAddFAB, BottomNav } from './components/layout';
+import { AuthProvider, useAuth, UIProvider } from './contexts';
+import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
 import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner } from './components/common';
 import { EntryForm } from './components/entries/EntryForm';
 import { WatchlistProvider } from './contexts/WatchlistContext';
@@ -51,6 +51,7 @@ const AppRoutes: React.FC = () => {
             {isAuthenticated && <Sidebar />}
             {/* Main content area needs to be pushed to the right to accommodate the 256px wide fixed sidebar */}
             <main className={`app-main ${isAuthenticated ? 'app-main--with-sidebar' : ''}`}>
+                {isAuthenticated && <TopBar />}
                 <Routes>
                 {/* Public Routes */}
                 <Route
@@ -193,7 +194,9 @@ export const WatchHiveApp: React.FC = () => {
             <AuthProvider>
                 <NotificationProvider>
                     <WatchlistProvider>
-                        <AppRoutes />
+                        <UIProvider>
+                            <AppRoutes />
+                        </UIProvider>
                     </WatchlistProvider>
                 </NotificationProvider>
             </AuthProvider>

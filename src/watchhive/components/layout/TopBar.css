@@ -1,0 +1,77 @@
+.wh-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    height: 72px; /* Standard header height */
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 183, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.glass-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.wh-topbar__content {
+    width: 100%;
+    max-width: 1200px; /* Optional: limit max width or make it full */
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wh-topbar__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.wh-topbar__icon {
+    font-size: 24px;
+    color: #ffb700;
+    flex-shrink: 0;
+}
+
+.wh-topbar__title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #2D2926;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.wh-topbar__right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .wh-topbar {
+        height: 64px;
+    }
+    
+    .wh-topbar__content {
+        padding: 0 1.25rem;
+    }
+    
+    .wh-topbar__title {
+        font-size: 1.125rem;
+    }
+    
+    .wh-topbar__icon {
+        font-size: 20px;
+    }
+}

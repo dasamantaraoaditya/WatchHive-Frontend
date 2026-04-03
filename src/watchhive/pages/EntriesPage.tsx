@@ -5,9 +5,17 @@ import { EntryForm } from '../components/entries/EntryForm';
 import { EntryList, EntryCard } from '../components/entries/EntryList';
 import { useAuth } from '../contexts';
 import { WatchlistGrid, ProfileStats } from '../components/profile';
-import { BeeLoader, HeaderActions } from '../components/common';
+import { BeeLoader } from '../components/common';
+import { useUI } from '../contexts';
 
 export const EntriesPage: React.FC = () => {
+    const { setPageTitle, setPageIcon } = useUI();
+
+    useEffect(() => {
+        setPageTitle('Activity');
+        setPageIcon('history');
+    }, [setPageTitle, setPageIcon]);
+
     const [showForm, setShowForm] = useState(false);
     const [editingEntry, setEditingEntry] = useState<Entry | undefined>(undefined);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -72,16 +80,6 @@ export const EntriesPage: React.FC = () => {
 
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#FFF9F0] font-display text-[#2D2926]">
-            {/* Embedded Header for Mobile */}
-            <header className="sticky top-0 z-40 w-full border-b border-[#ffb700]/20 bg-[#FFF9F0]/90 backdrop-blur-md px-6 lg:px-20 py-3 md:hidden">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="text-[#ffb700]"><span className="material-symbols-outlined text-3xl">history</span></div>
-                        <h2 className="text-xl font-extrabold tracking-tight text-[#2D2926]">Activity</h2>
-                    </div>
-                    <HeaderActions />
-                </div>
-            </header>
 
             <main className="max-w-5xl mx-auto w-full px-4 py-8 flex flex-col gap-8">
                 {!showForm ? (

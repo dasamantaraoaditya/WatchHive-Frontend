@@ -1,11 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../contexts';
+import { useAuth, useUI } from '../contexts';
 import { userService } from '../services';
 import { FollowListModal } from '../components/profile';
+import { User, UpdateUserData } from '../types';
 
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser } = useAuth();
+    const { setPageTitle, setPageIcon } = useUI();
+
+    useEffect(() => {
+        setPageTitle('My Profile');
+        setPageIcon('person');
+    }, [setPageTitle, setPageIcon]);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -110,18 +118,27 @@ export const ProfilePage: React.FC = () => {
         }
     };
 
+    const handleTogglePrivacy = async (field: keyof UpdateUserData, value: boolean) => {
+        try {
+            const updatedUser = await userService.updateUserData({ [field]: value });
+            updateUser(updatedUser);
+            // setSuccessMsg(`${field.replace(/([A-Z])/g, ' $1')} updated!`);
+            // setTimeout(() => setSuccessMsg(null), 2000);
+        } catch (err: any) {
+            setError(err.message || 'Failed to update privacy settings');
+        }
+    };
+
+    const Toggle: React.FC<{ checked: boolean; onChange: (val: boolean) => void }> = ({ checked, onChange }) => (
+        <label className="relative inline-flex items-center cursor-pointer group">
+            <input type="checkbox" className="sr-only peer" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ffb700]"></div>
+        </label>
+    );
+
     return (
         <div className="flex h-screen w-full flex-col bg-[#FFF9F0] font-sans text-slate-900 overflow-hidden">
             
-            {/* Mobile Header */}
-            <header className="sticky top-0 z-40 w-full border-b border-[#ffb700]/20 bg-[#FFF9F0]/90 backdrop-blur-md px-4 py-3 md:hidden">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-extrabold tracking-tight text-[#2D2926]">Profile</h2>
-                    <button onClick={handleInvite} className="w-10 h-10 flex items-center justify-center rounded-full bg-[#ffb700]/10 text-[#ffb700] active:scale-90 transition-transform">
-                        <span className="material-symbols-outlined text-[20px]">share</span>
-                    </button>
-                </div>
-            </header>
 
             {/* Main Content Area */}
             <div className="flex-1 w-full overflow-y-auto overflow-x-hidden relative">
@@ -237,6 +254,83 @@ export const ProfilePage: React.FC = () => {
 
                         </div>
                     </div>
+
+                    {/* Privacy Settings Block */}
+                    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700]">
+                                <span className="material-symbols-outlined">lock</span>
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-slate-800">Privacy & Visibility</h2>
+                                <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Control how others see your hive</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Main Privacy Toggle */}
+                            <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-[#ffb700]/30 transition-all md:col-span-2">
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${user.isPrivate ? 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20' : 'bg-white text-slate-400 border border-slate-200'}`}>
+                                        <span className="material-symbols-outlined text-2xl">{user.isPrivate ? 'visibility_off' : 'visibility'}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-black text-slate-700">Private Profile</span>
+                                        <span className="text-[11px] text-slate-500 font-medium max-w-[280px]">When enabled, only people you follow can see your entries and activity.</span>
+                                    </div>
+                                </div>
+                                <Toggle
+                                    checked={user.isPrivate}
+                                    onChange={(val) => handleTogglePrivacy('isPrivate', val)}
+                                />
+                            </div>
+
+                            {/* Visibility Details - Conditional */}
+                            {!user.isPrivate && (
+                                <>
+                                    {[
+                                        { id: 'showWatchEntries', label: 'Show Watch Entries', icon: 'history', desc: 'Display your movie/show history' },
+                                        { id: 'showCurrentlyWatching', label: 'Currently Watching', icon: 'visibility', desc: 'Show what you are eyeing right now' },
+                                        { id: 'showWatchlist', label: 'Show Watchlist', icon: 'list_alt', desc: 'Let others see your future picks' }
+                                    ].map((item) => (
+                                        <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 group transition-all hover:bg-slate-50/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-[#ffb700] group-hover:bg-[#ffb700]/5 transition-all">
+                                                    <span className="material-symbols-outlined text-xl">{item.icon}</span>
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-slate-700">{item.label}</span>
+                                                    <span className="text-[10px] text-slate-400 font-medium">{item.desc}</span>
+                                                </div>
+                                            </div>
+                                            <Toggle
+                                                checked={user[item.id as keyof User] as boolean}
+                                                onChange={(val) => handleTogglePrivacy(item.id as keyof UpdateUserData, val)}
+                                            />
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Version Information Footer */}
+                    <footer className="mt-6 mb-8 py-6 border-t border-slate-100/50">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 tracking-tight">
+                                <div className="flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[14px]">desktop_windows</span>
+                                    <span>Client v1.0.0</span>
+                                </div>
+                                <div className="w-1 h-1 rounded-full bg-slate-200"></div>
+                                <div className="flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[14px]">dns</span>
+                                    <span>Server v1.0.0</span>
+                                </div>
+                            </div>
+                            <p className="text-[9px] text-slate-300 font-medium uppercase tracking-widest mt-1">Handcrafted with passion</p>
+                        </div>
+                    </footer>
 
                 </main>
             </div>

@@ -4,18 +4,21 @@ import { User } from '../types/user.types';
 import userService from '../services/userService';
 import EntryList from '../components/entries/EntryList';
 import { FollowListModal } from '../components/profile/FollowListModal';
-import { useAuth } from '../contexts';
+import { useAuth, useUI } from '../contexts';
 import { BeeLoader } from '../components/common';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { user: currentUser } = useAuth();
+    const { setPageTitle, setPageIcon } = useUI();
     const navigate = useNavigate();
 
     const [profileUser, setProfileUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
+    const [activeTab, setActiveTab] = useState<'entries' | 'watching' | 'watchlist'>('entries');
+
 
     useEffect(() => {
         if (!id) return;
@@ -29,6 +32,8 @@ export const UserProfilePage: React.FC = () => {
             try {
                 const data = await userService.getUser(id);
                 setProfileUser(data);
+                setPageTitle(data.displayName || data.username);
+                setPageIcon('person');
             } catch (err) {
                 console.error(err);
                 setError('User not found');
@@ -38,7 +43,7 @@ export const UserProfilePage: React.FC = () => {
         };
 
         fetchUser();
-    }, [id, currentUser, navigate]);
+    }, [id, currentUser, navigate, setPageTitle, setPageIcon]);
 
     const handleFollowToggle = async () => {
         if (!profileUser) return;
@@ -83,17 +88,6 @@ export const UserProfilePage: React.FC = () => {
     return (
         <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-[#FFF9F0] font-display text-[#2D2926]">
             
-            {/* Embedded Header for Mobile mostly, Desktop uses Sidebar natively */}
-            <header className="sticky top-0 z-40 w-full border-b border-[#ffb700]/20 bg-[#FFF9F0]/90 backdrop-blur-md px-6 lg:px-20 py-3 md:hidden">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="text-[#ffb700]">
-                            <span className="material-symbols-outlined text-3xl">hive</span>
-                        </div>
-                        <h2 className="text-xl font-extrabold tracking-tight text-[#2D2926]">WatchHive</h2>
-                    </div>
-                </div>
-            </header>
 
             <main className="max-w-5xl mx-auto w-full px-4 py-8 flex flex-col gap-8">
                 
@@ -168,31 +162,64 @@ export const UserProfilePage: React.FC = () => {
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="flex border-b border-[#ffb700]/10 gap-8">
-                    <button className="pb-4 px-2 font-bold whitespace-nowrap relative text-[#ffb700] border-b-2 border-[#ffb700]">
-                        Entries
-                        <span className="absolute -top-1 -right-2 flex h-2 w-2 rounded-full bg-[#ffb700]"></span>
-                    </button>
-                </div>
+                {canViewEntries && (
+                    <div className="flex border-b border-[#ffb700]/10 gap-8">
+                        {[
+                            { id: 'entries', label: 'Entries', show: profileUser.showWatchEntries },
+                            { id: 'watching', label: 'Currently Watching', show: profileUser.showCurrentlyWatching },
+                            { id: 'watchlist', label: 'Watchlist', show: profileUser.showWatchlist }
+                        ].filter(t => t.show || (currentUser && currentUser.id === profileUser.id)).map(tab => (
+                            <button 
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`pb-4 px-2 font-bold whitespace-nowrap relative transition-all ${
+                                    activeTab === tab.id ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-[#2D2926]/40 hover:text-[#2D2926]/60'
+                                }`}
+                            >
+                                {tab.label}
+                                {activeTab === tab.id && tab.id === 'entries' && (
+                                    <span className="absolute -top-1 -right-2 flex h-2 w-2 rounded-full bg-[#ffb700]"></span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
 
                 {/* Tab Container */}
                 <section className="flex flex-col gap-6">
                     {canViewEntries ? (
-                        <>
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-bold flex items-center gap-2 text-[#2D2926]">
-                                    <span className="material-symbols-outlined text-[#ffb700]">history</span>
-                                    Recent Activity
-                                </h3>
-                                <div className="flex gap-2">
-                                    <button className="p-2 bg-white border border-[#ffb700]/10 rounded-lg text-[#2D2926]/40 hover:text-[#ffb700] transition-colors">
-                                        <span className="material-symbols-outlined text-xl">filter_list</span>
-                                    </button>
+                        <div className="animate-in fade-in duration-300">
+                            {activeTab === 'entries' && (
+                                <>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-bold flex items-center gap-2 text-[#2D2926]">
+                                            <span className="material-symbols-outlined text-[#ffb700]">history</span>
+                                            Recent Activity
+                                        </h3>
+                                    </div>
+                                    <EntryList filters={{ userId: profileUser.id }} readOnly />
+                                </>
+                            )}
+                            {activeTab === 'watching' && (
+                                <div className="bg-white border border-[#ffb700]/10 shadow-sm rounded-3xl p-12 text-center text-[#2D2926]">
+                                    <div className="flex flex-col items-center">
+                                        <span className="material-symbols-outlined text-5xl mb-6 text-[#ffb700]">visibility</span>
+                                        <h3 className="text-2xl font-bold mb-2">Currently Watching</h3>
+                                        <p className="text-[#2D2926]/60 mt-2 text-lg">Detailed "Currently Watching" views are coming soon!</p>
+                                    </div>
                                 </div>
-                            </div>
-                            {/* Reusing existing real Feed! */}
-                            <EntryList filters={{ userId: profileUser.id }} readOnly />
-                        </>
+                            )}
+                            {activeTab === 'watchlist' && (
+                                <div className="bg-white border border-[#ffb700]/10 shadow-sm rounded-3xl p-12 text-center text-[#2D2926]">
+                                    <div className="flex flex-col items-center">
+                                        <span className="material-symbols-outlined text-5xl mb-6 text-[#ffb700]">list_alt</span>
+                                        <h3 className="text-2xl font-bold mb-2">Watchlist</h3>
+                                        <p className="text-[#2D2926]/60 mt-2 text-lg">Watchlist integration for public profiles is on the way.</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     ) : (
                         <div className="bg-white border border-[#ffb700]/10 shadow-sm rounded-3xl p-12 text-center text-[#2D2926]">
                             <div className="flex flex-col items-center">

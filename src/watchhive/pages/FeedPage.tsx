@@ -4,14 +4,21 @@ import { feedApi, FeedItem } from '../services/feed.service';
 import { userService } from '../services/userService';
 import { User } from '../types';
 import { FeedCard } from '../components/feed/FeedCard';
-import { Avatar, FeedCardSkeleton, ErrorState, EmptyState, BeeLoader, HeaderActions } from '../components/common';
+import { Avatar, FeedCardSkeleton, ErrorState, EmptyState, BeeLoader } from '../components/common';
 import './FeedPage.css';
 import '../components/feed/Feed.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
+import { useUI } from '../contexts';
 
 export const FeedPage: React.FC = () => {
     const isOnline = useOnlineStatus();
+    const { setPageTitle, setPageIcon } = useUI();
+
+    useEffect(() => {
+        setPageTitle('The Hive Feed');
+        setPageIcon('diversity_3');
+    }, [setPageTitle, setPageIcon]);
 
     // State
     const [items, setItems] = useState<FeedItem[]>([]);
@@ -141,11 +148,6 @@ export const FeedPage: React.FC = () => {
     return (
         <div className="feed-page-layout">
             <div className="feed-page-main">
-                <header className="feed-page-header glass-header flex items-center justify-between">
-                    <h2>The Hive Feed</h2>
-                    <HeaderActions />
-                </header>
-
                 <div className="feed-container">
                     {/* Error State (Dismissable or retryable) */}
                     {error && (
