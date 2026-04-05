@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WatchHive Interactive Architecture</title>
+    <!-- Load Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- Load svg-pan-zoom -->
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; overflow: hidden; }
+        .toolbar { padding: 15px 20px; background-color: #2c3e50; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; position: relative; }
+        .toolbar h1 { margin: 0; font-size: 18px; font-weight: 500; }
+        .controls { display: flex; gap: 10px; }
+        select, button { padding: 8px 12px; font-size: 14px; border: none; border-radius: 4px; outline: none; font-family: inherit; }
+        button { background-color: #3498db; color: white; cursor: pointer; transition: background 0.2s; font-weight: bold; }
+        button:hover { background-color: #2980b9; }
+        #canvas-container { height: calc(100vh - 65px); width: 100%; position: relative; background: #ffffff; }
+        #graph-output { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; cursor: grab; }
+        #graph-output:active { cursor: grabbing; }
+        
+        .zoom-controls { position: absolute; bottom: 30px; right: 30px; display: flex; flex-direction: column; gap: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 6px; overflow: hidden; z-index: 20; border: 1px solid #e0e0e0; }
+        .zoom-controls button { background: white; color: #333; border-radius: 0; padding: 10px 15px; font-weight: bold; font-size: 20px; border-bottom: 1px solid #eee; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; }
+        .zoom-controls button:last-child { border-bottom: none; }
+        .zoom-controls button:hover { background: #f1f2f6; }
+        
+        /* Helper to center the diagram if it doesn't take full width */
+        svg { display: block; margin: auto; }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <h1>WatchHive Architecture Viewer</h1>
+        <div class="controls">
+            <select id="diagram-select" onchange="renderGraph()">
+                <option value="high-level">High-Level Architecture</option>
+                <option value="directory">Directory Structure</option>
+                <option value="data-flow">Data Flow Sequence</option>
+            </select>
+            <button onclick="toggleFullScreen()">⛶ Fullscreen</button>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <div id="graph-output"></div>
+        <div class="zoom-controls">
+            <button onclick="panZoom.zoomIn()" title="Zoom In">+</button>
+            <button onclick="panZoom.zoomOut()" title="Zoom Out">−</button>
+            <button onclick="panZoom.resetZoom()" title="Reset Zoom">↺</button>
+        </div>
+    </div>
+
+    <script>
+        const graphs = {
+            'high-level': `
+graph LR
+    classDef clientNode fill:#fcfcfc,stroke:#333,stroke-width:2px,color:#333;
+    classDef reactNode fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1;
+    classDef stateNode fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c;
+    classDef serviceNode fill:#fff8e1,stroke:#fbc02d,stroke-width:2px,color:#f57f17;
+    classDef backendNode fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+
+    Client((Client Browser)):::clientNode
+
+    subgraph Core ["Frontend Application Core"]
+        Main["main.tsx (Entry)"]:::reactNode
+        Router["WatchHiveApp.tsx (Router)"]:::reactNode
+        
+        subgraph GlobalState ["Global State"]
+            direction TB
+            AuthCtx["AuthContext"]:::stateNode
+            NotifCtx["NotificationContext"]:::stateNode
+            WatchCtx["WatchlistContext"]:::stateNode
+        end
+        
+        subgraph UILayer ["UI Presentation Layer"]
+            direction TB
+            Pages["Page Views (e.g. Feed, Profile)"]:::reactNode
+            Comps["Shared UI Components"]:::reactNode
+        end
+
+        subgraph ServiceLayer ["Service Layer"]
+            direction TB
+            AuthSvc["Auth Service"]:::serviceNode
+            FeedSvc["Feed Service"]:::serviceNode
+            AxiosClient["api.ts (Axios Config)"]:::serviceNode
+        end
+    end
+
+    Backend[("Backend API<br/>http://localhost:5001")]:::backendNode
+    SW{{"Service Worker<br/>(Vite PWA Offline Support)"}}:::serviceNode
+
+    Client -->|Initial Load| Main
+    Client -->|Intercepts Requests| SW
+    SW -.->|Serves Cached Assets| Client
+
+    Main --> Router
+    Router --> AuthCtx & NotifCtx & WatchCtx
+
+    AuthCtx & NotifCtx & WatchCtx --> Pages
+    Pages --> Comps
+    Pages --> FeedSvc & AuthSvc
+    
+    FeedSvc & AuthSvc --> AxiosClient
+    AxiosClient -->|Authenticated REST Calls| Backend
+            `,
+            'directory': `
+graph TD
+    classDef folder fill:#ffeb3b,stroke:#f57f17,stroke-width:2px,color:#333;
+    classDef file fill:#e0f7fa,stroke:#00838f,stroke-width:1px,color:#006064;
+
+    Root["📂 src/watchhive"]:::folder
+    Components["📂 components"]:::folder
+    Contexts["📂 contexts"]:::folder
+    Pages["📂 pages"]:::folder
+    Services["📂 services"]:::folder
+    Types["📂 types"]:::folder
+
+    Root --> Components & Contexts & Pages & Services & Types
+    
+    Components --> AuthC["📂 auth"]:::folder
+    Components --> CommonC["📂 common"]:::folder
+    Components --> FeedC["📂 feed"]:::folder
+    
+    Contexts --> AuthContextC["📄 AuthContext.tsx"]:::file
+    Contexts --> NotifContextC["📄 NotificationContext.tsx"]:::file
+    
+    Pages --> FeedP["📄 FeedPage.tsx"]:::file
+    Pages --> LoginP["📄 LoginPage.tsx"]:::file
+    
+    Services --> ApiS["📄 api.ts"]:::file
+    Services --> AuthS["📄 authService.ts"]:::file
+    
+    Types --> ApiT["📄 api.types.ts"]:::file
+            `,
+            'data-flow': `
+sequenceDiagram
+    autonumber
+    actor User as Client (User)
+    participant Component as FeedPage (UI Component)
+    participant Service as feed.service.ts (Logic)
+    participant API as api.ts (Axios Interceptor)
+    participant Backend as Express API Server
+    
+    User->>Component: Opens Feed Page
+    
+    Component->>Service: invoke getFeed()
+    Service->>API: axios.get('/api/feed')
+    
+    Note over API: Axios automatically attaches <br/> JWT from localStorage
+    
+    API->>Backend: HTTP GET /api/feed
+    
+    Backend-->>API: 200 OK + JSON Results
+    API-->>Service: AxiosResponse<Data>
+    Service-->>Component: Returns Array of Feed Items
+    
+    Component->>Component: setFeedPosts(data)
+    Component-->>User: Renders Feed Items dynamically
+            `
+        };
+
+        let panZoom = null;
+
+        mermaid.initialize({ startOnLoad: false, theme: 'default', flowchart: { useMaxWidth: false }});
+
+        async function renderGraph() {
+            const val = document.getElementById('diagram-select').value;
+            const container = document.getElementById('graph-output');
+            
+            // Cleanup existing panZoom instance to switch graphs completely
+            if (panZoom) {
+                panZoom.destroy();
+                panZoom = null;
+            }
+
+            container.innerHTML = '';
+            
+            try {
+                // Generate a unique ID to prevent caching issues in mermaid rendering
+                const id = 'mermaid-svg-' + Date.now();
+                const { svg } = await mermaid.render(id, graphs[val]);
+                container.innerHTML = svg;
+
+                const svgElement = container.querySelector('svg');
+                // Ensuring SVG is scalable but constraints apply
+                svgElement.style.width = '100%';
+                svgElement.style.height = '100%';
+                
+                // Keep interactivity from svgs
+                const links = svgElement.querySelectorAll("a");
+                links.forEach(l => l.setAttribute("target", "_blank"));
+
+                // Initialize svg-pan-zoom
+                panZoom = svgPanZoom(svgElement, {
+                    zoomEnabled: true,
+                    controlIconsEnabled: false,
+                    fit: true,
+                    center: true,
+                    minZoom: 0.2,
+                    maxZoom: 10,
+                    zoomScaleSensitivity: 0.3
+                });
+            } catch (err) {
+                console.error("Mermaid Render Error", err);
+                container.innerHTML = "<p style='color:red'>Failed to render diagram. Check console.</p>";
+            }
+        }
+
+        function toggleFullScreen() {
+            const elem = document.documentElement;
+            if (!document.fullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) { /* Safari */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE11 */
+                    elem.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        // Render the default view on startup
+        window.addEventListener('load', renderGraph);
+    </script>
+</body>
+</html>
