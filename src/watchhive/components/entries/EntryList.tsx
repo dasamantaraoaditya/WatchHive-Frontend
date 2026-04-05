@@ -467,6 +467,23 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
         loadEntries();
     }, [loadEntries]);
 
+    // Push a synthetic history entry when the card opens so the phone's
+    // hardware back button closes the card instead of navigating to a previous page.
+    useEffect(() => {
+        if (!selectedEntry) return;
+
+        history.pushState({ expandedCard: true }, '');
+
+        const handlePopState = () => {
+            setSelectedEntry(null);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [selectedEntry]);
+
     const handleDelete = async (id: string) => {
         if (!window.confirm('Are you sure you want to delete this entry?')) return;
         try {
@@ -538,7 +555,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                         key="expanded-card"
                         entry={selectedEntry.entry}
                         details={selectedEntry.details}
-                        onClose={() => setSelectedEntry(null)}
+                        onClose={() => history.back()}
                         onEdit={onEdit}
                     />
                 )}
