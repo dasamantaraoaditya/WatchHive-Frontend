@@ -176,6 +176,19 @@ export const ExpandedCard: React.FC<{
     onClose: () => void;
     onEdit?: (entry: Entry) => void;
 }> = ({ entry, details, onClose, onEdit }) => {
+    const [isNavVisible, setIsNavVisible] = useState(true);
+    const lastScrollY = React.useRef(0);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const currentY = e.currentTarget.scrollTop;
+        if (currentY > lastScrollY.current && currentY > 60) {
+            if (isNavVisible) setIsNavVisible(false);
+        } else if (currentY < lastScrollY.current) {
+            if (!isNavVisible) setIsNavVisible(true);
+        }
+        lastScrollY.current = currentY;
+    };
+
     const posterUrl = details?.poster_path
         ? `https://image.tmdb.org/t/p/original${details.poster_path}`
         : null;
@@ -213,13 +226,16 @@ export const ExpandedCard: React.FC<{
 
     return (
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } }}
+            exit={{ opacity: 0, y: 0, transition: { duration: 0.35, ease: [0.66, 0.06] } }}
+            onScroll={handleScroll}
             className="fixed inset-y-0 right-0 left-0 md:left-[256px] z-[100] flex flex-col bg-[#FFF9F0] overflow-y-auto no-scrollbar font-display"
         >
             {/* Sticky Navigation Bar */}
-            <div className="sticky top-4 md:top-6 z-50 flex justify-between items-start px-4 md:px-6 pointer-events-none w-full max-w-full">
+            <div
+                className={`sticky top-4 md:top-6 z-50 flex justify-between items-start px-4 md:px-6 pointer-events-none w-full max-w-full transition-all duration-300 ease-in-out ${isNavVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
+            >
                 <motion.button
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -230,7 +246,7 @@ export const ExpandedCard: React.FC<{
                 >
                     <span className="material-symbols-outlined text-[20px] ml-1">arrow_back_ios</span>
                 </motion.button>
-                
+
                 {onEdit && (
                     <motion.button
                         initial={{ opacity: 0, scale: 0.8 }}
