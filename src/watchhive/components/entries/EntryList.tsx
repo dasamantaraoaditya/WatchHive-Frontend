@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { ErrorState, EmptyState, WatchlistButton, BeeLoader } from '../common';
+import { ErrorState, EmptyState, BeeLoader } from '../common';
 import '../profile/Profile.css';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,7 +43,7 @@ export const EntryCard: React.FC<{
     onEdit?: (entry: Entry) => void;
     onDelete?: (id: string) => void;
     onClick?: (entry: Entry, details: TmdbDetails | null) => void;
-}> = ({ entry, onEdit, onDelete, onClick }) => {
+}> = ({ entry, onEdit, onDelete: _onDelete, onClick }) => {
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
 
