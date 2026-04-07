@@ -6,6 +6,7 @@ import EntryList from '../components/entries/EntryList';
 import { FollowListModal } from '../components/profile/FollowListModal';
 import { useAuth, useUI } from '../contexts';
 import { BeeLoader } from '../components/common';
+import { SuggestMovieModal } from '../components/suggestions/SuggestMovieModal';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -18,6 +19,7 @@ export const UserProfilePage: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
     const [activeTab, setActiveTab] = useState<'entries' | 'watching' | 'watchlist'>('entries');
+    const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
 
 
     useEffect(() => {
@@ -143,21 +145,31 @@ export const UserProfilePage: React.FC = () => {
                             )}
                         </div>
                         
-                        <div className="flex md:flex-col gap-2 w-full md:w-auto">
-                            <button 
-                                onClick={handleFollowToggle} 
-                                className={`flex-1 md:w-32 font-bold py-2.5 rounded-lg transition-all text-sm shadow-sm ${
-                                    profileUser.isFollowing 
-                                    ? 'bg-[#2D2926]/10 text-[#2D2926] hover:bg-[#2D2926]/20' 
-                                    : 'bg-[#ffb700] text-white hover:brightness-105'
-                                }`}
-                            >
-                                <span className="flex items-center justify-center gap-1">
-                                    <span className="material-symbols-outlined text-[16px]">{profileUser.isFollowing ? 'person_remove' : 'person_add'}</span>
-                                    {profileUser.isFollowing ? 'Unfollow' : 'Follow'}
-                                </span>
-                            </button>
-                        </div>
+                            <div className="flex md:flex-col gap-2 w-full md:w-auto">
+                                <button 
+                                    onClick={handleFollowToggle} 
+                                    className={`flex-1 md:w-40 font-bold py-2.5 rounded-lg transition-all text-sm shadow-sm ${
+                                        profileUser.isFollowing 
+                                        ? 'bg-[#2D2926]/10 text-[#2D2926] hover:bg-[#2D2926]/20' 
+                                        : 'bg-[#ffb700] text-white hover:brightness-105'
+                                    }`}
+                                >
+                                    <span className="flex items-center justify-center gap-1">
+                                        <span className="material-symbols-outlined text-[16px]">{profileUser.isFollowing ? 'person_remove' : 'person_add'}</span>
+                                        {profileUser.isFollowing ? 'Unfollow' : 'Follow'}
+                                    </span>
+                                </button>
+                                
+                                <button 
+                                    onClick={() => setIsSuggestModalOpen(true)}
+                                    className="flex-1 md:w-40 font-bold py-2.5 rounded-lg bg-white border border-[#ffb700]/30 text-[#ffb700] hover:bg-[#ffb700]/5 transition-all text-sm shadow-sm"
+                                >
+                                    <span className="flex items-center justify-center gap-1">
+                                        <span className="material-symbols-outlined text-[16px]">auto_awesome</span>
+                                        Suggest Movie
+                                    </span>
+                                </button>
+                            </div>
                     </div>
                 </div>
 
@@ -239,6 +251,17 @@ export const UserProfilePage: React.FC = () => {
                     onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
                     userId={profileUser.id}
                     type={modalConfig.type}
+                />
+            )}
+            {profileUser && isSuggestModalOpen && (
+                <SuggestMovieModal
+                    toUserId={profileUser.id}
+                    toUserName={profileUser.displayName || profileUser.username}
+                    onClose={() => setIsSuggestModalOpen(false)}
+                    onSuccess={() => {
+                        // Optionally show a toast
+                        console.log('Suggestion sent successfully!');
+                    }}
                 />
             )}
         </div>

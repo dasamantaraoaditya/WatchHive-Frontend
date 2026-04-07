@@ -4,9 +4,10 @@ import { entriesApi, Entry } from '../services/entries.service';
 import { EntryForm } from '../components/entries/EntryForm';
 import { EntryList, EntryCard } from '../components/entries/EntryList';
 import { useAuth } from '../contexts';
-import { WatchlistGrid, ProfileStats } from '../components/profile';
+import { WatchlistGrid } from '../components/profile';
 import { BeeLoader } from '../components/common';
 import { useUI } from '../contexts';
+import { SuggestionsTab } from '../components/suggestions/SuggestionsTab';
 
 export const EntriesPage: React.FC = () => {
     const { setPageTitle, setPageIcon } = useUI();
@@ -22,18 +23,24 @@ export const EntriesPage: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // Handle auto-open form from navigation state
+    // Handle auto-open form or switch tab from navigation state
     useEffect(() => {
         if (location.state?.openForm) {
             setShowForm(true);
             setEditingEntry(undefined);
             // Clear the state so it doesn't re-open on refresh
+            navigate(location.pathname, { replace: true, state: { ...location.state, openForm: false } });
+        }
+        const stateTab = location.state?.activeTab;
+        if (stateTab && ['history', 'watching', 'watchlist', 'suggestions'].includes(stateTab)) {
+            setActiveTab(stateTab as any);
+            // Clear state to prevent sticking on this tab if user navigates away and back
             navigate(location.pathname, { replace: true, state: {} });
         }
     }, [location.state, navigate, location.pathname]);
 
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'stats'>('history');
+    const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('history');
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
 
@@ -116,10 +123,10 @@ export const EntriesPage: React.FC = () => {
                                 Watchlist
                             </button>
                             <button 
-                                onClick={() => setActiveTab('stats')}
-                                className={`pb-3 md:pb-4 px-4 md:px-2 font-bold whitespace-nowrap transition-colors relative text-sm md:text-base scroll-snap-align-start ${activeTab === 'stats' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
+                                onClick={() => setActiveTab('suggestions')}
+                                className={`pb-3 md:pb-4 px-4 md:px-2 font-bold whitespace-nowrap transition-colors relative text-sm md:text-base scroll-snap-align-start ${activeTab === 'suggestions' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-500 hover:text-slate-700'}`}
                             >
-                                Insights
+                                Suggestions
                             </button>
                         </div>
 
@@ -176,19 +183,11 @@ export const EntriesPage: React.FC = () => {
                             </section>
                         )}
 
-                        {activeTab === 'stats' && (
-                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12 mt-4">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-slate-800">
-                                        <span className="material-symbols-outlined text-[#ffb700]">analytics</span>
-                                        Hive Analytics
-                                    </h3>
-                                </div>
-                                <div className="w-full bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-                                    <ProfileStats />
-                                </div>
-                            </section>
+                        {activeTab === 'suggestions' && (
+                            <SuggestionsTab />
                         )}
+
+
                     </>
                 ) : (
                     <EntryForm

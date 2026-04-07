@@ -425,6 +425,8 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedEntry, setSelectedEntry] = useState<{ entry: Entry, details: TmdbDetails | null } | null>(null);
+    const [sortBy, setSortBy] = useState<'watchedAt' | 'rating' | 'title'>('watchedAt');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [pagination, setPagination] = useState({
         total: 0,
         limit: 10,
@@ -436,7 +438,12 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
         try {
             setIsLoading(true);
             setError(null);
-            const response = await entriesApi.getEntries({ ...filters, ...params });
+            const response = await entriesApi.getEntries({ 
+                ...filters, 
+                sortBy, 
+                order: sortOrder,
+                ...params 
+            });
             if (params?.offset && params.offset > 0) {
                 setEntries(prev => [...prev, ...response.entries]);
             } else {
@@ -448,7 +455,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
         } finally {
             setIsLoading(false);
         }
-    }, [filters]);
+    }, [filters, sortBy, sortOrder]);
 
     const handleLoadMore = useCallback(() => {
         if (pagination.hasMore && !isLoading) {
@@ -523,10 +530,31 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     }
 
     return (
-        <div className="w-full flex gap-4 flex-col">
-            <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-black text-[#2D2926]">Watch History</h2>
-                <span className="text-sm font-bold bg-[#ffb700]/10 text-[#ffb700] px-3 py-1 rounded-full">{pagination.total} {pagination.total === 1 ? 'title' : 'titles'}</span>
+        <div className="w-full flex gap-6 flex-col">
+            <div className="flex flex-row items-center justify-end mb-1 gap-4">
+                <div className="hidden sm:flex items-center gap-2">
+                    <span className="text-[10px] font-black bg-[#2D2926]/5 text-[#2D2926]/40 px-3 py-1.5 rounded-full uppercase tracking-widest border border-[#2D2926]/5">{pagination.total} Logged Titles</span>
+                </div>
+                
+                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-[#ffb700]/20 shadow-sm hover:border-[#ffb700]/40 transition-colors">
+                    <span className="material-symbols-outlined text-[16px] text-[#ffb700]">swap_vert</span>
+                    <select 
+                        className="bg-transparent border-none text-[11px] font-black text-[#2D2926] focus:ring-0 cursor-pointer p-0 pr-6 uppercase tracking-wider"
+                        value={`${sortBy}-${sortOrder}`}
+                        onChange={(e) => {
+                            const [newSort, newOrder] = e.target.value.split('-') as [any, any];
+                            setSortBy(newSort);
+                            setSortOrder(newOrder);
+                        }}
+                    >
+                        <option value="watchedAt-desc">Recently Watched</option>
+                        <option value="watchedAt-asc">Oldest Watched</option>
+                        <option value="rating-desc">Highest Rated</option>
+                        <option value="rating-asc">Lowest Rated</option>
+                        <option value="title-asc">Movie: A-Z</option>
+                        <option value="title-desc">Movie: Z-A</option>
+                    </select>
+                </div>
             </div>
 
             <div className="watchlist-grid outline-none">

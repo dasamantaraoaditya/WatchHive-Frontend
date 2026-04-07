@@ -53,6 +53,8 @@ const NotificationsPage: React.FC = () => {
                 return <>{actor} wants to follow you</>;
             case 'FOLLOW_ACCEPT':
                 return <>{actor} accepted your follow request</>;
+            case 'SUGGESTION':
+                return <>{actor} suggested you watch <strong className="font-bold text-[#2D2926]">{content.title}</strong></>;
             default:
                 return 'New activity in your network';
         }
@@ -66,15 +68,19 @@ const NotificationsPage: React.FC = () => {
             case 'FOLLOW': return <span className="material-symbols-outlined text-emerald-500">person_add</span>;
             case 'FOLLOW_REQUEST': return <span className="material-symbols-outlined text-[#ffb700]">lock_person</span>;
             case 'FOLLOW_ACCEPT': return <span className="material-symbols-outlined text-emerald-600">how_to_reg</span>;
+            case 'SUGGESTION': return <span className="material-symbols-outlined text-amber-500">auto_awesome</span>;
             default: return <span className="material-symbols-outlined text-[#ffb700]">notifications</span>;
         }
     };
 
-    const getLink = (n: any) => {
+    const getLinkData = (n: any) => {
         if (n.type === 'FOLLOW' || n.type === 'FOLLOW_REQUEST' || n.type === 'FOLLOW_ACCEPT') {
-            return `/watch-hive/profile/${n.content.actorId}`;
+            return { to: `/watch-hive/profile/${n.content.actorId}` };
         }
-        return `/watch-hive/entry/${n.content.entryId}`;
+        if (n.type === 'SUGGESTION') {
+            return { to: '/watch-hive/entries', state: { activeTab: 'suggestions' } };
+        }
+        return { to: `/watch-hive/entry/${n.content.entryId}` };
     };
 
     return (
@@ -127,7 +133,7 @@ const NotificationsPage: React.FC = () => {
                         {notifications.map((n) => (
                             <div key={n.id} className="relative group">
                                 <Link
-                                    to={getLink(n)}
+                                    {...getLinkData(n)}
                                     className={`flex items-start gap-4 p-4 sm:p-5 rounded-2xl transition-all shadow-sm border ${
                                         n.isRead 
                                         ? 'bg-white border-[#ffb700]/10 hover:border-[#ffb700]/30 hover:shadow-md' 
