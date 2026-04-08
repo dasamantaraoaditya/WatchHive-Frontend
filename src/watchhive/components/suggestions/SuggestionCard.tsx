@@ -10,6 +10,8 @@ interface SuggestionCardProps {
 }
 
 interface TmdbDetails {
+    title: string;
+    name?: string;
     poster_path: string | null;
     overview: string;
     vote_average: number;
@@ -29,6 +31,8 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                 const endpoint = group.mediaType === 'tv' ? 'tv' : 'movie';
                 const data: any = await apiClient.get(`/tmdb/${endpoint}/${group.tmdbId}`);
                 setDetails({
+                    title: data.title || data.name,
+                    name: data.name,
                     poster_path: data.poster_path,
                     overview: data.overview,
                     vote_average: data.vote_average,
@@ -47,6 +51,10 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
 
     const handleDismiss = async () => {
         if (isDismissing) return;
+        
+        const title = details?.title || 'this title';
+        if (!window.confirm(`Dismiss suggestions for "${title}"?`)) return;
+
         setIsDismissing(true);
         try {
             // Delete all suggestions in this group
@@ -61,13 +69,14 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
 
     if (isLoading) {
         return (
-            <div className="watchlist-card animate-pulse bg-slate-100 flex items-center justify-center min-h-[200px]">
+            <div className="watchlist-card animate-pulse bg-slate-100 flex items-center justify-center min-h-[250px] rounded-3xl">
                 <BeeLoader size="small" message="" />
             </div>
         );
     }
 
     const posterUrl = details?.poster_path ? `https://image.tmdb.org/t/p/w342${details.poster_path}` : null;
+    const title = details?.title || details?.name || 'Untitled';
     
     // De-duplicate suggestors
     const uniqueSuggestors = group.suggestors.reduce((acc: any[], current) => {
@@ -78,66 +87,76 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     return (
         <div className="watchlist-card group relative flex flex-col h-full bg-white rounded-3xl border border-[#ffb700]/10 overflow-hidden shadow-sm hover:shadow-md transition-all">
             {/* Poster Wrapper */}
-            <div className="watchlist-card__poster-wrapper aspect-[2/3] relative overflow-hidden">
+            <div className="watchlist-card__poster-wrapper aspect-[2/3] relative overflow-hidden bg-stone-900">
                 {posterUrl ? (
-                    <img src={posterUrl} alt="" className="watchlist-card__poster w-full h-full object-cover transition-transform group-hover:scale-110" />
+                    <img src={posterUrl} alt={title} className="watchlist-card__poster w-full h-full object-cover transition-transform group-hover:scale-105" />
                 ) : (
-                    <div className="w-full h-full bg-[#FFF9F0] flex items-center justify-center"><span className="material-symbols-outlined text-[#ffb700]/30 text-5xl">movie</span></div>
+                    <div className="w-full h-full bg-[#FFF9F0] flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[#2D2926]/20 text-5xl">movie</span>
+                    </div>
                 )}
                 
-                {/* Actions Overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 p-4">
-                    <WatchlistButton 
-                        tmdbId={group.tmdbId} 
-                        mediaType={group.mediaType} 
-                        className="w-full py-2.5 bg-[#ffb700] text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 hover:brightness-105" 
-                    />
+                {/* Standardized Action Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="watchlist-action-standard">
+                        <WatchlistButton 
+                            tmdbId={group.tmdbId} 
+                            mediaType={group.mediaType as any} 
+                            variant="icon"
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                        />
+                    </div>
+                    
                     <button 
                         onClick={handleDismiss}
-                        className="w-full py-2.5 bg-white/20 backdrop-blur-md text-white border border-white/30 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/30 transition-all flex items-center justify-center gap-2"
+                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
                         disabled={isDismissing}
+                        title="Dismiss Suggestion"
                     >
-                        <span className="material-symbols-outlined text-[16px]">visibility_off</span>
-                        Dismiss
+                        <span className="material-symbols-outlined text-[18px]">
+                            {isDismissing ? 'sync' : 'visibility_off'}
+                        </span>
                     </button>
                 </div>
 
                 {/* Badge Overlay */}
-                <div className="absolute top-3 left-3 flex flex-col gap-2">
-                    <span className="bg-[#ffb700] text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider">
+                <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
+                    <span className="bg-[#ffb700] text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider opacity-90">
                         {group.suggestions.length > 1 ? `${group.suggestions.length} Suggestions` : 'Suggested'}
                     </span>
                 </div>
             </div>
 
             {/* Info Section */}
-            <div className="p-4 flex flex-col flex-1 gap-2">
-                <h4 className="text-sm font-black text-[#2D2926] leading-tight line-clamp-2" title={details?.overview}>
-                    {details?.overview ? details.overview.split('.')[0] : 'Suggested title'}
+            <div className="p-4 flex flex-col flex-1 gap-1">
+                <h4 className="text-[13px] leading-tight font-black text-[#2D2926] truncate" title={title}>
+                    {title}
                 </h4>
+                <p className="text-[11px] text-[#2D2926]/60 line-clamp-2 leading-snug mt-1 italic">
+                    {details?.overview || 'No description available'}
+                </p>
                 
-                <div className="mt-auto pt-4 border-t border-[#ffb700]/10">
+                <div className="mt-auto pt-3 border-t border-[#ffb700]/10">
                     <div className="flex flex-col gap-2">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40">Suggested by</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-[#2D2926]/40">From your Hive</span>
                         <div className="flex -space-x-2 overflow-hidden">
                             {uniqueSuggestors.slice(0, 4).map(s => (
                                 <img 
                                     key={s.id} 
                                     src={s.profilePictureUrl || `https://ui-avatars.com/api/?name=${s.displayName || s.username}&background=ffb700&color=fff`} 
                                     title={s.displayName || s.username}
-                                    className="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover bg-white" 
+                                    className="inline-block h-7 w-7 rounded-full ring-2 ring-white object-cover bg-white" 
                                     alt=""
                                 />
                             ))}
                             {uniqueSuggestors.length > 4 && (
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-[#2D2926] ring-2 ring-white">
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-[#2D2926] ring-2 ring-white">
                                     +{uniqueSuggestors.length - 4}
                                 </div>
                             )}
                         </div>
-                        <p className="text-[10px] font-bold text-[#2D2926]/60 truncate">
-                            {uniqueSuggestors.map(s => s.displayName || s.username).join(', ')}
-                        </p>
                     </div>
                 </div>
             </div>
