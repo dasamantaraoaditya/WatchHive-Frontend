@@ -193,49 +193,48 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                         ))}
                                     </div>
 
-                                    {/* Streamlined Action Row */}
-                                    <div className="flex items-center gap-4 py-4 px-1 border-y border-[#2D2926]/5 mb-8">
-                                        <button 
-                                            onClick={handleWatchlistToggle}
-                                            className={`flex items-center gap-2 group transition-all`}
-                                        >
-                                            <span className={`material-symbols-outlined text-2xl transition-all ${inWatchlist ? 'text-[#ffb700] filled' : 'text-[#2D2926]/20 group-hover:text-[#ffb700]'}`}>
-                                                {inWatchlist ? 'bookmark_added' : 'bookmark_add'}
-                                            </span>
-                                            <span className={`text-[10px] font-black uppercase tracking-widest ${inWatchlist ? 'text-[#ffb700]' : 'text-[#2D2926]/60'}`}>
-                                                {inWatchlist ? 'Saved' : 'Watchlist'}
-                                            </span>
-                                        </button>
+                                    {/* Sync'd Action Bar (FeedCard Style) */}
+                                    <div className="flex flex-wrap items-center justify-between gap-6 py-6 border-y border-[#2D2926]/5 mb-8">
+                                        <div className="flex items-center gap-6 md:gap-8">
+                                            <button 
+                                                onClick={handleWatchlistToggle}
+                                                className={`flex items-center gap-2.5 group transition-all`}
+                                                title={inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+                                            >
+                                                <span className={`material-symbols-outlined text-[22px] transition-all ${inWatchlist ? 'text-[#ffb700] filled' : 'text-[#2D2926]/40 group-hover:text-[#ffb700]'}`}>
+                                                    {inWatchlist ? 'bookmark_added' : 'bookmark_add'}
+                                                </span>
+                                                <span className={`text-[11px] font-black uppercase tracking-[0.15em] transition-colors ${inWatchlist ? 'text-[#ffb700]' : 'text-[#2D2926]/60 group-hover:text-[#2D2926]'}`}>
+                                                    {inWatchlist ? 'Saved' : 'Watchlist'}
+                                                </span>
+                                            </button>
 
-                                        <div className="w-px h-6 bg-[#2D2926]/5" />
+                                            <button 
+                                                onClick={() => setView('log')}
+                                                className="flex items-center gap-2.5 group transition-all"
+                                            >
+                                                <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#2D2926] transition-all">edit_note</span>
+                                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Log Watch</span>
+                                            </button>
 
-                                        <button 
-                                            onClick={() => setView('log')}
-                                            className="flex items-center gap-2 group transition-all"
-                                        >
-                                            <span className="material-symbols-outlined text-2xl text-[#2D2926]/20 group-hover:text-[#2D2926] transition-all">edit_note</span>
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/60">Log</span>
-                                        </button>
+                                            <button 
+                                                onClick={() => setView('suggest')}
+                                                className="flex items-center gap-2.5 group transition-all"
+                                            >
+                                                <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#ffb700] transition-all">send</span>
+                                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Suggest</span>
+                                            </button>
+                                        </div>
 
-                                        <div className="w-px h-6 bg-[#2D2926]/5" />
-
-                                        <button 
-                                            onClick={() => setView('suggest')}
-                                            className="flex items-center gap-2 group transition-all"
-                                        >
-                                            <span className="material-symbols-outlined text-2xl text-[#2D2926]/20 group-hover:text-[#ffb700] transition-all">send</span>
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/60">Suggest</span>
-                                        </button>
-
-                                        <div className="w-px h-6 bg-[#2D2926]/5" />
-
-                                        <button 
-                                            onClick={handleShare}
-                                            className="flex items-center gap-2 group transition-all"
-                                        >
-                                            <span className="material-symbols-outlined text-2xl text-[#2D2926]/20 group-hover:text-blue-500 transition-all">share</span>
-                                            <span className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/60">Share</span>
-                                        </button>
+                                        <div className="flex items-center">
+                                            <button 
+                                                onClick={handleShare}
+                                                className="w-10 h-10 rounded-full flex items-center justify-center bg-[#2D2926]/5 text-[#2D2926]/40 hover:text-blue-500 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
+                                                title="Share this movie"
+                                            >
+                                                <span className="material-symbols-outlined text-[20px]">share</span>
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="mb-8">
