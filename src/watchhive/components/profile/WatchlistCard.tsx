@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { WatchlistButton } from '../common';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import { entriesApi, CreateEntryData } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
@@ -39,11 +38,14 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         e.stopPropagation();
         if (marking || !details) return;
 
+        const title = details.title || details.name;
+        if (!window.confirm(`Mark "${title}" as watched and add to your hive?`)) return;
+
         setMarking(true);
         try {
             const entryData: CreateEntryData = {
                 tmdbId: Number(tmdbId),
-                title: details.title || details.name,
+                title: title,
                 type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
                 watchedAt: new Date().toISOString().split('T')[0],
                 review: '',
@@ -58,6 +60,16 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         } finally {
             setMarking(false);
         }
+    };
+
+    const handleRemove = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const title = details?.title || details?.name;
+        if (!window.confirm(`Remove "${title}" from your watchlist?`)) return;
+        
+        await removeFromList(tmdbId);
     };
 
     if (loading) {
@@ -103,7 +115,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                     </button>
                     
                     <button
-                        onClick={() => removeFromList(tmdbId)}
+                        onClick={handleRemove}
                         className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
                         title="Remove from Watchlist"
                     >
