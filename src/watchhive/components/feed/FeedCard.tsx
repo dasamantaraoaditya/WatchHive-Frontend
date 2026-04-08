@@ -25,6 +25,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [likeCount, setLikeCount] = useState<number>(entryData?._count?.likes || 0);
     const [commentCount, setCommentCount] = useState<number>(entryData?._count?.comments || 0);
     const [showComments, setShowComments] = useState<boolean>(false);
+    const [showShareFeedback, setShowShareFeedback] = useState<boolean>(false);
 
     // Only fetch details if it's an ENTRY (suggestions come with poster_path usually)
     const { details } = useTmdbDetails(entryData?.tmdbId, entryData?.type);
@@ -82,6 +83,40 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
             // Revert
             setIsLiked(previousLiked);
             setLikeCount(previousCount);
+        }
+    };
+
+    const handleShare = async () => {
+        const shareTitle = 'WatchHive';
+        const shareText = isSuggestion 
+            ? `Check out this recommendation for "${title}" on WatchHive! ✨`
+            : `Check out ${displayName}'s ${actionText} for "${title}" on WatchHive! ✨`;
+        
+        // Use user's profile as the target link if it's an entry
+        const shareUrl = userId 
+            ? `${window.location.origin}/watch-hive/profile/${userId}`
+            : window.location.origin;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                    url: shareUrl,
+                });
+            } catch (err) {
+                if (err instanceof Error && err.name !== 'AbortError') {
+                    console.error('Error sharing:', err);
+                }
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+                setShowShareFeedback(true);
+                setTimeout(() => setShowShareFeedback(false), 2000);
+            } catch (err) {
+                console.error('Failed to copy link:', err);
+            }
         }
     };
 
@@ -228,8 +263,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     </div>
                     
                     <div className="flex items-center gap-4">
-                        <button className="icon-only-btn" title="Share via WatchHive">
-                            <span className="material-symbols-outlined text-[20px]">share</span>
+                        <button 
+                            className={`icon-only-btn transition-all ${showShareFeedback ? 'text-green-500' : ''}`} 
+                            title={showShareFeedback ? "Link Copied!" : "Share activity"}
+                            onClick={handleShare}
+                        >
+                            <span className="material-symbols-outlined text-[20px]">
+                                {showShareFeedback ? 'check_circle' : 'share'}
+                            </span>
                         </button>
                         {!item.data?.isWatched && targetTmdbId && (
                             <div className="flex items-center gap-2">
