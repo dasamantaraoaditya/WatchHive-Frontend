@@ -110,4 +110,92 @@ export const SuggestionWidgetSkeleton: React.FC = () => {
     );
 };
 
+export const MindLensHighlightsSkeleton: React.FC = () => {
+    return (
+        <div className="space-y-8 animate-pulse">
+            {/* Tab Nav Skeleton */}
+            <div className="flex bg-[#F5E6D3]/50 p-1 rounded-2xl w-full max-w-sm mx-auto">
+                <div className="flex-1 h-10 bg-white/50 rounded-xl" />
+                <div className="flex-1 h-10 bg-transparent rounded-xl" />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Persona Card Skeleton */}
+                <div className="lg:col-span-1 bg-white border border-[#F5E6D3] rounded-3xl p-8 flex flex-col items-center">
+                    <Skeleton variant="circle" width={128} height={128} className="mb-6" />
+                    <Skeleton variant="text" width="40%" height={12} className="mb-2" />
+                    <Skeleton variant="text" width="70%" height={24} className="mb-4" />
+                    <Skeleton variant="text" width="90%" height={14} />
+                    <Skeleton variant="text" width="80%" height={14} />
+                </div>
+
+                {/* Vibe Chart Skeleton */}
+                <div className="lg:col-span-2 bg-white border border-[#F5E6D3] rounded-3xl p-8">
+                    <div className="flex justify-between items-start mb-8">
+                        <div>
+                            <Skeleton variant="text" width={120} height={20} className="mb-2" />
+                            <Skeleton variant="text" width={180} height={12} />
+                        </div>
+                        <div className="text-right">
+                            <Skeleton variant="text" width={100} height={32} className="mb-2" />
+                            <Skeleton variant="text" width={80} height={14} />
+                        </div>
+                    </div>
+                    <div className="h-[150px] w-full flex items-end gap-1 px-4">
+                        {[...Array(20)].map((_, i) => (
+                            <div 
+                                key={i} 
+                                className="flex-1 bg-[#ffb700]/10 rounded-t-sm" 
+                                style={{ height: `${20 + Math.random() * 60}%` }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {/* Themes Skeleton */}
+                <div className="lg:col-span-2 bg-white border border-[#F5E6D3] rounded-3xl p-8">
+                    <Skeleton variant="text" width={150} height={20} className="mb-6" />
+                    <div className="space-y-6">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i}>
+                                <div className="flex justify-between mb-2">
+                                    <Skeleton variant="text" width="30%" height={14} />
+                                    <Skeleton variant="text" width="10%" height={14} />
+                                </div>
+                                <Skeleton variant="rect" width="100%" height={8} className="rounded-full" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Temporal Peak Skeleton */}
+                <div className="bg-white border border-[#F5E6D3] rounded-3xl p-8 flex flex-col items-center justify-center">
+                    <Skeleton variant="text" width="50%" height={10} className="mb-6" />
+                    <Skeleton variant="circle" width={100} height={100} className="border-8 border-[#F5E6D3]" />
+                </div>
+
+                {/* Insights Skeleton */}
+                <div className="bg-white border border-[#F5E6D3] rounded-3xl p-6">
+                    <Skeleton variant="text" width="60%" height={18} className="mb-4" />
+                    <Skeleton variant="text" width="90%" height={14} />
+                    <Skeleton variant="text" width="85%" height={14} />
+                    <Skeleton variant="text" width="95%" height={14} />
+                </div>
+            </div>
+            
+            {/* Aesthetics Profile Skeleton */}
+            <div className="bg-white border border-[#F5E6D3] rounded-3xl p-8">
+                <Skeleton variant="text" width={150} height={20} className="mb-8" />
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {[...Array(6)].map((_, i) => (
+                        <Skeleton key={i} variant="rect" width="100%" className="aspect-square rounded-2xl" />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default Skeleton;

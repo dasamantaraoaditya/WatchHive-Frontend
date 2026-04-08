@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { mindLensApi, MindLensData } from '../../services/mindlens.service';
-import { BeeLoader } from '../common';
+import { MindLensHighlightsSkeleton } from '../common/Skeleton';
 import { Link } from 'react-router-dom';
 import { ProfileStats } from '../profile';
 
@@ -60,11 +60,7 @@ export const MindLensView: React.FC = () => {
     };
 
     if (isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-32 bg-white rounded-3xl border border-[#F5E6D3]">
-                <BeeLoader size="medium" message="Analyzing your viewing psyche..." />
-            </div>
-        );
+        return <MindLensHighlightsSkeleton />;
     }
 
     if (error || !data) {
