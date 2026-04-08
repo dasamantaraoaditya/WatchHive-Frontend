@@ -3,24 +3,40 @@ import { useWatchlist } from '../../contexts/WatchlistContext';
 import { WatchlistCard } from './WatchlistCard';
 import './Profile.css';
 import { EmptyState, SkeletonGrid } from '../common';
+import { ListItem } from '../../services/lists.service';
 
-export const WatchlistGrid: React.FC = () => {
-    const { watchlist, isLoading, fetchWatchlist } = useWatchlist();
+interface WatchlistGridProps {
+    items?: ListItem[];
+    isLoading?: boolean;
+}
+
+export const WatchlistGrid: React.FC<WatchlistGridProps> = ({ 
+    items: propItems, 
+    isLoading: propLoading 
+}) => {
+    const { watchlist: contextWatchlist, isLoading: contextLoading, fetchWatchlist } = useWatchlist();
+
+    // Use props if provided, otherwise context
+    const items = propItems || (contextWatchlist?.items || []);
+    const loading = propLoading !== undefined ? propLoading : (contextLoading && !contextWatchlist);
 
     useEffect(() => {
-        fetchWatchlist();
-    }, [fetchWatchlist]);
+        // Only fetch context watchlist if we aren't using prop items
+        if (!propItems) {
+            fetchWatchlist();
+        }
+    }, [fetchWatchlist, propItems]);
 
-    if (isLoading && !watchlist) {
+    if (loading) {
         return <SkeletonGrid count={6} />;
     }
 
-    if (!watchlist || (watchlist.items || []).length === 0) {
+    if (items.length === 0) {
         return (
             <div className="py-8 text-center text-secondary">
                 <EmptyState
-                    title="Your watchlist is empty"
-                    message="Add movies and shows you want to watch!"
+                    title={propItems ? "Watchlist is empty" : "Your watchlist is empty"}
+                    message={propItems ? "This user hasn't added anything to watch yet." : "Add movies and shows you want to watch!"}
                     icon="👀"
                 />
             </div>
@@ -29,13 +45,11 @@ export const WatchlistGrid: React.FC = () => {
 
     return (
         <div className="watchlist-grid">
-            {(watchlist.items || []).map((item) => (
+            {items.map((item) => (
                 <WatchlistCard
                     key={item.id}
                     tmdbId={item.tmdbId}
-                    // @ts-ignore: mediaType isn't in ListItem type yet?
-                    // I updated lists.service.ts so it should be there.
-                    mediaType={item.mediaType || 'movie'}
+                    mediaType={item.mediaType as 'movie' | 'tv' || 'movie'}
                 />
             ))}
         </div>

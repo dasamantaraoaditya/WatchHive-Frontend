@@ -7,6 +7,8 @@ import { FollowListModal } from '../components/profile/FollowListModal';
 import { useAuth, useUI } from '../contexts';
 import { BeeLoader } from '../components/common';
 import { SuggestMovieModal } from '../components/suggestions/SuggestMovieModal';
+import { listsApi, ListItem } from '../services/lists.service';
+import { WatchlistGrid } from '../components/profile/WatchlistGrid';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -20,6 +22,10 @@ export const UserProfilePage: React.FC = () => {
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
     const [activeTab, setActiveTab] = useState<'entries' | 'watching' | 'watchlist'>('entries');
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
+
+    // Dynamic data for tabs
+    const [watchlistItems, setWatchlistItems] = useState<ListItem[]>([]);
+    const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
 
 
     useEffect(() => {
@@ -46,6 +52,24 @@ export const UserProfilePage: React.FC = () => {
 
         fetchUser();
     }, [id, currentUser, navigate, setPageTitle, setPageIcon]);
+
+    // Fetch watchlist if active
+    useEffect(() => {
+        if (activeTab === 'watchlist' && id && !watchlistItems.length) {
+            const fetchWatchlist = async () => {
+                setIsWatchlistLoading(true);
+                try {
+                    const data = await listsApi.getUserWatchlist(id);
+                    setWatchlistItems(data.items || []);
+                } catch (err) {
+                    console.error('Failed to fetch user watchlist', err);
+                } finally {
+                    setIsWatchlistLoading(false);
+                }
+            };
+            fetchWatchlist();
+        }
+    }, [activeTab, id, watchlistItems.length]);
 
     const handleFollowToggle = async () => {
         if (!profileUser) return;
@@ -214,22 +238,26 @@ export const UserProfilePage: React.FC = () => {
                                 </>
                             )}
                             {activeTab === 'watching' && (
-                                <div className="bg-white border border-[#ffb700]/10 shadow-sm rounded-3xl p-12 text-center text-[#2D2926]">
-                                    <div className="flex flex-col items-center">
-                                        <span className="material-symbols-outlined text-5xl mb-6 text-[#ffb700]">visibility</span>
-                                        <h3 className="text-2xl font-bold mb-2">Currently Watching</h3>
-                                        <p className="text-[#2D2926]/60 mt-2 text-lg">Detailed "Currently Watching" views are coming soon!</p>
+                                <>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-bold flex items-center gap-2 text-[#2D2926]">
+                                            <span className="material-symbols-outlined text-[#ffb700]">visibility</span>
+                                            Currently Watching
+                                        </h3>
                                     </div>
-                                </div>
+                                    <EntryList filters={{ userId: profileUser.id, isWatching: true }} readOnly />
+                                </>
                             )}
                             {activeTab === 'watchlist' && (
-                                <div className="bg-white border border-[#ffb700]/10 shadow-sm rounded-3xl p-12 text-center text-[#2D2926]">
-                                    <div className="flex flex-col items-center">
-                                        <span className="material-symbols-outlined text-5xl mb-6 text-[#ffb700]">list_alt</span>
-                                        <h3 className="text-2xl font-bold mb-2">Watchlist</h3>
-                                        <p className="text-[#2D2926]/60 mt-2 text-lg">Watchlist integration for public profiles is on the way.</p>
+                                <>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-bold flex items-center gap-2 text-[#2D2926]">
+                                            <span className="material-symbols-outlined text-[#ffb700]">list_alt</span>
+                                            Saved Content
+                                        </h3>
                                     </div>
-                                </div>
+                                    <WatchlistGrid items={watchlistItems} isLoading={isWatchlistLoading} />
+                                </>
                             )}
                         </div>
                     ) : (
