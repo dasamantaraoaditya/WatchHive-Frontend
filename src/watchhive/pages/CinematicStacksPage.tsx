@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Reorder, AnimatePresence, motion } from 'framer-motion';
 import { listsApi, List, ListItem } from '../services/lists.service';
 import { RankedItem } from '../components/stacks/RankedItem';
+import { RankedItemSkeleton } from '../components/stacks/RankedItemSkeleton';
+import { SearchItemSkeleton } from '../components/stacks/SearchItemSkeleton';
+import { StackCardSkeleton } from '../components/stacks/StackCardSkeleton';
 import { BeeLoader, ErrorState, Modal } from '../components/common';
 import { useUI } from '../contexts';
 import apiClient from '../services/api';
@@ -166,8 +169,13 @@ export const CinematicStacksPage: React.FC = () => {
 
     if (isLoading && lists.length === 0) {
         return (
-            <div className="flex-grow flex items-center justify-center">
-                <BeeLoader size="large" message="Sifting through the hive..." />
+            <div className="stacks-page p-4 pt-8 md:p-8 max-w-5xl mx-auto w-full">
+                <div className="flex gap-3 overflow-x-auto pb-4 mb-4">
+                    {[...Array(3)].map((_, i) => <StackCardSkeleton key={i} />)}
+                </div>
+                <div className="flex flex-col gap-4">
+                    {[...Array(5)].map((_, i) => <RankedItemSkeleton key={i} />)}
+                </div>
             </div>
         );
     }
@@ -227,8 +235,8 @@ export const CinematicStacksPage: React.FC = () => {
 
                         <div className="max-w-2xl mx-auto w-full flex-grow overflow-y-auto no-scrollbar">
                             {isSearching ? (
-                                <div className="py-20 flex justify-center">
-                                    <BeeLoader size="medium" />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12">
+                                    {[...Array(6)].map((_, i) => <SearchItemSkeleton key={i} />)}
                                 </div>
                             ) : searchResults.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12">
@@ -301,8 +309,8 @@ export const CinematicStacksPage: React.FC = () => {
                     {/* Rankings List */}
                     <div className="flex-grow">
                         {isLoading && items.length === 0 ? (
-                            <div className="py-20 flex justify-center">
-                                <BeeLoader size="medium" />
+                            <div className="flex flex-col gap-4">
+                                {[...Array(5)].map((_, i) => <RankedItemSkeleton key={i} />)}
                             </div>
                         ) : (
                             <>
