@@ -115,7 +115,7 @@ export const EntryCard: React.FC<{
     return (
         <motion.div
             layoutId={`card-wrapper-${entry.id}`}
-            className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu"
+            className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl"
             onClick={() => onClick && onClick(entry, details)}
             whileHover={onClick ? { scale: 0.98, transition: { duration: 0.2 } } : {}}
             whileTap={onClick ? { scale: 0.95 } : {}}
@@ -179,8 +179,8 @@ export const EntryCard: React.FC<{
                 </div>
             </div>
 
-            <motion.div layoutId={`card-content-${entry.id}`} className="watchlist-card__info gap-1 p-3 flex flex-col h-full bg-white dark:bg-stone-900">
-                <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-bold dark:text-stone-100" title={entry.title}>
+            <motion.div layoutId={`card-content-${entry.id}`} className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white">
+                <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={entry.title}>
                     {entry.title}
                 </motion.h4>
                 <div className="text-[10px] text-[#2D2926]/40 dark:text-stone-400 font-bold mb-1.5 flex items-center justify-between">
@@ -650,11 +650,8 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                         onClose={() => history.back()}
                         onEdit={onEdit}
                         onDelete={readOnly ? undefined : handleDelete}
-                        onComplete={readOnly ? undefined : (entry) => {
-                            // This will be handled by the parent if needed, 
-                            // but EntryList's default is usually just history.
-                            // However, we can add a default handler if EntryList 
-                            // is used for "Watching" entries.
+                        onComplete={readOnly ? undefined : (_entry) => {
+                            // This will be handled by the parent if needed
                         }}
                     />
                 )}
