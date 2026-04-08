@@ -60,4 +60,27 @@ export const MovieCardSkeleton: React.FC = () => {
     );
 };
 
+export const TrendingWidgetSkeleton: React.FC = () => {
+    return (
+        <div className="trending-item animate-pulse opacity-60 pointer-events-none py-2">
+            <div className="w-16 h-2 bg-[#2D2926]/10 rounded mb-1.5" />
+            <div className="w-[85%] h-3.5 bg-[#2D2926]/10 rounded mb-1.5" />
+            <div className="w-20 h-2 bg-[#2D2926]/5 rounded" />
+        </div>
+    );
+};
+
+export const SuggestionWidgetSkeleton: React.FC = () => {
+    return (
+        <div className="suggestion-item animate-pulse opacity-60 pointer-events-none py-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-[#2D2926]/10 flex-shrink-0" />
+            <div className="flex-grow min-w-0 mx-3 space-y-1.5">
+                <div className="w-24 h-3 bg-[#2D2926]/10 rounded" />
+                <div className="w-16 h-2 bg-[#2D2926]/5 rounded" />
+            </div>
+            <div className="w-14 h-7 bg-[#2D2926]/10 rounded-lg flex-shrink-0" />
+        </div>
+    );
+};
+
 export default Skeleton;
