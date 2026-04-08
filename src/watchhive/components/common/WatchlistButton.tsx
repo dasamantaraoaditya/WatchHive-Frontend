@@ -48,11 +48,11 @@ export const WatchlistButton: React.FC<WatchlistButtonProps> = ({
                 aria-label={inList ? "Remove from Watchlist" : "Add to Watchlist"}
             >
                 {inList ? (
-                    <span className="material-symbols-outlined w-full h-full flex items-center justify-center text-inherit" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                         bookmark_added
                     </span>
                 ) : (
-                    <span className="material-symbols-outlined w-full h-full flex items-center justify-center text-inherit">
+                    <span className="material-symbols-outlined text-[18px]">
                         bookmark_add
                     </span>
                 )}

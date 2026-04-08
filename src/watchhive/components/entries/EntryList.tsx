@@ -138,7 +138,7 @@ export const EntryCard: React.FC<{
                 <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     {onEdit && (
                         <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" title="Edit">
-                            <span className="material-symbols-outlined text-[16px]">edit</span>
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
                         </button>
                     )}
                     {_onDelete && (
@@ -150,7 +150,7 @@ export const EntryCard: React.FC<{
                             className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" 
                             title="Delete"
                         >
-                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
                         </button>
                     )}
                     {_onComplete && entry.isWatching && (
