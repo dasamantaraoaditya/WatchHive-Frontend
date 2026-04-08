@@ -42,8 +42,9 @@ export const EntryCard: React.FC<{
     entry: Entry;
     onEdit?: (entry: Entry) => void;
     onDelete?: (id: string) => void;
+    onComplete?: (entry: Entry) => void;
     onClick?: (entry: Entry, details: TmdbDetails | null) => void;
-}> = ({ entry, onEdit, onDelete: _onDelete, onClick }) => {
+}> = ({ entry, onEdit, onDelete: _onDelete, onComplete: _onComplete, onClick }) => {
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
 
@@ -152,6 +153,18 @@ export const EntryCard: React.FC<{
                             <span className="material-symbols-outlined text-[16px]">delete</span>
                         </button>
                     )}
+                    {_onComplete && entry.isWatching && (
+                        <button 
+                            onClick={(e) => { 
+                                e.stopPropagation(); 
+                                _onComplete(entry); 
+                            }} 
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" 
+                            title="Complete Watching"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                        </button>
+                    )}
                 </div>
 
                 <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
@@ -188,7 +201,8 @@ export const ExpandedCard: React.FC<{
     onClose: () => void;
     onEdit?: (entry: Entry) => void;
     onDelete?: (id: string) => void;
-}> = ({ entry, details, onClose, onEdit, onDelete }) => {
+    onComplete?: (entry: Entry) => void;
+}> = ({ entry, details, onClose, onEdit, onDelete, onComplete }) => {
     const [isNavVisible, setIsNavVisible] = useState(true);
     const lastScrollY = React.useRef(0);
 
@@ -288,6 +302,21 @@ export const ExpandedCard: React.FC<{
                     >
                         <span className="material-symbols-outlined text-[18px]">delete</span>
                         Delete Entry
+                    </motion.button>
+                )}
+
+                {onComplete && entry.isWatching && (
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 }}
+                        onClick={() => {
+                            onComplete(entry);
+                        }}
+                        className="px-4 py-2 rounded-full bg-white/70 backdrop-blur-xl flex items-center gap-2 text-[#2D2926] font-bold text-sm hover:bg-green-50 hover:text-green-600 transition-all border border-white/40 shadow-sm shadow-md pointer-events-auto"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                        Complete Watching
                     </motion.button>
                 )}
             </div>
@@ -618,6 +647,12 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                         onClose={() => history.back()}
                         onEdit={onEdit}
                         onDelete={readOnly ? undefined : handleDelete}
+                        onComplete={readOnly ? undefined : (entry) => {
+                            // This will be handled by the parent if needed, 
+                            // but EntryList's default is usually just history.
+                            // However, we can add a default handler if EntryList 
+                            // is used for "Watching" entries.
+                        }}
                     />
                 )}
             </AnimatePresence>

@@ -85,6 +85,21 @@ export const EntriesPage: React.FC = () => {
         setShowForm(true);
     };
 
+    const handleComplete = async (entry: Entry) => {
+        if (!window.confirm(`Mark "${entry.title}" as completed?`)) return;
+        try {
+            await entriesApi.updateEntry(entry.id, {
+                isWatching: false,
+                watchedAt: new Date().toISOString()
+            });
+            fetchWatching();
+            setRefreshKey(prev => prev + 1); // Refresh history tab too
+        } catch (err) {
+            console.error('Failed to complete watching', err);
+            alert('Failed to update entry');
+        }
+    };
+
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#FFF9F0] font-display text-[#2D2926]">
 
@@ -156,12 +171,7 @@ export const EntriesPage: React.FC = () => {
                                             <EntryCard 
                                                 key={entry.id} 
                                                 entry={entry}
-                                                onDelete={async (id) => {
-                                                    if (window.confirm('Remove from currently watching?')) {
-                                                        await entriesApi.deleteEntry(id);
-                                                        fetchWatching();
-                                                    }
-                                                }}
+                                                onComplete={handleComplete}
                                             />
                                         ))}
                                     </div>
