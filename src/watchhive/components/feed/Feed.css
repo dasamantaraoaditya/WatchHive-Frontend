@@ -194,3 +194,11 @@
 .icon-only-btn:hover {
     color: var(--accent-primary);
 }
+
+.filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
+}
+
+.action-btn--commented {
+    color: var(--accent-primary);
+}

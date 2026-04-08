@@ -26,6 +26,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [commentCount, setCommentCount] = useState<number>(entryData?._count?.comments || 0);
     const [showComments, setShowComments] = useState<boolean>(false);
     const [showShareFeedback, setShowShareFeedback] = useState<boolean>(false);
+    const [isCommented, setIsCommented] = useState<boolean>(entryData?.isCommented || false);
 
     // Only fetch details if it's an ENTRY (suggestions come with poster_path usually)
     const { details } = useTmdbDetails(entryData?.tmdbId, entryData?.type);
@@ -242,14 +243,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     className={`action-btn ${isLiked ? 'action-btn--liked' : ''}`}
                                     onClick={handleLike}
                                 >
-                                    <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'fill-1' : ''}`}>favorite</span>
+                                    <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'filled' : ''}`}>favorite</span>
                                     <span className="text-sm font-medium">{likeCount}</span>
                                 </button>
                                 <button
-                                    className="action-btn"
+                                    className={`action-btn ${isCommented ? 'action-btn--commented' : ''}`}
                                     onClick={() => setShowComments(true)}
                                 >
-                                    <span className="material-symbols-outlined text-[20px]">chat_bubble</span>
+                                    <span className={`material-symbols-outlined text-[20px] ${isCommented ? 'filled' : ''}`}>chat_bubble</span>
                                     <span className="text-sm font-medium">{commentCount}</span>
                                 </button>
                             </>
@@ -287,7 +288,10 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     isOpen={showComments}
                     onClose={() => setShowComments(false)}
                     entryId={entryData.id}
-                    onCommentAdded={() => setCommentCount(prev => prev + 1)}
+                    onCommentAdded={() => {
+                        setCommentCount(prev => prev + 1);
+                        setIsCommented(true);
+                    }}
                 />
             )}
         </>
