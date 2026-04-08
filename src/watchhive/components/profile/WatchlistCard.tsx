@@ -72,39 +72,57 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const rating = details.vote_average ? details.vote_average.toFixed(1) : '';
 
     return (
-        <div className="watchlist-card">
-            <div className="watchlist-card__poster-wrapper">
+        <div className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu">
+            <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
                 {details.poster_path ? (
                     <img
                         src={`${TMDB_IMG}${details.poster_path}`}
                         alt={title}
-                        className="watchlist-card__poster"
+                        className="watchlist-card__poster object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                     />
                 ) : (
-                    <div className="watchlist-card__no-poster">Top Secret 🎬</div>
+                    <div className="watchlist-card__no-poster h-full flex items-center justify-center bg-[#ffb700]/5">
+                        <span className="material-symbols-outlined text-4xl mb-2 text-[#2D2926]/20">movie</span>
+                    </div>
                 )}
 
-                <div className="watchlist-card__overlay">
-                    <WatchlistButton tmdbId={tmdbId} mediaType={mediaType as any} variant="icon" />
-                </div>
+                {/* Overlay shadow for cinematic feel */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                <div className="watchlist-card__hover-action">
+                {/* Standardized Actions Layout */}
+                <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
-                        className="watchlist-mark-btn"
                         onClick={handleMarkAsWatched}
                         disabled={marking}
-                        title="Mark as Watched"
+                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                        title="Mark as Watched (Hive It)"
                     >
-                        {marking ? '🐝' : '🍯 Hive It'}
+                        <span className="material-symbols-outlined text-[18px]">
+                            {marking ? 'sync' : 'check_circle'}
+                        </span>
+                    </button>
+                    
+                    <button
+                        onClick={() => removeFromList(tmdbId)}
+                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                        title="Remove from Watchlist"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
                     </button>
                 </div>
+
+                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                    <span className="bg-[#ffb700] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90 uppercase tracking-tighter">
+                        {mediaType === 'tv' ? '📺 TV' : '🎬 Movie'}
+                    </span>
+                </div>
             </div>
-            <div className="watchlist-card__info">
-                <h4 className="watchlist-card__title" title={title}>{title}</h4>
-                <div className="watchlist-card__meta">
-                    {year && <span>{year}</span>}
+            <div className="watchlist-card__info gap-1 p-3 flex flex-col h-full bg-white dark:bg-stone-900 border-t border-slate-50">
+                <h4 className="watchlist-card__title text-[13px] leading-tight font-bold dark:text-stone-100 truncate" title={title}>{title}</h4>
+                <div className="watchlist-card__meta text-[11px] font-bold mt-1 text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
+                    <span>{year || 'Coming Soon'}</span>
                     {rating && (
-                        <span className="watchlist-card__rating">⭐ {rating}</span>
+                        <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {rating}</span>
                     )}
                 </div>
             </div>
