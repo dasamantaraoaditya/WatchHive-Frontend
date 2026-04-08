@@ -198,4 +198,62 @@ export const MindLensHighlightsSkeleton: React.FC = () => {
     );
 };
 
+export const ProfileSkeleton: React.FC = () => {
+    return (
+        <div className="max-w-5xl mx-auto w-full px-4 py-8 md:px-8 space-y-8 animate-pulse">
+            {/* Profile Hero Skeleton */}
+            <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-6 md:p-10 shadow-sm flex flex-col md:flex-row items-center gap-8">
+                {/* Avatar Skeleton */}
+                <div className="relative shrink-0">
+                    <Skeleton variant="circle" width={160} height={160} className="md:w-40 md:h-40 w-32 h-32" />
+                </div>
+
+                {/* Info Skeleton */}
+                <div className="flex-1 text-center md:text-left space-y-4 w-full">
+                    <div className="space-y-2">
+                        <Skeleton variant="text" width="40%" height={32} className="mx-auto md:mx-0" />
+                        <Skeleton variant="text" width="20%" height={16} className="mx-auto md:mx-0" />
+                    </div>
+                    
+                    <div className="space-y-2 py-2">
+                        <Skeleton variant="text" width="80%" height={14} className="mx-auto md:mx-0" />
+                        <Skeleton variant="text" width="60%" height={14} className="mx-auto md:mx-0" />
+                    </div>
+
+                    <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-2">
+                        {[...Array(3)].map((_, i) => (
+                            <div key={i} className="bg-slate-50 border border-slate-100 px-5 py-2.5 rounded-lg min-w-[100px] flex flex-col items-center gap-1">
+                                <Skeleton variant="text" width={40} height={24} />
+                                <Skeleton variant="text" width={60} height={10} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Actions Skeleton */}
+                <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto">
+                    <Skeleton variant="rect" width="100%" height={44} className="md:w-40 rounded-xl" />
+                    <Skeleton variant="rect" width="100%" height={44} className="md:w-40 rounded-xl" />
+                </div>
+            </div>
+
+            {/* Tabs Skeleton */}
+            <div className="flex justify-center md:justify-start gap-8 border-b border-slate-200 px-4">
+                {[...Array(3)].map((_, i) => (
+                    <div key={i} className="pb-4">
+                        <Skeleton variant="text" width={80} height={20} />
+                    </div>
+                ))}
+            </div>
+
+            {/* Grid Skeleton */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {[...Array(10)].map((_, i) => (
+                    <MovieCardSkeleton key={i} />
+                ))}
+            </div>
+        </div>
+    );
+};
+
 export default Skeleton;

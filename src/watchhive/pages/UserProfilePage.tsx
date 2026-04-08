@@ -5,8 +5,8 @@ import userService from '../services/userService';
 import EntryList from '../components/entries/EntryList';
 import { FollowListModal } from '../components/profile/FollowListModal';
 import { useAuth, useUI } from '../contexts';
-import { BeeLoader } from '../components/common';
 import { SuggestMovieModal } from '../components/suggestions/SuggestMovieModal';
+import { ProfileSkeleton } from '../components/common/Skeleton';
 import { listsApi, ListItem } from '../services/lists.service';
 import { WatchlistGrid } from '../components/profile/WatchlistGrid';
 
@@ -91,11 +91,7 @@ export const UserProfilePage: React.FC = () => {
         }
     };
 
-    if (loading) return (
-         <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-[#FFF9F0]">
-            <BeeLoader size="medium" message="Loading User Profile..." />
-        </div>
-    );
+    if (loading) return <ProfileSkeleton />;
 
     if (error || !profileUser) return (
         <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-[#FFF9F0] p-8 font-display">
