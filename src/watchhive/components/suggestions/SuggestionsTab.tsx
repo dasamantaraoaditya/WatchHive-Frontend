@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { suggestionsApi, GroupedSuggestion } from '../../services/suggestions.service';
 import { SuggestionCard } from './SuggestionCard';
-import { BeeLoader, ErrorState, EmptyState } from '../common';
+import { SkeletonGrid, ErrorState, EmptyState } from '../common';
 
 export const SuggestionsTab: React.FC = () => {
     const [groups, setGroups] = useState<GroupedSuggestion[]>([]);
@@ -26,11 +26,7 @@ export const SuggestionsTab: React.FC = () => {
     }, [fetchSuggestions]);
 
     if (isLoading) {
-        return (
-            <div className="py-12 flex justify-center w-full">
-                <BeeLoader size="medium" message="Gathering suggestions from your hive..." />
-            </div>
-        );
+        return <SkeletonGrid count={4} />;
     }
 
     if (error) {

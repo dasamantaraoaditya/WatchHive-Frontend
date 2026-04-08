@@ -5,7 +5,11 @@ import { EntryForm } from '../components/entries/EntryForm';
 import { EntryList, EntryCard } from '../components/entries/EntryList';
 import { useAuth } from '../contexts';
 import { WatchlistGrid } from '../components/profile';
-import { BeeLoader } from '../components/common';
+import { 
+    BeeLoader, 
+    SkeletonCard, 
+    SkeletonGrid
+} from '../components/common';
 import { useUI } from '../contexts';
 import { SuggestionsTab } from '../components/suggestions/SuggestionsTab';
 
@@ -163,7 +167,9 @@ export const EntriesPage: React.FC = () => {
                                     </div>
                                 </div>
                                 
-                                {watchingEntries.length === 0 ? (
+                                {isWatchingLoading && watchingEntries.length === 0 ? (
+                                    <SkeletonGrid count={3} />
+                                ) : watchingEntries.length === 0 ? (
                                     <div className="text-center py-16 text-slate-500 bg-white border border-slate-100 rounded-xl font-medium shadow-sm">No active sessions. Start watching something!</div>
                                 ) : (
                                     <div className="watchlist-grid">
@@ -174,6 +180,7 @@ export const EntriesPage: React.FC = () => {
                                                 onComplete={handleComplete}
                                             />
                                         ))}
+                                        {isWatchingLoading && <SkeletonCard />}
                                     </div>
                                 )}
                             </section>

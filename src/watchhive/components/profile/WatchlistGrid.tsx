@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import { WatchlistCard } from './WatchlistCard';
 import './Profile.css';
-import { EmptyState } from '../common';
+import { EmptyState, SkeletonGrid } from '../common';
 
 export const WatchlistGrid: React.FC = () => {
     const { watchlist, isLoading, fetchWatchlist } = useWatchlist();
@@ -12,13 +12,7 @@ export const WatchlistGrid: React.FC = () => {
     }, [fetchWatchlist]);
 
     if (isLoading && !watchlist) {
-        return (
-            <div className="watchlist-grid">
-                {[...Array(6)].map((_, i) => (
-                    <div key={i} className="watchlist-card skeleton" />
-                ))}
-            </div>
-        );
+        return <SkeletonGrid count={6} />;
     }
 
     if (!watchlist || (watchlist.items || []).length === 0) {

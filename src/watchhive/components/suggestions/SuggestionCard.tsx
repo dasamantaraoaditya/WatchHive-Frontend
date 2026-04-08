@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
-import { WatchlistButton, BeeLoader } from '../common';
+import { WatchlistButton, SkeletonCard } from '../common';
 import '../profile/Profile.css';
 
 interface SuggestionCardProps {
@@ -68,11 +68,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     };
 
     if (isLoading) {
-        return (
-            <div className="watchlist-card animate-pulse bg-slate-100 flex items-center justify-center min-h-[250px] rounded-3xl">
-                <BeeLoader size="small" message="" />
-            </div>
-        );
+        return <SkeletonCard />;
     }
 
     const posterUrl = details?.poster_path ? `https://image.tmdb.org/t/p/w342${details.poster_path}` : null;
