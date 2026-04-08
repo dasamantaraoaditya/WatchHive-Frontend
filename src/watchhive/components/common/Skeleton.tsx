@@ -33,18 +33,45 @@ export const FeedCardSkeleton: React.FC = () => {
     return (
         <div className="skeleton-feed-card">
             <div className="skeleton-feed-header">
-                <Skeleton variant="circle" width={40} height={40} />
-                <div style={{ flex: 1 }}>
-                    <Skeleton variant="text" width="40%" height={16} className="mb-2" />
-                    <Skeleton variant="text" width="20%" height={12} />
+                <Skeleton variant="circle" width={48} height={48} />
+                <div className="flex-1">
+                    <Skeleton variant="text" width="60%" height={16} className="mb-2" />
+                    <Skeleton variant="text" width="35%" height={12} />
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                    <Skeleton variant="text" width={40} height={10} />
+                    <Skeleton variant="text" width={60} height={12} />
                 </div>
             </div>
-            <Skeleton variant="rect" width="100%" height={200} className="mb-4 rounded-lg" />
-            <Skeleton variant="text" width="90%" height={14} />
-            <Skeleton variant="text" width="80%" height={14} />
-            <div className="flex gap-4 mt-4">
-                <Skeleton variant="rect" width={60} height={24} className="rounded-full" />
-                <Skeleton variant="rect" width={60} height={24} className="rounded-full" />
+
+            <div className="skeleton-feed-poster">
+                <Skeleton variant="rect" width="100%" height="100%" />
+            </div>
+
+            <div className="skeleton-feed-insight">
+                <Skeleton variant="circle" width={24} height={24} className="mt-1" />
+                <div className="flex-1">
+                    <Skeleton variant="text" width="20%" height={12} className="mb-2" />
+                    <Skeleton variant="text" width="90%" height={14} />
+                    <Skeleton variant="text" width="70%" height={14} />
+                </div>
+            </div>
+
+            <div className="skeleton-feed-actions">
+                <div className="flex gap-6">
+                    <div className="flex items-center gap-2">
+                        <Skeleton variant="circle" width={20} height={20} />
+                        <Skeleton variant="text" width={20} height={14} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Skeleton variant="circle" width={20} height={20} />
+                        <Skeleton variant="text" width={20} height={14} />
+                    </div>
+                </div>
+                <div className="flex items-center gap-4">
+                    <Skeleton variant="circle" width={24} height={24} />
+                    <Skeleton variant="circle" width={24} height={24} />
+                </div>
             </div>
         </div>
     );

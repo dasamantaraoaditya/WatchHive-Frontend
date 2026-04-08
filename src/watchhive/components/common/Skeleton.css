@@ -1,6 +1,5 @@
 .skeleton {
-    background-color: rgba(255, 255, 255, 0.05);
-    /* Match dark theme bg-secondary slightly lighter */
+    background-color: rgba(45, 41, 38, 0.08); /* Darker on light bg */
     border-radius: var(--radius-md);
     position: relative;
     overflow: hidden;
@@ -15,11 +14,9 @@
     transform: translateX(-100%);
     background-image: linear-gradient(90deg,
             rgba(255, 255, 255, 0) 0,
-            rgba(255, 255, 255, 0.05) 20%,
-            /* Slight highlight for shimmer */
-            rgba(255, 255, 255, 0.1) 60%,
+            rgba(255, 255, 255, 0.4) 50%, /* Stronger shimmer */
             rgba(255, 255, 255, 0));
-    animation: shimmer 2s infinite;
+    animation: shimmer 1.5s infinite;
     content: '';
 }
 
@@ -45,23 +42,44 @@
     border-radius: 50%;
 }
 
-.skeleton-card {
-    height: 300px;
-    /* Example height for card skeleton */
-}
-
 /* Feed specific skeleton helper */
 .skeleton-feed-card {
-    padding: var(--space-4);
-    margin-bottom: var(--space-6);
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 183, 0, 0.15);
+    border-radius: var(--radius-3xl);
 }
 
 .skeleton-feed-header {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.skeleton-feed-poster {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-2xl);
+    margin-bottom: 1rem;
+}
+
+.skeleton-feed-insight {
+    background: rgba(255, 183, 0, 0.05);
+    border: 1px solid rgba(255, 183, 0, 0.1);
+    border-radius: var(--radius-2xl);
+    padding: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.skeleton-feed-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(45, 41, 38, 0.05);
 }
