@@ -136,8 +136,20 @@ export const EntryCard: React.FC<{
                 {/* Actions */}
                 <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     {onEdit && (
-                        <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm" title="Edit">
+                        <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" title="Edit">
                             <span className="material-symbols-outlined text-[16px]">edit</span>
+                        </button>
+                    )}
+                    {_onDelete && (
+                        <button 
+                            onClick={(e) => { 
+                                e.stopPropagation(); 
+                                _onDelete(entry.id); 
+                            }} 
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" 
+                            title="Delete"
+                        >
+                            <span className="material-symbols-outlined text-[16px]">delete</span>
                         </button>
                     )}
                 </div>
@@ -175,7 +187,8 @@ export const ExpandedCard: React.FC<{
     details: TmdbDetails | null;
     onClose: () => void;
     onEdit?: (entry: Entry) => void;
-}> = ({ entry, details, onClose, onEdit }) => {
+    onDelete?: (id: string) => void;
+}> = ({ entry, details, onClose, onEdit, onDelete }) => {
     const [isNavVisible, setIsNavVisible] = useState(true);
     const lastScrollY = React.useRef(0);
 
@@ -260,6 +273,21 @@ export const ExpandedCard: React.FC<{
                     >
                         <span className="material-symbols-outlined text-[18px]">edit_note</span>
                         Edit Entry
+                    </motion.button>
+                )}
+
+                {onDelete && (
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 }}
+                        onClick={() => {
+                            onDelete(entry.id);
+                        }}
+                        className="px-4 py-2 rounded-full bg-white/70 backdrop-blur-xl flex items-center gap-2 text-[#2D2926] font-bold text-sm hover:bg-red-50 hover:text-red-500 transition-all border border-white/40 shadow-sm shadow-md pointer-events-auto"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                        Delete Entry
                     </motion.button>
                 )}
             </div>
@@ -496,6 +524,10 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
         try {
             await entriesApi.deleteEntry(id);
             setEntries((prev) => prev.filter((e) => e.id !== id));
+            if (selectedEntry?.entry.id === id) {
+                setSelectedEntry(null);
+                history.back(); // Close expanded card if it was open
+            }
         } catch (err: any) {
             alert(err.response?.data?.error || 'Failed to delete entry');
         }
@@ -585,6 +617,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                         details={selectedEntry.details}
                         onClose={() => history.back()}
                         onEdit={onEdit}
+                        onDelete={readOnly ? undefined : handleDelete}
                     />
                 )}
             </AnimatePresence>
