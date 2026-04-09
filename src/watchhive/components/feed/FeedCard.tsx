@@ -28,6 +28,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [commentCount, setCommentCount] = useState<number>(entryData?._count?.comments || 0);
     const [showComments, setShowComments] = useState<boolean>(false);
     const [showExpanded, setShowExpanded] = useState<boolean>(false);
+    const [showShareFeedback, setShowShareFeedback] = useState<boolean>(false);
+    const [isCommented, setIsCommented] = useState<boolean>(entryData?.isCommented || false);
 
     // Only fetch details if it's an ENTRY (suggestions come with poster_path usually), OR if the user expands the card
     const shouldFetchDetails = !isSuggestion || showExpanded;
@@ -36,12 +38,12 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const { details } = useTmdbDetails(fetchTmdbId as number, entryData?.type || mediaTypeFallback);
 
     const title = isSuggestion ? (item.data.title || item.data.name) : entryData.title;
-    
+
     // Choose cinematic landscape backdrop if available; otherwise fallback to poster
     const backdropPathRaw = isSuggestion ? item.data.backdrop_path : details?.backdrop_path;
     const posterPathRaw = isSuggestion ? item.data.poster_path : details?.poster_path;
-    
-    const posterUrl = backdropPathRaw 
+
+    const posterUrl = backdropPathRaw
         ? `${TMDB_BACKDROP_IMG}${backdropPathRaw}`
         : (posterPathRaw ? `${TMDB_POSTER_IMG}${posterPathRaw}` : null);
 
@@ -58,13 +60,13 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
-    
+
     // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM"
-    const timestamp = !isSuggestion 
-        ? new Date(entryData.createdAt).toLocaleString(undefined, { 
-            month: 'short', day: 'numeric', year: 'numeric', 
-            hour: 'numeric', minute: '2-digit' 
-          }).replace(',', ' at')
+    const timestamp = !isSuggestion
+        ? new Date(entryData.createdAt).toLocaleString(undefined, {
+            month: 'short', day: 'numeric', year: 'numeric',
+            hour: 'numeric', minute: '2-digit'
+        }).replace(',', ' at')
         : 'Just Now';
 
     const handleLike = async () => {
@@ -91,7 +93,41 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         }
     };
 
-    const actionText = isSuggestion ? 'recommends' : (entryData?.review ? 'reviewed' : (entryData?.isWatching ? 'is watching' : 'just watched'));
+    const handleShare = async () => {
+        const shareTitle = 'WatchHive';
+        const shareText = isSuggestion
+            ? `Check out this recommendation for "${title}" on WatchHive! ✨`
+            : `Check out ${displayName}'s ${actionText} for "${title}" on WatchHive! ✨`;
+
+        // Use user's profile as the target link if it's an entry
+        const shareUrl = userId
+            ? `${window.location.origin}/watch-hive/profile/${userId}`
+            : window.location.origin;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                    url: shareUrl,
+                });
+            } catch (err) {
+                if (err instanceof Error && err.name !== 'AbortError') {
+                    console.error('Error sharing:', err);
+                }
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+                setShowShareFeedback(true);
+                setTimeout(() => setShowShareFeedback(false), 2000);
+            } catch (err) {
+                console.error('Failed to copy link:', err);
+            }
+        }
+    };
+
+    const actionText = isSuggestion ? 'recommends' : (entryData?.review ? 'reviewed' : 'just watched');
 
     const releaseYear = (details?.release_date || details?.first_air_date || '').substring(0, 4);
     const runtime = details?.runtime || (details?.episode_run_time && details.episode_run_time[0]);
@@ -125,7 +161,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             />
                         </Link>
                     </div>
-                    
+
                     <div className="feed-card-header-info flex-1 min-w-0 pr-2">
                         <div className="flex items-start justify-between w-full">
                             <div className="flex flex-col min-w-[0] pr-2">
@@ -148,7 +184,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     </p>
                                 )}
                             </div>
-                            
+
                             {!isSuggestion && (
                                 <div className="text-right flex-shrink-0 flex flex-col justify-center border-l border-[#2D2926]/5 pl-3">
                                     <span className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Seen at</span>
@@ -176,7 +212,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     <span className="font-bold text-white text-lg">{Number(rating).toFixed(1)}</span>
                                 </div>
                             )}
-                            
+
                             {/* Tags (if any exist) */}
                             {!isSuggestion && entryData?.tags && entryData.tags.length > 0 && (
                                 <div className="feed-card-tags">
@@ -213,14 +249,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     className={`action-btn ${isLiked ? 'action-btn--liked' : ''}`}
                                     onClick={handleLike}
                                 >
-                                    <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'fill-1' : ''}`}>favorite</span>
+                                    <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'filled' : ''}`}>favorite</span>
                                     <span className="text-sm font-medium">{likeCount}</span>
                                 </button>
                                 <button
-                                    className="action-btn"
+                                    className={`action-btn ${isCommented ? 'action-btn--commented' : ''}`}
                                     onClick={() => setShowComments(true)}
                                 >
-                                    <span className="material-symbols-outlined text-[20px]">chat_bubble</span>
+                                    <span className={`material-symbols-outlined text-[20px] ${isCommented ? 'filled' : ''}`}>chat_bubble</span>
                                     <span className="text-sm font-medium">{commentCount}</span>
                                 </button>
                             </>
@@ -232,10 +268,16 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             </button>
                         )}
                     </div>
-                    
+
                     <div className="flex items-center gap-4">
-                        <button className="icon-only-btn" title="Share via WatchHive">
-                            <span className="material-symbols-outlined text-[20px]">share</span>
+                        <button
+                            className={`icon-only-btn transition-all ${showShareFeedback ? 'text-green-500' : ''}`}
+                            title={showShareFeedback ? "Link Copied!" : "Share activity"}
+                            onClick={handleShare}
+                        >
+                            <span className="material-symbols-outlined text-[20px]">
+                                {showShareFeedback ? 'check_circle' : 'share'}
+                            </span>
                         </button>
                         {!item.data?.isWatched && targetTmdbId && (
                             <div className="flex items-center gap-2">
@@ -252,7 +294,10 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     isOpen={showComments}
                     onClose={() => setShowComments(false)}
                     entryId={entryData.id}
-                    onCommentAdded={() => setCommentCount(prev => prev + 1)}
+                    onCommentAdded={() => {
+                        setCommentCount(prev => prev + 1);
+                        setIsCommented(true);
+                    }}
                 />
             )}
 

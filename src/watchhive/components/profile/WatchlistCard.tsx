@@ -84,7 +84,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const rating = details.vote_average ? details.vote_average.toFixed(1) : '';
 
     return (
-        <div className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu">
+        <div className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl bg-white border border-[#ffb700]/10 shadow-sm hover:shadow-md transition-all">
             <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
                 {details.poster_path ? (
                     <img
@@ -129,8 +129,8 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                     </span>
                 </div>
             </div>
-            <div className="watchlist-card__info gap-1 p-3 flex flex-col h-full bg-white dark:bg-stone-900 border-t border-slate-50">
-                <h4 className="watchlist-card__title text-[13px] leading-tight font-bold dark:text-stone-100 truncate" title={title}>{title}</h4>
+            <div className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white border-t border-slate-50">
+                <h4 className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={title}>{title}</h4>
                 <div className="watchlist-card__meta text-[11px] font-bold mt-1 text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
                     <span>{year || 'Coming Soon'}</span>
                     {rating && (

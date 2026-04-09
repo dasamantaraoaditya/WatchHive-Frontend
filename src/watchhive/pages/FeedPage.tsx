@@ -4,7 +4,7 @@ import { feedApi, FeedItem } from '../services/feed.service';
 import { userService } from '../services/userService';
 import { User } from '../types';
 import { FeedCard } from '../components/feed/FeedCard';
-import { Avatar, FeedCardSkeleton, ErrorState, EmptyState, BeeLoader } from '../components/common';
+import { Avatar, FeedCardSkeleton, TrendingWidgetSkeleton, SuggestionWidgetSkeleton, ErrorState, EmptyState } from '../components/common';
 import './FeedPage.css';
 import '../components/feed/Feed.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
@@ -206,7 +206,9 @@ export const FeedPage: React.FC = () => {
                     </div>
                     <div className="widget-content">
                         {loadingTrending ? (
-                            <BeeLoader size="small" message="Calculating buzz..." />
+                            <div className="flex flex-col">
+                                {[...Array(3)].map((_, i) => <TrendingWidgetSkeleton key={i} />)}
+                            </div>
                         ) : trendingItems.length > 0 ? (
                             trendingItems.map((item, index) => (
                                 <div className="trending-item" key={index}>
@@ -225,7 +227,9 @@ export const FeedPage: React.FC = () => {
                     <h3 className="mb-4 font-bold text-[#2D2926]">Suggested Follows</h3>
                     <div className="widget-content">
                         {loadingSuggestions ? (
-                            <BeeLoader size="small" message="Finding people for you..." className="py-2" />
+                            <div className="flex flex-col">
+                                {[...Array(3)].map((_, i) => <SuggestionWidgetSkeleton key={i} />)}
+                            </div>
                         ) : suggestedUsers.length > 0 ? (
                             suggestedUsers.map(user => (
                                 <div className="suggestion-item" key={user.id}>

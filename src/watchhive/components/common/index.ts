@@ -5,6 +5,7 @@ export * from './Avatar';
 export * from './HeaderActions';
 export * from './DonationButton';
 export * from './Skeleton';
+export * from './SkeletonCard';
 export * from './ErrorState';
 export * from './EmptyState';
 export * from './OfflineBanner';

@@ -71,6 +71,10 @@ export const listsApi = {
 
     removeFromWatchlist: async (listId: string, tmdbId: number): Promise<void> => {
         return await listsApi.removeFromStack(listId, tmdbId);
+    },
+
+    getUserWatchlist: async (userId: string): Promise<List> => {
+        return await apiClient.get<List>(`/users/${userId}/watchlist`);
     }
 };
 

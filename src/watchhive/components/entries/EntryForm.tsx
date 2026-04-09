@@ -5,6 +5,7 @@ import { HiveDatePicker } from '../common/HiveDatePicker';
 
 interface EntryFormProps {
     entry?: Entry;
+    prefillData?: { tmdbId: number; title: string; type: 'MOVIE' | 'TV_SHOW'; posterPath?: string | null; overview?: string | null };
     onSuccess?: (entry: Entry) => void;
     onCancel?: () => void;
     isModal?: boolean;
@@ -149,7 +150,7 @@ const LOCATION_PRESETS = [
     { label: 'Mobile', value: 'On the Go', icon: 'smartphone' },
 ];
 
-export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel, isModal = false }) => {
+export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false }) => {
     const isEditing = !!entry;
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -161,9 +162,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
 
     // ── Form state ──
     const [formData, setFormData] = useState<CreateEntryData>({
-        tmdbId: entry?.tmdbId || 0,
-        title: entry?.title || '',
-        type: entry?.type || 'MOVIE',
+        tmdbId: entry?.tmdbId || prefillData?.tmdbId || 0,
+        title: entry?.title || prefillData?.title || '',
+        type: entry?.type || prefillData?.type || 'MOVIE',
         watchedAt: entry?.watchedAt 
             ? new Date(entry.watchedAt).toISOString().slice(0, 16) 
             : new Date().toISOString().slice(0, 16),
@@ -176,12 +177,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, onSuccess, onCancel
     });
 
     // ── UI state ──
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(prefillData?.title || '');
     const [searchResults, setSearchResults] = useState<TmdbResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
-    const [selectedPoster, setSelectedPoster] = useState<string | null>(null);
-    const [selectedOverview, setSelectedOverview] = useState<string | null>(null);
+    const [selectedPoster, setSelectedPoster] = useState<string | null>(prefillData?.posterPath ? `https://image.tmdb.org/t/p/w342${prefillData.posterPath}` : null);
+    const [selectedOverview, setSelectedOverview] = useState<string | null>(prefillData?.overview || null);
     const [showMoreDetails, setShowMoreDetails] = useState(!!(entry?.review || entry?.tags?.length || entry?.watchLocation));
     const [tagInput, setTagInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);

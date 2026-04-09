@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from '../types/user.types';
 import userService from '../services/userService';
-import { Avatar, ErrorState, EmptyState, BeeLoader, MovieDetailsModal } from '../components/common';
+import { Avatar, ErrorState, EmptyState, MovieDetailsModal } from '../components/common';
 import { useUI } from '../contexts';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import apiClient from '../services/api';
+import { MovieSearchSkeleton } from '../components/search/MovieSearchSkeleton';
+import { UserSearchSkeleton } from '../components/search/UserSearchSkeleton';
 
 interface TmdbResult {
     id: number;
@@ -201,9 +203,12 @@ export const SearchUsersPage: React.FC = () => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="py-20 flex justify-center"
+                                className={searchMode === 'movies' ? "grid grid-cols-1 sm:grid-cols-2 gap-4" : "flex flex-col gap-4"}
                             >
-                                <BeeLoader size="medium" />
+                                {searchMode === 'movies' 
+                                    ? [...Array(6)].map((_, i) => <MovieSearchSkeleton key={i} />)
+                                    : [...Array(6)].map((_, i) => <UserSearchSkeleton key={i} />)
+                                }
                             </motion.div>
                         ) : searchMode === 'users' ? (
                             <motion.div 
@@ -294,7 +299,16 @@ export const SearchUsersPage: React.FC = () => {
                         </div>
                     )}
 
-                    <div ref={observerTarget} className="h-4 w-full" />
+                    <div ref={observerTarget} className="h-4 w-full mt-4" />
+                    
+                    {loading && (userResults.length > 0 || movieResults.length > 0) && (
+                        <div className={searchMode === 'movies' ? "grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4" : "flex flex-col gap-4 mt-4"}>
+                            {searchMode === 'movies' 
+                                ? [...Array(2)].map((_, i) => <MovieSearchSkeleton key={`more-${i}`} />)
+                                : <UserSearchSkeleton key="more-user" />
+                            }
+                        </div>
+                    )}
                 </div>
             </main>
 

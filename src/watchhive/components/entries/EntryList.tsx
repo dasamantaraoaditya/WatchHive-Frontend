@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { ErrorState, EmptyState, BeeLoader } from '../common';
+import {
+    SkeletonCard,
+    SkeletonGrid,
+    ErrorState,
+    EmptyState
+} from '../common';
 import '../profile/Profile.css';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -88,7 +93,7 @@ export const EntryCard: React.FC<{
     return (
         <motion.div
             layoutId={`card-wrapper-${entry.id}`}
-            className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu"
+            className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl"
             onClick={() => onClick && onClick(entry, details)}
             whileHover={onClick ? { scale: 0.98, transition: { duration: 0.2 } } : {}}
             whileTap={onClick ? { scale: 0.95 } : {}}
@@ -152,8 +157,8 @@ export const EntryCard: React.FC<{
                 </div>
             </div>
 
-            <motion.div layoutId={`card-content-${entry.id}`} className="watchlist-card__info gap-1 p-3 flex flex-col h-full bg-white dark:bg-stone-900">
-                <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-bold dark:text-stone-100" title={entry.title}>
+            <motion.div layoutId={`card-content-${entry.id}`} className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white">
+                <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={entry.title}>
                     {entry.title}
                 </motion.h4>
                 <div className="text-[10px] text-[#2D2926]/40 dark:text-stone-400 font-bold mb-1.5 flex items-center justify-between">
@@ -264,11 +269,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     };
 
     if (isLoading && entries.length === 0) {
-        return (
-            <div className="w-full flex justify-center py-20">
-                <BeeLoader size="large" message="Loading your hive..." />
-            </div>
-        );
+        return <SkeletonGrid count={8} />;
     }
 
     if (error) {
@@ -423,8 +424,10 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
             <div ref={observerTarget} className="h-4 w-full mt-4" />
 
             {isLoading && entries.length > 0 && (
-                <div className="flex justify-center items-center py-6 gap-3">
-                    <BeeLoader size="small" message="Fetching older entries..." />
+                <div className="watchlist-grid mt-4">
+                    {[...Array(4)].map((_, i) => (
+                        <SkeletonCard key={`more-${i}`} />
+                    ))}
                 </div>
             )}
 

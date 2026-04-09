@@ -3,6 +3,7 @@ import { useAuth, useUI } from '../contexts';
 import { userService } from '../services';
 import { FollowListModal } from '../components/profile';
 import { User, UpdateUserData } from '../types';
+import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 
 
 export const ProfilePage: React.FC = () => {
@@ -34,7 +35,7 @@ export const ProfilePage: React.FC = () => {
         if (user) setBioText(user.bio || '');
     }, [user?.bio]);
 
-    if (!user) return null;
+    if (!user) return <ProfileSkeleton />;
 
     const handleAvatarClick = () => fileInputRef.current?.click();
 
@@ -224,17 +225,25 @@ export const ProfilePage: React.FC = () => {
                                         <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Watches</p>
                                     </div>
                                     <div 
-                                        className="bg-slate-50 border border-slate-100 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all"
+                                        className="bg-slate-50 border border-slate-100 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
                                         onClick={() => stats && setModalConfig({ isOpen: true, type: 'followers' })}
                                     >
-                                        <p className="text-xl md:text-2xl font-black text-slate-700">{stats?.followersCount || 0}</p>
+                                        {stats ? (
+                                            <p className="text-xl md:text-2xl font-black text-slate-700">{stats.followersCount}</p>
+                                        ) : (
+                                            <Skeleton variant="text" width={40} height={24} />
+                                        )}
                                         <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Followers</p>
                                     </div>
                                     <div 
-                                        className="bg-slate-50 border border-slate-100 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all"
+                                        className="bg-slate-50 border border-slate-100 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
                                         onClick={() => stats && setModalConfig({ isOpen: true, type: 'following' })}
                                     >
-                                        <p className="text-xl md:text-2xl font-black text-slate-700">{stats?.followingCount || 0}</p>
+                                        {stats ? (
+                                            <p className="text-xl md:text-2xl font-black text-slate-700">{stats.followingCount}</p>
+                                        ) : (
+                                            <Skeleton variant="text" width={40} height={24} />
+                                        )}
                                         <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Following</p>
                                     </div>
                                 </div>
