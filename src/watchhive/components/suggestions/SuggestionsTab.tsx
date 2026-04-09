@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { suggestionsApi, GroupedSuggestion } from '../../services/suggestions.service';
 import { SuggestionCard } from './SuggestionCard';
-import { SkeletonGrid, ErrorState, EmptyState } from '../common';
+import { SkeletonGrid, ErrorState, EmptyState, FilterBar } from '../common';
 
 export const SuggestionsTab: React.FC = () => {
     const [groups, setGroups] = useState<GroupedSuggestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [search, setSearch] = useState('');
+    const [sortBy, setSortBy] = useState('recent');
 
     const fetchSuggestions = useCallback(async () => {
         setIsLoading(true);
@@ -25,6 +27,25 @@ export const SuggestionsTab: React.FC = () => {
         fetchSuggestions();
     }, [fetchSuggestions]);
 
+    const filteredGroups = groups
+        .filter(group => {
+            const query = search.toLowerCase();
+            const suggestorMatch = group.suggestors.some(s => 
+                s.username.toLowerCase().includes(query) || 
+                (s.displayName && s.displayName.toLowerCase().includes(query))
+            );
+            const messageMatch = group.suggestions.some(s => 
+                s.message && s.message.toLowerCase().includes(query)
+            );
+            return suggestorMatch || messageMatch;
+        })
+        .sort((a, b) => {
+            const dateA = new Date(a.suggestions[0]?.createdAt || 0).getTime();
+            const dateB = new Date(b.suggestions[0]?.createdAt || 0).getTime();
+            if (sortBy === 'recent') return dateB - dateA;
+            return 0;
+        });
+
     if (isLoading) {
         return <SkeletonGrid count={4} />;
     }
@@ -38,16 +59,22 @@ export const SuggestionsTab: React.FC = () => {
     }
 
     return (
-        <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
-            <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-slate-800">
-                    <span className="material-symbols-outlined text-[#ffb700]">auto_awesome</span>
-                    Sent for You
-                </h3>
-            </div>
+        <section className="flex flex-col gap-2 animate-[fade-in_0.3s_ease-out] mb-12 mt-4">
+            <FilterBar 
+                search={search}
+                onSearchChange={setSearch}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                sortOptions={[
+                    { value: 'recent', label: 'Recently Suggested' }
+                ]}
+                count={groups.length}
+                countLabel="Titles Suggested"
+                placeholder="Search suggestions..."
+            />
 
             {groups.length === 0 ? (
-                <div className="mt-4 w-full flex justify-center">
+                <div className="py-20 w-full flex justify-center bg-white border border-[#ffb700]/10 rounded-3xl shadow-sm">
                     <EmptyState
                         title="No suggestions yet"
                         message="When your friends suggest movies to you, they'll show up here in a beautiful grid!"
@@ -56,8 +83,8 @@ export const SuggestionsTab: React.FC = () => {
                 </div>
             ) : (
                 <>
-                    <div className="watchlist-grid">
-                        {groups.map((group) => (
+                    <div className="watchlist-grid outline-none">
+                        {filteredGroups.map((group) => (
                             <SuggestionCard 
                                 key={`${group.mediaType}-${group.tmdbId}`} 
                                 group={group} 
@@ -66,8 +93,8 @@ export const SuggestionsTab: React.FC = () => {
                         ))}
                     </div>
                     
-                    <div className="mt-8 flex items-center gap-3 p-6 bg-white border border-dashed border-[#ffb700]/30 rounded-3xl">
-                        <span className="material-symbols-outlined text-[#ffb700]">info</span>
+                    <div className="mt-8 flex items-center gap-3 p-6 bg-white border border-dashed border-[#ffb700]/30 rounded-3xl group hover:border-[#ffb700]/50 transition-colors">
+                        <span className="material-symbols-outlined text-[#ffb700] animate-pulse">info</span>
                         <p className="text-sm text-[#2D2926]/60 font-medium italic">
                             Duplicates are automatically grouped into a single card for a cleaner view.
                         </p>

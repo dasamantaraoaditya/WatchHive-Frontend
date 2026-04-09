@@ -5,7 +5,8 @@ import {
     SkeletonCard, 
     SkeletonGrid,
     ErrorState, 
-    EmptyState 
+    EmptyState,
+    FilterBar
 } from '../common';
 import '../profile/Profile.css';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
@@ -487,6 +488,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedEntry, setSelectedEntry] = useState<{ entry: Entry, details: TmdbDetails | null } | null>(null);
+    const [search, setSearch] = useState(filters?.search || '');
     const [sortBy, setSortBy] = useState<'watchedAt' | 'rating' | 'title'>('watchedAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [pagination, setPagination] = useState({
@@ -502,6 +504,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
             setError(null);
             const response = await entriesApi.getEntries({ 
                 ...filters, 
+                search,
                 sortBy, 
                 order: sortOrder,
                 ...params 
@@ -534,7 +537,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
 
     useEffect(() => {
         loadEntries();
-    }, [loadEntries]);
+    }, [loadEntries, search, sortBy, sortOrder]);
 
     // Push a synthetic history entry when the card opens so the phone's
     // hardware back button closes the card instead of navigating to a previous page.
@@ -579,66 +582,64 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
         );
     }
 
-    if (entries.length === 0) {
-        return (
-            <div className="py-20 w-full flex justify-center">
-                <EmptyState
-                    title="No entries found"
-                    message={typeof filters?.search === 'string' ? `No results for "${filters.search}"` : "Start logging your watch history!"}
-                    icon={<span className="text-5xl drop-shadow-sm">🎬</span>}
-                />
-            </div>
-        );
-    }
-
     return (
-        <div className="w-full flex gap-6 flex-col">
-            <div className="flex flex-row items-center justify-end mb-1 gap-4">
-                <div className="hidden sm:flex items-center gap-2">
-                    <span className="text-[10px] font-black bg-[#2D2926]/5 text-[#2D2926]/40 px-3 py-1.5 rounded-full uppercase tracking-widest border border-[#2D2926]/5">{pagination.total} Logged Titles</span>
-                </div>
-                
-                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-[#ffb700]/20 shadow-sm hover:border-[#ffb700]/40 transition-colors">
-                    <span className="material-symbols-outlined text-[16px] text-[#ffb700]">swap_vert</span>
-                    <select 
-                        className="bg-transparent border-none text-[11px] font-black text-[#2D2926] focus:ring-0 cursor-pointer p-0 pr-6 uppercase tracking-wider"
-                        value={`${sortBy}-${sortOrder}`}
-                        onChange={(e) => {
-                            const [newSort, newOrder] = e.target.value.split('-') as [any, any];
-                            setSortBy(newSort);
-                            setSortOrder(newOrder);
-                        }}
-                    >
-                        <option value="watchedAt-desc">Recently Watched</option>
-                        <option value="watchedAt-asc">Oldest Watched</option>
-                        <option value="rating-desc">Highest Rated</option>
-                        <option value="rating-asc">Lowest Rated</option>
-                        <option value="title-asc">Movie: A-Z</option>
-                        <option value="title-desc">Movie: Z-A</option>
-                    </select>
-                </div>
-            </div>
+        <div className="w-full flex gap-1 flex-col">
+            <FilterBar 
+                search={search}
+                onSearchChange={setSearch}
+                sortBy={`${sortBy}-${sortOrder}`}
+                onSortChange={(val) => {
+                    const [newSort, newOrder] = val.split('-') as [any, any];
+                    setSortBy(newSort);
+                    setSortOrder(newOrder);
+                }}
+                sortOptions={[
+                    { value: 'watchedAt-desc', label: 'Recently Watched' },
+                    { value: 'watchedAt-asc', label: 'Oldest Watched' },
+                    { value: 'rating-desc', label: 'Highest Rated' },
+                    { value: 'rating-asc', label: 'Lowest Rated' },
+                    { value: 'title-asc', label: 'Movie: A-Z' },
+                    { value: 'title-desc', label: 'Movie: Z-A' }
+                ]}
+                count={pagination.total}
+                countLabel="Logged Titles"
+                placeholder="Search your history..."
+            />
 
-            <div className="watchlist-grid outline-none">
-                {entries.map((entry) => (
-                    <EntryCard
-                        key={entry.id}
-                        entry={entry}
-                        onEdit={onEdit}
-                        onDelete={readOnly ? undefined : handleDelete}
-                        onClick={(entry, details) => setSelectedEntry({ entry, details })}
+            {entries.length === 0 ? (
+                <div className="py-20 w-full flex justify-center bg-white border border-[#ffb700]/10 rounded-3xl shadow-sm">
+                    <EmptyState
+                        title={search ? "No matching entries" : "No entries found"}
+                        message={search ? `No results for "${search}"` : "Start logging your watch history!"}
+                        icon={<span className="text-5xl drop-shadow-sm">🎬</span>}
+                        actionLabel={search ? "Clear Search" : undefined}
+                        onAction={search ? () => setSearch('') : undefined}
                     />
-                ))}
-            </div>
-
-            <div ref={observerTarget} className="h-4 w-full mt-4" />
-
-            {isLoading && entries.length > 0 && (
-                <div className="watchlist-grid mt-4">
-                    {[...Array(4)].map((_, i) => (
-                        <SkeletonCard key={`more-${i}`} />
-                    ))}
                 </div>
+            ) : (
+                <>
+                    <div className="watchlist-grid outline-none">
+                        {entries.map((entry) => (
+                            <EntryCard
+                                key={entry.id}
+                                entry={entry}
+                                onEdit={onEdit}
+                                onDelete={readOnly ? undefined : handleDelete}
+                                onClick={(entry, details) => setSelectedEntry({ entry, details })}
+                            />
+                        ))}
+                    </div>
+
+                    <div ref={observerTarget} className="h-4 w-full mt-4" />
+
+                    {isLoading && entries.length > 0 && (
+                        <div className="watchlist-grid mt-4">
+                            {[...Array(4)].map((_, i) => (
+                                <SkeletonCard key={`more-${i}`} />
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
 
             <AnimatePresence>
