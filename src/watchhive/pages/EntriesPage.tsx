@@ -6,9 +6,10 @@ import { EntryList, EntryCard } from '../components/entries/EntryList';
 import { useAuth } from '../contexts';
 import { WatchlistGrid } from '../components/profile';
 import { 
-    BeeLoader, 
     SkeletonCard, 
-    SkeletonGrid
+    SkeletonGrid,
+    EmptyState,
+    FilterBar
 } from '../components/common';
 import { useUI } from '../contexts';
 import { SuggestionsTab } from '../components/suggestions/SuggestionsTab';
@@ -47,6 +48,7 @@ export const EntriesPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('history');
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
+    const [watchingSort, setWatchingSort] = useState('recent');
 
     useEffect(() => {
         if (user && activeTab === 'watching') {
@@ -104,6 +106,13 @@ export const EntriesPage: React.FC = () => {
         }
     };
 
+    const sortedWatchingEntries = [...watchingEntries]
+        .sort((a, b) => {
+            if (watchingSort === 'recent') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            if (watchingSort === 'title') return a.title.localeCompare(b.title);
+            return 0;
+        });
+
     return (
         <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#FFF9F0] font-display text-[#2D2926]">
 
@@ -150,30 +159,39 @@ export const EntriesPage: React.FC = () => {
                         </div>
 
                         {activeTab === 'history' && (
-                            <section className="flex flex-col animate-[fade-in_0.3s_ease-out]">
+                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mt-6">
                                 <EntryList key={refreshKey} onEdit={handleEdit} />
                             </section>
                         )}
                         
                         {activeTab === 'watching' && (
-                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12 mt-4">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-slate-800">
-                                        <span className="material-symbols-outlined text-[#ffb700]">history</span>
-                                        Active Sessions
-                                    </h3>
-                                    <div className="flex gap-2">
-                                        {isWatchingLoading && <BeeLoader size="small" message="" className="py-0" />}
-                                    </div>
-                                </div>
+                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12 mt-6">
+                                <FilterBar 
+                                    sortBy={watchingSort}
+                                    onSortChange={setWatchingSort}
+                                    sortOptions={[
+                                        { value: 'recent', label: 'Recently Added' },
+                                        { value: 'title', label: 'Title: A-Z' }
+                                    ]}
+                                    count={sortedWatchingEntries.length}
+                                    countLabel="Active Sessions"
+                                />
                                 
                                 {isWatchingLoading && watchingEntries.length === 0 ? (
                                     <SkeletonGrid count={3} />
-                                ) : watchingEntries.length === 0 ? (
-                                    <div className="text-center py-16 text-slate-500 bg-white border border-slate-100 rounded-xl font-medium shadow-sm">No active sessions. Start watching something!</div>
+                                ) : sortedWatchingEntries.length === 0 ? (
+                                    <div className="py-20 w-full flex justify-center bg-white border border-[#ffb700]/10 rounded-3xl shadow-sm">
+                                        <EmptyState
+                                            title="No active sessions"
+                                            message="The hive is quiet. Start watching something to track it here!"
+                                            icon={<span className="text-5xl drop-shadow-sm">📺</span>}
+                                            actionLabel="Log a Watch"
+                                            onAction={handleAddNew}
+                                        />
+                                    </div>
                                 ) : (
                                     <div className="watchlist-grid">
-                                        {watchingEntries.map(entry => (
+                                        {sortedWatchingEntries.map(entry => (
                                             <EntryCard 
                                                 key={entry.id} 
                                                 entry={entry}
@@ -187,21 +205,15 @@ export const EntriesPage: React.FC = () => {
                         )}
 
                         {activeTab === 'watchlist' && (
-                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12 mt-4">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="text-xl font-black tracking-tight flex items-center gap-2 text-slate-800">
-                                        <span className="material-symbols-outlined text-[#ffb700]">bookmark</span>
-                                        Watchlist: Saved for Later
-                                    </h3>
-                                </div>
-                                <div className="w-full">
-                                    <WatchlistGrid />
-                                </div>
+                            <section className="w-full flex animate-[fade-in_0.3s_ease-out] flex-col gap-6 mt-6">
+                                <WatchlistGrid />
                             </section>
                         )}
 
                         {activeTab === 'suggestions' && (
-                            <SuggestionsTab />
+                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mt-6">
+                                <SuggestionsTab />
+                            </section>
                         )}
 
 

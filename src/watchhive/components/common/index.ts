@@ -8,6 +8,7 @@ export * from './Skeleton';
 export * from './SkeletonCard';
 export * from './ErrorState';
 export * from './EmptyState';
+export * from './FilterBar';
 export * from './OfflineBanner';
 export * from './WatchlistButton';
 export * from './HiveDatePicker';
