@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import { Avatar, WatchlistButton } from '../common';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
+import { TmdbExpandedCard } from './TmdbExpandedCard';
+import { AnimatePresence } from 'framer-motion';
 import whLogo from '../../assets/images/watchhive-logo.png';
 import './Feed.css';
 
@@ -25,9 +27,13 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [likeCount, setLikeCount] = useState<number>(entryData?._count?.likes || 0);
     const [commentCount, setCommentCount] = useState<number>(entryData?._count?.comments || 0);
     const [showComments, setShowComments] = useState<boolean>(false);
+    const [showExpanded, setShowExpanded] = useState<boolean>(false);
 
-    // Only fetch details if it's an ENTRY (suggestions come with poster_path usually)
-    const { details } = useTmdbDetails(entryData?.tmdbId, entryData?.type);
+    // Only fetch details if it's an ENTRY (suggestions come with poster_path usually), OR if the user expands the card
+    const shouldFetchDetails = !isSuggestion || showExpanded;
+    const fetchTmdbId = shouldFetchDetails ? targetTmdbId : null;
+    const mediaTypeFallback = (item.data as any)?.media_type?.toUpperCase() === 'TV' ? 'TV_SHOW' : 'MOVIE';
+    const { details } = useTmdbDetails(fetchTmdbId as number, entryData?.type || mediaTypeFallback);
 
     const title = isSuggestion ? (item.data.title || item.data.name) : entryData.title;
     
@@ -85,7 +91,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         }
     };
 
-    const actionText = isSuggestion ? 'recommends' : (entryData?.review ? 'reviewed' : 'just watched');
+    const actionText = isSuggestion ? 'recommends' : (entryData?.review ? 'reviewed' : (entryData?.isWatching ? 'is watching' : 'just watched'));
 
     const releaseYear = (details?.release_date || details?.first_air_date || '').substring(0, 4);
     const runtime = details?.runtime || (details?.episode_run_time && details.episode_run_time[0]);
@@ -155,7 +161,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
                 {/* Content: Poster Image */}
                 {posterUrl && (
-                    <div className="feed-card-poster-container">
+                    <div className="feed-card-poster-container cursor-pointer" onClick={() => setShowExpanded(true)}>
                         <div className="feed-card-poster-gradient"></div>
                         <img
                             src={posterUrl}
@@ -249,6 +255,20 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     onCommentAdded={() => setCommentCount(prev => prev + 1)}
                 />
             )}
+
+            <AnimatePresence>
+                {showExpanded && targetTmdbId && (details || item.data) && (
+                    <TmdbExpandedCard
+                        tmdbId={targetTmdbId}
+                        mediaType={entryData?.type || mediaTypeFallback}
+                        details={details}                  // full data with watch_providers (null while loading)
+                        fallbackData={item.data}          // basic data for instant display
+                        title={title}
+                        onClose={() => setShowExpanded(false)}
+                        isWatched={item.data?.isWatched}
+                    />
+                )}
+            </AnimatePresence>
         </>
     );
 };

@@ -27,7 +27,14 @@ export const useTmdbDetails = (tmdbId: number, type: 'MOVIE' | 'TV_SHOW' | 'EPIS
 
         const fetchDetails = async () => {
             try {
-                const data = await apiClient.get(`/tmdb/${endpoint}/${tmdbId}`);
+                const raw: any = await apiClient.get(`/tmdb/${endpoint}/${tmdbId}`);
+                // TMDB returns providers under the key 'watch/providers' (with a slash).
+                // Normalize it to 'watch_providers' so components can access it consistently.
+                const data = {
+                    ...raw,
+                    watch_providers: raw['watch/providers']?.results || raw['watch_providers'] || {},
+                };
+                delete data['watch/providers'];
                 tmdbCache.set(cacheKey, data);
                 setDetails(data);
             } catch (err) {

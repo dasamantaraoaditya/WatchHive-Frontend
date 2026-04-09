@@ -71,19 +71,19 @@ export const WatchlistButton: React.FC<WatchlistButtonProps> = ({
             {localLoading ? (
                 <span className="wh-spinner-sm" />
             ) : inList ? (
-                <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="mr-1">
+                <span className="flex items-center justify-center whitespace-nowrap gap-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                     </svg>
                     In Watchlist
-                </>
+                </span>
             ) : (
-                <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="mr-1">
+                <span className="flex items-center justify-center whitespace-nowrap gap-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
                     </svg>
                     Watchlist
-                </>
+                </span>
             )}
         </Button>
     );
