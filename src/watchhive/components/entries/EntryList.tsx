@@ -488,7 +488,6 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedEntry, setSelectedEntry] = useState<{ entry: Entry, details: TmdbDetails | null } | null>(null);
-    const [search, setSearch] = useState(filters?.search || '');
     const [sortBy, setSortBy] = useState<'watchedAt' | 'rating' | 'title'>('watchedAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [pagination, setPagination] = useState({
@@ -504,7 +503,6 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
             setError(null);
             const response = await entriesApi.getEntries({ 
                 ...filters, 
-                search,
                 sortBy, 
                 order: sortOrder,
                 ...params 
@@ -537,7 +535,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
 
     useEffect(() => {
         loadEntries();
-    }, [loadEntries, search, sortBy, sortOrder]);
+    }, [loadEntries, sortBy, sortOrder]);
 
     // Push a synthetic history entry when the card opens so the phone's
     // hardware back button closes the card instead of navigating to a previous page.
@@ -585,8 +583,6 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     return (
         <div className="w-full flex animate-[fade-in_0.3s_ease-out] flex-col gap-6">
             <FilterBar 
-                search={search}
-                onSearchChange={setSearch}
                 sortBy={`${sortBy}-${sortOrder}`}
                 onSortChange={(val) => {
                     const [newSort, newOrder] = val.split('-') as [any, any];
@@ -603,17 +599,14 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
                 ]}
                 count={pagination.total}
                 countLabel="Logged Titles"
-                placeholder="Search your history..."
             />
 
             {entries.length === 0 ? (
                 <div className="py-20 w-full flex justify-center bg-white border border-[#ffb700]/10 rounded-3xl shadow-sm">
                     <EmptyState
-                        title={search ? "No matching entries" : "No entries found"}
-                        message={search ? `No results for "${search}"` : "Start logging your watch history!"}
+                        title="No entries found"
+                        message="Start logging your watch history!"
                         icon={<span className="text-5xl drop-shadow-sm">🎬</span>}
-                        actionLabel={search ? "Clear Search" : undefined}
-                        onAction={search ? () => setSearch('') : undefined}
                     />
                 </div>
             ) : (

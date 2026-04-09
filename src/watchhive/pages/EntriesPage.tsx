@@ -48,7 +48,6 @@ export const EntriesPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('history');
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
-    const [watchingSearch, setWatchingSearch] = useState('');
     const [watchingSort, setWatchingSort] = useState('recent');
 
     useEffect(() => {
@@ -108,9 +107,6 @@ export const EntriesPage: React.FC = () => {
     };
 
     const sortedWatchingEntries = [...watchingEntries]
-        .filter(entry => 
-            entry.title.toLowerCase().includes(watchingSearch.toLowerCase())
-        )
         .sort((a, b) => {
             if (watchingSort === 'recent') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
             if (watchingSort === 'title') return a.title.localeCompare(b.title);
@@ -171,8 +167,6 @@ export const EntriesPage: React.FC = () => {
                         {activeTab === 'watching' && (
                             <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12 mt-6">
                                 <FilterBar 
-                                    search={watchingSearch}
-                                    onSearchChange={setWatchingSearch}
                                     sortBy={watchingSort}
                                     onSortChange={setWatchingSort}
                                     sortOptions={[
@@ -181,7 +175,6 @@ export const EntriesPage: React.FC = () => {
                                     ]}
                                     count={sortedWatchingEntries.length}
                                     countLabel="Active Sessions"
-                                    placeholder="Search currently watching..."
                                 />
                                 
                                 {isWatchingLoading && watchingEntries.length === 0 ? (
@@ -189,11 +182,11 @@ export const EntriesPage: React.FC = () => {
                                 ) : sortedWatchingEntries.length === 0 ? (
                                     <div className="py-20 w-full flex justify-center bg-white border border-[#ffb700]/10 rounded-3xl shadow-sm">
                                         <EmptyState
-                                            title={watchingSearch ? "No matching sessions" : "No active sessions"}
-                                            message={watchingSearch ? `No results for "${watchingSearch}"` : "The hive is quiet. Start watching something to track it here!"}
+                                            title="No active sessions"
+                                            message="The hive is quiet. Start watching something to track it here!"
                                             icon={<span className="text-5xl drop-shadow-sm">📺</span>}
-                                            actionLabel={watchingSearch ? "Clear Search" : "Log a Watch"}
-                                            onAction={() => watchingSearch ? setWatchingSearch('') : handleAddNew()}
+                                            actionLabel="Log a Watch"
+                                            onAction={handleAddNew}
                                         />
                                     </div>
                                 ) : (

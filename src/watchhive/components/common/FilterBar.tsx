@@ -6,8 +6,8 @@ interface SortOption {
 }
 
 interface FilterBarProps {
-    search: string;
-    onSearchChange: (value: string) => void;
+    search?: string;
+    onSearchChange?: (value: string) => void;
     sortBy: string;
     onSortChange: (value: string) => void;
     sortOptions: SortOption[];
@@ -17,7 +17,7 @@ interface FilterBarProps {
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
-    search,
+    search = "",
     onSearchChange,
     sortBy,
     onSortChange,
@@ -27,19 +27,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     countLabel = "items"
 }) => {
     return (
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 py-2">
-            <div className="flex-1 relative group max-w-2xl">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#2D2926]/40 group-focus-within:text-[#ffb700] transition-colors text-[20px]">
-                    search
-                </span>
-                <input
-                    type="text"
-                    placeholder={placeholder}
-                    value={search}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-[#ffb700]/10 rounded-2xl text-[14px] font-medium text-[#2D2926] placeholder-[#2D2926]/30 focus:outline-none focus:ring-2 focus:ring-[#ffb700]/10 focus:border-[#ffb700]/30 transition-all shadow-sm group-hover:bg-white"
-                />
-            </div>
+        <div className={`flex flex-col md:flex-row items-stretch md:items-center ${onSearchChange ? 'justify-between' : 'justify-end'} gap-4 py-2`}>
+            {onSearchChange && (
+                <div className="flex-1 relative group max-w-2xl">
+                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#2D2926]/40 group-focus-within:text-[#ffb700] transition-colors text-[20px]">
+                        search
+                    </span>
+                    <input
+                        type="text"
+                        placeholder={placeholder}
+                        value={search}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-[#ffb700]/10 rounded-2xl text-[14px] font-medium text-[#2D2926] placeholder-[#2D2926]/30 focus:outline-none focus:ring-2 focus:ring-[#ffb700]/10 focus:border-[#ffb700]/30 transition-all shadow-sm group-hover:bg-white"
+                    />
+                </div>
+            )}
 
             <div className="flex items-center gap-3 self-end md:self-auto">
                 {count !== undefined && (

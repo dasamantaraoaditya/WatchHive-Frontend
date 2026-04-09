@@ -7,7 +7,6 @@ export const SuggestionsTab: React.FC = () => {
     const [groups, setGroups] = useState<GroupedSuggestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('recent');
 
     const fetchSuggestions = useCallback(async () => {
@@ -28,17 +27,6 @@ export const SuggestionsTab: React.FC = () => {
     }, [fetchSuggestions]);
 
     const filteredGroups = groups
-        .filter(group => {
-            const query = search.toLowerCase();
-            const suggestorMatch = group.suggestors.some(s => 
-                s.username.toLowerCase().includes(query) || 
-                (s.displayName && s.displayName.toLowerCase().includes(query))
-            );
-            const messageMatch = group.suggestions.some(s => 
-                s.message && s.message.toLowerCase().includes(query)
-            );
-            return suggestorMatch || messageMatch;
-        })
         .sort((a, b) => {
             const dateA = new Date(a.suggestions[0]?.createdAt || 0).getTime();
             const dateB = new Date(b.suggestions[0]?.createdAt || 0).getTime();
@@ -61,8 +49,6 @@ export const SuggestionsTab: React.FC = () => {
     return (
         <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
             <FilterBar 
-                search={search}
-                onSearchChange={setSearch}
                 sortBy={sortBy}
                 onSortChange={setSortBy}
                 sortOptions={[
@@ -70,7 +56,6 @@ export const SuggestionsTab: React.FC = () => {
                 ]}
                 count={groups.length}
                 countLabel="Titles Suggested"
-                placeholder="Search suggestions..."
             />
 
             {groups.length === 0 ? (

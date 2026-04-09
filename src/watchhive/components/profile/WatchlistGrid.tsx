@@ -15,7 +15,6 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     isLoading: propLoading 
 }) => {
     const { watchlist: contextWatchlist, isLoading: contextLoading, fetchWatchlist } = useWatchlist();
-    const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('recent');
 
     // Use props if provided, otherwise context
@@ -30,9 +29,6 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     }, [fetchWatchlist, propItems]);
 
     const filteredItems = [...items]
-        .filter(item => 
-            item.title?.toLowerCase().includes(search.toLowerCase())
-        )
         .sort((a, b) => {
             if (sortBy === 'recent') return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
             if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '');
@@ -46,8 +42,6 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     return (
         <div className="flex flex-col gap-6">
             <FilterBar 
-                search={search}
-                onSearchChange={setSearch}
                 sortBy={sortBy}
                 onSortChange={setSortBy}
                 sortOptions={[
@@ -56,17 +50,14 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                 ]}
                 count={filteredItems.length}
                 countLabel="Saved Titles"
-                placeholder="Search your watchlist..."
             />
 
             {filteredItems.length === 0 ? (
                 <div className="py-20 w-full flex justify-center bg-white border border-[#ffb700]/10 rounded-3xl shadow-sm">
                     <EmptyState
-                        title={search ? "No matching titles" : "Your watchlist is empty"}
-                        message={search ? `No results for "${search}"` : "The hive is waiting. Add movies and shows you want to watch!"}
+                        title="Your watchlist is empty"
+                        message="The hive is waiting. Add movies and shows you want to watch!"
                         icon={<span className="text-5xl drop-shadow-sm">👀</span>}
-                        actionLabel={search ? "Clear Search" : undefined}
-                        onAction={search ? () => setSearch('') : undefined}
                     />
                 </div>
             ) : (
