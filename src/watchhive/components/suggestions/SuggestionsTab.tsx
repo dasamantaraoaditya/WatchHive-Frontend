@@ -59,7 +59,7 @@ export const SuggestionsTab: React.FC = () => {
     }
 
     return (
-        <section className="flex flex-col gap-2 animate-[fade-in_0.3s_ease-out] mb-12 mt-4">
+        <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
             <FilterBar 
                 search={search}
                 onSearchChange={setSearch}

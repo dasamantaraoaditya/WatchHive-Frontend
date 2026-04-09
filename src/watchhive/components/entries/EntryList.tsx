@@ -583,7 +583,7 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     }
 
     return (
-        <div className="w-full flex gap-1 flex-col">
+        <div className="w-full flex animate-[fade-in_0.3s_ease-out] flex-col gap-6">
             <FilterBar 
                 search={search}
                 onSearchChange={setSearch}

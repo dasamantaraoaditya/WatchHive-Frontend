@@ -44,7 +44,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     }
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-6">
             <FilterBar 
                 search={search}
                 onSearchChange={setSearch}

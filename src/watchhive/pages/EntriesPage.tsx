@@ -163,13 +163,13 @@ export const EntriesPage: React.FC = () => {
                         </div>
 
                         {activeTab === 'history' && (
-                            <section className="flex flex-col animate-[fade-in_0.3s_ease-out]">
+                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mt-6">
                                 <EntryList key={refreshKey} onEdit={handleEdit} />
                             </section>
                         )}
                         
                         {activeTab === 'watching' && (
-                            <section className="flex flex-col gap-2 animate-[fade-in_0.3s_ease-out] mb-12 mt-4">
+                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12 mt-6">
                                 <FilterBar 
                                     search={watchingSearch}
                                     onSearchChange={setWatchingSearch}
@@ -212,13 +212,15 @@ export const EntriesPage: React.FC = () => {
                         )}
 
                         {activeTab === 'watchlist' && (
-                            <section className="flex flex-col gap-2 animate-[fade-in_0.3s_ease-in] mb-12 mt-4">
+                            <section className="w-full flex animate-[fade-in_0.3s_ease-out] flex-col gap-6 mt-6">
                                 <WatchlistGrid />
                             </section>
                         )}
 
                         {activeTab === 'suggestions' && (
-                            <SuggestionsTab />
+                            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mt-6">
+                                <SuggestionsTab />
+                            </section>
                         )}
 
 
