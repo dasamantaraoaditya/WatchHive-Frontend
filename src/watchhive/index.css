@@ -192,6 +192,10 @@
     --accent-primary: var(--primary-500);
     --accent-hover: var(--primary-600);
     --accent-light: var(--primary-50);
+
+    /* === Header === */
+    --header-height: 72px;
+    --header-height-mobile: 64px;
 }
 
 /* ============================================
@@ -246,10 +250,21 @@ body {
     min-height: 100vh;
     min-width: 0;
     transition: margin-left var(--transition-base);
+    background-color: var(--bg-primary);
 }
 
 .app-main--with-sidebar {
     margin-left: 256px; /* Width of the sidebar */
+}
+
+/* Page Container - Standardized for all screens */
+.page-container {
+    width: 100%;
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
 }
 
 @media (max-width: 768px) {
@@ -428,7 +443,7 @@ select:focus-visible {
 
 /* Display */
 .hidden {
-    display: none !important;
+    display: none;
 }
 
 .block {
@@ -608,6 +623,38 @@ select:focus-visible {
     max-width: var(--container-xl);
 }
 
+.max-w-2xl {
+    max-width: var(--container-2xl);
+}
+
+.max-w-3xl {
+    max-width: var(--container-3xl);
+}
+
+.max-w-4xl {
+    max-width: var(--container-4xl);
+}
+
+.max-w-5xl {
+    max-width: var(--container-5xl);
+}
+
+.max-w-6xl {
+    max-width: var(--container-6xl);
+}
+
+.max-w-7xl {
+    max-width: var(--container-7xl);
+}
+
+.max-w-full {
+    max-width: 100%;
+}
+
+.max-w-none {
+    max-width: none;
+}
+
 /* Responsive Utilities */
 @media (max-width: 768px) {
     .mobile-hidden {
@@ -669,6 +716,26 @@ select:focus-visible {
 
 .animate-slide-down {
     animation: slideDown var(--transition-slow) ease-out;
+}
+
+@keyframes skeletonPulse {
+    0% {
+        background-color: var(--neutral-100);
+        opacity: 0.6;
+    }
+    50% {
+        background-color: var(--neutral-200);
+        opacity: 1;
+    }
+    100% {
+        background-color: var(--neutral-100);
+        opacity: 0.6;
+    }
+}
+
+.skeleton {
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+    background-color: var(--neutral-100);
 }
 
 /* ============================================

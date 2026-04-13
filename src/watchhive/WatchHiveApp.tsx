@@ -7,6 +7,7 @@ import { EntryForm } from './components/entries/EntryForm';
 import { WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage } from './pages';
+import { ScrollToTop } from './components/common';
 import './index.css';
 
 // Protected Route Component
@@ -192,6 +193,7 @@ const AppRoutes: React.FC = () => {
 export const WatchHiveApp: React.FC = () => {
     return (
         <BrowserRouter>
+            <ScrollToTop />
             <AuthProvider>
                 <NotificationProvider>
                     <WatchlistProvider>

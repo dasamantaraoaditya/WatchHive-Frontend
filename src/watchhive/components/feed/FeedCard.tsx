@@ -30,6 +30,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [showExpanded, setShowExpanded] = useState<boolean>(false);
     const [showShareFeedback, setShowShareFeedback] = useState<boolean>(false);
     const [isCommented, setIsCommented] = useState<boolean>(entryData?.isCommented || false);
+    const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
 
     // Only fetch details if it's an ENTRY (suggestions come with poster_path usually), OR if the user expands the card
     const shouldFetchDetails = !isSuggestion || showExpanded;
@@ -163,7 +164,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     </div>
 
                     <div className="feed-card-header-info flex-1 min-w-0 pr-2">
-                        <div className="flex items-start justify-between w-full">
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between w-full gap-2">
                             <div className="flex flex-col min-w-[0] pr-2">
                                 <p className="feed-card-header-text">
                                     {isSuggestion ? (
@@ -184,13 +185,6 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     </p>
                                 )}
                             </div>
-
-                            {!isSuggestion && (
-                                <div className="text-right flex-shrink-0 flex flex-col justify-center border-l border-[#2D2926]/5 pl-3">
-                                    <span className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] mb-0.5 whitespace-nowrap">Seen at</span>
-                                    <span className="text-[11px] font-bold text-[#2D2926]/50 whitespace-nowrap">{timestamp}</span>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -204,15 +198,22 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             alt={title}
                             className="feed-card-poster-img"
                             loading="lazy"
+                            onLoad={() => setIsImageLoading(false)}
+                            onError={() => setIsImageLoading(false)}
                         />
+                        {isImageLoading && (
+                            <div className="absolute inset-0 skeleton" style={{ zIndex: 0 }} />
+                        )}
                         <div className="feed-card-poster-badges">
-                            {rating && (
-                                <div className="feed-card-rating">
-                                    <span className="material-symbols-outlined text-primary text-xl">grade</span>
-                                    <span className="font-bold text-white text-lg">{Number(rating).toFixed(1)}</span>
-                                </div>
-                            )}
-
+                            <div className="flex flex-col gap-2">
+                                {rating && (
+                                    <div className="feed-card-rating">
+                                        <span className="material-symbols-outlined text-primary text-xl">grade</span>
+                                        <span className="font-bold text-white text-lg">{Number(rating).toFixed(1)}</span>
+                                    </div>
+                                )}
+                            </div>
+                            
                             {/* Tags (if any exist) */}
                             {!isSuggestion && entryData?.tags && entryData.tags.length > 0 && (
                                 <div className="feed-card-tags">
@@ -222,6 +223,15 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                 </div>
                             )}
                         </div>
+                    </div>
+                )}
+
+                {/* Refined Timestamp Placement: Right-aligned below the image */}
+                {!isSuggestion && (
+                    <div className="feed-card-timestamp-footer">
+                        <span className="material-symbols-outlined text-[12px] opacity-40">schedule</span>
+                        <span className="timestamp-label">Seen</span>
+                        <span className="timestamp-value">{timestamp}</span>
                     </div>
                 )}
 

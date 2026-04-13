@@ -27,13 +27,13 @@ export const HeaderActions: React.FC = () => {
 
     return (
         <div className="flex items-center gap-3">
-            <Link to="/watch-hive/notifications" className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-white/20 text-[#2D2926] hover:bg-white/40 transition-colors" title="Notifications">
-                <span className="material-symbols-outlined text-[20px] md:text-[24px]">notifications</span>
+            <Link to="/watch-hive/notifications" className="w-10 h-10 flex items-center justify-center rounded-full bg-black/5 text-[#2D2926] hover:bg-[#ffb700]/10 transition-all" title="Notifications">
+                <span className="material-symbols-outlined text-[22px]">notifications</span>
             </Link>
             
             <div className="relative" ref={profileRef}>
                 <button
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-transparent hover:border-[#ffb700] transition-colors focus:outline-none focus:ring-4 focus:ring-[#ffb700]/10 flex items-center justify-center bg-white/20"
+                    className="w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-[#ffb700] transition-colors focus:outline-none focus:ring-4 focus:ring-[#ffb700]/10 flex items-center justify-center bg-black/5"
                     onClick={() => setProfileOpen(p => !p)}
                     title="My Account"
                     aria-label="Open profile menu"
@@ -41,18 +41,24 @@ export const HeaderActions: React.FC = () => {
                     <Avatar src={user?.profilePictureUrl} name={user?.displayName || user?.username || 'User'} size="sm" />
                 </button>
                 {profileOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-white/90 backdrop-blur-xl border border-white/20 rounded-2xl shadow-xl overflow-hidden z-50">
-                        <div className="p-4 bg-[#ffb700]/5 flex flex-col items-center border-b border-[#2D2926]/5">
+                    <div className="absolute right-0 top-full mt-3 w-64 bg-white/95 backdrop-blur-xl border border-black/5 rounded-2xl shadow-2xl overflow-hidden z-50 animate-slide-up">
+                        <div className="p-5 bg-gradient-to-br from-[#ffb700]/10 to-transparent flex flex-col items-center border-b border-black/5">
+                            <Avatar src={user?.profilePictureUrl} name={user?.displayName || user?.username || 'User'} size="md" className="mb-3 shadow-lg shadow-[#ffb700]/10" />
                             <strong className="text-sm font-black text-[#2D2926] truncate w-full text-center">{user?.displayName || user?.username}</strong>
-                            <span className="text-[10px] uppercase font-bold text-[#2D2926]/40 tracking-widest truncate w-full text-center">@{user?.username}</span>
+                            <span className="text-[10px] uppercase font-bold text-[#2D2926]/40 tracking-widest truncate w-full text-center mt-1">@{user?.username}</span>
                         </div>
                         <div className="p-2 flex flex-col gap-1">
-                            <Link to="/watch-hive/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm font-bold text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors">
-                                <span className="material-symbols-outlined text-[18px] text-[#ffb700]">person</span>
-                                View My Profile
+                            <Link to="/watch-hive/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors">
+                                <span className="material-symbols-outlined text-[20px] text-[#ffb700]">person</span>
+                                Profile
                             </Link>
-                            <button onClick={handleLogout} className="flex items-center gap-3 w-full text-left px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition-colors">
-                                <span className="material-symbols-outlined text-[18px]">logout</span>
+                            <Link to="/watch-hive/search" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors">
+                                <span className="material-symbols-outlined text-[20px] text-[#ffb700]">explore</span>
+                                Explore
+                            </Link>
+                            <div className="h-px bg-black/5 my-1 mx-2" />
+                            <button onClick={handleLogout} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
+                                <span className="material-symbols-outlined text-[20px]">logout</span>
                                 Sign Out
                             </button>
                         </div>

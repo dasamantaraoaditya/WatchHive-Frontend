@@ -31,6 +31,7 @@ export const TmdbExpandedCard: React.FC<TmdbExpandedCardProps> = ({ tmdbId, medi
     // Merge: prefer full `details` but fall back to `fallbackData` for basic fields
     const d = details || fallbackData;
     const [isNavVisible, setIsNavVisible] = useState(true);
+    const [isPosterLoading, setIsPosterLoading] = useState(true);
     const lastScrollY = React.useRef(0);
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -119,9 +120,15 @@ export const TmdbExpandedCard: React.FC<TmdbExpandedCardProps> = ({ tmdbId, medi
                             src={posterUrl}
                             alt={title}
                             className="absolute inset-0 w-full h-full object-cover object-top md:object-center"
+                            onLoad={() => setIsPosterLoading(false)}
+                            onError={() => setIsPosterLoading(false)}
                         />
                     )}
                 </picture>
+
+                {isPosterLoading && (
+                    <div className="absolute inset-0 skeleton" />
+                )}
 
                 <div className="absolute inset-0 bg-gradient-to-t from-[#FFF9F0] via-[#FFF9F0]/60 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />

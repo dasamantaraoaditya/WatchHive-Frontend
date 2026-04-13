@@ -33,14 +33,20 @@ export const FeedCardSkeleton: React.FC = () => {
     return (
         <div className="skeleton-feed-card">
             <div className="skeleton-feed-header">
-                <Skeleton variant="circle" width={48} height={48} />
-                <div className="flex-1">
-                    <Skeleton variant="text" width="60%" height={16} className="mb-2" />
-                    <Skeleton variant="text" width="35%" height={12} />
+                <div className="skeleton-avatar-wrapper">
+                    <Skeleton variant="circle" width={48} height={48} />
                 </div>
-                <div className="flex flex-col items-end gap-1">
-                    <Skeleton variant="text" width={40} height={10} />
-                    <Skeleton variant="text" width={60} height={12} />
+                <div className="flex-1 min-w-0">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                        <div className="flex-1 space-y-2">
+                            <Skeleton variant="text" width="70%" height={16} />
+                            <Skeleton variant="text" width="40%" height={12} />
+                        </div>
+                        <div className="hidden md:flex flex-col items-end gap-1 border-l border-black/5 pl-3">
+                            <Skeleton variant="text" width={40} height={10} />
+                            <Skeleton variant="text" width={60} height={12} />
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -49,28 +55,32 @@ export const FeedCardSkeleton: React.FC = () => {
             </div>
 
             <div className="skeleton-feed-insight">
-                <Skeleton variant="circle" width={24} height={24} className="mt-1" />
+                <Skeleton variant="circle" width={24} height={24} className="mt-1 opacity-50" />
                 <div className="flex-1">
-                    <Skeleton variant="text" width="20%" height={12} className="mb-2" />
-                    <Skeleton variant="text" width="90%" height={14} />
+                    <Skeleton variant="text" width="30%" height={10} className="mb-2 opacity-50" />
+                    <Skeleton variant="text" width="95%" height={14} className="mb-1.5" />
                     <Skeleton variant="text" width="70%" height={14} />
                 </div>
             </div>
 
-            <div className="skeleton-feed-actions">
+            <div className="skeleton-feed-timestamp">
+                <Skeleton variant="text" width={80} height={10} />
+            </div>
+
+            <div className="skeleton-feed-actions mt-6">
                 <div className="flex gap-6">
                     <div className="flex items-center gap-2">
                         <Skeleton variant="circle" width={20} height={20} />
-                        <Skeleton variant="text" width={20} height={14} />
+                        <Skeleton variant="text" width={24} height={14} />
                     </div>
                     <div className="flex items-center gap-2">
                         <Skeleton variant="circle" width={20} height={20} />
-                        <Skeleton variant="text" width={20} height={14} />
+                        <Skeleton variant="text" width={24} height={14} />
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
-                    <Skeleton variant="circle" width={24} height={24} />
-                    <Skeleton variant="circle" width={24} height={24} />
+                    <Skeleton variant="circle" width={24} height={24} className="opacity-40" />
+                    <Skeleton variant="circle" width={32} height={32} className="opacity-40" />
                 </div>
             </div>
         </div>

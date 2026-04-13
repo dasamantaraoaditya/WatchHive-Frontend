@@ -49,6 +49,13 @@
     font-size: 0.95rem;
     line-height: 1.4;
     margin: 0;
+    word-break: break-word; /* Ensure extremely long words don't overflow */
+}
+
+@media (max-width: 768px) {
+    .feed-card-header-text {
+        font-size: 0.9rem;
+    }
 }
 
 .feed-card-time {
@@ -201,4 +208,34 @@
 
 .action-btn--commented {
     color: var(--accent-primary);
+}
+
+/* ── Timestamp Footer (New) ── */
+.feed-card-timestamp-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    padding-right: 0.25rem;
+}
+
+.timestamp-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: rgba(45, 41, 38, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+
+.timestamp-value {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgba(45, 41, 38, 0.45);
+}
+
+@media (max-width: 768px) {
+    .feed-card-timestamp-footer {
+        margin-top: 0.5rem;
+    }
 }

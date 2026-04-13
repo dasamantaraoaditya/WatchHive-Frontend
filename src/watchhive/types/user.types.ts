@@ -8,6 +8,7 @@ export interface User {
     profilePictureUrl: string | null;
     location: string | null;
     isPrivate: boolean;
+    privacyLevel: 'PUBLIC' | 'FOLLOWERS_ONLY' | 'PRIVATE';
     showWatchEntries: boolean;
     showCurrentlyWatching: boolean;
     showWatchlist: boolean;
@@ -45,7 +46,7 @@ export interface UpdateUserData {
     displayName?: string;
     bio?: string;
     location?: string;
-    isPrivate?: boolean;
+    privacyLevel?: 'PUBLIC' | 'FOLLOWERS_ONLY' | 'PRIVATE';
     showWatchEntries?: boolean;
     showCurrentlyWatching?: boolean;
     showWatchlist?: boolean;

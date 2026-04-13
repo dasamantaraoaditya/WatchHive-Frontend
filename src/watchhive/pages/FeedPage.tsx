@@ -10,6 +10,7 @@ import '../components/feed/Feed.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useUI } from '../contexts';
+import { PageLayout } from '../components/layout';
 
 export const FeedPage: React.FC = () => {
     const isOnline = useOnlineStatus();
@@ -146,110 +147,106 @@ export const FeedPage: React.FC = () => {
     }
 
     return (
-        <div className="feed-page-layout">
-            <div className="feed-page-main">
-                <div className="feed-container">
-                    {/* Error State (Dismissable or retryable) */}
-                    {error && (
-                        <div className="mb-6">
+        <PageLayout maxWidth="none" className="w-full px-4 md:px-12">
+            <div className="feed-page-layout flex flex-row gap-8 items-start justify-between w-full">
+                {/* Main Feed Content Area - Centered in the remaining space */}
+                <div className="flex-1 flex justify-center min-w-0">
+                    <div className="w-full max-w-[680px] flex flex-col gap-6">
+                        {/* Error State */}
+                        {error && (
                             <ErrorState
                                 message={error}
                                 onRetry={() => fetchFeed(1)}
                             />
-                        </div>
-                    )}
+                        )}
 
-                    {/* Feed Items */}
-                    {items.map((item) => (
-                        <FeedCard key={`${item.type}-${item.id}`} item={item} />
-                    ))}
+                        {/* Feed Items */}
+                        {items.length > 0 ? (
+                            items.map((item) => (
+                                <FeedCard key={`${item.type}-${item.id}`} item={item} />
+                            ))
+                        ) : !loading && !initialLoading ? (
+                            <EmptyState
+                                title="Your feed is empty"
+                                message="Follow users or rate movies to see activity here!"
+                                icon={<span className="material-symbols-outlined text-4xl text-primary">feed</span>}
+                                actionLabel="Discover People"
+                                onAction={() => window.location.href = '/watch-hive/search'}
+                            />
+                        ) : null}
 
-                    {/* Skeletons for loading */}
-                    {(loading || initialLoading) && (
-                        <>
-                            <FeedCardSkeleton />
-                            <FeedCardSkeleton />
-                            <FeedCardSkeleton />
-                        </>
-                    )}
+                        {/* Skeletons */}
+                        {(loading || initialLoading) && (
+                            <>
+                                <FeedCardSkeleton />
+                                <FeedCardSkeleton />
+                            </>
+                        )}
 
-                    {/* Infinite Scroll Anchor */}
-                    <div ref={observerTarget} style={{ height: '20px', margin: '20px 0' }} />
-
-                    {/* Empty State */}
-                    {!loading && !initialLoading && items.length === 0 && !error && (
-                        <EmptyState
-                            title="Your feed is empty"
-                            message="Follow users or rate movies to see activity here!"
-                            icon={
-                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                                </svg>
-                            }
-                            actionLabel="Find People"
-                            onAction={() => window.location.href = '/watch-hive/search'}
-                        />
-                    )}
+                        {/* Infinite Scroll Anchor */}
+                        <div ref={observerTarget} style={{ height: '20px', margin: '20px 0' }} />
+                    </div>
                 </div>
+
+                {/* Right Sidebar Widgets */}
+                <aside className="feed-right-sidebar">
+                    <div className="flex flex-col gap-8 sticky top-[100px] w-[320px]">
+                        {/* Trending Section */}
+                        <section className="widget-section">
+                            <div className="widget-header">
+                                <h3>
+                                    <span className="material-symbols-outlined text-primary leading-none">trending_up</span>
+                                    Trending in Hive
+                                </h3>
+                            </div>
+                            <div className="widget-content">
+                                {loadingTrending ? (
+                                    <TrendingWidgetSkeleton />
+                                ) : trendingItems.length > 0 ? (
+                                    trendingItems.map((item, index) => (
+                                        <div className="trending-item" key={index}>
+                                            <p className="trending-context">{item.context || 'Trending'}</p>
+                                            <p className="trending-title">{item.title}</p>
+                                            <p className="trending-stats">{(item.buzzes || 0).toLocaleString()} Buzzes</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-slate-400">No trending topics right now.</p>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Suggestions Section */}
+                        <section className="widget-section">
+                            <div className="widget-header">
+                                <h3>
+                                    <span className="material-symbols-outlined text-primary leading-none">group_add</span>
+                                    Who to Follow
+                                </h3>
+                            </div>
+                            <div className="widget-content">
+                                {loadingSuggestions ? (
+                                    <SuggestionWidgetSkeleton />
+                                ) : suggestedUsers.length > 0 ? (
+                                    suggestedUsers.map(user => (
+                                        <div className="suggestion-item" key={user.id}>
+                                            <Avatar src={user.profilePictureUrl || null} name={user.displayName || user.username} size="sm" />
+                                            <div className="suggestion-info">
+                                                <p className="suggestion-name">{user.displayName || user.username}</p>
+                                                <p className="suggestion-role text-xs text-[#2D2926]/40 line-clamp-1">{user.bio || 'Movie Fan'}</p>
+                                            </div>
+                                            <button className="btn-follow" onClick={() => handleFollow(user.id)}>Follow</button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-[#2D2926]/50">No suggestions right now.</p>
+                                )}
+                            </div>
+                        </section>
+                    </div>
+                </aside>
             </div>
-
-            {/* Right Sidebar Widgets */}
-            <aside className="feed-right-sidebar pr-6">
-
-
-                <section className="widget-section">
-                    <div className="widget-header">
-                        <h3>
-                            <span className="material-symbols-outlined text-primary leading-none">trending_up</span>
-                            Trending in Hive
-                        </h3>
-                    </div>
-                    <div className="widget-content">
-                        {loadingTrending ? (
-                            <div className="flex flex-col">
-                                {[...Array(3)].map((_, i) => <TrendingWidgetSkeleton key={i} />)}
-                            </div>
-                        ) : trendingItems.length > 0 ? (
-                            trendingItems.map((item, index) => (
-                                <div className="trending-item" key={index}>
-                                    <p className="trending-context">{item.context}</p>
-                                    <p className="trending-title">{item.title}</p>
-                                    <p className="trending-stats">{item.buzzes.toLocaleString()} Buzzes</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-sm text-slate-400 mb-2">No trending topics right now.</p>
-                        )}
-                    </div>
-                </section>
-
-                <section className="widget-section">
-                    <h3 className="mb-4 font-bold text-[#2D2926]">Suggested Follows</h3>
-                    <div className="widget-content">
-                        {loadingSuggestions ? (
-                            <div className="flex flex-col">
-                                {[...Array(3)].map((_, i) => <SuggestionWidgetSkeleton key={i} />)}
-                            </div>
-                        ) : suggestedUsers.length > 0 ? (
-                            suggestedUsers.map(user => (
-                                <div className="suggestion-item" key={user.id}>
-                                    <Avatar src={user.profilePictureUrl || null} name={user.displayName || user.username} size="sm" />
-                                    <div className="suggestion-info">
-                                        <p className="suggestion-name">{user.displayName || user.username}</p>
-                                        <p className="suggestion-role text-xs text-[#2D2926]/40 line-clamp-1">{user.bio ? user.bio : 'Movie Fan'}</p>
-                                    </div>
-                                    <button className="btn-follow" onClick={() => handleFollow(user.id)}>Follow</button>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-sm text-[#2D2926]/50 mb-2">No suggestions right now.</p>
-                        )}
-                    </div>
-                    <button className="btn-show-more">Show more</button>
-                </section>
-            </aside>
-
-        </div>
+        </PageLayout>
     );
 };
 

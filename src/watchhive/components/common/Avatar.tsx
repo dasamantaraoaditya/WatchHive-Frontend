@@ -76,6 +76,7 @@ export const Avatar: React.FC<AvatarProps> = ({
 }) => {
     const resolvedSrc = resolveAvatarUrl(src);
     const [imgError, setImgError] = React.useState(false);
+    const [isImgLoading, setIsImgLoading] = React.useState(true);
 
     const showImage = resolvedSrc && !imgError;
 
@@ -88,13 +89,20 @@ export const Avatar: React.FC<AvatarProps> = ({
             onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
         >
             {showImage ? (
-                <img
-                    src={resolvedSrc}
-                    alt={name}
-                    className="avatar__image"
-                    onError={() => setImgError(true)}
-                    draggable={false}
-                />
+                <>
+                    <img
+                        src={resolvedSrc}
+                        alt={name}
+                        className={`avatar__image ${isImgLoading ? 'opacity-0' : 'opacity-100'}`}
+                        onLoad={() => setIsImgLoading(false)}
+                        onError={() => {
+                            setImgError(true);
+                            setIsImgLoading(false);
+                        }}
+                        draggable={false}
+                    />
+                    {isImgLoading && <div className="avatar__placeholder skeleton" />}
+                </>
             ) : (
                 <div
                     className="avatar__placeholder"
