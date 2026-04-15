@@ -22,6 +22,7 @@ export const ProfilePage: React.FC = () => {
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
     const [stats, setStats] = useState<{ followersCount: number; followingCount: number } | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
+    const [privacyUpdating, setPrivacyUpdating] = useState(false);
     
     // Data export / import state
     const [exportFormat, setExportFormat] = useState<ExportFormat>('json');
@@ -162,11 +163,17 @@ export const ProfilePage: React.FC = () => {
     };
 
     const handleTogglePrivacy = async (field: keyof UpdateUserData, value: any) => {
+        setPrivacyUpdating(true);
+        setError(null);
         try {
             const updatedUser = await userService.updateUserData({ [field]: value });
             updateUser(updatedUser);
+            setSuccessMsg(`${field === 'privacyLevel' ? 'Visibility' : 'Setting'} updated successfully!`);
+            setTimeout(() => setSuccessMsg(null), 3000);
         } catch (err: any) {
             setError(err.message || 'Failed to update privacy settings');
+        } finally {
+            setPrivacyUpdating(false);
         }
     };
 
@@ -317,7 +324,15 @@ export const ProfilePage: React.FC = () => {
                             Profile Visibility
                         </h3>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
+                            {privacyUpdating && (
+                                <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center animate-fade-in">
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="w-8 h-8 border-4 border-[#ffb700] border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ffb700]">Applying changes...</p>
+                                    </div>
+                                </div>
+                            )}
                             {[
                                 { 
                                     id: 'PUBLIC', 
@@ -340,25 +355,30 @@ export const ProfilePage: React.FC = () => {
                                     desc: 'Only you can see your profile details and entries.',
                                     color: 'bg-slate-100 text-slate-600'
                                 }
-                            ].map((tier) => (
-                                <button
-                                    key={tier.id}
-                                    onClick={() => handleTogglePrivacy('privacyLevel', tier.id)}
-                                    className={`flex flex-col items-center text-center p-5 rounded-2xl border-2 transition-all group ${
-                                        user.privacyLevel === tier.id 
-                                        ? 'border-[#ffb700] bg-[#ffb700]/5' 
-                                        : 'border-slate-100 hover:border-[#ffb700]/30 hover:bg-slate-50'
-                                    }`}
-                                >
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110 ${tier.color}`}>
-                                        <span className="material-symbols-outlined text-2xl">{tier.icon}</span>
-                                    </div>
-                                    <div className="font-bold text-slate-900 mb-1">{tier.label}</div>
-                                    <div className="text-[11px] leading-relaxed text-slate-400 font-medium">
-                                        {tier.desc}
-                                    </div>
-                                </button>
-                            ))}
+                            ].map((tier) => {
+                                const currentPrivacyLevel = user.privacyLevel || (user.isPrivate ? 'FOLLOWERS_ONLY' : 'PUBLIC');
+                                const isActive = currentPrivacyLevel === tier.id;
+
+                                return (
+                                    <button
+                                        key={tier.id}
+                                        onClick={() => handleTogglePrivacy('privacyLevel', tier.id)}
+                                        className={`flex flex-col items-center text-center p-5 rounded-2xl border-2 transition-all group ${
+                                            isActive 
+                                            ? 'border-[#ffb700] bg-[#ffb700]/5' 
+                                            : 'border-slate-100 hover:border-[#ffb700]/30 hover:bg-slate-50'
+                                        }`}
+                                    >
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110 ${tier.color}`}>
+                                            <span className="material-symbols-outlined text-2xl">{tier.icon}</span>
+                                        </div>
+                                        <div className="font-bold text-slate-900 mb-1">{tier.label}</div>
+                                        <div className="text-[11px] leading-relaxed text-slate-400 font-medium">
+                                            {tier.desc}
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         {user.privacyLevel === 'PUBLIC' && (
@@ -372,7 +392,7 @@ export const ProfilePage: React.FC = () => {
                     </div>
 
                     {/* Visibility Details - Conditional */}
-                    {user.privacyLevel !== 'PRIVATE' && (
+                    {(user.privacyLevel || (user.isPrivate ? 'FOLLOWERS_ONLY' : 'PUBLIC')) !== 'PRIVATE' && (
                         <>
                             {[
                                 { id: 'showWatchEntries', label: 'Show Watch Entries', icon: 'history', desc: 'Display your movie/show history' },

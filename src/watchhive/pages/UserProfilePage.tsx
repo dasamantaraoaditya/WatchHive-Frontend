@@ -37,8 +37,8 @@ export const UserProfilePage: React.FC = () => {
             return;
         }
 
-        const fetchUser = async () => {
-            setLoading(true);
+        const fetchUser = async (showLoading = true) => {
+            if (showLoading) setLoading(true);
             try {
                 const data = await userService.getUser(id);
                 setProfileUser(data);
@@ -48,7 +48,7 @@ export const UserProfilePage: React.FC = () => {
                 console.error(err);
                 setError('User not found');
             } finally {
-                setLoading(false);
+                if (showLoading) setLoading(false);
             }
         };
 
@@ -86,6 +86,9 @@ export const UserProfilePage: React.FC = () => {
             } else {
                 await userService.followUser(profileUser.id);
             }
+            // Re-fetch full user data to update stats and tabs immediately
+            const updatedData = await userService.getUser(profileUser.id);
+            setProfileUser(updatedData);
         } catch (err) {
             // Revert on error
             setProfileUser(prev => prev ? ({ ...prev, isFollowing: originalStatus }) : null);
@@ -159,7 +162,7 @@ export const UserProfilePage: React.FC = () => {
                                 {profileUser.bio || "Building a hive of visual experiences. Passionate about storytelling and cinema."}
                             </p>
                             
-                            {profileUser._count && (
+                            {canViewEntries && profileUser._count && (
                                 <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-2">
                                     {[
                                         { label: 'Watches', count: profileUser._count.entries || 0, icon: 'movie' },
