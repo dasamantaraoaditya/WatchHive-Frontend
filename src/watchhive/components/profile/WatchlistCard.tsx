@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWatchlist } from '../../contexts/WatchlistContext';
-import { entriesApi, CreateEntryData } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
+import { MovieDetailsModal } from '../common';
 import './Profile.css';
 
 interface WatchlistCardProps {
@@ -14,7 +14,8 @@ const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
 export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie' }) => {
     const [details, setDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [marking, setMarking] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [modalView, setModalView] = useState<'details' | 'log'>('details');
     const { removeFromList } = useWatchlist();
 
     useEffect(() => {
@@ -36,30 +37,13 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const handleMarkAsWatched = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        if (marking || !details) return;
+        setModalView('log');
+        setShowModal(true);
+    };
 
-        const title = details.title || details.name;
-        if (!window.confirm(`Mark "${title}" as watched and add to your hive?`)) return;
-
-        setMarking(true);
-        try {
-            const entryData: CreateEntryData = {
-                tmdbId: Number(tmdbId),
-                title: title,
-                type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
-                watchedAt: new Date().toISOString().split('T')[0],
-                review: '',
-                tags: []
-            };
-
-            await entriesApi.createEntry(entryData);
-            await removeFromList(tmdbId);
-        } catch (error) {
-            console.error('Failed to mark as watched', error);
-            alert('Failed to mark as watched. Please try again.');
-        } finally {
-            setMarking(false);
-        }
+    const handleCardClick = () => {
+        setModalView('details');
+        setShowModal(true);
     };
 
     const handleRemove = async (e: React.MouseEvent) => {
@@ -84,8 +68,12 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const rating = details.vote_average ? details.vote_average.toFixed(1) : '';
 
     return (
-        <div className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl bg-white border border-[#ffb700]/10 shadow-sm hover:shadow-md transition-all">
-            <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
+        <>
+            <div 
+                className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl bg-white border border-[#ffb700]/10 shadow-sm hover:shadow-md transition-all"
+                onClick={handleCardClick}
+            >
+                <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
                 {details.poster_path ? (
                     <img
                         src={`${TMDB_IMG}${details.poster_path}`}
@@ -105,12 +93,11 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                         onClick={handleMarkAsWatched}
-                        disabled={marking}
                         className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
                         title="Mark as Watched (Hive It)"
                     >
                         <span className="material-symbols-outlined text-[18px]">
-                            {marking ? 'sync' : 'check_circle'}
+                            check_circle
                         </span>
                     </button>
                     
@@ -139,5 +126,17 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 </div>
             </div>
         </div>
+
+        <MovieDetailsModal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            tmdbId={tmdbId}
+            mediaType={mediaType as 'movie' | 'tv'}
+            initialView={modalView}
+            onLogSuccess={async () => {
+                await removeFromList(tmdbId);
+            }}
+        />
+        </>
     );
 };

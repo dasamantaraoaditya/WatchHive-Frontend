@@ -90,18 +90,9 @@ export const EntriesPage: React.FC = () => {
     };
 
     const handleComplete = async (entry: Entry) => {
-        if (!window.confirm(`Mark "${entry.title}" as completed?`)) return;
-        try {
-            await entriesApi.updateEntry(entry.id, {
-                isWatching: false,
-                watchedAt: new Date().toISOString()
-            });
-            fetchWatching();
-            setRefreshKey(prev => prev + 1);
-        } catch (err) {
-            console.error('Failed to complete watching', err);
-            alert('Failed to update entry');
-        }
+        // The modal handles the actual update now. Just refresh the list.
+        fetchWatching();
+        setRefreshKey(prev => prev + 1);
     };
 
     const sortedWatchingEntries = [...watchingEntries]

@@ -28,13 +28,19 @@ interface MovieDetailsModalProps {
     onClose: () => void;
     tmdbId: number | null;
     mediaType: 'movie' | 'tv' | null;
+    initialView?: 'details' | 'log' | 'suggest';
+    onLogSuccess?: () => void;
+    existingEntry?: any; // any to avoid circular import if Entry is not available here, or import it
 }
 
 export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
     isOpen,
     onClose,
     tmdbId,
-    mediaType
+    mediaType,
+    initialView = 'details',
+    onLogSuccess,
+    existingEntry
 }) => {
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [loading, setLoading] = useState(false);
@@ -46,14 +52,14 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
 
     useEffect(() => {
         if (isOpen && tmdbId && mediaType) {
-            setView('details');
+            setView(initialView);
             fetchDetails();
         } else {
             setDetails(null);
             setError(null);
-            setView('details');
+            setView(initialView);
         }
-    }, [isOpen, tmdbId, mediaType]);
+    }, [isOpen, tmdbId, mediaType, initialView]);
 
     const handleWatchlistToggle = async () => {
         if (!tmdbId) return;
@@ -289,6 +295,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                             </div>
 
                             <EntryForm 
+                                entry={existingEntry}
                                 prefillData={{
                                     tmdbId: tmdbId!,
                                     title: title,
@@ -297,7 +304,10 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                     overview: details.overview
                                 }}
                                 isModal={true}
-                                onSuccess={() => onClose()}
+                                onSuccess={() => {
+                                    if (onLogSuccess) onLogSuccess();
+                                    onClose();
+                                }}
                                 onCancel={() => setView('details')}
                             />
                         </div>

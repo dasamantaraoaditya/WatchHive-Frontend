@@ -6,7 +6,8 @@ import {
     SkeletonGrid,
     ErrorState,
     EmptyState,
-    FilterBar
+    FilterBar,
+    MovieDetailsModal
 } from '../common';
 import '../profile/Profile.css';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
@@ -31,6 +32,7 @@ export const EntryCard: React.FC<{
 }> = ({ entry, onEdit, onDelete: _onDelete, onComplete: _onComplete, onClick }) => {
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
+    const [isCompleting, setIsCompleting] = useState(false);
 
     const cacheKey = `${entry.type}-${entry.tmdbId}`;
 
@@ -141,7 +143,7 @@ export const EntryCard: React.FC<{
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                _onComplete(entry);
+                                setIsCompleting(true);
                             }}
                             className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
                             title="Complete Watching"
@@ -175,6 +177,23 @@ export const EntryCard: React.FC<{
                     {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
                 </div>
             </motion.div>
+
+            <MovieDetailsModal
+                isOpen={isCompleting}
+                onClose={() => setIsCompleting(false)}
+                tmdbId={entry.tmdbId}
+                mediaType={entry.type === 'TV_SHOW' ? 'tv' : 'movie'}
+                initialView="log"
+                existingEntry={{
+                    ...entry,
+                    isWatching: false,
+                    watchedAt: new Date().toISOString()
+                }}
+                onLogSuccess={() => {
+                    if (_onComplete) _onComplete(entry);
+                    setIsCompleting(false);
+                }}
+            />
         </motion.div>
     );
 };
