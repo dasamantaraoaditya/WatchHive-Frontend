@@ -196,13 +196,13 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         <img
                             src={posterUrl}
                             alt={title}
-                            className="feed-card-poster-img"
+                            className={`feed-card-poster-img transition-opacity duration-700 ease-in-out ${isImageLoading ? 'opacity-0 scale-105' : 'opacity-100 scale-100'}`}
                             loading="lazy"
                             onLoad={() => setIsImageLoading(false)}
                             onError={() => setIsImageLoading(false)}
                         />
                         {isImageLoading && (
-                            <div className="absolute inset-0 skeleton" style={{ zIndex: 0 }} />
+                            <div className="absolute inset-0 skeleton" style={{ zIndex: 0, borderBottomLeftRadius: '0', borderBottomRightRadius: '0' }} />
                         )}
                         <div className="feed-card-poster-badges">
                             <div className="flex flex-col gap-2">
