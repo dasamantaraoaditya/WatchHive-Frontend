@@ -9,6 +9,7 @@ interface EntryFormProps {
     onSuccess?: (entry: Entry) => void;
     onCancel?: () => void;
     isModal?: boolean;
+    defaultIsWatching?: boolean;
 }
 
 interface TmdbResult {
@@ -150,7 +151,7 @@ const LOCATION_PRESETS = [
     { label: 'Mobile', value: 'On the Go', icon: 'smartphone' },
 ];
 
-export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false }) => {
+export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false, defaultIsWatching = false }) => {
     const isEditing = !!entry;
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -172,7 +173,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         review: entry?.review || '',
         tags: entry?.tags || [],
         isRewatch: entry?.isRewatch || false,
-        isWatching: entry?.isWatching || false,
+        isWatching: entry?.isWatching || defaultIsWatching,
         watchLocation: entry?.watchLocation || '',
     });
 

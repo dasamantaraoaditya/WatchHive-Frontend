@@ -2,9 +2,9 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth, UIProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
-import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner } from './components/common';
+import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, MovieDetailsModal } from './components/common';
 import { EntryForm } from './components/entries/EntryForm';
-import { WatchlistProvider } from './contexts/WatchlistContext';
+import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage } from './pages';
 import { ScrollToTop } from './components/common';
@@ -43,7 +43,23 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 // App Routes Component
 const AppRoutes: React.FC = () => {
     const { isAuthenticated } = useAuth();
-    const [isQuickAddOpen, setIsQuickAddOpen] = React.useState(false);
+    const { addToList } = useWatchlist();
+    const [activeAction, setActiveAction] = React.useState<'log' | 'watching' | 'watchlist' | 'suggest' | null>(null);
+    const [selectedMedia, setSelectedMedia] = React.useState<{ tmdbId: number; mediaType: 'movie' | 'tv' } | null>(null);
+
+    const closeAll = () => {
+        setActiveAction(null);
+        setSelectedMedia(null);
+    };
+
+    const handleSearchSelect = async (tmdbId: number, mediaType: 'movie' | 'tv') => {
+        if (activeAction === 'watchlist') {
+            await addToList(tmdbId, mediaType);
+            closeAll();
+        } else if (activeAction === 'suggest') {
+            setSelectedMedia({ tmdbId, mediaType });
+        }
+    };
 
     return (
         <div className="app-layout">
@@ -165,19 +181,44 @@ const AppRoutes: React.FC = () => {
                 
                 {isAuthenticated && (
                     <>
-                        <QuickAddFAB onClick={() => setIsQuickAddOpen(true)} />
+                        <QuickAddFAB 
+                            onLogWatch={() => setActiveAction('log')}
+                            onCurrentlyWatching={() => setActiveAction('watching')}
+                            onWatchlist={() => setActiveAction('watchlist')}
+                            onSuggest={() => setActiveAction('suggest')}
+                        />
 
+                        {/* Modals for Quick Actions */}
+                        
                         <Modal
-                            isOpen={isQuickAddOpen}
-                            onClose={() => setIsQuickAddOpen(false)}
+                            isOpen={activeAction === 'log' || activeAction === 'watching'}
+                            onClose={closeAll}
                             title="Log your latest watch"
                         >
                             <EntryForm
-                                onSuccess={() => setIsQuickAddOpen(false)}
-                                onCancel={() => setIsQuickAddOpen(false)}
+                                onSuccess={closeAll}
+                                onCancel={closeAll}
                                 isModal={true}
+                                defaultIsWatching={activeAction === 'watching'}
                             />
                         </Modal>
+
+                        <SearchMediaModal
+                            isOpen={(activeAction === 'watchlist' || activeAction === 'suggest') && !selectedMedia}
+                            onClose={closeAll}
+                            title={activeAction === 'watchlist' ? 'Add to Watchlist' : 'Suggest to a Friend'}
+                            onSelect={handleSearchSelect}
+                        />
+
+                        {selectedMedia && activeAction === 'suggest' && (
+                            <MovieDetailsModal
+                                isOpen={true}
+                                onClose={closeAll}
+                                tmdbId={selectedMedia.tmdbId}
+                                mediaType={selectedMedia.mediaType}
+                                initialView="suggest"
+                            />
+                        )}
                     </>
                 )}
 
