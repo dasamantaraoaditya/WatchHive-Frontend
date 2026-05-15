@@ -89,7 +89,7 @@ export const EntriesPage: React.FC = () => {
         setShowForm(true);
     };
 
-    const handleComplete = async (entry: Entry) => {
+    const handleComplete = async () => {
         // The modal handles the actual update now. Just refresh the list.
         fetchWatching();
         setRefreshKey(prev => prev + 1);
