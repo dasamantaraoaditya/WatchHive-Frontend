@@ -36,6 +36,8 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     const callbackRef = useRef(onSuccess);
     const errorRef = useRef(onError);
 
+    const [scriptError, setScriptError] = useState(false);
+
     // Keep refs current to avoid stale closures in Google's callback
     callbackRef.current = onSuccess;
     errorRef.current = onError;
@@ -65,6 +67,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
         if (existingScript) {
             // Script tag exists but hasn't loaded yet, listen for it
             existingScript.addEventListener('load', () => setScriptLoaded(true));
+            existingScript.addEventListener('error', () => setScriptError(true));
             return;
         }
 
@@ -74,7 +77,10 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
         script.async = true;
         script.defer = true;
         script.onload = () => setScriptLoaded(true);
-        script.onerror = () => errorRef.current('Failed to load Google Sign-In');
+        script.onerror = () => {
+            setScriptError(true);
+            errorRef.current('Failed to load Google Sign-In script.');
+        };
         document.head.appendChild(script);
     }, []);
 
@@ -145,6 +151,20 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
                 </svg>
                 Continue with Google (Not configured)
             </button>
+        );
+    }
+
+    if (scriptError) {
+        return (
+            <div className="w-full flex flex-col items-center justify-center p-4 border border-rose-200 bg-rose-50 rounded-2xl gap-2">
+                <span className="material-symbols-outlined text-rose-500 text-[24px]">shield_lock</span>
+                <p className="text-[13px] font-bold text-rose-600 text-center">
+                    Google Sign-In was blocked by your browser's Adblocker or Tracking Prevention (like Edge Shields).
+                </p>
+                <p className="text-[12px] font-semibold text-rose-500/80 text-center">
+                    Please disable it for this site and refresh the page to continue.
+                </p>
+            </div>
         );
     }
 
