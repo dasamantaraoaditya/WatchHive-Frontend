@@ -127,6 +127,12 @@ export const CinematicStacksPage: React.FC = () => {
 
     const handleRemove = async (tmdbId: number) => {
         if (!currentList) return;
+        const targetItem = items.find(item => item.tmdbId === tmdbId);
+        const title = targetItem?.title || 'this title';
+
+        const confirmed = window.confirm(`Are you sure you want to remove "${title}" from this stack?`);
+        if (!confirmed) return;
+
         try {
             await listsApi.removeFromStack(currentList.id, tmdbId);
             setItems(prev => prev.filter(item => item.tmdbId !== tmdbId));
