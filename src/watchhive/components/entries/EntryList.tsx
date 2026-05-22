@@ -97,101 +97,103 @@ export const EntryCard: React.FC<{
     const metadataString = metaItems.join(' • ');
 
     return (
-        <motion.div
-            layoutId={`card-wrapper-${entry.id}`}
-            className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl"
-            onClick={() => onClick && onClick(entry, details)}
-            whileHover={onClick ? { scale: 0.98, transition: { duration: 0.2 } } : {}}
-            whileTap={onClick ? { scale: 0.95 } : {}}
-        >
-            <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
-                {posterUrl && !imgError ? (
-                    <motion.img
-                        layoutId={`poster-${entry.id}`}
-                        src={posterUrl}
-                        alt={entry.title}
-                        className="watchlist-card__poster object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
-                        loading="lazy"
-                        onError={() => setImgError(true)}
-                    />
-                ) : (
-                    <div className="watchlist-card__no-poster h-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-4xl mb-2 text-[#2D2926]/20">movie</span>
+        <>
+            <motion.div
+                layoutId={`card-wrapper-${entry.id}`}
+                className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl"
+                onClick={() => onClick && onClick(entry, details)}
+                whileHover={onClick ? { scale: 0.98, transition: { duration: 0.2 } } : {}}
+                whileTap={onClick ? { scale: 0.95 } : {}}
+            >
+                <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
+                    {posterUrl && !imgError ? (
+                        <motion.img
+                            layoutId={`poster-${entry.id}`}
+                            src={posterUrl}
+                            alt={entry.title}
+                            className="watchlist-card__poster object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="watchlist-card__no-poster h-full flex items-center justify-center">
+                            <span className="material-symbols-outlined text-4xl mb-2 text-[#2D2926]/20">movie</span>
+                        </div>
+                    )}
+
+                    {/* Overlay shadow for cinematic feel */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Actions — desktop hover only */}
+                    <div className="hidden sm:flex absolute top-2 right-2 flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        {onEdit && (
+                            <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" title="Edit">
+                                <span className="material-symbols-outlined text-[18px]">edit</span>
+                            </button>
+                        )}
+                        {_onDelete && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    _onDelete(entry.id);
+                                }}
+                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                                title="Delete"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                        )}
+                        {_onComplete && entry.isWatching && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsCompleting(true);
+                                }}
+                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                                title="Complete Watching"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                            </button>
+                        )}
                     </div>
-                )}
 
-                {/* Overlay shadow for cinematic feel */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                        <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90`}>
+                            {ti.emoji}
+                        </span>
+                    </div>
+                </div>
 
-                {/* Actions — desktop hover only */}
-                <div className="hidden sm:flex absolute top-2 right-2 flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {onEdit && (
-                        <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" title="Edit">
-                            <span className="material-symbols-outlined text-[18px]">edit</span>
-                        </button>
+                <motion.div layoutId={`card-content-${entry.id}`} className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white">
+                    <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={entry.title}>
+                        {entry.title}
+                    </motion.h4>
+                    <div className="text-[10px] text-[#2D2926]/40 dark:text-stone-400 font-bold mb-1.5 flex items-center justify-between">
+                        <span>{formatDate(entry.watchedAt)}</span>
+                    </div>
+                    {details?.overview && (
+                        <p className="text-[11px] text-[#2D2926]/60 dark:text-stone-500 line-clamp-2 leading-relaxed mb-2 mt-0.5">
+                            {details.overview}
+                        </p>
                     )}
-                    {_onDelete && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                _onDelete(entry.id);
-                            }}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            title="Delete"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
-                    )}
+                    <div className="watchlist-card__meta text-[11px] font-bold mt-auto text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
+                        <span className="truncate flex-1">{metadataString || '-'}</span>
+                        {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
+                    </div>
+                    {/* Have Watched button — always visible when entry is in currently watching mode */}
                     {_onComplete && entry.isWatching && (
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setIsCompleting(true);
                             }}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            title="Complete Watching"
+                            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
                         >
-                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                            <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                            Have Watched
                         </button>
                     )}
-                </div>
-
-                <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                    <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90`}>
-                        {ti.emoji}
-                    </span>
-                </div>
-            </div>
-
-            <motion.div layoutId={`card-content-${entry.id}`} className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white">
-                <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={entry.title}>
-                    {entry.title}
-                </motion.h4>
-                <div className="text-[10px] text-[#2D2926]/40 dark:text-stone-400 font-bold mb-1.5 flex items-center justify-between">
-                    <span>{formatDate(entry.watchedAt)}</span>
-                </div>
-                {details?.overview && (
-                    <p className="text-[11px] text-[#2D2926]/60 dark:text-stone-500 line-clamp-2 leading-relaxed mb-2 mt-0.5">
-                        {details.overview}
-                    </p>
-                )}
-                <div className="watchlist-card__meta text-[11px] font-bold mt-auto text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
-                    <span className="truncate flex-1">{metadataString || '-'}</span>
-                    {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
-                </div>
-                {/* Have Watched button — always visible when entry is in currently watching mode */}
-                {_onComplete && entry.isWatching && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsCompleting(true);
-                        }}
-                        className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
-                    >
-                        <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                        Have Watched
-                    </button>
-                )}
+                </motion.div>
             </motion.div>
 
             <MovieDetailsModal
@@ -210,7 +212,7 @@ export const EntryCard: React.FC<{
                     setIsCompleting(false);
                 }}
             />
-        </motion.div>
+        </>
     );
 };
 

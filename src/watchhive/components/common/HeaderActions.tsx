@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts';
 import { Avatar } from './Avatar';
 import { useNotifications } from '../../contexts/NotificationContext';
+import { followsService } from '../../services/follows.service';
+import { PendingRequestsModal } from '../profile/PendingRequestsModal';
 
 export const HeaderActions: React.FC = () => {
     const { user, logout } = useAuth();
@@ -10,6 +12,28 @@ export const HeaderActions: React.FC = () => {
     const navigate = useNavigate();
     const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef<HTMLDivElement>(null);
+    const [pendingCount, setPendingCount] = useState(0);
+    const [pendingModalOpen, setPendingModalOpen] = useState(false);
+
+    const fetchPendingCount = async () => {
+        if (!user) return;
+        try {
+            const data = await followsService.getPendingRequests();
+            setPendingCount(data.length);
+        } catch (error) {
+            console.error('Failed to fetch pending requests count', error);
+        }
+    };
+
+    useEffect(() => {
+        if (user) {
+            fetchPendingCount();
+            const interval = setInterval(fetchPendingCount, 15000);
+            return () => clearInterval(interval);
+        } else {
+            setPendingCount(0);
+        }
+    }, [user]);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -63,6 +87,23 @@ export const HeaderActions: React.FC = () => {
                                 <span className="material-symbols-outlined text-[20px] text-[#ffb700]">explore</span>
                                 Explore
                             </Link>
+                            <button 
+                                onClick={() => {
+                                    setProfileOpen(false);
+                                    setPendingModalOpen(true);
+                                }}
+                                className="flex items-center justify-between w-full px-4 py-3 text-xs font-black uppercase tracking-widest text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors text-left"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-[20px] text-[#ffb700]">lock_person</span>
+                                    Pending Requests
+                                </div>
+                                {pendingCount > 0 && (
+                                    <span className="bg-[#ffb700] text-white px-2 py-0.5 rounded-full text-[9px] font-black tracking-normal">
+                                        {pendingCount}
+                                    </span>
+                                )}
+                            </button>
                             <div className="h-px bg-black/5 my-1 mx-2" />
                             <button onClick={handleLogout} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
                                 <span className="material-symbols-outlined text-[20px]">logout</span>
@@ -72,6 +113,11 @@ export const HeaderActions: React.FC = () => {
                     </div>
                 )}
             </div>
+            <PendingRequestsModal 
+                isOpen={pendingModalOpen} 
+                onClose={() => setPendingModalOpen(false)} 
+                onRequestsUpdated={fetchPendingCount} 
+            />
         </div>
     );
 };

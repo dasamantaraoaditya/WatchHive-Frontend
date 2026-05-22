@@ -27,9 +27,11 @@ interface PendingRequest {
 export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOpen, onClose, onRequestsUpdated }) => {
     const [requests, setRequests] = useState<PendingRequest[]>([]);
     const [loading, setLoading] = useState(false);
+    const [hasHadRequests, setHasHadRequests] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
+            setHasHadRequests(false);
             fetchRequests();
             document.body.style.overflow = 'hidden';
         } else {
@@ -38,11 +40,24 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
+    // Auto-close modal 1.5s after user finishes resolving all pending requests
+    useEffect(() => {
+        if (isOpen && hasHadRequests && requests.length === 0 && !loading) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [requests.length, hasHadRequests, isOpen, loading, onClose]);
+
     const fetchRequests = async () => {
         setLoading(true);
         try {
             const data = await followsService.getPendingRequests();
             setRequests(data);
+            if (data && data.length > 0) {
+                setHasHadRequests(true);
+            }
         } catch (error) {
             console.error('Failed to fetch pending requests', error);
         } finally {
@@ -136,8 +151,14 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
                                 All Caught Up!
                             </h4>
                             <p className="text-sm font-medium text-[#2D2926]/50">
-                                You don't have any pending follow requests to review.
+                                {hasHadRequests ? "You've resolved all pending requests." : "You don't have any pending follow requests to review."}
                             </p>
+                            <button
+                                onClick={onClose}
+                                className="mt-4 px-6 py-2.5 bg-[#2D2926] text-white hover:bg-[#ffb700] hover:text-[#2D2926] text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm active:scale-95"
+                            >
+                                Dismiss
+                            </button>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-2 p-2">

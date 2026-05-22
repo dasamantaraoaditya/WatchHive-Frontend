@@ -107,21 +107,43 @@ export const SearchUsersPage: React.FC = () => {
         enabled: isOnline && !error,
     });
 
-    const handleFollowToggle = async (e: React.MouseEvent, user: User) => {
+    const handleFollowToggle = async (e: React.MouseEvent, targetUser: User) => {
         e.preventDefault();
         e.stopPropagation();
-        setUserResults(prev => prev.map(u =>
-            u.id === user.id ? { ...u, isFollowing: !u.isFollowing } : u
-        ));
-        try {
-            if (user.isFollowing) {
-                await userService.unfollowUser(user.id);
+
+        const originalFollowing = targetUser.isFollowing;
+        const originalRequested = targetUser.isRequested;
+
+        let nextFollowing = originalFollowing;
+        let nextRequested = originalRequested;
+
+        if (originalFollowing) {
+            nextFollowing = false;
+            nextRequested = false;
+        } else if (originalRequested) {
+            nextFollowing = false;
+            nextRequested = false;
+        } else {
+            if (targetUser.isPrivate) {
+                nextRequested = true;
             } else {
-                await userService.followUser(user.id);
+                nextFollowing = true;
+            }
+        }
+
+        setUserResults(prev => prev.map(u =>
+            u.id === targetUser.id ? { ...u, isFollowing: nextFollowing, isRequested: nextRequested } : u
+        ));
+
+        try {
+            if (originalFollowing || originalRequested) {
+                await userService.unfollowUser(targetUser.id);
+            } else {
+                await userService.followUser(targetUser.id);
             }
         } catch (err) {
             setUserResults(prev => prev.map(u =>
-                u.id === user.id ? { ...u, isFollowing: user.isFollowing } : u
+                u.id === targetUser.id ? { ...u, isFollowing: originalFollowing, isRequested: originalRequested } : u
             ));
         }
     };
@@ -236,10 +258,14 @@ export const SearchUsersPage: React.FC = () => {
                                     <button
                                         onClick={(e) => handleFollowToggle(e, user)}
                                         className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
-                                            user.isFollowing ? 'bg-slate-100 text-slate-500' : 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20'
+                                            user.isFollowing 
+                                            ? 'bg-slate-100 text-slate-500' 
+                                            : user.isRequested
+                                            ? 'bg-amber-100 text-amber-600 hover:bg-amber-200'
+                                            : 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20 hover:brightness-105'
                                         }`}
                                     >
-                                        {user.isFollowing ? 'Following' : 'Follow'}
+                                        {user.isFollowing ? 'Following' : user.isRequested ? 'Requested 🔒' : 'Follow'}
                                     </button>
                                 </Link>
                             ))}

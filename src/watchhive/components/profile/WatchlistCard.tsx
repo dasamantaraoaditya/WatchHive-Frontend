@@ -21,13 +21,22 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const [modalView, setModalView] = useState<'details' | 'log'>('details');
     const { removeFromList } = useWatchlist();
     const [isTransitioning, setIsTransitioning] = useState(false);
-    const { confirm } = useCustomAlert();
+    const { confirm, alert } = useCustomAlert();
 
     const handleAddToWatching = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
 
         if (isTransitioning) return;
+
+        const title = details?.title || details?.name || 'this title';
+        const confirmed = await confirm(`Would you like to start watching "${title}"? This will move it from your watchlist to your Currently Watching list.`, {
+            title: 'Start Watching',
+            confirmText: 'Start Watching',
+            severity: 'primary'
+        });
+        if (!confirmed) return;
+
         setIsTransitioning(true);
 
         try {
@@ -44,8 +53,19 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
 
             // Remove from watchlist
             await removeFromList(tmdbId);
+
+            // Display beautiful success alert
+            await alert(`"${title}" has been successfully moved to your Currently Watching list!`, {
+                title: 'Watching Started',
+                severity: 'success',
+                confirmText: 'Awesome'
+            });
         } catch (err) {
             console.error('Failed to move item to currently watching', err);
+            await alert(`Failed to start watching "${title}". Please try again.`, {
+                title: 'Error',
+                severity: 'error'
+            });
         } finally {
             setIsTransitioning(false);
         }
