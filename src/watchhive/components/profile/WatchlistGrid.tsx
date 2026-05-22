@@ -107,14 +107,14 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                             </span>
                         </div>
                         <h3 className="text-2xl font-black text-[#2D2926] mb-2">
-                            {searchQuery ? "No matching titles" : "Nothing saved yet"}
+                            {searchQuery ? "No matching titles" : "No watchlist preferences"}
                         </h3>
                         <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
                             {searchQuery
                                 ? `No watchlist items match "${searchQuery}"`
                                 : readOnly
                                     ? "This user hasn't saved any movies or shows to their watchlist yet."
-                                    : "Add movies and shows you want to watch next and they'll appear here."}
+                                    : "Your watchlist is looking empty. Add movies and shows you want to watch next to build your cinematic preferences!"}
                         </p>
                         {!searchQuery && !readOnly && (
                             <button
