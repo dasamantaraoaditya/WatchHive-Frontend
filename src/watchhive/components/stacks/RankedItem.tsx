@@ -18,12 +18,14 @@ interface TmdbDetails {
 interface RankedItemProps {
     item: ListItem;
     rank: number;
+    totalItems: number;
     onRemove?: (tmdbId: number) => void;
+    onMove?: (direction: 'up' | 'down') => void;
 }
 
 const tmdbCache = new Map<number, TmdbDetails>();
 
-export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) => {
+export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, onRemove, onMove }) => {
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
     const dragControls = useDragControls();
@@ -127,7 +129,43 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
                     </div>
                 )}
                 
-                <div className="flex items-center gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-1 sm:gap-2">
+                    {onMove && (
+                        <div className="flex flex-col bg-white border border-[#2D2926]/10 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onMove('up');
+                                }}
+                                disabled={rank === 1}
+                                className={`w-8 h-6 flex items-center justify-center transition-all ${
+                                    rank === 1 
+                                        ? 'text-[#2D2926]/10 cursor-not-allowed bg-slate-50/50' 
+                                        : 'text-[#2D2926]/60 hover:text-[#ffb700] hover:bg-[#ffb700]/5 active:scale-95'
+                                }`}
+                                title="Move up"
+                            >
+                                <span className="material-symbols-outlined text-[18px] font-bold">keyboard_arrow_up</span>
+                            </button>
+                            <div className="h-[1px] bg-[#2D2926]/10 w-full" />
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onMove('down');
+                                }}
+                                disabled={rank === totalItems}
+                                className={`w-8 h-6 flex items-center justify-center transition-all ${
+                                    rank === totalItems 
+                                        ? 'text-[#2D2926]/10 cursor-not-allowed bg-slate-50/50' 
+                                        : 'text-[#2D2926]/60 hover:text-[#ffb700] hover:bg-[#ffb700]/5 active:scale-95'
+                                }`}
+                                title="Move down"
+                            >
+                                <span className="material-symbols-outlined text-[18px] font-bold">keyboard_arrow_down</span>
+                            </button>
+                        </div>
+                    )}
+
                     {onRemove && (
                         <motion.button
                             whileHover={{ scale: 1.1, color: '#ef4444' }}
@@ -143,7 +181,7 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, onRemove }) 
                     <motion.div
                         onPointerDown={(e) => dragControls.start(e)}
                         whileHover={{ color: '#ffb700' }}
-                        className="drag-handle w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/10"
+                        className="drag-handle w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/10 cursor-grab active:cursor-grabbing"
                     >
                         <span className="material-symbols-outlined text-[20px] sm:text-[22px]">drag_indicator</span>
                     </motion.div>

@@ -146,6 +146,31 @@ export const CinematicStacksPage: React.FC = () => {
         }
     };
 
+    const handleMoveItem = async (index: number, direction: 'up' | 'down') => {
+        if (!currentList) return;
+        if (direction === 'up' && index === 0) return;
+        if (direction === 'down' && index === items.length - 1) return;
+
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        const newItems = [...items];
+        const temp = newItems[index];
+        newItems[index] = newItems[targetIndex];
+        newItems[targetIndex] = temp;
+
+        setItems(newItems);
+        try {
+            const reorderData = newItems.map((item, idx) => ({
+                tmdbId: item.tmdbId,
+                orderIndex: idx
+            }));
+            await listsApi.reorderStack(currentList.id, reorderData);
+        } catch (err) {
+            console.error('Failed to save order:', err);
+            // Revert state on failure
+            loadRankedList(currentList.id);
+        }
+    };
+
     const handleCreateStack = async () => {
         if (!newStackName.trim()) return;
         if (lists.length >= 5) return; // Max 5 rankings
@@ -328,12 +353,14 @@ export const CinematicStacksPage: React.FC = () => {
                                             className="flex flex-col gap-4 px-1 md:px-0"
                                         >
                                             <AnimatePresence mode="popLayout" initial={false}>
-                                                {items.map((item) => (
+                                                {items.map((item, index) => (
                                                     <RankedItem
                                                         key={`${currentList.id}-${item.tmdbId}`}
                                                         item={item}
-                                                        rank={items.indexOf(item) + 1}
+                                                        rank={index + 1}
+                                                        totalItems={items.length}
                                                         onRemove={handleRemove}
+                                                        onMove={(direction) => handleMoveItem(index, direction)}
                                                     />
                                                 ))}
                                             </AnimatePresence>
