@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
-import { Link } from 'react-router-dom';
-import { BeeLoader } from '../components/common';
+import { Link, useNavigate } from 'react-router-dom';
+import { BeeLoader, Button } from '../components/common';
 import { useUI } from '../contexts';
 import { PageLayout } from '../components/layout';
 
@@ -19,7 +19,19 @@ const NotificationsPage: React.FC = () => {
         rejectFollowRequest
     } = useNotifications();
 
+    const navigate = useNavigate();
     const { setPageTitle, setPageIcon } = useUI();
+
+    const notificationsRef = useRef(notifications);
+    const markAllAsReadRef = useRef(markAllAsRead);
+
+    useEffect(() => {
+        notificationsRef.current = notifications;
+    }, [notifications]);
+
+    useEffect(() => {
+        markAllAsReadRef.current = markAllAsRead;
+    }, [markAllAsRead]);
 
     useEffect(() => {
         setPageTitle('Notifications');
@@ -35,6 +47,44 @@ const NotificationsPage: React.FC = () => {
     useEffect(() => {
         fetchNotifications(1);
     }, [fetchNotifications]);
+
+    // 1. Auto-mark all as read after 2 seconds of viewing the page
+    useEffect(() => {
+        const hasUnread = notifications.some(n => !n.isRead);
+        if (hasUnread && !loading) {
+            const timer = setTimeout(() => {
+                markAllAsRead();
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [notifications, loading, markAllAsRead]);
+
+    // 2. Track tab/window focus to sync notifications automatically when focusing
+    useEffect(() => {
+        const handleFocus = () => {
+            if (document.visibilityState === 'visible' || document.hasFocus()) {
+                fetchNotifications(1);
+            }
+        };
+
+        window.addEventListener('focus', handleFocus);
+        document.addEventListener('visibilitychange', handleFocus);
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+            document.removeEventListener('visibilitychange', handleFocus);
+        };
+    }, [fetchNotifications]);
+
+    // 3. Fallback: Mark all as read when leaving the page/unmounting
+    useEffect(() => {
+        return () => {
+            const hasUnread = notificationsRef.current.some(n => !n.isRead);
+            if (hasUnread) {
+                markAllAsReadRef.current();
+            }
+        };
+    }, []);
 
     const getNotificationMessage = (n: any) => {
         const { type, content } = n;
@@ -86,29 +136,53 @@ const NotificationsPage: React.FC = () => {
     return (
         <PageLayout maxWidth="3xl">
             <div className="flex flex-col gap-6 pb-20 animate-slide-up">
-                {/* Custom Header Section */}
-                <div className="flex items-center justify-between pb-4 border-b border-black/5">
-                    <div className="flex flex-col">
-                        <h1 className="text-3xl font-black tracking-tighter text-[#2D2926]">Activity</h1>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Buzz from your hive</p>
+                {/* Premium Header Section */}
+                <div className="flex flex-row items-center justify-between pb-4 border-b border-black/5">
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-black tracking-tighter text-[#2D2926]">
+                            Activity<span className="text-[#ffb700]">Hub</span>
+                        </h1>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                        <button 
+                    <div className="flex items-center gap-2 shrink-0">
+                        <Button 
+                            variant="secondary"
+                            size="sm"
                             onClick={() => fetchNotifications(1)} 
-                            className="w-10 h-10 rounded-2xl hover:bg-slate-100 text-[#2D2926] transition-all flex items-center justify-center bg-white border border-black/5 shadow-sm"
+                            className="!h-9 !px-2.5 sm:!px-3.5 flex items-center gap-1.5 active:scale-95 transition-all"
                             title="Refresh"
                         >
-                            <span className="material-symbols-outlined text-lg">refresh</span>
-                        </button>
+                            <span className="material-symbols-outlined text-[18px]">refresh</span>
+                            <span className="hidden sm:inline text-[11px] font-black uppercase tracking-wider">Refresh</span>
+                        </Button>
                         {notifications.length > 0 && (
-                             <button 
+                             <Button 
+                                variant="secondary"
+                                size="sm"
                                 onClick={markAllAsRead} 
-                                className="bg-[#2D2926] hover:bg-black text-white font-black py-3 px-6 rounded-2xl text-[9px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-black/5"
-                            >
-                                 Clear All
-                             </button>
+                                className="!h-9 !px-2.5 sm:!px-3.5 flex items-center gap-1.5 active:scale-95 transition-all"
+                                title="Clear All"
+                             >
+                                 <span className="material-symbols-outlined text-[18px]">done_all</span>
+                                 <span className="hidden sm:inline text-[11px] font-black uppercase tracking-wider">Clear All</span>
+                             </Button>
                         )}
+                        <Button 
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                                if (window.history.length > 1) {
+                                    navigate(-1);
+                                } else {
+                                    navigate('/watch-hive/feed');
+                                }
+                            }}
+                            className="!h-9 !px-2.5 sm:!px-3.5 flex items-center gap-1.5 active:scale-95 transition-all"
+                            title="Close"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">close</span>
+                            <span className="hidden sm:inline text-[11px] font-black uppercase tracking-wider">Close</span>
+                        </Button>
                     </div>
                 </div>
 
@@ -118,14 +192,21 @@ const NotificationsPage: React.FC = () => {
                             <BeeLoader size="small" message="Loading your activity..." />
                         </div>
                     ) : notifications.length === 0 ? (
-                         <div className="flex flex-col items-center justify-center py-24 text-center px-8 bg-white rounded-[40px] border border-black/5 shadow-sm">
-                            <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6">
-                                <span className="material-symbols-outlined text-4xl text-slate-200">notifications_off</span>
+                         <div className="flex flex-col items-center justify-center py-24 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                            <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/2 relative">
+                                <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
+                                <span className="material-symbols-outlined text-4xl text-slate-200 relative z-10">notifications_off</span>
                             </div>
-                            <h3 className="text-2xl font-black text-[#2D2926] mb-2">No notifications yet</h3>
-                            <p className="text-slate-400 font-bold max-w-xs mx-auto leading-relaxed">
+                            <h3 className="text-2xl font-black text-[#2D2926] mb-2">No activity yet</h3>
+                            <p className="text-slate-400 font-bold max-w-xs mx-auto leading-relaxed mb-6">
                                 When people interact with your cinematic journey or follow you, you'll see the buzz here.
                             </p>
+                            <button
+                                onClick={() => navigate('/watch-hive/feed')}
+                                className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95"
+                            >
+                                Back to Feed
+                            </button>
                          </div>
                     ) : (
                         <div className="flex flex-col gap-3">
@@ -133,16 +214,16 @@ const NotificationsPage: React.FC = () => {
                                 <div key={n.id} className="relative group">
                                     <Link
                                         {...getLinkData(n)}
-                                        className={`flex items-start gap-4 p-5 rounded-[28px] transition-all border ${
+                                        className={`flex items-start gap-4 p-5 rounded-[28px] transition-all duration-300 border hover:-translate-y-0.5 ${
                                             n.isRead 
                                             ? 'bg-white border-black/5 hover:border-[#ffb700]/30 hover:shadow-xl hover:shadow-black/5' 
-                                            : 'bg-[#ffb700]/5 border-[#ffb700]/20 hover:bg-white hover:border-[#ffb700]/50'
+                                            : 'bg-gradient-to-br from-[#ffb700]/5 to-transparent border-[#ffb700]/15 hover:bg-white hover:border-[#ffb700]/30 hover:shadow-xl hover:shadow-black/5 shadow-sm shadow-[#ffb700]/2'
                                         }`}
                                         onClick={() => {
                                             if (!n.isRead) markAsRead(n.id);
                                         }}
                                     >
-                                        <div className={`flex items-center justify-center w-12 h-12 rounded-2xl shrink-0 transition-colors ${n.isRead ? 'bg-slate-50 text-slate-400' : 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20'}`}>
+                                        <div className={`flex items-center justify-center w-12 h-12 rounded-2xl shrink-0 transition-all duration-300 ${n.isRead ? 'bg-slate-50 text-slate-400' : 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20'}`}>
                                             {getNotificationIcon(n.type)}
                                         </div>
                                         
@@ -160,7 +241,7 @@ const NotificationsPage: React.FC = () => {
                                                     })}
                                                 </span>
                                                 {!n.isRead && (
-                                                    <span className="w-1.5 h-1.5 bg-[#ffb700] rounded-full" />
+                                                    <span className="w-1.5 h-1.5 bg-[#ffb700] rounded-full animate-pulse" />
                                                 )}
                                             </div>
                                         </div>
@@ -170,7 +251,7 @@ const NotificationsPage: React.FC = () => {
                                         </div>
                                     </Link>
 
-                                    {n.type === 'FOLLOW_REQUEST' && !n.isRead && (
+                                    {n.type === 'FOLLOW_REQUEST' && (
                                         <div className="mt-3 ml-16 flex gap-3">
                                             <button
                                                 className="px-6 py-2.5 bg-[#ffb700] hover:brightness-105 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-[#ffb700]/10 transition-all"

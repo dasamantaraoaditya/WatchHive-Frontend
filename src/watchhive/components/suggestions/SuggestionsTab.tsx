@@ -1,10 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { suggestionsApi, GroupedSuggestion } from '../../services/suggestions.service';
+import apiClient from '../../services/api.js';
 import { SuggestionCard } from './SuggestionCard';
-import { SkeletonGrid, ErrorState, EmptyState, FilterBar } from '../common';
+import { SkeletonGrid, ErrorState, FilterBar } from '../common';
 
-export const SuggestionsTab: React.FC = () => {
-    const [groups, setGroups] = useState<GroupedSuggestion[]>([]);
+interface SuggestionsTabProps {
+    searchQuery?: string;
+    onSearchChange?: (val: string) => void;
+}
+
+interface DetailedGroupedSuggestion extends GroupedSuggestion {
+    title: string;
+    overview: string;
+    posterPath: string | null;
+}
+
+export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({ 
+    searchQuery = '',
+    onSearchChange
+}) => {
+    const [groups, setGroups] = useState<DetailedGroupedSuggestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('recent');
@@ -14,7 +29,32 @@ export const SuggestionsTab: React.FC = () => {
         setError(null);
         try {
             const data = await suggestionsApi.getMySuggestions();
-            setGroups(data);
+            
+            // Preload details in parallel for instant client-side filtering and rendering
+            const groupsWithDetails = await Promise.all(
+                data.map(async (group) => {
+                    try {
+                        const endpoint = group.mediaType === 'tv' ? 'tv' : 'movie';
+                        const tmdbData: any = await apiClient.get(`/tmdb/${endpoint}/${group.tmdbId}`);
+                        return {
+                            ...group,
+                            title: tmdbData.title || tmdbData.name || 'Untitled',
+                            overview: tmdbData.overview || '',
+                            posterPath: tmdbData.poster_path
+                        };
+                    } catch (err) {
+                        console.error('Failed to fetch TMDb details for group:', group.tmdbId, err);
+                        return {
+                            ...group,
+                            title: 'Untitled',
+                            overview: '',
+                            posterPath: null
+                        };
+                    }
+                })
+            );
+
+            setGroups(groupsWithDetails);
         } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to fetch suggestions');
         } finally {
@@ -27,6 +67,13 @@ export const SuggestionsTab: React.FC = () => {
     }, [fetchSuggestions]);
 
     const filteredGroups = groups
+        .filter(group => {
+            if (!searchQuery) return true;
+            return (
+                group.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                group.overview.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        })
         .sort((a, b) => {
             const dateA = new Date(a.suggestions[0]?.createdAt || 0).getTime();
             const dateB = new Date(b.suggestions[0]?.createdAt || 0).getTime();
@@ -35,7 +82,23 @@ export const SuggestionsTab: React.FC = () => {
         });
 
     if (isLoading) {
-        return <SkeletonGrid count={4} />;
+        return (
+            <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
+                <FilterBar 
+                    search={searchQuery}
+                    onSearchChange={onSearchChange}
+                    placeholder="Search suggestions from friends..."
+                    sortBy={sortBy}
+                    onSortChange={setSortBy}
+                    sortOptions={[
+                        { value: 'recent', label: 'Recently Suggested' }
+                    ]}
+                    count={0}
+                    countLabel="Titles Suggested"
+                />
+                <SkeletonGrid count={4} />
+            </section>
+        );
     }
 
     if (error) {
@@ -49,22 +112,34 @@ export const SuggestionsTab: React.FC = () => {
     return (
         <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
             <FilterBar 
+                search={searchQuery}
+                onSearchChange={onSearchChange}
+                placeholder="Search suggestions from friends..."
                 sortBy={sortBy}
                 onSortChange={setSortBy}
                 sortOptions={[
                     { value: 'recent', label: 'Recently Suggested' }
                 ]}
-                count={groups.length}
-                countLabel="Titles Suggested"
+                count={filteredGroups.length}
+                countLabel={searchQuery ? "Matching Suggestions" : "Titles Suggested"}
             />
 
-            {groups.length === 0 ? (
-                <div className="py-20 w-full flex justify-center bg-white border border-[#ffb700]/10 rounded-3xl shadow-sm">
-                    <EmptyState
-                        title="No suggestions yet"
-                        message="When your friends suggest movies to you, they'll show up here in a beautiful grid!"
-                        icon={<span className="text-5xl drop-shadow-sm">🐝</span>}
-                    />
+            {filteredGroups.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                    <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
+                        <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
+                        <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">
+                            {searchQuery ? "travel_explore" : "auto_awesome"}
+                        </span>
+                    </div>
+                    <h3 className="text-2xl font-black text-[#2D2926] mb-2">
+                        {searchQuery ? "No matching suggestions" : "No suggestions yet"}
+                    </h3>
+                    <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed">
+                        {searchQuery
+                            ? `We couldn't find any suggestions matching "${searchQuery}"`
+                            : "When friends from your hive suggest movies or shows, they'll appear here!"}
+                    </p>
                 </div>
             ) : (
                 <>
@@ -74,6 +149,11 @@ export const SuggestionsTab: React.FC = () => {
                                 key={`${group.mediaType}-${group.tmdbId}`} 
                                 group={group} 
                                 onStatusChange={fetchSuggestions}
+                                preloadedDetails={{
+                                    title: group.title,
+                                    overview: group.overview,
+                                    poster_path: group.posterPath
+                                }}
                             />
                         ))}
                     </div>

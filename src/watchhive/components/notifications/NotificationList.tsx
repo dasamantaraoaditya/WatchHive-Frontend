@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { Link } from 'react-router-dom';
 import './NotificationList.css';
@@ -9,6 +9,38 @@ interface NotificationListProps {
 
 const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
     const { notifications, loading, markAsRead, markAllAsRead, acceptFollowRequest, rejectFollowRequest } = useNotifications();
+
+    const notificationsRef = useRef(notifications);
+    const markAllAsReadRef = useRef(markAllAsRead);
+
+    useEffect(() => {
+        notificationsRef.current = notifications;
+    }, [notifications]);
+
+    useEffect(() => {
+        markAllAsReadRef.current = markAllAsRead;
+    }, [markAllAsRead]);
+
+    // 1. Auto-mark all as read after 2 seconds of the list being open
+    useEffect(() => {
+        const hasUnread = notifications.some(n => !n.isRead);
+        if (hasUnread && !loading) {
+            const timer = setTimeout(() => {
+                markAllAsRead();
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [notifications, loading, markAllAsRead]);
+
+    // 2. Fallback: Mark all as read when the list is closed/unmounted
+    useEffect(() => {
+        return () => {
+            const hasUnread = notificationsRef.current.some(n => !n.isRead);
+            if (hasUnread) {
+                markAllAsReadRef.current();
+            }
+        };
+    }, []);
 
     const getNotificationMessage = (n: any) => {
         const { type, content } = n;
@@ -89,7 +121,7 @@ const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
                             {!n.isRead && <div className="unread-indicator" />}
                         </Link>
 
-                        {n.type === 'FOLLOW_REQUEST' && !n.isRead && (
+                        {n.type === 'FOLLOW_REQUEST' && (
                             <div className="notification-actions">
                                 <button
                                     className="accept-btn"

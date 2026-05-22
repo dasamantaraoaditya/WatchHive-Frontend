@@ -27,7 +27,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     countLabel = "items"
 }) => {
     return (
-        <div className={`flex flex-col md:flex-row items-stretch md:items-center ${onSearchChange ? 'justify-between' : 'justify-end'} gap-4 py-2`}>
+        <div className={`flex flex-row items-center ${onSearchChange ? 'justify-between' : 'justify-end'} gap-4 py-2 w-full`}>
             {onSearchChange && (
                 <div className="flex-1 relative group max-w-2xl">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#2D2926]/40 group-focus-within:text-[#ffb700] transition-colors text-[20px]">
@@ -38,12 +38,21 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         placeholder={placeholder}
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-[#ffb700]/10 rounded-2xl text-[14px] font-medium text-[#2D2926] placeholder-[#2D2926]/30 focus:outline-none focus:ring-2 focus:ring-[#ffb700]/10 focus:border-[#ffb700]/30 transition-all shadow-sm group-hover:bg-white"
+                        className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-[#ffb700]/10 rounded-2xl text-[14px] font-medium text-[#2D2926] placeholder-[#2D2926]/30 focus:outline-none focus:ring-2 focus:ring-[#ffb700]/10 focus:border-[#ffb700]/30 transition-all shadow-sm group-hover:bg-white"
                     />
+                    {search && (
+                        <button
+                            onClick={() => onSearchChange('')}
+                            className="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-[#ffb700] transition-colors"
+                            title="Clear Search"
+                        >
+                            <span className="material-symbols-outlined text-lg">close</span>
+                        </button>
+                    )}
                 </div>
             )}
 
-            <div className="flex items-center gap-3 self-end md:self-auto">
+            <div className="flex items-center gap-3 shrink-0">
                 {count !== undefined && (
                     <div className="hidden lg:flex items-center">
                         <span className="text-[10px] font-black bg-[#ffb700]/5 text-[#ffb700]/60 px-4 py-2 rounded-xl uppercase tracking-widest border border-[#ffb700]/10">

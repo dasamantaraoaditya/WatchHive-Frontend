@@ -8,7 +8,6 @@ import { WatchlistGrid } from '../components/profile';
 import { 
     SkeletonCard, 
     SkeletonGrid,
-    EmptyState,
     FilterBar
 } from '../components/common';
 import { SuggestionsTab } from '../components/suggestions/SuggestionsTab';
@@ -33,6 +32,21 @@ export const EntriesPage: React.FC = () => {
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
     const [watchingSort, setWatchingSort] = useState('recent');
+    const [searchQueries, setSearchQueries] = useState({
+        history: '',
+        watching: '',
+        watchlist: '',
+        suggestions: ''
+    });
+    const [debouncedHistorySearch, setDebouncedHistorySearch] = useState('');
+
+    // Debounce the search query for the history tab to avoid redundant API hits
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedHistorySearch(searchQueries.history);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchQueries.history]);
 
     // Handle auto-open form or switch tab from navigation state
     useEffect(() => {
@@ -102,20 +116,15 @@ export const EntriesPage: React.FC = () => {
             return 0;
         });
 
+    const filteredWatchingEntries = sortedWatchingEntries.filter(entry => 
+        entry.title.toLowerCase().includes(searchQueries.watching.toLowerCase())
+    );
+
     return (
         <PageLayout maxWidth="5xl">
             {!showForm ? (
                 <>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white border border-[#ffb700]/10 shadow-sm rounded-3xl p-6 md:p-10 animate-slide-up">
-                        <div>
-                            <h1 className="text-3xl font-black tracking-tight text-[#2D2926]">Activity</h1>
-                            <p className="text-[#2D2926]/40 mt-1 font-bold text-sm uppercase tracking-widest">Track and manage your cinematic journey</p>
-                        </div>
-                        <button onClick={handleAddNew} className="flex items-center justify-center gap-2 bg-[#ffb700] text-white font-black uppercase tracking-widest py-4 px-8 rounded-2xl hover:brightness-105 transition-all shadow-lg shadow-[#ffb700]/20 w-full sm:w-auto text-xs">
-                            <span className="material-symbols-outlined font-bold text-[20px]">add</span>
-                            Log a Watch
-                        </button>
-                    </div>
+
                     
                     {/* Navigation Tabs */}
                     <div className="flex border-b border-black/5 gap-0 md:gap-8 mt-4 overflow-x-auto no-scrollbar scroll-strip" style={{ scrollSnapType: 'x mandatory' }}>
@@ -147,38 +156,64 @@ export const EntriesPage: React.FC = () => {
 
                     {activeTab === 'history' && (
                         <section className="flex flex-col gap-6 animate-fade-in mt-6">
-                            <EntryList key={refreshKey} onEdit={handleEdit} />
+                            <EntryList 
+                                key={refreshKey} 
+                                onEdit={handleEdit}
+                                onAddNew={handleAddNew}
+                                searchQuery={searchQueries.history}
+                                onSearchChange={(val) => setSearchQueries(prev => ({ ...prev, history: val }))}
+                                filters={{ search: debouncedHistorySearch }}
+                            />
                         </section>
                     )}
                     
                     {activeTab === 'watching' && (
                         <section className="flex flex-col gap-6 animate-fade-in mt-6">
                             <FilterBar 
+                                search={searchQueries.watching}
+                                onSearchChange={(val) => setSearchQueries(prev => ({ ...prev, watching: val }))}
+                                placeholder="Search currently watching list..."
                                 sortBy={watchingSort}
                                 onSortChange={setWatchingSort}
                                 sortOptions={[
                                     { value: 'recent', label: 'Recently Added' },
                                     { value: 'title', label: 'Title: A-Z' }
                                 ]}
-                                count={sortedWatchingEntries.length}
-                                countLabel="Active Sessions"
+                                count={filteredWatchingEntries.length}
+                                countLabel={searchQueries.watching ? "Matching Sessions" : "Active Sessions"}
                             />
                             
                             {isWatchingLoading && watchingEntries.length === 0 ? (
                                 <SkeletonGrid count={3} />
-                            ) : sortedWatchingEntries.length === 0 ? (
-                                <div className="py-20 w-full flex justify-center bg-white border border-black/5 rounded-3xl shadow-sm">
-                                    <EmptyState
-                                        title="No active sessions"
-                                        message="The hive is quiet. Start watching something to track it here!"
-                                        icon={<span className="text-5xl drop-shadow-sm">📺</span>}
-                                        actionLabel="Log a Watch"
-                                        onAction={handleAddNew}
-                                    />
+                            ) : filteredWatchingEntries.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                                    <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
+                                        <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
+                                        <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">
+                                            {searchQueries.watching ? "travel_explore" : "live_tv"}
+                                        </span>
+                                    </div>
+                                    <h3 className="text-2xl font-black text-[#2D2926] mb-2">
+                                        {searchQueries.watching ? "No matching sessions" : "No active sessions"}
+                                    </h3>
+                                    <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
+                                        {searchQueries.watching 
+                                            ? `We couldn't find any active sessions matching "${searchQueries.watching}"` 
+                                            : "The hive is quiet. Start watching a movie or TV show to track your active sessions!"}
+                                    </p>
+                                    {!searchQueries.watching && (
+                                        <button
+                                            onClick={handleAddNew}
+                                            className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
+                                        >
+                                            <span className="material-symbols-outlined text-base font-bold">add</span>
+                                            Log a Watch
+                                        </button>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="watchlist-grid">
-                                    {sortedWatchingEntries.map(entry => (
+                                    {filteredWatchingEntries.map(entry => (
                                         <EntryCard 
                                             key={entry.id} 
                                             entry={entry}
@@ -193,13 +228,19 @@ export const EntriesPage: React.FC = () => {
 
                     {activeTab === 'watchlist' && (
                         <section className="w-full flex animate-fade-in flex-col gap-6 mt-6">
-                            <WatchlistGrid />
+                            <WatchlistGrid 
+                                searchQuery={searchQueries.watchlist} 
+                                onSearchChange={(val) => setSearchQueries(prev => ({ ...prev, watchlist: val }))}
+                            />
                         </section>
                     )}
 
                     {activeTab === 'suggestions' && (
                         <section className="flex flex-col gap-6 animate-fade-in mt-6">
-                            <SuggestionsTab />
+                            <SuggestionsTab 
+                                searchQuery={searchQueries.suggestions} 
+                                onSearchChange={(val) => setSearchQueries(prev => ({ ...prev, suggestions: val }))}
+                            />
                         </section>
                     )}
                 </>

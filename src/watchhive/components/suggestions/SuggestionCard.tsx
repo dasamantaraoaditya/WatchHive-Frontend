@@ -7,6 +7,11 @@ import '../profile/Profile.css';
 interface SuggestionCardProps {
     group: GroupedSuggestion;
     onStatusChange?: () => void;
+    preloadedDetails?: {
+        title: string;
+        overview: string;
+        poster_path: string | null;
+    };
 }
 
 interface TmdbDetails {
@@ -20,12 +25,24 @@ interface TmdbDetails {
     genres: string[];
 }
 
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange }) => {
+export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange, preloadedDetails }) => {
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDismissing, setIsDismissing] = useState(false);
 
     useEffect(() => {
+        if (preloadedDetails) {
+            setDetails({
+                title: preloadedDetails.title,
+                poster_path: preloadedDetails.poster_path,
+                overview: preloadedDetails.overview,
+                vote_average: 0,
+                genres: []
+            });
+            setIsLoading(false);
+            return;
+        }
+
         const fetchDetails = async () => {
             try {
                 const endpoint = group.mediaType === 'tv' ? 'tv' : 'movie';
@@ -47,7 +64,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
             }
         };
         fetchDetails();
-    }, [group.tmdbId, group.mediaType]);
+    }, [group.tmdbId, group.mediaType, preloadedDetails]);
 
     const handleDismiss = async () => {
         if (isDismissing) return;

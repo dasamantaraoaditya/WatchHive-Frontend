@@ -5,7 +5,6 @@ import {
     SkeletonCard,
     SkeletonGrid,
     ErrorState,
-    EmptyState,
     FilterBar,
     MovieDetailsModal
 } from '../common';
@@ -17,8 +16,11 @@ import { ExpandedCard } from './ExpandedCard';
 
 interface EntryListProps {
     onEdit?: (entry: Entry) => void;
+    onAddNew?: () => void;
     filters?: GetEntriesParams;
     readOnly?: boolean;
+    searchQuery?: string;
+    onSearchChange?: (val: string) => void;
 }
 
 const tmdbCache = new Map<string, TmdbDetails>();
@@ -203,7 +205,14 @@ export const EntryCard: React.FC<{
 
 
 
-export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly }) => {
+export const EntryList: React.FC<EntryListProps> = ({ 
+    onEdit,
+    onAddNew,
+    filters, 
+    readOnly, 
+    searchQuery, 
+    onSearchChange 
+}) => {
     const [entries, setEntries] = useState<Entry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -289,7 +298,32 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     };
 
     if (isLoading && entries.length === 0) {
-        return <SkeletonGrid count={8} />;
+        return (
+            <div className="w-full flex animate-[fade-in_0.3s_ease-out] flex-col gap-6">
+                <FilterBar
+                    search={searchQuery}
+                    onSearchChange={onSearchChange}
+                    placeholder="Search logged movies, TV shows, or ratings..."
+                    sortBy={`${sortBy}-${sortOrder}`}
+                    onSortChange={(val) => {
+                        const [newSort, newOrder] = val.split('-') as [any, any];
+                        setSortBy(newSort);
+                        setSortOrder(newOrder);
+                    }}
+                    sortOptions={[
+                        { value: 'watchedAt-desc', label: 'Recently Watched' },
+                        { value: 'watchedAt-asc', label: 'Oldest Watched' },
+                        { value: 'rating-desc', label: 'Highest Rated' },
+                        { value: 'rating-asc', label: 'Lowest Rated' },
+                        { value: 'title-asc', label: 'Movie: A-Z' },
+                        { value: 'title-desc', label: 'Movie: Z-A' }
+                    ]}
+                    count={0}
+                    countLabel="Logged Titles"
+                />
+                <SkeletonGrid count={8} />
+            </div>
+        );
     }
 
     if (error) {
@@ -301,13 +335,32 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     }
 
     if (entries.length === 0) {
+        const hasSearch = typeof filters?.search === 'string' && filters.search;
         return (
-            <div className="py-20 w-full flex justify-center">
-                <EmptyState
-                    title="No entries found"
-                    message={typeof filters?.search === 'string' ? `No results for "${filters.search}"` : "Start logging your watch history!"}
-                    icon={<span className="text-5xl drop-shadow-sm">🎬</span>}
-                />
+            <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
+                    <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
+                    <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">
+                        {hasSearch ? "travel_explore" : "movie"}
+                    </span>
+                </div>
+                <h3 className="text-2xl font-black text-[#2D2926] mb-2">
+                    {hasSearch ? "No matching entries" : "No entries yet"}
+                </h3>
+                <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
+                    {hasSearch
+                        ? `No results found for "${filters!.search}"`
+                        : "Start building your cinematic journey — log a movie or show you've watched!"}
+                </p>
+                {!hasSearch && onAddNew && (
+                    <button
+                        onClick={onAddNew}
+                        className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
+                    >
+                        <span className="material-symbols-outlined text-base font-bold">add</span>
+                        Log a Watch
+                    </button>
+                )}
             </div>
         );
     }
@@ -404,6 +457,9 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
     return (
         <div className="w-full flex animate-[fade-in_0.3s_ease-out] flex-col gap-6">
             <FilterBar
+                search={searchQuery}
+                onSearchChange={onSearchChange}
+                placeholder="Search logged movies, TV shows, or ratings..."
                 sortBy={`${sortBy}-${sortOrder}`}
                 onSortChange={(val) => {
                     const [newSort, newOrder] = val.split('-') as [any, any];
@@ -423,12 +479,15 @@ export const EntryList: React.FC<EntryListProps> = ({ onEdit, filters, readOnly 
             />
 
             {entries.length === 0 ? (
-                <div className="py-20 w-full flex justify-center bg-white border border-[#ffb700]/10 rounded-3xl shadow-sm">
-                    <EmptyState
-                        title="No entries found"
-                        message="Start logging your watch history!"
-                        icon={<span className="text-5xl drop-shadow-sm">🎬</span>}
-                    />
+                <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                    <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
+                        <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
+                        <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">movie</span>
+                    </div>
+                    <h3 className="text-2xl font-black text-[#2D2926] mb-2">No entries yet</h3>
+                    <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed">
+                        Start building your cinematic journey — log a movie or show you've watched!
+                    </p>
                 </div>
             ) : (
                 <>

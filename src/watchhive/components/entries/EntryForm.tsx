@@ -529,29 +529,36 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                     )}
 
                     {/* ── Actions ── */}
-                    <div className={`
-                        flex flex-col sm:flex-row items-center justify-end gap-4 border-t border-[#ffb700]/20 pt-8 mt-4
-                        ${isMobile && isModal ? 'pb-10' : ''}
-                    `}>
+                    <div className={`flex flex-row items-center justify-end gap-3 border-t border-[#ffb700]/20 pt-8 mt-4 ${isMobile && isModal ? 'pb-10' : ''}`}>
                         {onCancel && (
-                            <button type="button" onClick={onCancel} className="w-full sm:w-auto px-8 py-3.5 bg-transparent text-[#2D2926]/60 font-bold tracking-widest uppercase hover:bg-[#2D2926]/5 rounded-xl transition-all disabled:opacity-50 focus:outline-none" disabled={isLoading}>
-                                Abandon Setup
+                            <button
+                                type="button"
+                                onClick={onCancel}
+                                disabled={isLoading}
+                                className="flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-[#2D2926] font-black text-xs uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 focus:outline-none active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-base">close</span>
+                                Cancel
                             </button>
                         )}
                         <button
                             type="submit"
-                            className={`
-                                w-full sm:w-auto flex items-center justify-center gap-2 px-10 py-4 bg-[#ffb700] text-white font-black text-lg rounded-2xl hover:brightness-105 shadow-[0_8px_30px_-10px_rgba(255,183,0,0.6)] transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none
-                                ${isMobile ? 'order-first' : ''}
-                            `}
+                            className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[#ffb700] text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-lg shadow-[#ffb700]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none active:scale-95"
                             disabled={isLoading || (!isEditing && !hasSelection)}
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                                    Synchronizing...
+                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                                    Saving...
                                 </>
-                            ) : isEditing ? 'Update Entry' : 'Log Entry'}
+                            ) : (
+                                <>
+                                    <span className="material-symbols-outlined text-base font-bold">
+                                        {isEditing ? 'edit_note' : 'add'}
+                                    </span>
+                                    {isEditing ? 'Update Entry' : 'Log Entry'}
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>
