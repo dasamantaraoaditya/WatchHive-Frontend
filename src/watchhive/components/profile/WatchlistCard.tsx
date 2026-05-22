@@ -8,11 +8,12 @@ import './Profile.css';
 interface WatchlistCardProps {
     tmdbId: number;
     mediaType?: string;
+    readOnly?: boolean;
 }
 
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
 
-export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie' }) => {
+export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie', readOnly = false }) => {
     const [details, setDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -120,40 +121,42 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                 {/* Standardized Actions Layout */}
-                <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button
-                        onClick={handleAddToWatching}
-                        disabled={isTransitioning}
-                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors disabled:opacity-50"
-                        title="Start Watching (Move to Currently Watching)"
-                    >
-                        {isTransitioning ? (
-                            <span className="animate-spin text-[12px] text-[#ffb700]">⏳</span>
-                        ) : (
-                            <span className="material-symbols-outlined text-[18px]">
-                                play_arrow
-                            </span>
-                        )}
-                    </button>
+                {!readOnly && (
+                    <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button
+                            onClick={handleAddToWatching}
+                            disabled={isTransitioning}
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors disabled:opacity-50"
+                            title="Start Watching (Move to Currently Watching)"
+                        >
+                            {isTransitioning ? (
+                                <span className="animate-spin text-[12px] text-[#ffb700]">⏳</span>
+                            ) : (
+                                <span className="material-symbols-outlined text-[18px]">
+                                    play_arrow
+                                </span>
+                            )}
+                        </button>
 
-                    <button
-                        onClick={handleMarkAsWatched}
-                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                        title="Mark as Watched (Hive It)"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">
-                            check_circle
-                        </span>
-                    </button>
-                    
-                    <button
-                        onClick={handleRemove}
-                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                        title="Remove from Watchlist"
-                    >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
-                </div>
+                        <button
+                            onClick={handleMarkAsWatched}
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                            title="Mark as Watched (Hive It)"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">
+                                check_circle
+                            </span>
+                        </button>
+                        
+                        <button
+                            onClick={handleRemove}
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                            title="Remove from Watchlist"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                    </div>
+                )}
 
                 <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
                     <span className="bg-[#ffb700] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90 uppercase tracking-tighter">
@@ -179,7 +182,9 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
             mediaType={mediaType as 'movie' | 'tv'}
             initialView={modalView}
             onLogSuccess={async () => {
-                await removeFromList(tmdbId);
+                if (!readOnly) {
+                    await removeFromList(tmdbId);
+                }
             }}
         />
         </>
