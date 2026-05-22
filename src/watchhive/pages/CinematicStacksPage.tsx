@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Reorder, AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { listsApi, List, ListItem } from '../services/lists.service';
 import { RankedItem } from '../components/stacks/RankedItem';
 import { RankedItemSkeleton } from '../components/stacks/RankedItemSkeleton';
@@ -123,18 +123,7 @@ export const CinematicStacksPage: React.FC = () => {
         }
     };
 
-    const handleReorder = async (newItems: ListItem[]) => {
-        setItems(newItems);
-        try {
-            const reorderData = newItems.map((item, index) => ({
-                tmdbId: item.tmdbId,
-                orderIndex: index
-            }));
-            await listsApi.reorderStack(currentList!.id, reorderData);
-        } catch (err) {
-            console.error('Failed to save order:', err);
-        }
-    };
+
 
     const handleRemove = async (tmdbId: number) => {
         if (!currentList) return;
@@ -346,12 +335,7 @@ export const CinematicStacksPage: React.FC = () => {
                                 <>
                                     {/* Ranked items list */}
                                     {items.length > 0 && (
-                                        <Reorder.Group
-                                            axis="y"
-                                            values={items}
-                                            onReorder={handleReorder}
-                                            className="flex flex-col gap-4 px-1 md:px-0"
-                                        >
+                                        <div className="flex flex-col gap-4 px-1 md:px-0">
                                             <AnimatePresence mode="popLayout" initial={false}>
                                                 {items.map((item, index) => (
                                                     <RankedItem
@@ -364,7 +348,7 @@ export const CinematicStacksPage: React.FC = () => {
                                                     />
                                                 ))}
                                             </AnimatePresence>
-                                        </Reorder.Group>
+                                        </div>
                                     )}
 
                                     {items.length < 10 && (

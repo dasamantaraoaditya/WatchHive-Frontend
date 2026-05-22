@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Reorder, useDragControls, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ListItem } from '../../services/lists.service';
 import apiClient from '../../services/api';
 import './Stacks.css';
@@ -28,7 +28,6 @@ const tmdbCache = new Map<number, TmdbDetails>();
 export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, onRemove, onMove }) => {
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
-    const dragControls = useDragControls();
 
     useEffect(() => {
         if (tmdbCache.has(item.tmdbId)) {
@@ -67,19 +66,10 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, 
     const rating = item.localRating || (details?.vote_average ? details.vote_average.toFixed(1) : null);
 
     return (
-        <Reorder.Item
-            value={item}
-            dragListener={false}
-            dragControls={dragControls}
+        <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            whileDrag={{ 
-                scale: 1.02, 
-                boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
-                zIndex: 50,
-                rotate: 1
-            }}
             className="ranked-item-card group flex w-full"
         >
             {/* Rank Indicator */}
@@ -177,16 +167,8 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, 
                             <span className="material-symbols-outlined text-[18px] sm:text-[20px]">delete_sweep</span>
                         </motion.button>
                     )}
-                    
-                    <motion.div
-                        onPointerDown={(e) => dragControls.start(e)}
-                        whileHover={{ color: '#ffb700' }}
-                        className="drag-handle w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-[#2D2926]/10 cursor-grab active:cursor-grabbing"
-                    >
-                        <span className="material-symbols-outlined text-[20px] sm:text-[22px]">drag_indicator</span>
-                    </motion.div>
                 </div>
             </div>
-        </Reorder.Item>
+        </motion.div>
     );
 };
