@@ -6,6 +6,7 @@ import { useWatchlist } from '../../contexts/WatchlistContext';
 import { EntryForm } from '../entries/EntryForm';
 import { SuggestUserSelector } from '../suggestions/SuggestUserSelector';
 import { useCustomAlert } from '../../contexts';
+import { entriesApi } from '../../services/entries.service';
 
 interface MovieDetails {
     id: number;
@@ -63,9 +64,60 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [view, setView] = useState<'details' | 'log' | 'suggest'>('details');
+    const [isTransitioning, setIsTransitioning] = useState(false);
 
     const { addToList, removeFromList, isInWatchlist } = useWatchlist();
-    const { alert } = useCustomAlert();
+    const { alert, confirm } = useCustomAlert();
+
+    const handleStartWatching = async () => {
+        if (!tmdbId || isTransitioning) return;
+
+        const title = details?.title || details?.name || 'this title';
+        const confirmed = await confirm(`Would you like to start watching "${title}"? This will move it from your watchlist to your Currently Watching list.`, {
+            title: 'Start Watching',
+            confirmText: 'Start Watching',
+            severity: 'primary'
+        });
+        if (!confirmed) return;
+
+        setIsTransitioning(true);
+
+        try {
+            const apiType = mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
+            
+            // Create currently watching entry
+            await entriesApi.createEntry({
+                tmdbId,
+                title: details?.title || details?.name || 'this title',
+                type: apiType,
+                isWatching: true,
+                startedAt: new Date().toISOString()
+            });
+
+            // Remove from watchlist
+            await removeFromList(tmdbId);
+
+            // Display beautiful success alert
+            await alert(`"${title}" has been successfully moved to your Currently Watching list!`, {
+                title: 'Watching Started',
+                severity: 'success',
+                confirmText: 'Awesome'
+            });
+
+            if (onLogSuccess) {
+                onLogSuccess();
+            }
+            onClose();
+        } catch (err) {
+            console.error('Failed to move item to currently watching', err);
+            await alert(`Failed to start watching "${title}". Please try again.`, {
+                title: 'Error',
+                severity: 'error'
+            });
+        } finally {
+            setIsTransitioning(false);
+        }
+    };
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'TBA';
@@ -270,6 +322,22 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                                             {inWatchlist ? 'Saved' : 'Watchlist'}
                                                         </span>
                                                     </button>
+
+                                                    {inWatchlist && (
+                                                        <button 
+                                                            onClick={handleStartWatching}
+                                                            disabled={isTransitioning}
+                                                            className="flex items-center gap-2.5 group transition-all disabled:opacity-50"
+                                                            title="Start Watching (Move to Currently Watching)"
+                                                        >
+                                                            {isTransitioning ? (
+                                                                <span className="animate-spin text-[16px] text-[#ffb700]">⏳</span>
+                                                            ) : (
+                                                                <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#ffb700] transition-all">play_circle</span>
+                                                            )}
+                                                            <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Start Watching</span>
+                                                        </button>
+                                                    )}
 
                                                     <button 
                                                         onClick={() => setView('log')}
