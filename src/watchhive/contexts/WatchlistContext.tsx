@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 interface WatchlistContextType {
     watchlist: List | null;
     isLoading: boolean;
-    // We pass listId explicitly or handle internally? Internal is better for 'default watchlist'
+    hasLoaded: boolean;
     addToList: (tmdbId: number, mediaType?: 'movie' | 'tv') => Promise<void>;
     removeFromList: (tmdbId: number) => Promise<void>;
     isInWatchlist: (tmdbId: number) => boolean;
@@ -26,20 +26,30 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const { isAuthenticated } = useAuth();
     const [watchlist, setWatchlist] = useState<List | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [hasLoaded, setHasLoaded] = useState(false);
 
     const fetchWatchlist = useCallback(async () => {
         if (!isAuthenticated) {
             setWatchlist(null);
+            setHasLoaded(false);
             return;
         }
         setIsLoading(true);
+        // Safety timeout — always clear loading state after 8 seconds
+        const timeout = setTimeout(() => {
+            setIsLoading(false);
+            setHasLoaded(true);
+        }, 8000);
         try {
             const list = await listsApi.getWatchlist();
             setWatchlist(list);
         } catch (error) {
             console.error('Failed to fetch watchlist', error);
+            setWatchlist(null);
         } finally {
+            clearTimeout(timeout);
             setIsLoading(false);
+            setHasLoaded(true);
         }
     }, [isAuthenticated]);
 
@@ -48,6 +58,7 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             fetchWatchlist();
         } else {
             setWatchlist(null);
+            setHasLoaded(false);
         }
     }, [isAuthenticated, fetchWatchlist]);
 
@@ -126,7 +137,7 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     return (
-        <WatchlistContext.Provider value={{ watchlist, isLoading, addToList, removeFromList, isInWatchlist, fetchWatchlist }}>
+        <WatchlistContext.Provider value={{ watchlist, isLoading, hasLoaded, addToList, removeFromList, isInWatchlist, fetchWatchlist }}>
             {children}
         </WatchlistContext.Provider>
     );

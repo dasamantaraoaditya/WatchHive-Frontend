@@ -178,6 +178,19 @@ export const EntryCard: React.FC<{
                     <span className="truncate flex-1">{metadataString || '-'}</span>
                     {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
                 </div>
+                {/* Have Watched button — always visible when entry is in currently watching mode */}
+                {_onComplete && entry.isWatching && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsCompleting(true);
+                        }}
+                        className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
+                    >
+                        <span className="material-symbols-outlined text-[15px]">check_circle</span>
+                        Have Watched
+                    </button>
+                )}
             </motion.div>
 
             <MovieDetailsModal

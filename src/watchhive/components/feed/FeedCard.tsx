@@ -63,8 +63,9 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
 
     // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM"
-    const timestamp = !isSuggestion
-        ? new Date(entryData.createdAt).toLocaleString(undefined, {
+    const displayTimestamp = item.timestamp || entryData?.updatedAt || entryData?.createdAt;
+    const timestamp = !isSuggestion && displayTimestamp
+        ? new Date(displayTimestamp).toLocaleString(undefined, {
             month: 'short', day: 'numeric', year: 'numeric',
             hour: 'numeric', minute: '2-digit'
         }).replace(',', ' at')
@@ -128,7 +129,20 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         }
     };
 
-    const actionText = isSuggestion ? 'recommends' : (entryData?.review ? 'reviewed' : 'just watched');
+    const actionText = (() => {
+        if (isSuggestion) return 'recommends';
+        if (!entryData) return 'just watched';
+        
+        if (entryData.isWatching) {
+            return 'started watching';
+        }
+        
+        if (entryData.startedAt) {
+            return 'completed watching';
+        }
+        
+        return entryData.review ? 'reviewed' : 'just watched';
+    })();
 
     const releaseYear = (details?.release_date || details?.first_air_date || '').substring(0, 4);
     const runtime = details?.runtime || (details?.episode_run_time && details.episode_run_time[0]);
@@ -229,8 +243,12 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                 {/* Refined Timestamp Placement: Right-aligned below the image */}
                 {!isSuggestion && (
                     <div className="feed-card-timestamp-footer">
-                        <span className="material-symbols-outlined text-[12px] opacity-40">schedule</span>
-                        <span className="timestamp-label">Seen</span>
+                        <span className="material-symbols-outlined text-[12px] opacity-40">
+                            {entryData?.isWatching ? 'play_arrow' : (entryData?.startedAt ? 'check_circle' : 'schedule')}
+                        </span>
+                        <span className="timestamp-label">
+                            {entryData?.isWatching ? 'Started' : (entryData?.startedAt ? 'Completed' : 'Seen')}
+                        </span>
                         <span className="timestamp-value">{timestamp}</span>
                     </div>
                 )}

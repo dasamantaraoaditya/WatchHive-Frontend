@@ -20,15 +20,16 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     onSearchChange,
     readOnly = false
 }) => {
-    const { watchlist: contextWatchlist, isLoading: contextLoading, fetchWatchlist, addToList } = useWatchlist();
+    const { watchlist: contextWatchlist, isLoading: contextLoading, hasLoaded: contextHasLoaded, fetchWatchlist, addToList } = useWatchlist();
     const [sortBy, setSortBy] = useState('recent');
     const [showAddModal, setShowAddModal] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
 
-    // Use props if provided, otherwise context
-    const items = propItems ?? (contextWatchlist?.items ?? []);
+    // Use props if provided, otherwise context — treat null/undefined items as empty array
+    const items: ListItem[] = propItems ?? (contextWatchlist?.items ?? []);
     const loading = propLoading !== undefined ? propLoading : contextLoading;
-
+    // Only show skeleton if we're actively loading AND haven't loaded before
+    const showSkeleton = loading && !contextHasLoaded;
 
     const handleAddToWatchlist = async (tmdbId: number, mediaType: 'movie' | 'tv') => {
         setIsAdding(true);
@@ -54,7 +55,8 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
             return 0;
         });
 
-    if (loading) {
+    // Show skeleton on first load only
+    if (showSkeleton) {
         return (
             <div className="flex flex-col gap-6">
                 <FilterBar 
@@ -97,18 +99,18 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                         <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
                             <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
                             <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">
-                                {searchQuery ? "travel_explore" : "bookmark"}
+                                {searchQuery ? "travel_explore" : "bookmark_add"}
                             </span>
                         </div>
                         <h3 className="text-2xl font-black text-[#2D2926] mb-2">
-                            {searchQuery ? "No matching titles" : "No watchlist preferences"}
+                            {searchQuery ? "No matching titles" : "Your watchlist is empty"}
                         </h3>
                         <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
                             {searchQuery
-                                ? `No watchlist items match "${searchQuery}"`
+                                ? `No watchlist items match "${searchQuery}". Try a different search term.`
                                 : readOnly
                                     ? "This user hasn't saved any movies or shows to their watchlist yet."
-                                    : "Your watchlist is looking empty. Add movies and shows you want to watch next to build your cinematic preferences!"}
+                                    : "Nothing saved yet! Add movies and shows you want to watch and build your personal hive queue."}
                         </p>
                         {!searchQuery && !readOnly && (
                             <button

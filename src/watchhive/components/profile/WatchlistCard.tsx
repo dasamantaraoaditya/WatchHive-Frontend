@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import apiClient from '../../services/api.js';
 import { MovieDetailsModal } from '../common';
+import { entriesApi } from '../../services/entries.service';
 import './Profile.css';
 
 interface WatchlistCardProps {
@@ -17,6 +18,35 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const [showModal, setShowModal] = useState(false);
     const [modalView, setModalView] = useState<'details' | 'log'>('details');
     const { removeFromList } = useWatchlist();
+    const [isTransitioning, setIsTransitioning] = useState(false);
+
+    const handleAddToWatching = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (isTransitioning) return;
+        setIsTransitioning(true);
+
+        try {
+            const apiType = mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
+            
+            // Create currently watching entry
+            await entriesApi.createEntry({
+                tmdbId,
+                title: details.title || details.name,
+                type: apiType,
+                isWatching: true,
+                startedAt: new Date().toISOString()
+            });
+
+            // Remove from watchlist
+            await removeFromList(tmdbId);
+        } catch (err) {
+            console.error('Failed to move item to currently watching', err);
+        } finally {
+            setIsTransitioning(false);
+        }
+    };
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -91,6 +121,21 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
 
                 {/* Standardized Actions Layout */}
                 <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button
+                        onClick={handleAddToWatching}
+                        disabled={isTransitioning}
+                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors disabled:opacity-50"
+                        title="Start Watching (Move to Currently Watching)"
+                    >
+                        {isTransitioning ? (
+                            <span className="animate-spin text-[12px] text-[#ffb700]">⏳</span>
+                        ) : (
+                            <span className="material-symbols-outlined text-[18px]">
+                                play_arrow
+                            </span>
+                        )}
+                    </button>
+
                     <button
                         onClick={handleMarkAsWatched}
                         className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"

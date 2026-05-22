@@ -20,7 +20,19 @@ interface MovieDetails {
     runtime?: number;
     episode_run_time?: number[];
     number_of_seasons?: number;
+    number_of_episodes?: number;
     tagline?: string;
+    status?: string;
+    original_language?: string;
+    'watch/providers'?: {
+        results: Record<string, {
+            link?: string;
+            flatrate?: { logo_path: string; provider_id: number; provider_name: string; display_priority: number }[];
+            rent?: { logo_path: string; provider_id: number; provider_name: string; display_priority: number }[];
+            buy?: { logo_path: string; provider_id: number; provider_name: string; display_priority: number }[];
+            free?: { logo_path: string; provider_id: number; provider_name: string; display_priority: number }[];
+        }>;
+    };
 }
 
 interface MovieDetailsModalProps {
@@ -48,6 +60,27 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
     const [view, setView] = useState<'details' | 'log' | 'suggest'>('details');
 
     const { addToList, removeFromList, isInWatchlist } = useWatchlist();
+
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return 'TBA';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    const getLanguageName = (code?: string) => {
+        if (!code) return '';
+        try {
+            const displayNames = new Intl.DisplayNames(['en'], { type: 'language' });
+            return displayNames.of(code) || code.toUpperCase();
+        } catch {
+            return code.toUpperCase();
+        }
+    };
     const inWatchlist = tmdbId ? isInWatchlist(tmdbId) : false;
 
     useEffect(() => {
@@ -250,30 +283,133 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                         </p>
                                     </div>
 
-                                    {/* Additional Stats */}
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 py-6 border-t border-[#2D2926]/5">
-                                        {details.runtime ? (
-                                            <div>
-                                                <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Duration</h5>
-                                                <p className="font-bold text-[#2D2926]">{details.runtime} mins</p>
-                                            </div>
-                                        ) : details.episode_run_time?.[0] ? (
-                                            <div>
-                                                <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Runtime</h5>
-                                                <p className="font-bold text-[#2D2926]">{details.episode_run_time[0]} mins</p>
-                                            </div>
-                                        ) : null}
-                                        
-                                        {details.number_of_seasons && (
-                                            <div>
-                                                <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Seasons</h5>
-                                                <p className="font-bold text-[#2D2926]">{details.number_of_seasons}</p>
-                                            </div>
-                                        )}
+                                    {/* Where to Watch */}
+                                    {(() => {
+                                        const watchProvidersData = details['watch/providers']?.results;
+                                        const localProviders = watchProvidersData 
+                                            ? (watchProvidersData.US || Object.values(watchProvidersData)[0]) 
+                                            : null;
 
-                                        <div>
-                                            <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Status</h5>
-                                            <p className="font-bold text-[#2D2926]">Released</p>
+                                        const streamingProviders = localProviders?.flatrate || localProviders?.free || [];
+                                        const purchaseProviders = localProviders?.rent || localProviders?.buy || [];
+                                        
+                                        // Deduplicate purchase providers by provider_id
+                                        const uniqueRentBuy = purchaseProviders.reduce((acc: any[], current: any) => {
+                                            const x = acc.find(item => item.provider_id === current.provider_id);
+                                            if (!x) {
+                                                return acc.concat([current]);
+                                            } else {
+                                                return acc;
+                                            }
+                                        }, []);
+
+                                        if (!streamingProviders.length && !uniqueRentBuy.length) return null;
+
+                                        return (
+                                            <div className="mb-8 p-6 bg-slate-50 rounded-2xl border border-black/5">
+                                                <h4 className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] mb-4 flex items-center gap-1.5">
+                                                    <span className="material-symbols-outlined text-sm text-[#ffb700]">live_tv</span>
+                                                    Where to Watch
+                                                </h4>
+                                                
+                                                <div className="flex flex-col gap-4">
+                                                    {streamingProviders.length > 0 && (
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                                            <span className="text-[10px] font-black text-[#2D2926]/50 uppercase tracking-widest sm:w-28 shrink-0">Stream</span>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {streamingProviders.map((provider: any) => (
+                                                                    <div 
+                                                                        key={provider.provider_id} 
+                                                                        className="flex items-center gap-1.5 bg-white border border-black/5 pl-1.5 pr-3 py-1 rounded-xl shadow-sm text-xs font-bold text-[#2D2926]"
+                                                                        title={provider.provider_name}
+                                                                    >
+                                                                        <img 
+                                                                            src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`} 
+                                                                            alt={provider.provider_name} 
+                                                                            className="w-5 h-5 rounded-md object-cover"
+                                                                        />
+                                                                        <span>{provider.provider_name}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {uniqueRentBuy.length > 0 && (
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                                            <span className="text-[10px] font-black text-[#2D2926]/50 uppercase tracking-widest sm:w-28 shrink-0">Rent / Buy</span>
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {uniqueRentBuy.map((provider: any) => (
+                                                                    <div 
+                                                                        key={provider.provider_id} 
+                                                                        className="flex items-center gap-1.5 bg-white border border-black/5 pl-1.5 pr-3 py-1 rounded-xl shadow-sm text-xs font-bold text-[#2D2926]"
+                                                                        title={provider.provider_name}
+                                                                    >
+                                                                        <img 
+                                                                            src={`https://image.tmdb.org/t/p/w92${provider.logo_path}`} 
+                                                                            alt={provider.provider_name} 
+                                                                            className="w-5 h-5 rounded-md object-cover"
+                                                                        />
+                                                                        <span>{provider.provider_name}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+
+                                    {/* Additional Cinematic Details */}
+                                    <div className="mb-8">
+                                        <h4 className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] mb-4">Cinematic Intel</h4>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 py-6 border-t border-b border-[#2D2926]/5">
+                                            {/* Release Date */}
+                                            <div>
+                                                <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Released</h5>
+                                                <p className="font-bold text-[#2D2926]">{formatDate(details.release_date || details.first_air_date)}</p>
+                                            </div>
+
+                                            {/* Duration / Runtime */}
+                                            {details.runtime ? (
+                                                <div>
+                                                    <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Duration</h5>
+                                                    <p className="font-bold text-[#2D2926]">{details.runtime} mins</p>
+                                                </div>
+                                            ) : details.episode_run_time?.[0] ? (
+                                                <div>
+                                                    <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Episode Runtime</h5>
+                                                    <p className="font-bold text-[#2D2926]">{details.episode_run_time[0]} mins</p>
+                                                </div>
+                                            ) : null}
+
+                                            {/* Seasons & Episodes (for TV) */}
+                                            {mediaType === 'tv' && (
+                                                <div>
+                                                    <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Format</h5>
+                                                    <p className="font-bold text-[#2D2926]">
+                                                        {details.number_of_seasons ? `${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}` : ''}
+                                                        {details.number_of_episodes ? ` (${details.number_of_episodes} Episode${details.number_of_episodes > 1 ? 's' : ''})` : ''}
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            {/* Status */}
+                                            {details.status && (
+                                                <div>
+                                                    <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Status</h5>
+                                                    <p className="font-bold text-[#2D2926]">{details.status}</p>
+                                                </div>
+                                            )}
+
+                                            {/* Language */}
+                                            {details.original_language && (
+                                                <div>
+                                                    <h5 className="text-[9px] font-black text-[#2D2926]/30 uppercase tracking-widest mb-1">Language</h5>
+                                                    <p className="font-bold text-[#2D2926]">{getLanguageName(details.original_language)}</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
