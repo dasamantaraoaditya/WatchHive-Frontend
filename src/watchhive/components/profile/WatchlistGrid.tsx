@@ -10,13 +10,15 @@ interface WatchlistGridProps {
     isLoading?: boolean;
     searchQuery?: string;
     onSearchChange?: (val: string) => void;
+    readOnly?: boolean;
 }
 
 export const WatchlistGrid: React.FC<WatchlistGridProps> = ({ 
     items: propItems, 
     isLoading: propLoading,
     searchQuery = '',
-    onSearchChange
+    onSearchChange,
+    readOnly = false
 }) => {
     const { watchlist: contextWatchlist, isLoading: contextLoading, fetchWatchlist, addToList } = useWatchlist();
     const [sortBy, setSortBy] = useState('recent');
@@ -110,9 +112,11 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                         <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
                             {searchQuery
                                 ? `No watchlist items match "${searchQuery}"`
-                                : "Add movies and shows you want to watch next and they'll appear here."}
+                                : readOnly
+                                    ? "This user hasn't saved any movies or shows to their watchlist yet."
+                                    : "Add movies and shows you want to watch next and they'll appear here."}
                         </p>
-                        {!searchQuery && (
+                        {!searchQuery && !readOnly && (
                             <button
                                 onClick={() => setShowAddModal(true)}
                                 disabled={isAdding}

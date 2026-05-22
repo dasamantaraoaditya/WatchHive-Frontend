@@ -26,7 +26,7 @@ export const UserProfilePage: React.FC = () => {
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
 
     // Dynamic data for tabs
-    const [watchlistItems, setWatchlistItems] = useState<ListItem[]>([]);
+    const [watchlistItems, setWatchlistItems] = useState<ListItem[] | null>(null);
     const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
 
 
@@ -57,7 +57,7 @@ export const UserProfilePage: React.FC = () => {
 
     // Fetch watchlist if active
     useEffect(() => {
-        if (activeTab === 'watchlist' && id && !watchlistItems.length) {
+        if (activeTab === 'watchlist' && id && watchlistItems === null) {
             const fetchWatchlist = async () => {
                 setIsWatchlistLoading(true);
                 try {
@@ -71,7 +71,7 @@ export const UserProfilePage: React.FC = () => {
             };
             fetchWatchlist();
         }
-    }, [activeTab, id, watchlistItems.length]);
+    }, [activeTab, id, watchlistItems]);
 
     const handleFollowToggle = async () => {
         if (!profileUser) return;
@@ -263,7 +263,7 @@ export const UserProfilePage: React.FC = () => {
                                         </div>
                                         <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Saved for Later</h3>
                                     </div>
-                                    <WatchlistGrid items={watchlistItems} isLoading={isWatchlistLoading} />
+                                    <WatchlistGrid items={watchlistItems || []} isLoading={isWatchlistLoading} readOnly />
                                 </>
                             )}
                         </div>
