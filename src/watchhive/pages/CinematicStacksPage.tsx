@@ -246,29 +246,6 @@ export const CinematicStacksPage: React.FC = () => {
     return (
         <PageLayout maxWidth="5xl">
             <div className="flex flex-col gap-8 pb-24 animate-slide-up">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-black text-[#2D2926] tracking-tighter">
-                            Cinematic <span className="text-[#ffb700]">Stacks</span>
-                        </h1>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Curate your all-time rankings</p>
-                    </div>
-                    <motion.button 
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => lists.length < 5 ? setIsCreateModalOpen(true) : null}
-                        disabled={lists.length >= 5}
-                        className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg ${
-                            lists.length >= 5 
-                                ? 'bg-slate-100 text-slate-300 cursor-not-allowed shadow-none' 
-                                : 'bg-[#2D2926] text-white shadow-black/5 hover:bg-black'
-                        }`}
-                    >
-                        <span className="material-symbols-outlined text-lg">add_circle</span>
-                        <span>New Stack</span>
-                    </motion.button>
-                </div>
-            
                 {/* Immersive Search Overlay */}
                 <AnimatePresence>
                     {isSearchOpen && (
@@ -349,25 +326,40 @@ export const CinematicStacksPage: React.FC = () => {
 
 
                 {/* Stacks Selector */}
-                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
-                    {lists.map(list => (
-                        <motion.div
-                            key={list.id}
-                            onClick={() => loadRankedList(list.id)}
-                            className={`stack-card ${currentList?.id === list.id ? 'stack-card--active' : ''}`}
-                            whileHover={{ y: -4 }}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            <span className="stack-card__name truncate">{list.name}</span>
-                            <div className="flex items-center justify-between">
-                                <span className="stack-card__count">{currentList?.id === list.id ? `${items.length}/10` : '— /10'}</span>
-                                {currentList?.id === list.id && (
-                                    <span className="material-symbols-outlined text-[14px] text-[#ffb700]">verified</span>
-                                )}
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
+                {lists.length > 0 && (
+                    <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+                        {lists.map(list => (
+                            <motion.div
+                                key={list.id}
+                                onClick={() => loadRankedList(list.id)}
+                                className={`stack-card ${currentList?.id === list.id ? 'stack-card--active' : ''}`}
+                                whileHover={{ y: -4 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                <span className="stack-card__name truncate">{list.name}</span>
+                                <div className="flex items-center justify-between">
+                                    <span className="stack-card__count">{currentList?.id === list.id ? `${items.length}/10` : '— /10'}</span>
+                                    {currentList?.id === list.id && (
+                                        <span className="material-symbols-outlined text-[14px] text-[#ffb700]">verified</span>
+                                    )}
+                                </div>
+                            </motion.div>
+                        ))}
+
+                        {lists.length < 5 && (
+                            <motion.div
+                                onClick={() => setIsCreateModalOpen(true)}
+                                className="stack-card border-dashed border-[#ffb700]/30 hover:border-[#ffb700]/60 bg-[#ffb700]/5 flex flex-col items-center justify-center text-center select-none min-w-[120px] sm:min-w-[140px]"
+                                whileHover={{ y: -4 }}
+                                whileTap={{ scale: 0.98 }}
+                                style={{ justifyContent: 'center', alignItems: 'center' }}
+                            >
+                                <span className="material-symbols-outlined text-[#ffb700] text-xl sm:text-2xl mb-1">add_circle</span>
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#ffb700]">New Stack</span>
+                            </motion.div>
+                        )}
+                    </div>
+                )}
 
                 {currentList && (
                     <div className="flex flex-col gap-8">
