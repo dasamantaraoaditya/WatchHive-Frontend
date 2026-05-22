@@ -29,12 +29,6 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     const items = propItems ?? (contextWatchlist?.items ?? []);
     const loading = propLoading !== undefined ? propLoading : contextLoading;
 
-    useEffect(() => {
-        // Only fetch context watchlist if we aren't using prop items
-        if (!propItems) {
-            fetchWatchlist();
-        }
-    }, [fetchWatchlist, propItems]);
 
     const handleAddToWatchlist = async (tmdbId: number, mediaType: 'movie' | 'tv') => {
         setIsAdding(true);
