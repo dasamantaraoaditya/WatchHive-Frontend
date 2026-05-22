@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, BeeLoader } from '../common';
 import { interactionService, Comment } from '../../services/interaction.service';
-import { useAuth } from '../../contexts';
+import { useAuth, useCustomAlert } from '../../contexts';
 
 interface CommentsModalProps {
     isOpen: boolean;
@@ -12,6 +12,7 @@ interface CommentsModalProps {
 
 export const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, entryId, onCommentAdded }) => {
     const { user } = useAuth();
+    const { confirm } = useCustomAlert();
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +54,12 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({ isOpen, onClose, e
     };
 
     const handleDelete = async (commentId: string) => {
-        if (!window.confirm('Delete this comment?')) return;
+        const confirmed = await confirm('Delete this comment?', {
+            title: 'Delete Comment',
+            confirmText: 'Delete',
+            severity: 'danger'
+        });
+        if (!confirmed) return;
         try {
             await interactionService.deleteComment(commentId);
             setComments(comments.filter(c => c.id !== commentId));

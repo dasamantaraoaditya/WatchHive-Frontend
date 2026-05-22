@@ -59,6 +59,8 @@ const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
                 return <>{actor} wants to follow you</>;
             case 'FOLLOW_ACCEPT':
                 return <>{actor} accepted your follow request</>;
+            case 'FOLLOW_REJECT':
+                return <>{actor} rejected your follow request</>;
             default:
                 return 'New activity in your network';
         }
@@ -72,12 +74,13 @@ const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
             case 'FOLLOW': return '👤';
             case 'FOLLOW_REQUEST': return '🔒';
             case 'FOLLOW_ACCEPT': return '✅';
+            case 'FOLLOW_REJECT': return '❌';
             default: return '🔔';
         }
     };
 
     const getLink = (n: any) => {
-        if (n.type === 'FOLLOW' || n.type === 'FOLLOW_REQUEST' || n.type === 'FOLLOW_ACCEPT') {
+        if (n.type === 'FOLLOW' || n.type === 'FOLLOW_REQUEST' || n.type === 'FOLLOW_ACCEPT' || n.type === 'FOLLOW_REJECT') {
             return `/watch-hive/profile/${n.content.actorId}`;
         }
         return `/watch-hive/entry/${n.content.entryId}`;

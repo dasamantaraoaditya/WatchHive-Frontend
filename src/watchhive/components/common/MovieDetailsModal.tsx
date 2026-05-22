@@ -5,6 +5,7 @@ import apiClient from '../../services/api';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import { EntryForm } from '../entries/EntryForm';
 import { SuggestUserSelector } from '../suggestions/SuggestUserSelector';
+import { useCustomAlert } from '../../contexts';
 
 interface MovieDetails {
     id: number;
@@ -43,6 +44,8 @@ interface MovieDetailsModalProps {
     initialView?: 'details' | 'log' | 'suggest';
     onLogSuccess?: () => void;
     existingEntry?: any; // any to avoid circular import if Entry is not available here, or import it
+    onAddToStack?: () => void;
+    isInStack?: boolean;
 }
 
 export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
@@ -52,7 +55,9 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
     mediaType,
     initialView = 'details',
     onLogSuccess,
-    existingEntry
+    existingEntry,
+    onAddToStack,
+    isInStack = false
 }) => {
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [loading, setLoading] = useState(false);
@@ -60,6 +65,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
     const [view, setView] = useState<'details' | 'log' | 'suggest'>('details');
 
     const { addToList, removeFromList, isInWatchlist } = useWatchlist();
+    const { alert } = useCustomAlert();
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'TBA';
@@ -120,7 +126,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                 await navigator.share(shareData);
             } else {
                 await navigator.clipboard.writeText(window.location.href);
-                alert('Link copied to clipboard!');
+                await alert('Link copied to clipboard!', { title: 'Link Copied', severity: 'success' });
             }
         } catch (err) {
             console.error('Share failed', err);
@@ -235,34 +241,53 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                     {/* Sync'd Action Bar (FeedCard Style) */}
                                     <div className="flex flex-wrap items-center justify-between gap-6 py-6 border-y border-[#2D2926]/5 mb-8">
                                         <div className="flex items-center gap-6 md:gap-8">
-                                            <button 
-                                                onClick={handleWatchlistToggle}
-                                                className={`flex items-center gap-2.5 group transition-all`}
-                                                title={inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
-                                            >
-                                                <span className={`material-symbols-outlined text-[22px] transition-all ${inWatchlist ? 'text-[#ffb700] filled' : 'text-[#2D2926]/40 group-hover:text-[#ffb700]'}`}>
-                                                    {inWatchlist ? 'bookmark_added' : 'bookmark_add'}
-                                                </span>
-                                                <span className={`text-[11px] font-black uppercase tracking-[0.15em] transition-colors ${inWatchlist ? 'text-[#ffb700]' : 'text-[#2D2926]/60 group-hover:text-[#2D2926]'}`}>
-                                                    {inWatchlist ? 'Saved' : 'Watchlist'}
-                                                </span>
-                                            </button>
+                                            {onAddToStack ? (
+                                                <button 
+                                                    onClick={onAddToStack}
+                                                    disabled={isInStack}
+                                                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-2xl font-black text-[11px] uppercase tracking-[0.15em] transition-all shadow-md ${
+                                                        isInStack 
+                                                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                                                            : 'bg-[#ffb700] hover:brightness-105 text-white shadow-[#ffb700]/25'
+                                                    }`}
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">
+                                                        {isInStack ? 'check_circle' : 'add_circle'}
+                                                    </span>
+                                                    <span>{isInStack ? 'Added to Stack' : 'Add to Stack'}</span>
+                                                </button>
+                                            ) : (
+                                                <>
+                                                    <button 
+                                                        onClick={handleWatchlistToggle}
+                                                        className={`flex items-center gap-2.5 group transition-all`}
+                                                        title={inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+                                                    >
+                                                        <span className={`material-symbols-outlined text-[22px] transition-all ${inWatchlist ? 'text-[#ffb700] filled' : 'text-[#2D2926]/40 group-hover:text-[#ffb700]'}`}>
+                                                            {inWatchlist ? 'bookmark_added' : 'bookmark_add'}
+                                                        </span>
+                                                        <span className={`text-[11px] font-black uppercase tracking-[0.15em] transition-colors ${inWatchlist ? 'text-[#ffb700]' : 'text-[#2D2926]/60 group-hover:text-[#2D2926]'}`}>
+                                                            {inWatchlist ? 'Saved' : 'Watchlist'}
+                                                        </span>
+                                                    </button>
 
-                                            <button 
-                                                onClick={() => setView('log')}
-                                                className="flex items-center gap-2.5 group transition-all"
-                                            >
-                                                <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#2D2926] transition-all">edit_note</span>
-                                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Log Watch</span>
-                                            </button>
+                                                    <button 
+                                                        onClick={() => setView('log')}
+                                                        className="flex items-center gap-2.5 group transition-all"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#2D2926] transition-all">edit_note</span>
+                                                        <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Log Watch</span>
+                                                    </button>
 
-                                            <button 
-                                                onClick={() => setView('suggest')}
-                                                className="flex items-center gap-2.5 group transition-all"
-                                            >
-                                                <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#ffb700] transition-all">send</span>
-                                                <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Suggest</span>
-                                            </button>
+                                                    <button 
+                                                        onClick={() => setView('suggest')}
+                                                        className="flex items-center gap-2.5 group transition-all"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#ffb700] transition-all">send</span>
+                                                        <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Suggest</span>
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
 
                                         <div className="flex items-center">
@@ -454,8 +479,8 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                 mediaType={mediaType || 'movie'}
                                 title={title}
                                 onBack={() => setView('details')}
-                                onSuccess={() => {
-                                    alert(`Suggestion for ${title} sent!`);
+                                onSuccess={async () => {
+                                    await alert(`Suggestion for ${title} sent!`, { title: 'Suggestion Sent', severity: 'success' });
                                     onClose();
                                 }}
                             />

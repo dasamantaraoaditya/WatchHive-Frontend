@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth, UIProvider } from './contexts';
+import { AuthProvider, useAuth, UIProvider, CustomAlertProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
 import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, MovieDetailsModal } from './components/common';
 import { EntryForm } from './components/entries/EntryForm';
@@ -238,9 +238,11 @@ export const WatchHiveApp: React.FC = () => {
             <AuthProvider>
                 <NotificationProvider>
                     <WatchlistProvider>
-                        <UIProvider>
-                            <AppRoutes />
-                        </UIProvider>
+                        <CustomAlertProvider>
+                            <UIProvider>
+                                <AppRoutes />
+                            </UIProvider>
+                        </CustomAlertProvider>
                     </WatchlistProvider>
                 </NotificationProvider>
             </AuthProvider>

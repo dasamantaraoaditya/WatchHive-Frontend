@@ -3,6 +3,7 @@ import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.se
 import apiClient from '../../services/api.js';
 import { WatchlistButton, SkeletonCard } from '../common';
 import '../profile/Profile.css';
+import { useCustomAlert } from '../../contexts';
 
 interface SuggestionCardProps {
     group: GroupedSuggestion;
@@ -29,6 +30,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDismissing, setIsDismissing] = useState(false);
+    const { confirm } = useCustomAlert();
 
     useEffect(() => {
         if (preloadedDetails) {
@@ -70,7 +72,12 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
         if (isDismissing) return;
         
         const title = details?.title || 'this title';
-        if (!window.confirm(`Dismiss suggestions for "${title}"?`)) return;
+        const confirmed = await confirm(`Dismiss suggestions for "${title}"?`, {
+            title: 'Dismiss Suggestion',
+            confirmText: 'Dismiss',
+            severity: 'warning'
+        });
+        if (!confirmed) return;
 
         setIsDismissing(true);
         try {

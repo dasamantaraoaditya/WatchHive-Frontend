@@ -13,6 +13,7 @@ import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TmdbDetails, formatDate } from './types';
 import { ExpandedCard } from './ExpandedCard';
+import { useCustomAlert } from '../../contexts';
 
 interface EntryListProps {
     onEdit?: (entry: Entry) => void;
@@ -226,6 +227,7 @@ export const EntryList: React.FC<EntryListProps> = ({
     searchQuery, 
     onSearchChange 
 }) => {
+    const { alert, confirm } = useCustomAlert();
     const [entries, setEntries] = useState<Entry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -297,7 +299,12 @@ export const EntryList: React.FC<EntryListProps> = ({
     }, [selectedEntry]);
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm('Are you sure you want to delete this entry?')) return;
+        const confirmed = await confirm('Are you sure you want to delete this entry?', {
+            title: 'Delete Entry',
+            confirmText: 'Delete',
+            severity: 'danger'
+        });
+        if (!confirmed) return;
         try {
             await entriesApi.deleteEntry(id);
             setEntries((prev) => prev.filter((e) => e.id !== id));
@@ -306,7 +313,10 @@ export const EntryList: React.FC<EntryListProps> = ({
                 history.back(); // Close expanded card if it was open
             }
         } catch (err: any) {
-            alert(err.response?.data?.error || 'Failed to delete entry');
+            await alert(err.response?.data?.error || 'Failed to delete entry', {
+                title: 'Error',
+                severity: 'error'
+            });
         }
     };
 

@@ -5,8 +5,8 @@ import { RankedItem } from '../components/stacks/RankedItem';
 import { RankedItemSkeleton } from '../components/stacks/RankedItemSkeleton';
 import { SearchItemSkeleton } from '../components/stacks/SearchItemSkeleton';
 import { StackCardSkeleton } from '../components/stacks/StackCardSkeleton';
-import { BeeLoader, ErrorState, Modal } from '../components/common';
-import { useUI } from '../contexts';
+import { BeeLoader, ErrorState, Modal, MovieDetailsModal } from '../components/common';
+import { useUI, useCustomAlert } from '../contexts';
 import apiClient from '../services/api';
 import { PageLayout } from '../components/layout';
 import '../components/stacks/Stacks.css';
@@ -23,6 +23,7 @@ interface TmdbResult {
 
 export const CinematicStacksPage: React.FC = () => {
     const { setPageTitle, setPageIcon } = useUI();
+    const { alert, confirm } = useCustomAlert();
 
     useEffect(() => {
         setPageTitle('Rankings');
@@ -51,6 +52,11 @@ export const CinematicStacksPage: React.FC = () => {
     const [searchResults, setSearchResults] = useState<TmdbResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Movie Details Modal
+    const [selectedDetailTmdbId, setSelectedDetailTmdbId] = useState<number | null>(null);
+    const [selectedDetailMediaType, setSelectedDetailMediaType] = useState<'movie' | 'tv' | null>(null);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     const loadLists = useCallback(async () => {
         try {
@@ -123,7 +129,7 @@ export const CinematicStacksPage: React.FC = () => {
             setSearchQuery('');
             setSearchResults([]);
         } catch (err) {
-            alert('Failed to add item to stack');
+            await alert('Failed to add item to stack', { title: 'Error', severity: 'error' });
         }
     };
 
@@ -134,14 +140,18 @@ export const CinematicStacksPage: React.FC = () => {
         const targetItem = items.find(item => item.tmdbId === tmdbId);
         const title = targetItem?.title || 'this title';
 
-        const confirmed = window.confirm(`Are you sure you want to remove "${title}" from this stack?`);
+        const confirmed = await confirm(`Are you sure you want to remove "${title}" from this stack?`, {
+            title: 'Remove from Stack',
+            confirmText: 'Remove',
+            severity: 'danger'
+        });
         if (!confirmed) return;
 
         try {
             await listsApi.removeFromStack(currentList.id, tmdbId);
             setItems(prev => prev.filter(item => item.tmdbId !== tmdbId));
         } catch (err) {
-            alert('Failed to remove item');
+            await alert('Failed to remove item', { title: 'Error', severity: 'error' });
         }
     };
 
@@ -185,7 +195,7 @@ export const CinematicStacksPage: React.FC = () => {
             setIsCreateModalOpen(false);
             setNewStackName('');
         } catch (err) {
-            alert('Failed to create ranking');
+            await alert('Failed to create ranking', { title: 'Error', severity: 'error' });
         } finally {
             setIsCreating(false);
         }
@@ -201,7 +211,7 @@ export const CinematicStacksPage: React.FC = () => {
             setCurrentList(updated);
             setIsEditModalOpen(false);
         } catch (err) {
-            alert('Failed to rename stack');
+            await alert('Failed to rename stack', { title: 'Error', severity: 'error' });
         } finally {
             setIsUpdating(false);
         }
@@ -209,7 +219,11 @@ export const CinematicStacksPage: React.FC = () => {
 
     const handleDeleteStack = async () => {
         if (!currentList) return;
-        const confirmed = window.confirm(`Are you sure you want to delete the stack "${currentList.name}"? This action cannot be undone.`);
+        const confirmed = await confirm(`Are you sure you want to delete the stack "${currentList.name}"? This action cannot be undone.`, {
+            title: 'Delete Stack',
+            confirmText: 'Delete Stack',
+            severity: 'danger'
+        });
         if (!confirmed) return;
 
         try {
@@ -223,7 +237,7 @@ export const CinematicStacksPage: React.FC = () => {
                 setItems([]);
             }
         } catch (err) {
-            alert('Failed to delete stack');
+            await alert('Failed to delete stack', { title: 'Error', severity: 'error' });
         }
     };
 
@@ -287,7 +301,11 @@ export const CinematicStacksPage: React.FC = () => {
                                                 whileHover={{ scale: 1.02 }}
                                                 whileTap={{ scale: 0.98 }}
                                                 key={result.id}
-                                                onClick={() => handleAddItem(result)}
+                                                onClick={() => {
+                                                    setSelectedDetailTmdbId(result.id);
+                                                    setSelectedDetailMediaType(result.media_type === 'tv' ? 'tv' : 'movie');
+                                                    setIsDetailsOpen(true);
+                                                }}
                                                 className="p-4 rounded-[28px] bg-white border border-black/5 hover:border-[#ffb700]/30 flex items-center gap-4 text-left transition-all shadow-sm hover:shadow-xl hover:shadow-black/5"
                                             >
                                                 <div className="w-16 h-24 bg-slate-50 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
@@ -558,6 +576,30 @@ export const CinematicStacksPage: React.FC = () => {
                         </button>
                     </div>
                 </Modal>
+
+                <MovieDetailsModal
+                    isOpen={isDetailsOpen}
+                    onClose={() => {
+                        setIsDetailsOpen(false);
+                        setSelectedDetailTmdbId(null);
+                        setSelectedDetailMediaType(null);
+                    }}
+                    tmdbId={selectedDetailTmdbId}
+                    mediaType={selectedDetailMediaType}
+                    onAddToStack={async () => {
+                        if (selectedDetailTmdbId && selectedDetailMediaType) {
+                            await handleAddItem({
+                                id: selectedDetailTmdbId,
+                                media_type: selectedDetailMediaType,
+                                poster_path: null
+                            });
+                            setIsDetailsOpen(false);
+                            setSelectedDetailTmdbId(null);
+                            setSelectedDetailMediaType(null);
+                        }
+                    }}
+                    isInStack={items.some(item => item.tmdbId === selectedDetailTmdbId)}
+                />
             </div>
         </PageLayout>
     );

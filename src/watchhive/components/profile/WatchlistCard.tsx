@@ -4,6 +4,7 @@ import apiClient from '../../services/api.js';
 import { MovieDetailsModal } from '../common';
 import { entriesApi } from '../../services/entries.service';
 import './Profile.css';
+import { useCustomAlert } from '../../contexts';
 
 interface WatchlistCardProps {
     tmdbId: number;
@@ -20,6 +21,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const [modalView, setModalView] = useState<'details' | 'log'>('details');
     const { removeFromList } = useWatchlist();
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const { confirm } = useCustomAlert();
 
     const handleAddToWatching = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -82,7 +84,12 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         e.stopPropagation();
         
         const title = details?.title || details?.name;
-        if (!window.confirm(`Remove "${title}" from your watchlist?`)) return;
+        const confirmed = await confirm(`Remove "${title}" from your watchlist?`, {
+            title: 'Remove from Watchlist',
+            confirmText: 'Remove',
+            severity: 'danger'
+        });
+        if (!confirmed) return;
         
         await removeFromList(tmdbId);
     };

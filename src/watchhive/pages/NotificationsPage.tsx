@@ -103,6 +103,8 @@ const NotificationsPage: React.FC = () => {
                 return <>{actor} wants to follow you</>;
             case 'FOLLOW_ACCEPT':
                 return <>{actor} accepted your follow request</>;
+            case 'FOLLOW_REJECT':
+                return <>{actor} rejected your follow request</>;
             case 'SUGGESTION':
                 return <>{actor} suggested you watch <span className="text-[#ffb700] font-black">{content.title}</span></>;
             default:
@@ -118,13 +120,14 @@ const NotificationsPage: React.FC = () => {
             case 'FOLLOW': return <span className="material-symbols-outlined text-emerald-500 text-xl">person_add</span>;
             case 'FOLLOW_REQUEST': return <span className="material-symbols-outlined text-[#ffb700] text-xl">lock_person</span>;
             case 'FOLLOW_ACCEPT': return <span className="material-symbols-outlined text-emerald-600 text-xl">how_to_reg</span>;
+            case 'FOLLOW_REJECT': return <span className="material-symbols-outlined text-rose-500 text-xl">person_remove</span>;
             case 'SUGGESTION': return <span className="material-symbols-outlined text-amber-500 text-xl">auto_awesome</span>;
             default: return <span className="material-symbols-outlined text-[#ffb700] text-xl">notifications</span>;
         }
     };
 
     const getLinkData = (n: any) => {
-        if (n.type === 'FOLLOW' || n.type === 'FOLLOW_REQUEST' || n.type === 'FOLLOW_ACCEPT') {
+        if (n.type === 'FOLLOW' || n.type === 'FOLLOW_REQUEST' || n.type === 'FOLLOW_ACCEPT' || n.type === 'FOLLOW_REJECT') {
             return { to: `/watch-hive/profile/${n.content.actorId}` };
         }
         if (n.type === 'SUGGESTION') {

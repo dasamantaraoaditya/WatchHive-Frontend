@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { listsApi, List } from '../../services/lists.service';
 import { Modal, BeeLoader } from '../common';
+import { useCustomAlert } from '../../contexts';
 
 interface StackButtonProps {
     tmdbId: number;
@@ -17,6 +18,7 @@ export const StackButton: React.FC<StackButtonProps> = ({
     const [stacks, setStacks] = useState<List[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const { alert } = useCustomAlert();
 
     const loadStacks = async () => {
         setIsLoading(true);
@@ -44,7 +46,10 @@ export const StackButton: React.FC<StackButtonProps> = ({
             setIsOpen(false);
             // Optional: show a toast/success message
         } catch (err: any) {
-            alert(err.response?.data?.error || 'Failed to add to stack');
+            await alert(err.response?.data?.error || 'Failed to add to stack', {
+                title: 'Error',
+                severity: 'error'
+            });
         } finally {
             setIsSaving(false);
         }

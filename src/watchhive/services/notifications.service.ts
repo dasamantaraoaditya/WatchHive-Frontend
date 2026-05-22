@@ -3,7 +3,7 @@ import api from './api';
 export interface Notification {
     id: string;
     userId: string;
-    type: 'FOLLOW' | 'FOLLOW_REQUEST' | 'FOLLOW_ACCEPT' | 'LIKE' | 'COMMENT' | 'REPLY' | 'MENTION';
+    type: 'FOLLOW' | 'FOLLOW_REQUEST' | 'FOLLOW_ACCEPT' | 'FOLLOW_REJECT' | 'LIKE' | 'COMMENT' | 'REPLY' | 'MENTION' | 'SUGGESTION';
     content: {
         actorId: string;
         actorName: string;

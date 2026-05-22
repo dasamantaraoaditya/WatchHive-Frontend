@@ -28,9 +28,9 @@ const NotificationBell: React.FC = () => {
                 onClick={toggleDropdown}
                 aria-label="Toggle notifications"
             >
-                <span className="bell-icon">🔔</span>
+                <span className="material-symbols-outlined text-[22px] bell-icon text-white/80 hover:text-white transition-colors">notifications</span>
                 {unreadCount > 0 && (
-                    <span className="notification-badge">
+                    <span className="notification-badge animate-pulse">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
