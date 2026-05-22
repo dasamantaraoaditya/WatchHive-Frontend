@@ -347,36 +347,7 @@ export const EntryList: React.FC<EntryListProps> = ({
         );
     }
 
-    if (entries.length === 0) {
-        const hasSearch = typeof filters?.search === 'string' && filters.search;
-        return (
-            <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
-                <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
-                    <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
-                    <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">
-                        {hasSearch ? "travel_explore" : "movie"}
-                    </span>
-                </div>
-                <h3 className="text-2xl font-black text-[#2D2926] mb-2">
-                    {hasSearch ? "No matching entries" : "No entries yet"}
-                </h3>
-                <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
-                    {hasSearch
-                        ? `No results found for "${filters!.search}"`
-                        : "Start building your cinematic journey — log a movie or show you've watched!"}
-                </p>
-                {!hasSearch && onAddNew && (
-                    <button
-                        onClick={onAddNew}
-                        className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
-                    >
-                        <span className="material-symbols-outlined text-base font-bold">add</span>
-                        Log a Watch
-                    </button>
-                )}
-            </div>
-        );
-    }
+
 
     // Extracted to satisfy Rules of Hooks — hooks cannot be called inside render props
     const EntryActionsMenu: React.FC<{
@@ -467,6 +438,8 @@ export const EntryList: React.FC<EntryListProps> = ({
         );
     };
 
+    const hasSearch = typeof filters?.search === 'string' && !!filters.search;
+
     return (
         <div className="w-full flex animate-[fade-in_0.3s_ease-out] flex-col gap-6">
             <FilterBar
@@ -492,15 +465,30 @@ export const EntryList: React.FC<EntryListProps> = ({
             />
 
             {entries.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm animate-[fade-in_0.3s_ease-out]">
                     <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
                         <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
-                        <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">movie</span>
+                        <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">
+                            {hasSearch ? "travel_explore" : "movie"}
+                        </span>
                     </div>
-                    <h3 className="text-2xl font-black text-[#2D2926] mb-2">No entries yet</h3>
-                    <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed">
-                        Start building your cinematic journey — log a movie or show you've watched!
+                    <h3 className="text-2xl font-black text-[#2D2926] mb-2">
+                        {hasSearch ? "No matching entries" : "No entries yet"}
+                    </h3>
+                    <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
+                        {hasSearch
+                            ? `No results found for "${filters!.search}"`
+                            : "Start building your cinematic journey — log a movie or show you've watched!"}
                     </p>
+                    {!hasSearch && onAddNew && (
+                        <button
+                            onClick={onAddNew}
+                            className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
+                        >
+                            <span className="material-symbols-outlined text-base font-bold">add</span>
+                            Log a Watch
+                        </button>
+                    )}
                 </div>
             ) : (
                 <>

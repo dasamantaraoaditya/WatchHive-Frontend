@@ -43,6 +43,14 @@ export const listsApi = {
         return await apiClient.post<List>('/lists', data);
     },
 
+    updateList: async (listId: string, data: Partial<List>): Promise<List> => {
+        return await apiClient.patch<List>(`/lists/${listId}`, data);
+    },
+
+    deleteList: async (listId: string): Promise<void> => {
+        await apiClient.delete(`/lists/${listId}`);
+    },
+
     getWatchlist: async (): Promise<List> => {
         return await apiClient.get<List>('/lists/watchlist');
     },

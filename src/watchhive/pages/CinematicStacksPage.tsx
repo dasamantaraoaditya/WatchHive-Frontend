@@ -41,6 +41,10 @@ export const CinematicStacksPage: React.FC = () => {
     const [newStackName, setNewStackName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
 
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editStackName, setEditStackName] = useState('');
+    const [isUpdating, setIsUpdating] = useState(false);
+
     // Search Overlay
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -184,6 +188,42 @@ export const CinematicStacksPage: React.FC = () => {
             alert('Failed to create ranking');
         } finally {
             setIsCreating(false);
+        }
+    };
+
+    const handleEditStack = async () => {
+        if (!currentList) return;
+        if (!editStackName.trim()) return;
+        setIsUpdating(true);
+        try {
+            const updated = await listsApi.updateList(currentList.id, { name: editStackName });
+            setLists(prev => prev.map(l => l.id === currentList.id ? updated : l));
+            setCurrentList(updated);
+            setIsEditModalOpen(false);
+        } catch (err) {
+            alert('Failed to rename stack');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const handleDeleteStack = async () => {
+        if (!currentList) return;
+        const confirmed = window.confirm(`Are you sure you want to delete the stack "${currentList.name}"? This action cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            await listsApi.deleteList(currentList.id);
+            const remaining = lists.filter(l => l.id !== currentList.id);
+            setLists(remaining);
+            if (remaining.length > 0) {
+                loadRankedList(remaining[0].id);
+            } else {
+                setCurrentList(null);
+                setItems([]);
+            }
+        } catch (err) {
+            alert('Failed to delete stack');
         }
     };
 
@@ -331,6 +371,35 @@ export const CinematicStacksPage: React.FC = () => {
 
                 {currentList && (
                     <div className="flex flex-col gap-8">
+                        {/* Stack Action Header */}
+                        <div className="flex items-center justify-between bg-slate-50/50 backdrop-blur-md border border-slate-200/60 rounded-3xl p-5 sm:p-6 shadow-sm">
+                            <div className="min-w-0 pr-4">
+                                <span className="text-[9px] font-black text-[#ffb700] uppercase tracking-[0.2em]">Active Stack</span>
+                                <h2 className="text-xl sm:text-2xl font-black text-[#2D2926] tracking-tight truncate mt-0.5">
+                                    {currentList.name}
+                                </h2>
+                            </div>
+                            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                                <button
+                                    onClick={() => {
+                                        setEditStackName(currentList.name);
+                                        setIsEditModalOpen(true);
+                                    }}
+                                    className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white border border-[#2D2926]/10 text-[#2D2926]/60 hover:text-[#ffb700] hover:border-[#ffb700]/30 shadow-sm active:scale-95 transition-all"
+                                    title="Edit stack name"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">edit</span>
+                                </button>
+                                <button
+                                    onClick={handleDeleteStack}
+                                    className="w-10 h-10 rounded-2xl flex items-center justify-center bg-white border border-red-100 text-[#2D2926]/20 hover:text-red-500 hover:bg-red-50/50 hover:border-red-200 shadow-sm active:scale-95 transition-all"
+                                    title="Delete stack"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Rankings List */}
                         <div className="flex-grow">
                             {isLoading && items.length === 0 ? (
@@ -463,7 +532,37 @@ export const CinematicStacksPage: React.FC = () => {
                             disabled={!newStackName.trim() || isCreating}
                             className="w-full bg-[#2D2926] text-white py-6 rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-black/20 hover:bg-black transition-all disabled:opacity-30 flex items-center justify-center gap-3 active:scale-[0.98]"
                         >
-                            {isCreating ? <BeeLoader size="small" /> : 'Forg Stack'}
+                            {isCreating ? <BeeLoader size="small" /> : 'Forge Stack'}
+                        </button>
+                    </div>
+                </Modal>
+
+                <Modal
+                    isOpen={isEditModalOpen}
+                    onClose={() => setIsEditModalOpen(false)}
+                    title="Rename Cinematic Stack"
+                >
+                    <div className="flex flex-col gap-8 p-2">
+                        <div className="flex flex-col gap-3">
+                            <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] px-2">
+                                Stack Name
+                            </label>
+                            <input
+                                type="text"
+                                value={editStackName}
+                                onChange={(e) => setEditStackName(e.target.value)}
+                                placeholder="e.g., Sci-Fi Legends..."
+                                className="w-full p-6 rounded-[28px] bg-slate-50 border-2 border-black/5 font-black text-lg text-[#2D2926] placeholder:text-slate-200 focus:outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/5 transition-all"
+                                autoFocus
+                                onKeyDown={(e) => e.key === 'Enter' && handleEditStack()}
+                            />
+                        </div>
+                        <button
+                            onClick={handleEditStack}
+                            disabled={!editStackName.trim() || isUpdating}
+                            className="w-full bg-[#2D2926] text-white py-6 rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-black/20 hover:bg-black transition-all disabled:opacity-30 flex items-center justify-center gap-3 active:scale-[0.98]"
+                        >
+                            {isUpdating ? <BeeLoader size="small" /> : 'Save Changes'}
                         </button>
                     </div>
                 </Modal>
