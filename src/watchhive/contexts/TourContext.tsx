@@ -11,21 +11,51 @@ export interface TourStep {
 
 const TOUR_STEPS: TourStep[] = [
     {
+        target: '#nav-brand, .wh-sidebar__brand',
+        title: 'Welcome to WatchHive 🐝',
+        content: 'Your personal cinematic universe — log every movie & show you watch, track what\'s next, discover what your friends are buzzing about, and build curated ranked lists. All in one hive.',
+        placement: 'bottom'
+    },
+    {
         target: '[title="Quick Actions"]',
-        title: 'Quick Actions FAB ⚡',
-        content: 'Your primary hive switch. Click here to log a watch, start currently watching a show, bookmark to your watchlist, or suggest a title to a friend instantly!',
+        title: 'Quick Add — Your Hive Switch ⚡',
+        content: 'Tap the golden ⊕ button anytime to instantly log a new watch entry, mark something as Currently Watching, add to your Watchlist, or suggest a title to a friend — all without leaving your current page.',
         placement: 'left'
     },
     {
-        target: '.wh-sidebar__link[href*="mindlens"], .wh-bottom-nav__link[href*="mindlens"]',
-        title: 'MindLens Intelligence 🧠',
-        content: 'Discover high-fidelity data intelligence, deep genre clusters, and predictive analytics calculated directly from your viewing logs!',
+        target: '.wh-sidebar__link[href*="entries"], .wh-bottom-nav__link[href*="entries"], #nav-link-entries',
+        title: 'Entries — Your Watch Log 🎬',
+        content: 'Every quick-add lands here. Browse your full history across three tabs: Watched (completed titles with ratings), Currently Watching (in-progress shows), and Watchlist (your backlog). Filter, search, and edit any entry.',
         placement: 'right'
     },
     {
-        target: '.wh-sidebar__honey-level, [title="Notifications"]',
-        title: 'Honey Level & Notifications 🐝',
-        content: 'Earn XP for logging entries and building stack lists. Keep an eye on the notification bell for recommendations from your swarm!',
+        target: '.wh-sidebar__link[href*="mindlens"], .wh-bottom-nav__link[href*="mindlens"], #nav-link-mindlens',
+        title: 'MindLens — Deep Intelligence 🧠',
+        content: 'Your personal analytics engine. See genre heatmaps, binge patterns, average ratings by category, watch streaks, and AI-powered recommendations — all computed from your unique viewing history.',
+        placement: 'right'
+    },
+    {
+        target: '.wh-sidebar__link[href*="feed"], .wh-bottom-nav__link[href*="feed"], #nav-link-feed',
+        title: 'Feed — Your Social Hive 🏠',
+        content: 'See what people you follow are watching in real time. React to entries, discover hidden gems your friends rated highly, and get personalised suggestions based on your swarm\'s collective taste.',
+        placement: 'right'
+    },
+    {
+        target: '.wh-sidebar__link[href*="rankings"], .wh-bottom-nav__link[href*="rankings"]',
+        title: 'Rankings — Build Your Stack 🏆',
+        content: 'Create and rank your all-time favourites into curated Stack Lists — "Top 10 Thrillers", "Best Comfort Watches" and more. Drag to reorder, add cover art, and share your taste with followers.',
+        placement: 'right'
+    },
+    {
+        target: '#nav-profile-trigger, .wh-sidebar__user',
+        title: 'Profile & Privacy ⚙️',
+        content: 'Click your avatar to visit your profile. Manage your display name, bio, and profile picture. Use Privacy Settings to control who can follow you — toggle Follow Requests on to approve followers manually.',
+        placement: 'bottom'
+    },
+    {
+        target: '.wh-sidebar__link[href*="search"], .wh-bottom-nav__link[href*="search"], #nav-link-search',
+        title: 'Search — Discover & Connect 🔍',
+        content: 'Search any movie or TV show to instantly log it via Quick Add. Switch to the Users tab to find friends by username, view their public profiles, and send follow requests to join their hive.',
         placement: 'right'
     }
 ];
@@ -235,7 +265,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             <div className="flex flex-col gap-0.5 min-w-0">
                                 <h4 className="text-sm font-black text-[#2D2926]">Welcome to WatchHive! 🐝</h4>
                                 <p className="text-[11px] font-bold text-[#2D2926]/60 leading-relaxed mt-1">
-                                    Unlock your new cinematic workspace with a short, 30-second guided tour.
+                                    Take a quick 8-step tour to discover everything — from logging watches to analytics, rankings, and connecting with your swarm.
                                 </p>
                             </div>
                         </div>
