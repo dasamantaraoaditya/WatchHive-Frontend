@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './AuthContext';
 
@@ -71,6 +71,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [showWelcome, setShowWelcome] = useState(false);
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+    const tooltipRef = useRef<HTMLDivElement>(null);
 
     // Check if tour is completed for this user
     useEffect(() => {
@@ -164,59 +165,56 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const activeStep = TOUR_STEPS[currentStepIndex];
 
-    // Compute absolute tooltip placement relative to the viewport coordinates
-    const getTooltipPlacement = () => {
+    // Compute boundary-safe tooltip position — no CSS transforms, clamps within viewport
+    const getTooltipStyle = (): React.CSSProperties => {
         if (!targetRect) return {};
-        
-        // Safety Fallback for mobile and small tablets (Centered Bottom Drawer)
+
+        // Mobile: centered bottom drawer
         if (window.innerWidth < 768) {
             return {
-                position: 'fixed' as const,
+                position: 'fixed',
                 left: '16px',
                 right: '16px',
-                bottom: '24px',
-                width: 'calc(100% - 32px)',
+                bottom: '80px',
                 zIndex: 2000
             };
         }
 
         const gap = 14;
-        
-        switch (activeStep.placement) {
+        const PAD = 16; // min distance from any viewport edge
+        const TW = tooltipRef.current?.offsetWidth ?? 340;
+        const TH = tooltipRef.current?.offsetHeight ?? 220;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let left: number;
+        let top: number;
+
+        switch (activeStep?.placement) {
             case 'left':
-                return {
-                    position: 'fixed' as const,
-                    left: `${targetRect.left - gap}px`,
-                    top: `${targetRect.top + targetRect.height / 2}px`,
-                    transform: 'translate(-100%, -50%)',
-                    zIndex: 2000
-                };
+                left = targetRect.left - gap - TW;
+                top  = targetRect.top + targetRect.height / 2 - TH / 2;
+                break;
             case 'right':
-                return {
-                    position: 'fixed' as const,
-                    left: `${targetRect.left + targetRect.width + gap}px`,
-                    top: `${targetRect.top + targetRect.height / 2}px`,
-                    transform: 'translate(0, -50%)',
-                    zIndex: 2000
-                };
+                left = targetRect.right + gap;
+                top  = targetRect.top + targetRect.height / 2 - TH / 2;
+                break;
             case 'top':
-                return {
-                    position: 'fixed' as const,
-                    left: `${targetRect.left + targetRect.width / 2}px`,
-                    top: `${targetRect.top - gap}px`,
-                    transform: 'translate(-50%, -100%)',
-                    zIndex: 2000
-                };
+                left = targetRect.left + targetRect.width / 2 - TW / 2;
+                top  = targetRect.top - gap - TH;
+                break;
             case 'bottom':
             default:
-                return {
-                    position: 'fixed' as const,
-                    left: `${targetRect.left + targetRect.width / 2}px`,
-                    top: `${targetRect.top + targetRect.height + gap}px`,
-                    transform: 'translate(-50%, 0)',
-                    zIndex: 2000
-                };
+                left = targetRect.left + targetRect.width / 2 - TW / 2;
+                top  = targetRect.bottom + gap;
+                break;
         }
+
+        // Clamp so the tooltip never overflows any edge
+        left = Math.max(PAD, Math.min(left, vw - TW - PAD));
+        top  = Math.max(PAD, Math.min(top,  vh - TH - PAD));
+
+        return { position: 'fixed', left: `${left}px`, top: `${top}px`, zIndex: 2000 };
     };
 
     return (
@@ -292,12 +290,13 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                         {/* Interactive Tooltip Card */}
                         <motion.div
+                            ref={tooltipRef}
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-                            style={getTooltipPlacement()}
-                            className="w-[320px] md:w-[340px] bg-white border border-[#ffb700]/20 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.22)] p-5.5 flex flex-col gap-4 font-sans select-none border-t-4 border-t-[#ffb700]"
+                            style={getTooltipStyle()}
+                            className="w-[320px] md:w-[340px] bg-white border border-[#ffb700]/20 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.22)] p-5 flex flex-col gap-4 font-sans select-none border-t-4 border-t-[#ffb700]"
                         >
                             {/* Step Count & Skip */}
                             <div className="flex items-center justify-between">
