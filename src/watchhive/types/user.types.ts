@@ -19,6 +19,8 @@ export interface User {
     updatedAt: string;
     isFollowing?: boolean;
     isRequested?: boolean;
+    isIncomingRequest?: boolean;
+    incomingRequestId?: string | null;
     _count?: {
         followers: number;
         following: number;
