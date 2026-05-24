@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import followsService from '../../services/follows.service';
@@ -120,16 +121,16 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <AnimatePresence>
             <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
-                {/* Blur Backdrop */}
+                {/* Backdrop */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={onClose}
-                    className="absolute inset-0 bg-[#2D2926]/40 backdrop-blur-md"
+                    className="fixed inset-0 bg-[#2D2926]/40"
                 />
 
                 {/* Modal Container */}
@@ -278,7 +279,8 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
                     )}
                 </motion.div>
             </div>
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 
