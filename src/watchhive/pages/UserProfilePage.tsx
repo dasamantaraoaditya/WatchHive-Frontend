@@ -89,11 +89,7 @@ export const UserProfilePage: React.FC = () => {
             nextFollowing = false;
             nextRequested = false;
         } else {
-            if (profileUser.isPrivate) {
-                nextRequested = true;
-            } else {
-                nextFollowing = true;
-            }
+            nextRequested = true;
         }
 
         setProfileUser(prev => prev ? ({ ...prev, isFollowing: nextFollowing, isRequested: nextRequested }) : null);
@@ -136,9 +132,7 @@ export const UserProfilePage: React.FC = () => {
     let canViewEntries = false;
     if (isOwner) {
         canViewEntries = true;
-    } else if (privacyLevel === 'PUBLIC') {
-        canViewEntries = true;
-    } else if (privacyLevel === 'FOLLOWERS_ONLY' && isFollower) {
+    } else if (isFollower) {
         canViewEntries = true;
     }
 

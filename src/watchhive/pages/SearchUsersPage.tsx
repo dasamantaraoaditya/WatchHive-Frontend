@@ -124,11 +124,7 @@ export const SearchUsersPage: React.FC = () => {
             nextFollowing = false;
             nextRequested = false;
         } else {
-            if (targetUser.isPrivate) {
-                nextRequested = true;
-            } else {
-                nextFollowing = true;
-            }
+            nextRequested = true;
         }
 
         setUserResults(prev => prev.map(u =>
