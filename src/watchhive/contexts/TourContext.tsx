@@ -153,6 +153,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const skipTour = () => {
         setIsActive(false);
+        setShowWelcome(false);
         localStorage.setItem('wh_tour_completed', 'true');
     };
 
