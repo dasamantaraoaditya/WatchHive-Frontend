@@ -24,6 +24,7 @@ export const UserProfilePage: React.FC = () => {
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
     const [activeTab, setActiveTab] = useState<'entries' | 'watching' | 'watchlist'>('entries');
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
+    const [isHoveredRequested, setIsHoveredRequested] = useState(false);
 
     // Dynamic data for tabs
     const [watchlistItems, setWatchlistItems] = useState<ListItem[] | null>(null);
@@ -128,11 +129,16 @@ export const UserProfilePage: React.FC = () => {
     const privacyLevel = profileUser.privacyLevel || (profileUser.isPrivate ? 'FOLLOWERS_ONLY' : 'PUBLIC');
     const isOwner = currentUser?.id === profileUser.id;
     const isFollower = profileUser.isFollowing;
+    const isRequested = profileUser.isRequested;
     
     let canViewEntries = false;
     if (isOwner) {
         canViewEntries = true;
-    } else if (isFollower) {
+    } else if (isRequested) {
+        canViewEntries = false;
+    } else if (privacyLevel === 'PUBLIC') {
+        canViewEntries = true;
+    } else if (privacyLevel === 'FOLLOWERS_ONLY' && isFollower) {
         canViewEntries = true;
     }
 
@@ -197,15 +203,21 @@ export const UserProfilePage: React.FC = () => {
                         <div className="flex md:flex-col gap-3 w-full md:w-48">
                             <button 
                                 onClick={handleFollowToggle} 
+                                onMouseEnter={() => setIsHoveredRequested(true)}
+                                onMouseLeave={() => setIsHoveredRequested(false)}
                                 className={`flex-1 font-black py-4 rounded-2xl transition-all text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-black/5 ${
                                     profileUser.isFollowing 
                                     ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' 
                                     : profileUser.isRequested
-                                    ? 'bg-amber-100 text-amber-600 hover:bg-amber-200 border border-amber-200 shadow-amber-100/50'
+                                    ? 'bg-amber-100 text-amber-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 border border-amber-200 shadow-amber-100/50'
                                     : 'bg-[#ffb700] text-white hover:brightness-105 shadow-[#ffb700]/20'
                                 }`}
                             >
-                                {profileUser.isFollowing ? 'Unfollow' : profileUser.isRequested ? 'Requested 🔒' : 'Follow User'}
+                                {profileUser.isFollowing 
+                                    ? 'Unfollow' 
+                                    : profileUser.isRequested 
+                                    ? (isHoveredRequested ? 'Cancel Request ✕' : 'Requested 🔒') 
+                                    : 'Follow User'}
                             </button>
                             
                             <button 

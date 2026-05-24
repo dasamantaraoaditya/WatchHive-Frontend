@@ -52,6 +52,7 @@ export const SearchUsersPage: React.FC = () => {
 
     // Modal State
     const [selectedMovie, setSelectedMovie] = useState<{ id: number; type: 'movie' | 'tv' } | null>(null);
+    const [hoveredRequestedUserId, setHoveredRequestedUserId] = useState<string | null>(null);
 
     // Debounce search
     useEffect(() => {
@@ -253,15 +254,21 @@ export const SearchUsersPage: React.FC = () => {
                                     </div>
                                     <button
                                         onClick={(e) => handleFollowToggle(e, user)}
+                                        onMouseEnter={() => setHoveredRequestedUserId(user.id)}
+                                        onMouseLeave={() => setHoveredRequestedUserId(null)}
                                         className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${
                                             user.isFollowing 
-                                            ? 'bg-slate-100 text-slate-500' 
+                                            ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' 
                                             : user.isRequested
-                                            ? 'bg-amber-100 text-amber-600 hover:bg-amber-200'
+                                            ? 'bg-amber-100 text-amber-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 border border-amber-200'
                                             : 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20 hover:brightness-105'
                                         }`}
                                     >
-                                        {user.isFollowing ? 'Following' : user.isRequested ? 'Requested 🔒' : 'Follow'}
+                                        {user.isFollowing 
+                                            ? 'Following' 
+                                            : user.isRequested 
+                                            ? (hoveredRequestedUserId === user.id ? 'Cancel Request ✕' : 'Requested 🔒') 
+                                            : 'Follow'}
                                     </button>
                                 </Link>
                             ))}
