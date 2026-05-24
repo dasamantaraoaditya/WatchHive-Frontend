@@ -102,7 +102,7 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search friends..."
-                                className="w-full pl-12 pr-4 py-4 bg-[#FFF9F0]/50 border-2 border-[#ffb700]/10 rounded-2xl outline-none focus:border-[#ffb700] transition-all font-bold text-[#2D2926]"
+                                className="w-full pl-12 pr-4 py-4 bg-[#FFF9F0]/50 border-2 border-[#ffb700]/10 rounded-2xl outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all font-bold text-[#2D2926]"
                             />
                         </div>
 
@@ -164,7 +164,7 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 placeholder="Tell them why they need to watch this..."
-                                className="w-full p-5 bg-white border-2 border-[#ffb700]/10 rounded-3xl outline-none focus:border-[#ffb700] transition-all min-h-[140px] text-sm font-medium text-[#2D2926] placeholder:text-[#2D2926]/20"
+                                className="w-full p-5 bg-white border-2 border-[#ffb700]/10 rounded-[24px] outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all min-h-[140px] text-sm font-medium text-[#2D2926] placeholder:text-[#2D2926]/20"
                             />
                         </div>
 
@@ -173,7 +173,7 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                         <button
                             onClick={handleSend}
                             disabled={isSending}
-                            className="mt-auto w-full py-5 bg-[#2D2926] text-white font-black text-xs uppercase tracking-[0.2em] rounded-3xl shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                            className="mt-auto w-full py-4.5 bg-[#ffb700] text-white font-black text-xs uppercase tracking-[0.2em] rounded-[24px] shadow-xl shadow-[#ffb700]/20 hover:brightness-105 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer"
                         >
                             {isSending ? (
                                 <>

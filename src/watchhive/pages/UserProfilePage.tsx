@@ -223,56 +223,83 @@ export const UserProfilePage: React.FC = () => {
                             )}
                         </div>
                         
-                        <div className="flex md:flex-col gap-3 w-full md:w-48">
+                        <div className="flex flex-col gap-2.5 w-full md:w-64">
                             {profileUser.isIncomingRequest ? (
                                 <div className="flex flex-col gap-2 w-full">
                                     <p className="text-[9px] font-black text-center uppercase tracking-[0.15em] text-[#ffb700] bg-[#ffb700]/5 border border-[#ffb700]/15 py-2 rounded-xl">
                                         Wants to Follow You
                                     </p>
-                                    <div className="flex gap-2 w-full">
+                                    <div className="flex flex-row gap-2 w-full">
                                         <button 
                                             onClick={handleAcceptRequest} 
-                                            className="flex-1 font-black py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] uppercase tracking-[0.1em] shadow-lg shadow-emerald-500/10 active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
+                                            className="flex-1 font-black py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] uppercase tracking-[0.12em] shadow-md shadow-emerald-500/10 active:scale-95 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer"
                                         >
                                             <span className="material-symbols-outlined text-[14px] font-bold">check</span>
                                             Accept
                                         </button>
                                         <button 
                                             onClick={handleRejectRequest} 
-                                            className="flex-1 font-black py-3 rounded-2xl bg-rose-50 hover:bg-rose-500 hover:text-white border border-rose-100 hover:border-rose-500 text-rose-500 text-[10px] uppercase tracking-[0.1em] active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
+                                            className="flex-1 font-black py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-500 hover:text-white border border-rose-100 hover:border-rose-500 text-rose-500 text-[9px] uppercase tracking-[0.12em] active:scale-95 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer"
                                         >
                                             <span className="material-symbols-outlined text-[14px] font-bold">close</span>
                                             Decline
                                         </button>
+                                        <button 
+                                            onClick={() => setIsSuggestModalOpen(true)}
+                                            className="flex-1 font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/5 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-md shadow-black/5 flex items-center justify-center gap-1 cursor-pointer"
+                                        >
+                                            <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
+                                            Suggest
+                                        </button>
                                     </div>
                                 </div>
                             ) : (
-                                <button 
-                                    onClick={handleFollowToggle} 
-                                    onMouseEnter={() => setIsHoveredRequested(true)}
-                                    onMouseLeave={() => setIsHoveredRequested(false)}
-                                    className={`flex-1 font-black py-4 rounded-2xl transition-all text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-black/5 ${
-                                        profileUser.isFollowing 
-                                        ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' 
-                                        : profileUser.isRequested
-                                        ? 'bg-amber-100 text-amber-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 border border-amber-200 shadow-amber-100/50'
-                                        : 'bg-[#ffb700] text-white hover:brightness-105 shadow-[#ffb700]/20'
-                                    }`}
-                                >
-                                    {profileUser.isFollowing 
-                                        ? 'Unfollow' 
-                                        : profileUser.isRequested 
-                                        ? (isHoveredRequested ? 'Cancel Request ✕' : 'Requested 🔒') 
-                                        : 'Follow User'}
-                                </button>
+                                <div className="flex flex-row gap-2 w-full">
+                                    <button 
+                                        onClick={handleFollowToggle} 
+                                        onMouseEnter={() => setIsHoveredRequested(true)}
+                                        onMouseLeave={() => setIsHoveredRequested(false)}
+                                        className={`flex-1 font-black py-2.5 px-4 rounded-xl transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-md shadow-black/5 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
+                                            profileUser.isFollowing 
+                                            ? 'bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 border border-transparent' 
+                                            : profileUser.isRequested
+                                            ? 'bg-amber-50 text-amber-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 border border-amber-200 shadow-amber-100/50'
+                                            : 'bg-[#ffb700] text-white hover:brightness-105 shadow-[#ffb700]/15'
+                                        }`}
+                                    >
+                                        {profileUser.isFollowing ? (
+                                            <>
+                                                <span className="material-symbols-outlined text-[14px]">person_remove</span>
+                                                Unfollow
+                                            </>
+                                        ) : profileUser.isRequested ? (
+                                            isHoveredRequested ? (
+                                                <>
+                                                    <span className="material-symbols-outlined text-[14px]">cancel</span>
+                                                    Cancel
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="material-symbols-outlined text-[14px]">lock</span>
+                                                    Requested
+                                                </>
+                                            )
+                                        ) : (
+                                            <>
+                                                <span className="material-symbols-outlined text-[14px]">person_add</span>
+                                                Follow
+                                            </>
+                                        )}
+                                    </button>
+                                    <button 
+                                        onClick={() => setIsSuggestModalOpen(true)}
+                                        className="flex-1 font-black py-2.5 px-4 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/5 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-md shadow-black/5 flex items-center justify-center gap-1.5 cursor-pointer"
+                                    >
+                                        <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
+                                        Suggest
+                                    </button>
+                                </div>
                             )}
-                            
-                            <button 
-                                onClick={() => setIsSuggestModalOpen(true)}
-                                className="flex-1 font-black py-4 rounded-2xl bg-white border border-black/5 text-[#2D2926] hover:bg-slate-50 transition-all text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-black/5"
-                            >
-                                Suggest Media
-                            </button>
                         </div>
                     </div>
                 </div>

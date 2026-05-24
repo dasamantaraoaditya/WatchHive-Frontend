@@ -254,30 +254,32 @@ const NotificationsPage: React.FC = () => {
                                         </div>
                                     </Link>
 
-                                    {n.type === 'FOLLOW_REQUEST' && (
-                                        <div className="mt-3 ml-16 flex gap-3">
-                                            <button
-                                                className="px-6 py-2.5 bg-[#ffb700] hover:brightness-105 text-white font-black text-[10px] uppercase tracking-widest rounded-xl shadow-lg shadow-[#ffb700]/10 transition-all"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    acceptFollowRequest(n.content.requestId!, n.id);
-                                                }}
-                                            >
-                                                Accept Request
-                                            </button>
-                                            <button
-                                                className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-500 font-black text-[10px] uppercase tracking-widest rounded-xl transition-all"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    rejectFollowRequest(n.content.requestId!, n.id);
-                                                }}
-                                            >
-                                                Decline
-                                            </button>
-                                        </div>
-                                    )}
+                                     {n.type === 'FOLLOW_REQUEST' && (
+                                         <div className="mt-3 ml-16 flex gap-3">
+                                             <button
+                                                 className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9px] uppercase tracking-[0.15em] rounded-xl shadow-md shadow-emerald-500/10 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                                                 onClick={(e) => {
+                                                     e.preventDefault();
+                                                     e.stopPropagation();
+                                                     acceptFollowRequest(n.content.requestId!, n.id);
+                                                 }}
+                                             >
+                                                 <span className="material-symbols-outlined text-[14px] font-bold">check</span>
+                                                 Accept
+                                             </button>
+                                             <button
+                                                 className="px-4 py-2.5 bg-rose-50 border border-rose-100 text-rose-500 hover:bg-rose-500 hover:text-white hover:border-rose-500 font-black text-[9px] uppercase tracking-[0.15em] rounded-xl active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer"
+                                                 onClick={(e) => {
+                                                     e.preventDefault();
+                                                     e.stopPropagation();
+                                                     rejectFollowRequest(n.content.requestId!, n.id);
+                                                 }}
+                                             >
+                                                 <span className="material-symbols-outlined text-[14px] font-bold">close</span>
+                                                 Decline
+                                             </button>
+                                         </div>
+                                     )}
                                 </div>
                             ))}
                             

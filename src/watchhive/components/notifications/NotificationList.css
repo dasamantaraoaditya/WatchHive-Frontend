@@ -21,9 +21,11 @@
 .mark-all-btn {
     background: transparent;
     border: none;
-    color: var(--primary-400);
-    font-size: 0.75rem;
-    font-weight: 600;
+    color: #ffb700;
+    font-size: 0.725rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 6px;
@@ -31,7 +33,7 @@
 }
 
 .mark-all-btn:hover {
-    background: rgba(14, 165, 233, 0.1);
+    background: rgba(255, 183, 0, 0.1);
 }
 
 .notification-items {
@@ -98,7 +100,7 @@
 }
 
 .notification-item-container.unread {
-    background: rgba(14, 165, 233, 0.05);
+    background: rgba(255, 183, 0, 0.03);
 }
 
 .notification-icon {
@@ -122,8 +124,8 @@
 }
 
 .actor-name {
-    font-weight: 700;
-    color: var(--primary-400);
+    font-weight: 800;
+    color: #ffb700;
 }
 
 .notification-time {
@@ -138,9 +140,9 @@
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    background: var(--primary-500);
+    width: 7px;
+    height: 7px;
+    background: #ffb700;
     border-radius: 50%;
 }
 
@@ -167,7 +169,7 @@
 }
 
 .notification-list-footer a:hover {
-    color: var(--primary-400);
+    color: #ffb700;
 }
 
 /* Custom scrollbar for notifications */

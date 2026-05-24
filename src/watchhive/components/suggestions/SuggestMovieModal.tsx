@@ -104,7 +104,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({ toUserId, 
                                     value={searchQuery}
                                     onChange={handleSearchChange}
                                     autoFocus
-                                    className="w-full pl-12 pr-4 py-4 bg-[#FFF9F0]/50 border-2 border-[#ffb700]/20 rounded-2xl outline-none focus:border-[#ffb700] transition-all font-bold"
+                                    className="w-full pl-12 pr-4 py-4 bg-[#FFF9F0]/50 border-2 border-[#ffb700]/10 rounded-2xl outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all font-bold text-[#2D2926]"
                                     placeholder="Inception, Breaking Bad..."
                                 />
                                 {isSearching && <div className="absolute right-4 top-1/2 -translate-y-1/2"><BeeLoader size="small" message="" className="py-0" /></div>}
@@ -162,7 +162,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({ toUserId, 
                                 <textarea
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    className="w-full p-4 bg-white border border-[#ffb700]/20 rounded-2xl outline-none focus:border-[#ffb700] transition-all min-h-[100px] text-sm"
+                                    className="w-full p-5 bg-white border-2 border-[#ffb700]/10 rounded-[24px] outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all min-h-[120px] text-sm font-medium text-[#2D2926] placeholder:text-[#2D2926]/20"
                                     placeholder="Why should they watch this?"
                                 />
                             </div>
@@ -176,16 +176,16 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({ toUserId, 
                     <button
                         disabled={!selectedMovie || isSending}
                         onClick={handleSendSuggestion}
-                        className="w-full py-4 bg-[#ffb700] text-white font-black text-lg rounded-2xl hover:brightness-105 shadow-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale transition-all"
+                        className="w-full py-4.5 bg-[#ffb700] text-white font-black text-xs uppercase tracking-[0.2em] rounded-[24px] shadow-xl shadow-[#ffb700]/20 hover:brightness-105 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale cursor-pointer"
                     >
                         {isSending ? (
                             <>
-                                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
                                 Sending Suggestion...
                             </>
                         ) : (
                             <>
-                                <span className="material-symbols-outlined">send</span>
+                                <span className="material-symbols-outlined text-lg">send</span>
                                 Send Suggestion
                             </>
                         )}

@@ -125,26 +125,28 @@ const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
                         </Link>
 
                         {n.type === 'FOLLOW_REQUEST' && (
-                            <div className="notification-actions">
+                            <div className="mt-3 ml-12 flex gap-2">
                                 <button
-                                    className="accept-btn"
+                                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9px] uppercase tracking-[0.15em] rounded-xl shadow-md shadow-emerald-500/10 active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         acceptFollowRequest(n.content.requestId!, n.id);
                                     }}
                                 >
+                                    <span className="material-symbols-outlined text-[12px] font-bold">check</span>
                                     Accept
                                 </button>
                                 <button
-                                    className="reject-btn"
+                                    className="px-4 py-2 bg-slate-50 border border-slate-200 text-slate-500 hover:bg-rose-500 hover:text-white hover:border-rose-500 font-black text-[9px] uppercase tracking-[0.15em] rounded-xl active:scale-95 transition-all flex items-center justify-center gap-1 cursor-pointer"
                                     onClick={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
                                         rejectFollowRequest(n.content.requestId!, n.id);
                                     }}
                                 >
-                                    Reject
+                                    <span className="material-symbols-outlined text-[12px] font-bold">close</span>
+                                    Decline
                                 </button>
                             </div>
                         )}
