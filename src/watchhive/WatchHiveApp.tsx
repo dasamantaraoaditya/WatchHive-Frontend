@@ -194,6 +194,7 @@ const AppRoutes: React.FC = () => {
                             isOpen={activeAction === 'log' || activeAction === 'watching'}
                             onClose={closeAll}
                             title="Log your latest watch"
+                            maxWidth="max-w-4xl"
                         >
                             <EntryForm
                                 onSuccess={closeAll}

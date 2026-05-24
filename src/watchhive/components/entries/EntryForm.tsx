@@ -24,15 +24,14 @@ interface TmdbResult {
     vote_average?: number;
 }
 
-/* ── Star Rating Component (Tailwind Modified) ── */
 /* ── Premium Fractional Star Component ── */
 const FractionalStar: React.FC<{ fill: number; size: number; active: boolean }> = ({ fill, size, active }) => {
     const id = React.useId();
-    // Use the branding color for filled parts, and a subtle dark for empty parts
-    const strokeColor = active ? '#ffb700' : 'rgba(45, 41, 38, 0.2)';
+    // branding gold color vs soft background gray
+    const strokeColor = active ? '#ffb700' : 'rgba(45, 41, 38, 0.15)';
     
     return (
-        <svg width={size} height={size} viewBox="0 0 24 24" className="drop-shadow-sm transition-transform hover:scale-110">
+        <svg width={size} height={size} viewBox="0 0 24 24" className="drop-shadow-sm transition-all duration-300 transform hover:scale-115">
             <defs>
                 <linearGradient id={id} x1="0" x2="100%" y1="0" y2="0">
                     <stop offset={`${fill * 100}%`} stopColor="#ffb700" />
@@ -50,7 +49,7 @@ const FractionalStar: React.FC<{ fill: number; size: number; active: boolean }> 
     );
 };
 
-/* ── Sophisticated Rating Component ── */
+/* ── Star Rating Component with Snapping Snaps ── */
 const StarRating: React.FC<{
     value: number | undefined; 
     onChange: (v: number | undefined) => void;
@@ -70,8 +69,8 @@ const StarRating: React.FC<{
         
         // Map 0-width to 0-10 rating, clamped
         const rawRating = (x / width) * 10;
-        // Round to 1 decimal place
-        return Math.max(0, Math.min(10, Math.round(rawRating * 10) / 10));
+        // Snap to nearest 0.5 step for incredibly user-friendly rating snaps!
+        return Math.max(0.5, Math.min(10, Math.round(rawRating * 2) / 2));
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
@@ -92,16 +91,16 @@ const StarRating: React.FC<{
         if (isNaN(val)) {
             onChange(undefined);
         } else {
-            onChange(Math.max(0, Math.min(10, Math.round(val * 10) / 10)));
+            onChange(Math.max(0, Math.min(10, Math.round(val * 2) / 2)));
         }
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-6" role="radiogroup" aria-label="Rating">
+        <div className="flex flex-wrap items-center gap-4" role="radiogroup" aria-label="Rating">
             {/* The Interactive Star Row */}
             <div 
                 ref={containerRef}
-                className="flex items-center gap-1 cursor-crosshair py-2"
+                className="flex items-center gap-1.5 cursor-pointer py-1.5"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setHoverValue(null)}
                 onClick={handleClick}
@@ -115,7 +114,7 @@ const StarRating: React.FC<{
                         <FractionalStar 
                             key={i} 
                             fill={starFill} 
-                            size={40} 
+                            size={36} 
                             active={displayValue > starStart} 
                         />
                     );
@@ -123,33 +122,138 @@ const StarRating: React.FC<{
             </div>
             
             {/* The High-Precision Numeric Control */}
-            <div className="flex items-center gap-2 bg-gradient-to-br from-[#FFF9F0] to-white border border-[#ffb700]/20 px-4 py-2 rounded-2xl shadow-sm">
+            <div className="flex items-center gap-1 bg-gradient-to-br from-[#FFF9F0] to-white border border-[#ffb700]/25 px-3 py-1.5 rounded-xl shadow-sm">
                 <input
                     type="number"
                     min="0"
                     max="10"
-                    step="0.1"
+                    step="0.5"
                     value={value ?? ''}
                     onChange={handleInputChange}
                     disabled={disabled}
-                    className="w-14 bg-transparent text-[#ffb700] font-black text-xl outline-none border-none p-0 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-12 bg-transparent text-[#ffb700] font-black text-lg outline-none border-none p-0 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder="0.0"
                 />
-                <span className="text-[#2D2926]/40 font-black text-xs uppercase tracking-widest">/ 10</span>
+                <span className="text-[#2D2926]/30 font-black text-[10px] uppercase tracking-widest">/ 10</span>
             </div>
         </div>
     );
 };
 
-/* ── Watch location quick picks ── */
+/* ── Custom Brand SVGs for OTT Locations ── */
+
+const CinemaIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <path d="M4 4h16a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V6a2 2 0 0 1 2-2z" fill="url(#ticketGrad)" stroke="#FFD700" strokeWidth="1" />
+        <line x1="8" y1="5" x2="8" y2="19" stroke="#FFD700" strokeDasharray="2 2" />
+        <circle cx="15" cy="12" r="1.5" fill="#FFF" />
+        <defs>
+            <linearGradient id="ticketGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stopColor="#B33939" />
+                <stop offset="100%" stopColor="#210808" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
+const HomeIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M2 12a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z" fill="url(#sofaGrad)" />
+        <rect x="5" y="12" width="6" height="5" rx="1" fill="#FFF" fillOpacity="0.25" />
+        <rect x="13" y="12" width="6" height="5" rx="1" fill="#FFF" fillOpacity="0.25" />
+        <defs>
+            <linearGradient id="sofaGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stopColor="#F39C12" />
+                <stop offset="100%" stopColor="#D35400" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
+const NetflixIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <rect width="24" height="24" rx="5" fill="#141414" />
+        <path d="M7 4.5h3l3.5 10.5V4.5h3v15h-3L7 9.5v10H7V4.5z" fill="#E50914" />
+        <path d="M10 4.5v15l3.5-10.5V4.5H10z" fill="#B20710" />
+    </svg>
+);
+
+const DisneyIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <rect width="24" height="24" rx="5" fill="url(#disneyGrad)" />
+        <path d="M12 4c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm-0.5 7h-1v-1h1v1zm3 0h-1v-1h1v1z" fill="#FFF" fillOpacity="0.4" />
+        <path d="M5 8c1-1 2.5-1.5 4-1.5s3 .5 4 1.5M3 12c0-3 1.5-5 3.5-6M21 12c0 3-1.5 5-3.5 6" stroke="#FFF" strokeWidth="0.8" strokeLinecap="round" strokeDasharray="1 2.5" />
+        <polygon points="12,7 13.5,10 16,10 14,11.5 15,14 12,12.5 9,14 10,11.5 8,10 10.5,10" fill="#FFF" />
+        <defs>
+            <linearGradient id="disneyGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stopColor="#0B133A" />
+                <stop offset="60%" stopColor="#1E3E8F" />
+                <stop offset="100%" stopColor="#3B82F6" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
+const PrimeIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <rect width="24" height="24" rx="5" fill="url(#primeGrad)" />
+        <path d="M6 14.5c3 1.5 9 1.5 12 0" stroke="#FF9900" strokeWidth="2.2" strokeLinecap="round" />
+        <path d="M18 14.5l-3-.3M18 14.5v-2.5" stroke="#FF9900" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        <polygon points="10,8 15,11 10,14" fill="#FFF" />
+        <defs>
+            <linearGradient id="primeGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stopColor="#00A8E8" />
+                <stop offset="100%" stopColor="#005A9C" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
+const MobileIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <rect x="6" y="2" width="12" height="20" rx="2.5" fill="url(#mobileGrad)" stroke="#FFF" strokeWidth="0.5" />
+        <circle cx="12" cy="19.5" r="1" fill="#FFF" fillOpacity="0.8" />
+        <rect x="8" y="4" width="8" height="12" rx="0.5" fill="#1e272e" />
+        <polygon points="11,8 14,10 11,12" fill="#00D2D3" />
+        <defs>
+            <linearGradient id="mobileGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stopColor="#00D2D3" />
+                <stop offset="100%" stopColor="#01A3A4" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
+/* ── OTT Presets Mapping ── */
 const LOCATION_PRESETS = [
-    { label: 'Cinema', value: 'Cinema', icon: 'theater_comedy' },
-    { label: 'Home', value: 'Home', icon: 'home' },
-    { label: 'Netflix', value: 'Netflix', icon: 'cast' },
-    { label: 'Disney+', value: 'Disney+', icon: 'vpk' },
-    { label: 'Prime', value: 'Prime Video', icon: 'live_tv' },
-    { label: 'Mobile', value: 'On the Go', icon: 'smartphone' },
+    { label: 'Cinema', value: 'Cinema', renderIcon: () => <CinemaIcon /> },
+    { label: 'Home', value: 'Home', renderIcon: () => <HomeIcon /> },
+    { label: 'Netflix', value: 'Netflix', renderIcon: () => <NetflixIcon /> },
+    { label: 'Disney+', value: 'Disney+', renderIcon: () => <DisneyIcon /> },
+    { label: 'Prime', value: 'Prime Video', renderIcon: () => <PrimeIcon /> },
+    { label: 'Mobile', value: 'On the Go', renderIcon: () => <MobileIcon /> },
 ];
+
+/* ── Cinephile Mood Phrases ── */
+const getRatingMood = (rating: number | undefined): { text: string; color: string; icon: string } => {
+    if (rating === undefined || rating === 0) return { text: "Select a rating to record your thoughts", color: "text-[#2D2926]/40", icon: "rate_review" };
+    if (rating <= 2.0) return { text: "Disaster / Complete Waste of Time 🗑️", color: "text-red-600 bg-red-50 border-red-100", icon: "sentiment_very_dissatisfied" };
+    if (rating <= 4.0) return { text: "Poor / Not Recommended 👎", color: "text-orange-600 bg-orange-50 border-orange-100", icon: "sentiment_dissatisfied" };
+    if (rating <= 5.5) return { text: "Mediocre / Average🍿", color: "text-yellow-700 bg-yellow-50 border-yellow-100", icon: "sentiment_neutral" };
+    if (rating <= 7.0) return { text: "Decent / Enjoyable 👍", color: "text-lime-700 bg-lime-50 border-lime-100", icon: "sentiment_satisfied" };
+    if (rating <= 8.5) return { text: "Excellent / Highly Recommended 🔥", color: "text-emerald-700 bg-emerald-50 border-emerald-100", icon: "sentiment_very_satisfied" };
+    if (rating <= 9.5) return { text: "Outstanding / Near Flawless 🌟", color: "text-amber-700 bg-amber-50 border-amber-100", icon: "grade" };
+    return { text: "Absolute Masterpiece / Cinematic Perfection 🏆", color: "text-yellow-600 bg-amber-50 border-amber-200 font-extrabold animate-pulse", icon: "emoji_events" };
+};
+
+/* ── Timezone-Aware Local ISO Formatter ── */
+const toLocalISOString = (dateInput: Date | string | number) => {
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return '';
+    const offset = d.getTimezoneOffset() * 60000;
+    const localTime = new Date(d.getTime() - offset);
+    return localTime.toISOString().slice(0, 16);
+};
 
 export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false, defaultIsWatching = false }) => {
     const isEditing = !!entry;
@@ -167,8 +271,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         title: entry?.title || prefillData?.title || '',
         type: entry?.type || prefillData?.type || 'MOVIE',
         watchedAt: entry?.watchedAt 
-            ? new Date(entry.watchedAt).toISOString().slice(0, 16) 
-            : new Date().toISOString().slice(0, 16),
+            ? toLocalISOString(entry.watchedAt) 
+            : toLocalISOString(new Date()),
         rating: entry?.rating || undefined,
         review: entry?.review || '',
         tags: entry?.tags || [],
@@ -184,7 +288,6 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [showResults, setShowResults] = useState(false);
     const [selectedPoster, setSelectedPoster] = useState<string | null>(prefillData?.posterPath ? `https://image.tmdb.org/t/p/w342${prefillData.posterPath}` : null);
     const [selectedOverview, setSelectedOverview] = useState<string | null>(prefillData?.overview || null);
-    const [showMoreDetails, setShowMoreDetails] = useState(!!(entry?.review || entry?.tags?.length || entry?.watchLocation));
     const [tagInput, setTagInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -287,237 +390,314 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const hasSelection = formData.tmdbId > 0 && formData.title.length > 0;
 
     return (
-        <div className={`w-full ${!isModal ? 'max-w-4xl mx-auto py-4 md:py-8' : ''}`}>
-            <div className={`${!isModal ? 'bg-white border border-[#ffb700]/20 shadow-sm rounded-3xl p-4 md:p-10' : 'p-0'}`}>
+        <div className={`w-full ${!isModal ? 'max-w-4xl mx-auto py-2 md:py-6' : ''}`}>
+            <div className={`${!isModal ? 'bg-white border border-[#ffb700]/15 shadow-sm rounded-[32px] p-5 md:p-8' : 'p-0'}`}>
                 {!isModal && (
-                    <div className="flex flex-col gap-2 mb-8 border-b border-[#ffb700]/10 pb-6">
-                        <h2 className="text-3xl font-black text-[#2D2926] flex items-center gap-3">
-                            {isEditing ? <span className="text-[#ffb700] material-symbols-outlined text-[32px]">edit</span> : <span className="text-[#ffb700] material-symbols-outlined text-[32px]">movie</span>}
-                            {isEditing ? 'Edit Existing Entry' : 'Log your latest Watch'}
+                    <div className="flex flex-col gap-2 mb-6 border-b border-[#ffb700]/10 pb-4">
+                        <h2 className="text-2xl font-black text-[#2D2926] flex items-center gap-2.5">
+                            {isEditing ? (
+                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">edit</span>
+                            ) : (
+                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">movie</span>
+                            )}
+                            {isEditing ? 'Edit Your Entry' : 'Log a Watch'}
                         </h2>
-                        <p className="text-[#2D2926]/50 font-medium">
-                            {isEditing ? 'Update the details below to ensure historical accuracy.' : 'Search the global hive database, rate it, and add to your collection.'}
+                        <p className="text-xs text-[#2D2926]/50 font-bold uppercase tracking-wider">
+                            {isEditing ? 'Refine your rating, review, and details below.' : 'Search for a movie or TV show, rate it, and add it to your history.'}
                         </p>
                     </div>
                 )}
 
                 {error && (
-                    <div className="bg-red-100 text-red-700 border border-red-200 font-bold p-4 rounded-xl mb-8 flex items-center gap-2">
-                        <span className="material-symbols-outlined">warning</span>
+                    <div className="bg-red-50 text-red-600 border border-red-100 font-bold p-3.5 rounded-2xl mb-6 flex items-center gap-2 text-sm">
+                        <span className="material-symbols-outlined text-lg">warning</span>
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className={`flex flex-col ${isMobile ? 'gap-6' : 'gap-8'}`}>
-                    
-                    {/* ── Step 1: Search & Select ── */}
-                    {!isEditing && (
-                        <div className="flex flex-col gap-3">
-                            <label className="text-xs font-black uppercase tracking-[0.2em] text-[#2D2926]/40">1. What did you watch?</label>
-                            <div className="relative" ref={searchRef}>
-                                <div className="relative flex items-center">
-                                    <span className="material-symbols-outlined absolute left-4 text-[#ffb700] text-[24px]">search</span>
-                                    <input
-                                        type="text"
-                                        value={searchQuery}
-                                        onChange={handleSearchChange}
-                                        onFocus={() => searchResults.length > 0 && setShowResults(true)}
-                                        className="w-full pl-12 pr-4 py-4 bg-[#FFF9F0]/50 border-2 border-[#ffb700]/30 outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 rounded-2xl text-lg font-bold text-[#2D2926] transition-all"
-                                        placeholder="Search movies or TV shows…"
-                                        autoComplete="off"
-                                    />
-                                    {isSearching && <div className="absolute right-4 animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#ffb700]"></div>}
-                                </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        
+                        {/* ── Left Column: Media Information & Rating (5/12 cols) ── */}
+                        <div className="lg:col-span-5 flex flex-col gap-5">
+                            
+                            {/* Search or Selected Media Header */}
+                            {!isEditing ? (
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/40">What did you watch?</label>
+                                    <div className="relative" ref={searchRef}>
+                                        <div className="relative flex items-center">
+                                            <span className="material-symbols-outlined absolute left-3.5 text-[#ffb700] text-[20px]">search</span>
+                                            <input
+                                                type="text"
+                                                value={searchQuery}
+                                                onChange={handleSearchChange}
+                                                onFocus={() => searchResults.length > 0 && setShowResults(true)}
+                                                className="w-full pl-10 pr-10 py-3 bg-[#FFF9F0]/40 border-2 border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white focus:ring-4 focus:ring-[#ffb700]/10 rounded-2xl text-sm font-black text-[#2D2926] transition-all"
+                                                placeholder="Search movies or TV shows…"
+                                                autoComplete="off"
+                                            />
+                                            {isSearching && (
+                                                <div className="absolute right-3.5 animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#ffb700]"></div>
+                                            )}
+                                        </div>
 
-                                {/* Results dropdown */}
-                                {showResults && (
-                                    <div className="absolute top-full mt-2 left-0 right-0 max-h-80 overflow-y-auto bg-white border border-[#ffb700]/20 rounded-2xl shadow-[0_10px_40px_-10px_rgba(255,183,0,0.15)] z-50 p-2 flex flex-col gap-1">
-                                        {searchResults.map((r) => (
-                                            <button
-                                                key={r.id}
-                                                type="button"
-                                                className="w-full flex items-center gap-4 p-2 hover:bg-[#ffb700]/10 rounded-xl transition-colors cursor-pointer text-left focus:outline-none"
-                                                onClick={() => handleSelectResult(r)}
-                                            >
-                                                {r.poster_path ? (
-                                                    <img src={`https://image.tmdb.org/t/p/w92${r.poster_path}`} alt="" className="w-12 h-16 object-cover rounded-md shadow-sm border border-[#2D2926]/5" />
-                                                ) : (
-                                                    <div className="w-12 h-16 bg-[#FFF9F0] border border-[#ffb700]/20 rounded-md flex items-center justify-center text-[#ffb700]/50">
-                                                        <span className="material-symbols-outlined">image_not_supported</span>
-                                                    </div>
+                                        {/* Dropdown Results */}
+                                        {showResults && (
+                                            <div className="absolute top-full mt-1.5 left-0 right-0 max-h-72 overflow-y-auto bg-white border border-[#ffb700]/15 rounded-2xl shadow-[0_10px_35px_-10px_rgba(255,183,0,0.12)] z-50 p-1.5 flex flex-col gap-1">
+                                                {searchResults.map((r) => (
+                                                    <button
+                                                        key={r.id}
+                                                        type="button"
+                                                        className="w-full flex items-center gap-3.5 p-2 hover:bg-[#ffb700]/5 rounded-xl transition-colors cursor-pointer text-left focus:outline-none"
+                                                        onClick={() => handleSelectResult(r)}
+                                                    >
+                                                        {r.poster_path ? (
+                                                            <img src={`https://image.tmdb.org/t/p/w92${r.poster_path}`} alt="" className="w-9 h-13 object-cover rounded-lg shadow-sm border border-[#2D2926]/5" />
+                                                        ) : (
+                                                            <div className="w-9 h-13 bg-[#FFF9F0] border border-[#ffb700]/15 rounded-lg flex items-center justify-center text-[#ffb700]/40">
+                                                                <span className="material-symbols-outlined text-sm">image_not_supported</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-extrabold text-[#2D2926] text-sm truncate">{r.title || r.name}</h4>
+                                                            <div className="flex items-center gap-1.5 text-[9px] text-[#2D2926]/40 mt-0.5 font-black tracking-widest uppercase">
+                                                                <span className={r.media_type === 'tv' ? 'text-blue-500' : 'text-[#ffb700]'}>
+                                                                    {r.media_type === 'tv' ? 'TV' : 'Movie'}
+                                                                </span>
+                                                                {yearOf(r) && <span>• {yearOf(r)}</span>}
+                                                                {r.vote_average != null && r.vote_average > 0 && (
+                                                                    <span className="flex items-center gap-0.5 text-amber-500"> • ⭐ {(r.vote_average).toFixed(1)}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Selection Preview Card */}
+                                    {hasSelection && (
+                                        <div className="mt-3 flex gap-4 p-4 bg-gradient-to-br from-[#FFF9F0] to-white border border-[#ffb700]/20 rounded-2xl relative shadow-sm items-start overflow-hidden group">
+                                            <div className="absolute -right-10 -bottom-10 w-28 h-28 bg-[#ffb700]/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                                            {selectedPoster && (
+                                                <img src={selectedPoster} alt={formData.title} className="w-16 lg:w-20 aspect-[2/3] object-cover rounded-xl shadow-md border-2 border-white relative z-10" />
+                                            )}
+                                            <div className="flex-1 pt-1 min-w-0 relative z-10">
+                                                <h3 className="text-base font-black text-[#2D2926] truncate leading-snug">{formData.title}</h3>
+                                                <span className="inline-block px-2 py-0.5 bg-[#ffb700]/10 text-[#ffb700] font-black text-[9px] uppercase tracking-wider rounded-md mt-1 mb-2">
+                                                    {formData.type === 'TV_SHOW' ? '📺 TV Show' : '🎬 Movie'}
+                                                </span>
+                                                {selectedOverview && (
+                                                    <p className="text-[#2D2926]/50 text-xs leading-relaxed line-clamp-2 max-w-sm">{selectedOverview}</p>
                                                 )}
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-bold text-[#2D2926] truncate">{r.title || r.name}</h4>
-                                                    <div className="flex items-center gap-2 text-xs text-[#2D2926]/50 mt-1 font-bold tracking-widest uppercase">
-                                                        <span className={r.media_type === 'tv' ? 'text-blue-500' : 'text-[#ffb700]'}>{r.media_type === 'tv' ? 'TV' : 'Movie'}</span>
-                                                        {yearOf(r) && <span>• {yearOf(r)}</span>}
-                                                        {r.vote_average != null && r.vote_average > 0 && <span className="flex items-center gap-1"> • ⭐ {(r.vote_average).toFixed(1)}</span>}
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Selection preview */}
-                            {hasSelection && (
-                                <div className="mt-4 flex gap-6 p-4 bg-[#FFF9F0] border border-[#ffb700]/20 rounded-2xl relative shadow-sm items-start">
-                                    {selectedPoster && (
-                                        <img src={selectedPoster} alt={formData.title} className="w-24 lg:w-32 aspect-[2/3] object-cover rounded-xl shadow-md border border-white" />
+                                                <button
+                                                    type="button"
+                                                    className="mt-3 flex items-center gap-1 text-[10px] font-black text-red-500 hover:text-white hover:bg-red-500 bg-red-50 border border-red-100 hover:border-red-500 px-2.5 py-1 rounded-xl transition-all"
+                                                    onClick={() => {
+                                                        setFormData((prev) => ({ ...prev, tmdbId: 0, title: '', type: 'MOVIE' }));
+                                                        setSearchQuery('');
+                                                        setSelectedPoster(null);
+                                                        setSelectedOverview(null);
+                                                    }}
+                                                    aria-label="Clear selection"
+                                                >
+                                                    <span className="material-symbols-outlined text-xs">close</span>
+                                                    Clear Selection
+                                                </button>
+                                            </div>
+                                        </div>
                                     )}
-                                    <div className="flex-1 pt-2">
-                                        <h3 className="text-2xl font-black text-[#2D2926] mb-2">{formData.title}</h3>
-                                        <span className="inline-block px-3 py-1 bg-[#ffb700]/20 text-[#ffb700] font-bold text-xs uppercase tracking-widest rounded-lg mb-4">
-                                            {formData.type === 'TV_SHOW' ? '📺 TV Show' : formData.type === 'EPISODE' ? '📼 Episode' : '🎬 Movie'}
-                                        </span>
-                                        {selectedOverview && <p className="text-[#2D2926]/60 text-sm max-w-lg leading-relaxed line-clamp-3">{selectedOverview}</p>}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/40">Title</label>
+                                    <div className="p-3.5 bg-gradient-to-br from-[#FFF9F0]/80 to-white rounded-2xl border border-[#ffb700]/25 font-black text-base text-[#2D2926] flex items-center gap-2.5 shadow-sm">
+                                        <span className="material-symbols-outlined text-[#ffb700]">movie</span>
+                                        {formData.title}
                                     </div>
-                                    <button
-                                        type="button"
-                                        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white border border-[#ffb700]/20 hover:bg-red-50 text-[#2D2926]/40 hover:text-red-500 hover:border-red-200 transition-colors flex items-center justify-center font-bold"
-                                        onClick={() => {
-                                            setFormData((prev) => ({ ...prev, tmdbId: 0, title: '', type: 'MOVIE' }));
-                                            setSearchQuery('');
-                                            setSelectedPoster(null);
-                                            setSelectedOverview(null);
-                                        }}
-                                        aria-label="Clear selection"
-                                    >✕</button>
                                 </div>
                             )}
-                        </div>
-                    )}
 
-                    {isEditing && (
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-bold uppercase tracking-widest text-[#2D2926]/50">Locked Target Variable</label>
-                            <div className="p-4 bg-[#FFF9F0] rounded-2xl border border-[#ffb700]/20 font-black text-2xl text-[#2D2926]">
-                                {formData.title}
+                            {/* Premium Snapping Star Rating */}
+                            <div className="flex flex-col gap-2.5 p-4.5 bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Rate this Cinematic Experience</label>
+                                <StarRating value={formData.rating} onChange={(v) => setFormData((prev) => ({ ...prev, rating: v }))} />
+                                
+                                {/* Interactive Mood Badge */}
+                                {(() => {
+                                    const mood = getRatingMood(formData.rating);
+                                    return (
+                                        <div className={`flex items-center gap-2 mt-1.5 px-3 py-2 border rounded-xl ${mood.color} text-xs font-bold transition-all duration-300`}>
+                                            <span className="material-symbols-outlined text-base">{mood.icon}</span>
+                                            <span>{mood.text}</span>
+                                        </div>
+                                    );
+                                })()}
                             </div>
-                        </div>
-                    )}
 
-                    {/* ── Step 2: Rate ── */}
-                    <div className="flex flex-col gap-3">
-                        <label className="text-sm font-bold uppercase tracking-widest text-[#2D2926]/50">{(isEditing) ? '1' : '2'}. How would you rate it?</label>
-                        <StarRating value={formData.rating} onChange={(v) => setFormData((prev) => ({ ...prev, rating: v }))} />
-                    </div>
+                            {/* Date Picker & Switches */}
+                            <div className="flex flex-col gap-3.5 p-4.5 bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm">
+                                <HiveDatePicker
+                                    label="When did you watch this?"
+                                    value={formData.watchedAt}
+                                    onChange={(val: string) => setFormData((prev) => ({ ...prev, watchedAt: val || toLocalISOString(new Date()) }))}
+                                />
 
-                    {/* ── Step 3: When ── */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <HiveDatePicker
-                                label={(isEditing) ? '2. When did you experience it?' : '3. When did you experience it?'}
-                                value={formData.watchedAt}
-                                onChange={(val: string) => setFormData((prev) => ({ ...prev, watchedAt: val || new Date().toISOString().slice(0, 16) }))}
-                            />
+                                <div className="h-[1px] bg-[#ffb700]/10 my-1" />
 
-                        <div className="flex flex-col sm:flex-row gap-6">
-                            <label className="flex items-center gap-3 cursor-pointer group w-max outline-none focus:ring-4 focus:ring-[#ffb700]/10 rounded-xl p-2">
-                                <div className="relative">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.isRewatch}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, isRewatch: e.target.checked }))}
-                                        className="sr-only peer" 
-                                    />
-                                    <div className="w-14 h-7 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#ffb700] after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner"></div>
-                                </div>
-                                <span className="font-extrabold text-[#2D2926] group-hover:text-[#ffb700] transition-colors uppercase tracking-widest text-sm">Rewatch</span>
-                            </label>
-
-                            <label className="flex items-center gap-3 cursor-pointer group w-max outline-none focus:ring-4 focus:ring-[#ffb700]/10 rounded-xl p-2">
-                                <div className="relative">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.isWatching}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, isWatching: e.target.checked }))}
-                                        className="sr-only peer" 
-                                    />
-                                    <div className="w-14 h-7 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-[#22c55e] after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all shadow-inner"></div>
-                                </div>
-                                <span className="font-extrabold text-[#2D2926] group-hover:text-[#22c55e] transition-colors uppercase tracking-widest text-sm">Currently Watching</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    {/* ── Optional Details Toggle ── */}
-                    <div className="border-t border-[#ffb700]/10 pt-6 mt-4">
-                        <button
-                            type="button"
-                            className="bg-transparent border-none text-[#ffb700] font-bold uppercase tracking-widest text-sm flex items-center gap-2 hover:underline focus:outline-none"
-                            onClick={() => setShowMoreDetails((v) => !v)}
-                        >
-                            <span>{showMoreDetails ? 'Hide additional metrics' : 'Add custom annotations (Optional)'}</span>
-                            <span className="material-symbols-outlined text-lg">{showMoreDetails ? 'expand_less' : 'expand_more'}</span>
-                        </button>
-                    </div>
-
-                    {showMoreDetails && (
-                        <div className="flex flex-col gap-8 bg-[#FFF9F0]/30 p-6 sm:p-8 rounded-2xl border border-[#ffb700]/10">
-                            
-                            {/* Watch Location */}
-                            <div className="flex flex-col gap-3">
-                                <label className="text-sm font-bold uppercase tracking-widest text-[#2D2926]/50">Where were you?</label>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-                                    {LOCATION_PRESETS.map((l) => (
-                                        <button
-                                            key={l.value}
-                                            type="button"
-                                            className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all group/loc
-                                            ${formData.watchLocation === l.value ? 'bg-[#ffb700] text-white border-[#ffb700] shadow-md scale-[1.02]' : 'bg-white border-[#ffb700]/10 text-[#2D2926]/40 hover:border-[#ffb700]/30 hover:bg-[#FFF9F0]'}`}
-                                            onClick={() => setFormData((prev) => ({ ...prev, watchLocation: prev.watchLocation === l.value ? '' : l.value }))}
-                                        >
-                                            <span className={`material-symbols-outlined text-2xl transition-transform group-hover/loc:scale-110 ${formData.watchLocation === l.value ? 'text-white' : 'text-[#ffb700]/60'}`}>
-                                                {l.icon}
+                                <div className="flex flex-col gap-2.5">
+                                    {/* Rewatch Toggle */}
+                                    <label className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FFF9F0]/50 transition-all cursor-pointer group">
+                                        <div className="flex flex-col gap-0.5 min-w-0 pr-2">
+                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">Seen it before?</span>
+                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Toggle if this is a repeat viewing</span>
+                                        </div>
+                                        <div className="flex items-center gap-2.5 flex-shrink-0">
+                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
+                                                ${formData.isRewatch 
+                                                    ? 'bg-[#ffb700]/10 text-[#ffb700]' 
+                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
+                                                {formData.isRewatch ? 'ON' : 'OFF'}
                                             </span>
-                                            <span className="text-[10px] font-black uppercase tracking-widest">{l.label}</span>
-                                        </button>
-                                    ))}
+                                            <div className="relative">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.isRewatch}
+                                                    onChange={(e) => setFormData((prev) => ({ ...prev, isRewatch: e.target.checked }))}
+                                                    className="sr-only peer" 
+                                                />
+                                                <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#ffb700] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    {/* Currently Watching Toggle */}
+                                    <label className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FFF9F0]/50 transition-all cursor-pointer group">
+                                        <div className="flex flex-col gap-0.5 min-w-0 pr-2">
+                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#22c55e] transition-colors">Keep in Active Queue</span>
+                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Mark as currently watching / TV ongoing</span>
+                                        </div>
+                                        <div className="flex items-center gap-2.5 flex-shrink-0">
+                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
+                                                ${formData.isWatching 
+                                                    ? 'bg-[#22c55e]/10 text-[#22c55e]' 
+                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
+                                                {formData.isWatching ? 'ON' : 'OFF'}
+                                            </span>
+                                            <div className="relative">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.isWatching}
+                                                    onChange={(e) => setFormData((prev) => ({ ...prev, isWatching: e.target.checked }))}
+                                                    className="sr-only peer" 
+                                                />
+                                                <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#22c55e] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
+                                            </div>
+                                        </div>
+                                    </label>
                                 </div>
-                                <input
-                                    type="text"
-                                    value={formData.watchLocation || ''}
-                                    onChange={(e) => setFormData((prev) => ({ ...prev, watchLocation: e.target.value }))}
-                                    className="w-full mt-2 px-4 py-3 bg-white border border-[#ffb700]/20 outline-none focus:border-[#ffb700] rounded-xl text-[#2D2926]"
-                                    placeholder="Or type a custom location / environment..."
-                                />
+                            </div>
+                        </div>
+
+                        {/* ── Right Column: Rich Review, Colorful Locations, Tags (7/12 cols) ── */}
+                        <div className="lg:col-span-7 flex flex-col gap-5 bg-[#FFF9F0]/25 p-5 md:p-6.5 rounded-[32px] border border-[#ffb700]/10 backdrop-blur-sm">
+                            
+                            {/* Rich Notebook Review */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Write a Review or Log Thoughts</label>
+                                <div className="relative">
+                                    <textarea
+                                        value={formData.review || ''}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, review: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white focus:ring-4 focus:ring-[#ffb700]/10 rounded-2xl text-[#2D2926] text-sm leading-relaxed transition-all min-h-[140px]"
+                                        rows={4}
+                                        placeholder="Pour your cinematic critique here... how was the cinematography, acting, writing, or sound design?"
+                                    />
+                                    <span className="absolute bottom-2.5 right-3 text-[9px] font-black text-[#2D2926]/30 uppercase tracking-wider">
+                                        {(formData.review || '').length} chars
+                                    </span>
+                                </div>
                             </div>
 
-                            {/* Review */}
-                            <div className="flex flex-col gap-3">
-                                <label className="text-sm font-bold uppercase tracking-widest text-[#2D2926]/50">Thematic Review & Thoughts</label>
-                                <textarea
-                                    value={formData.review || ''}
-                                    onChange={(e) => setFormData((prev) => ({ ...prev, review: e.target.value }))}
-                                    className="w-full px-4 py-3 bg-white border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 rounded-xl text-[#2D2926] resize-y min-h-[120px]"
-                                    rows={4}
-                                    placeholder="Unleash your architectural critique..."
-                                />
+                            {/* Colorful Watch Location Brand Selectors */}
+                            <div className="flex flex-col gap-2.5">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Where did you watch it?</label>
+                                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                    {LOCATION_PRESETS.map((l) => {
+                                        const isSelected = formData.watchLocation === l.value;
+                                        return (
+                                            <button
+                                                key={l.value}
+                                                type="button"
+                                                className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2 transition-all group/loc relative overflow-hidden cursor-pointer
+                                                ${isSelected 
+                                                    ? 'bg-white border-[#ffb700] shadow-[0_4px_15px_-4px_rgba(255,183,0,0.22)] scale-[1.03]' 
+                                                    : 'bg-white/50 border-[#ffb700]/10 text-[#2D2926]/60 hover:border-[#ffb700]/30 hover:bg-white hover:scale-[1.02]'}`}
+                                                onClick={() => setFormData((prev) => ({ ...prev, watchLocation: prev.watchLocation === l.value ? '' : l.value }))}
+                                            >
+                                                <div className="transition-transform group-hover/loc:scale-110 duration-300">
+                                                    {l.renderIcon()}
+                                                </div>
+                                                <span className={`text-[9px] font-black uppercase tracking-wider transition-colors ${isSelected ? 'text-[#2D2926]' : 'text-[#2D2926]/40'}`}>
+                                                    {l.label}
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="relative flex items-center mt-1">
+                                    <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">location_on</span>
+                                    <input
+                                        type="text"
+                                        value={formData.watchLocation || ''}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, watchLocation: e.target.value }))}
+                                        className="w-full pl-9 pr-4 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
+                                        placeholder="Or type custom location (e.g. IMAX, Airplane, Living Room)..."
+                                    />
+                                </div>
                             </div>
 
-                            {/* Tags */}
-                            <div className="flex flex-col gap-3">
-                                <label className="text-sm font-bold uppercase tracking-widest text-[#2D2926]/50">Custom Index Tags</label>
-                                <input
-                                    type="text"
-                                    value={tagInput}
-                                    onChange={(e) => setTagInput(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            handleAddTag();
-                                        }
-                                    }}
-                                    className="w-full px-4 py-3 bg-white border border-[#ffb700]/20 outline-none focus:border-[#ffb700] rounded-xl text-[#2D2926]"
-                                    placeholder="Type a tag and press Enter"
-                                />
+                            {/* Tags Input System */}
+                            <div className="flex flex-col gap-2.5">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Cinematic Tags</label>
+                                <div className="relative flex items-center">
+                                    <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">sell</span>
+                                    <input
+                                        type="text"
+                                        value={tagInput}
+                                        onChange={(e) => setTagInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                handleAddTag();
+                                            }
+                                        }}
+                                        className="w-full pl-9 pr-20 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
+                                        placeholder="Add tag (e.g. masterpiece, visual-splendor) and press Enter..."
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddTag}
+                                        className="absolute right-2 px-3 py-1 bg-[#ffb700]/10 hover:bg-[#ffb700] text-[#ffb700] hover:text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all"
+                                    >
+                                        Add +
+                                    </button>
+                                </div>
+
                                 {formData.tags && formData.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mt-2">
+                                    <div className="flex flex-wrap gap-1.5 mt-1">
                                         {formData.tags.map((tag) => (
-                                            <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/10 border border-[#ffb700]/30 text-[#ffb700] px-3 py-1.5 rounded-lg text-sm font-black">
+                                            <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/5 border border-[#ffb700]/20 text-[#ffb700] px-2.5 py-1.5 rounded-lg text-xs font-black hover:bg-[#ffb700]/10 transition-colors">
                                                 #{tag}
-                                                <button type="button" onClick={() => handleRemoveTag(tag)} className="w-5 h-5 flex items-center justify-center rounded-full bg-[#ffb700]/20 text-[#ffb700] hover:bg-red-100 hover:text-red-500 transition-colors ml-1 focus:outline-none">
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => handleRemoveTag(tag)} 
+                                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-[#ffb700]/10 hover:bg-red-500 hover:text-white text-[#ffb700] transition-colors ml-1 focus:outline-none text-[8px] font-black"
+                                                    aria-label={`Remove tag ${tag}`}
+                                                >
                                                     ✕
                                                 </button>
                                             </span>
@@ -526,34 +706,34 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 )}
                             </div>
                         </div>
-                    )}
+                    </div>
 
-                    {/* ── Actions ── */}
-                    <div className={`flex flex-row items-center justify-end gap-3 border-t border-[#ffb700]/20 pt-8 mt-4 ${isMobile && isModal ? 'pb-10' : ''}`}>
+                    {/* ── Actions Footer ── */}
+                    <div className={`flex flex-row items-center justify-end gap-3 border-t border-[#ffb700]/15 pt-5 mt-6 ${isMobile && isModal ? 'pb-8' : ''}`}>
                         {onCancel && (
                             <button
                                 type="button"
                                 onClick={onCancel}
                                 disabled={isLoading}
-                                className="flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-[#2D2926] font-black text-xs uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 focus:outline-none active:scale-95"
+                                className="flex items-center justify-center gap-1.5 px-5 py-3 bg-slate-100 hover:bg-slate-200 text-[#2D2926] font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 focus:outline-none cursor-pointer active:scale-97"
                             >
-                                <span className="material-symbols-outlined text-base">close</span>
+                                <span className="material-symbols-outlined text-sm">close</span>
                                 Cancel
                             </button>
                         )}
                         <button
                             type="submit"
-                            className="flex items-center justify-center gap-2 px-8 py-3.5 bg-[#ffb700] text-white font-black text-xs uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-lg shadow-[#ffb700]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none active:scale-95"
+                            className="flex items-center justify-center gap-1.5 px-7 py-3 bg-[#ffb700] text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none cursor-pointer active:scale-97"
                             disabled={isLoading || (!isEditing && !hasSelection)}
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-white"></div>
                                     Saving...
                                 </>
                             ) : (
                                 <>
-                                    <span className="material-symbols-outlined text-base font-bold">
+                                    <span className="material-symbols-outlined text-sm font-bold">
                                         {isEditing ? 'edit_note' : 'add'}
                                     </span>
                                     {isEditing ? 'Update Entry' : 'Log Entry'}
