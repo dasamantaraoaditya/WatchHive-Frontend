@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import { WatchlistCard } from './WatchlistCard';
 import './Profile.css';
-import { SkeletonGrid, FilterBar, SearchMediaModal } from '../common';
+import { SkeletonCard, SkeletonGrid, FilterBar, SearchMediaModal } from '../common';
 import { ListItem } from '../../services/lists.service';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
 interface WatchlistGridProps {
     items?: ListItem[];
@@ -24,6 +25,8 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     const [sortBy, setSortBy] = useState('recent');
     const [showAddModal, setShowAddModal] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
+    const PAGE_SIZE = 20;
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
     // Use props if provided, otherwise context — treat null/undefined items as empty array
     const items: ListItem[] = propItems ?? (contextWatchlist?.items ?? []);
@@ -54,6 +57,23 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
             if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '');
             return 0;
         });
+
+    // Reset visible count when filter/sort changes
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+    }, [searchQuery, sortBy]);
+
+    const handleLoadMore = useCallback(() => {
+        setVisibleCount(prev => prev + PAGE_SIZE);
+    }, []);
+
+    const hasMoreItems = visibleCount < filteredItems.length;
+
+    const { observerTarget } = useInfiniteScroll({
+        onLoadMore: handleLoadMore,
+        hasMore: hasMoreItems,
+        isLoading: false,
+    });
 
     // Show skeleton on first load only
     if (showSkeleton) {
@@ -124,16 +144,26 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                         )}
                     </div>
                 ) : (
-                    <div className="watchlist-grid animate-[fade-in_0.3s_ease-out]">
-                        {filteredItems.map((item) => (
-                            <WatchlistCard
-                                key={item.id}
-                                tmdbId={item.tmdbId}
-                                mediaType={item.mediaType as 'movie' | 'tv' || 'movie'}
-                                readOnly={readOnly}
-                            />
-                        ))}
-                    </div>
+                    <>
+                        <div className="watchlist-grid animate-[fade-in_0.3s_ease-out]">
+                            {filteredItems.slice(0, visibleCount).map((item) => (
+                                <WatchlistCard
+                                    key={item.id}
+                                    tmdbId={item.tmdbId}
+                                    mediaType={item.mediaType as 'movie' | 'tv' || 'movie'}
+                                    readOnly={readOnly}
+                                />
+                            ))}
+                        </div>
+
+                        <div ref={observerTarget} className="h-4 w-full mt-4" />
+
+                        {hasMoreItems && (
+                            <div className="watchlist-grid mt-4">
+                                {[...Array(4)].map((_, i) => <SkeletonCard key={`wl-more-${i}`} />)}
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 

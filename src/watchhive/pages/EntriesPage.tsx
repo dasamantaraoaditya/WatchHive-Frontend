@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { entriesApi, Entry } from '../services/entries.service';
 import { EntryForm } from '../components/entries/EntryForm';
 import { EntryList, EntryCard } from '../components/entries/EntryList';
@@ -31,6 +32,7 @@ export const EntriesPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('history');
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
+    const [watchingPagination, setWatchingPagination] = useState({ total: 0, limit: 20, offset: 0, hasMore: false });
     const [watchingSort, setWatchingSort] = useState('recent');
     const [searchQueries, setSearchQueries] = useState({
         history: '',
@@ -62,25 +64,39 @@ export const EntriesPage: React.FC = () => {
         }
     }, [location.state, navigate, location.pathname]);
 
-    useEffect(() => {
-        if (user && activeTab === 'watching') {
-            fetchWatching();
-        }
-    }, [user?.id, activeTab]);
-
-    const fetchWatching = async () => {
+    const fetchWatching = useCallback(async (offset = 0) => {
         if (!user) return;
         setIsWatchingLoading(true);
         try {
-            const response = await entriesApi.getEntries({ userId: user.id, isWatching: true, limit: 10 });
+            const response = await entriesApi.getEntries({ userId: user.id, isWatching: true, limit: 20, offset });
             const filtered = response.entries.filter((e: Entry) => e.isWatching);
-            setWatchingEntries(filtered);
+            setWatchingEntries(prev => offset > 0 ? [...prev, ...filtered] : filtered);
+            setWatchingPagination(response.pagination);
         } catch (err) {
             console.error('Failed to fetch watching entries', err);
         } finally {
             setIsWatchingLoading(false);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (user && activeTab === 'watching') {
+            fetchWatching(0);
+        }
+    }, [user?.id, activeTab, fetchWatching]);
+
+    const handleLoadMoreWatching = useCallback(() => {
+        if (watchingPagination.hasMore && !isWatchingLoading) {
+            fetchWatching(watchingPagination.offset + watchingPagination.limit);
+        }
+    }, [watchingPagination, isWatchingLoading, fetchWatching]);
+
+    const { observerTarget: watchingObserverTarget } = useInfiniteScroll({
+        onLoadMore: handleLoadMoreWatching,
+        hasMore: watchingPagination.hasMore,
+        isLoading: isWatchingLoading,
+        enabled: activeTab === 'watching',
+    });
 
     const handleSuccess = () => {
         setShowForm(false);
@@ -105,7 +121,7 @@ export const EntriesPage: React.FC = () => {
 
     const handleComplete = async () => {
         // The modal handles the actual update now. Just refresh the list.
-        fetchWatching();
+        fetchWatching(0);
         setRefreshKey(prev => prev + 1);
     };
 
@@ -212,16 +228,25 @@ export const EntriesPage: React.FC = () => {
                                     )}
                                 </div>
                             ) : (
-                                <div className="watchlist-grid">
-                                    {filteredWatchingEntries.map(entry => (
-                                        <EntryCard 
-                                            key={entry.id} 
-                                            entry={entry}
-                                            onComplete={handleComplete}
-                                        />
-                                    ))}
-                                    {isWatchingLoading && <SkeletonCard />}
-                                </div>
+                                <>
+                                    <div className="watchlist-grid">
+                                        {filteredWatchingEntries.map(entry => (
+                                            <EntryCard 
+                                                key={entry.id} 
+                                                entry={entry}
+                                                onComplete={handleComplete}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    <div ref={watchingObserverTarget} className="h-4 w-full mt-4" />
+
+                                    {isWatchingLoading && watchingEntries.length > 0 && (
+                                        <div className="watchlist-grid mt-4">
+                                            {[...Array(4)].map((_, i) => <SkeletonCard key={`watch-more-${i}`} />)}
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </section>
                     )}

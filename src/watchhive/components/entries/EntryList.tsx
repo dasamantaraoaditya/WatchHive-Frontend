@@ -254,6 +254,7 @@ export const EntryList: React.FC<EntryListProps> = ({
             setIsLoading(true);
             setError(null);
             const response = await entriesApi.getEntries({
+                limit: 20,
                 ...filters,
                 sortBy,
                 order: sortOrder,

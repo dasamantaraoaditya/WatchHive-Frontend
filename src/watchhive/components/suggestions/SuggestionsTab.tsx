@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { suggestionsApi, GroupedSuggestion } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import { SuggestionCard } from './SuggestionCard';
-import { SkeletonGrid, ErrorState, FilterBar } from '../common';
+import { SkeletonCard, SkeletonGrid, ErrorState, FilterBar } from '../common';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
 interface SuggestionsTabProps {
     searchQuery?: string;
@@ -23,6 +24,8 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('recent');
+    const PAGE_SIZE = 20;
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
     const fetchSuggestions = useCallback(async () => {
         setIsLoading(true);
@@ -80,6 +83,24 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
             if (sortBy === 'recent') return dateB - dateA;
             return 0;
         });
+
+    // Reset visible count on search/sort change
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+    }, [searchQuery, sortBy]);
+
+    const handleLoadMore = useCallback(() => {
+        setVisibleCount(prev => prev + PAGE_SIZE);
+    }, []);
+
+    const hasMoreSuggestions = visibleCount < filteredGroups.length;
+
+    const { observerTarget } = useInfiniteScroll({
+        onLoadMore: handleLoadMore,
+        hasMore: hasMoreSuggestions,
+        isLoading: false,
+        enabled: !isLoading && !error,
+    });
 
     if (isLoading) {
         return (
@@ -141,10 +162,10 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                             : "When friends from your hive suggest movies or shows, they'll appear here!"}
                     </p>
                 </div>
-            ) : (
+                ) : (
                 <>
                     <div className="watchlist-grid outline-none">
-                        {filteredGroups.map((group) => (
+                        {filteredGroups.slice(0, visibleCount).map((group) => (
                             <SuggestionCard 
                                 key={`${group.mediaType}-${group.tmdbId}`} 
                                 group={group} 
@@ -157,6 +178,14 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                             />
                         ))}
                     </div>
+
+                    <div ref={observerTarget} className="h-4 w-full mt-4" />
+
+                    {hasMoreSuggestions && (
+                        <div className="watchlist-grid mt-4">
+                            {[...Array(4)].map((_, i) => <SkeletonCard key={`sug-more-${i}`} />)}
+                        </div>
+                    )}
                     
                     <div className="mt-8 flex items-center gap-3 p-6 bg-white border border-dashed border-[#ffb700]/30 rounded-3xl group hover:border-[#ffb700]/50 transition-colors">
                         <span className="material-symbols-outlined text-[#ffb700] animate-pulse">info</span>
