@@ -170,6 +170,12 @@ export const EntryCard: React.FC<{
                     </motion.h4>
                     <div className="text-[10px] text-[#2D2926]/40 dark:text-stone-400 font-bold mb-1.5 flex items-center justify-between">
                         <span>{formatDate(entry.watchedAt)}</span>
+                        {entry.watchLocation && (
+                            <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md font-black uppercase text-[8px] tracking-wider select-none shrink-0 ml-2" title={entry.watchLocation}>
+                                <span className="material-symbols-outlined text-[10px] font-bold">location_on</span>
+                                <span className="truncate max-w-[80px]">{entry.watchLocation}</span>
+                            </span>
+                        )}
                     </div>
                     {details?.overview && (
                         <p className="text-[11px] text-[#2D2926]/60 dark:text-stone-500 line-clamp-2 leading-relaxed mb-2 mt-0.5">

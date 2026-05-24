@@ -152,7 +152,7 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                 </div>
 
                 {/* Metadata Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className={`grid grid-cols-2 ${entry.watchLocation ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-4`}>
                     <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Your Rating</span>
                         <span className="text-[#2D2926] text-2xl font-black">{entry.rating ? `⭐ ${entry.rating}` : '-'}</span>
@@ -169,6 +169,15 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Status</span>
                         <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide">{entry.isWatching ? 'Watching' : 'Completed'}</span>
                     </div>
+                    {entry.watchLocation && (
+                        <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
+                            <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Watch Location</span>
+                            <span className="text-[#ffb700] text-sm font-black mt-1 tracking-wide flex items-center gap-1.5 min-w-0">
+                                <span className="material-symbols-outlined text-[18px]">location_on</span>
+                                <span className="text-[#2D2926] truncate">{entry.watchLocation}</span>
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Where to Watch */}

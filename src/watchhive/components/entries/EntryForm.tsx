@@ -224,6 +224,19 @@ const MobileIcon = () => (
     </svg>
 );
 
+const AnimaxIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <rect width="24" height="24" rx="5" fill="url(#animaxGrad)" />
+        <path d="M7 16.5L12 6L17 16.5M9 13.2H15" stroke="#FFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+        <defs>
+            <linearGradient id="animaxGrad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stopColor="#8A2BE2" />
+                <stop offset="100%" stopColor="#4B0082" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
 /* ── OTT Presets Mapping ── */
 const LOCATION_PRESETS = [
     { label: 'Cinema', value: 'Cinema', renderIcon: () => <CinemaIcon /> },
@@ -231,6 +244,7 @@ const LOCATION_PRESETS = [
     { label: 'Netflix', value: 'Netflix', renderIcon: () => <NetflixIcon /> },
     { label: 'Disney+', value: 'Disney+', renderIcon: () => <DisneyIcon /> },
     { label: 'Prime', value: 'Prime Video', renderIcon: () => <PrimeIcon /> },
+    { label: 'Animax', value: 'Animax', renderIcon: () => <AnimaxIcon /> },
     { label: 'Mobile', value: 'On the Go', renderIcon: () => <MobileIcon /> },
 ];
 
