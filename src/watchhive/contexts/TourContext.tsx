@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './AuthContext';
 
@@ -47,13 +47,30 @@ export const useTour = () => {
     return context;
 };
 
+// Select the first visible DOM node matching a selector query to prevent highlighting hidden media queries
+const queryVisibleElement = (selector: string): HTMLElement | null => {
+    try {
+        const elements = document.querySelectorAll(selector);
+        for (let i = 0; i < elements.length; i++) {
+            const el = elements[i] as HTMLElement;
+            const rect = el.getBoundingClientRect();
+            // Ensure element is visible in the viewport and not display:none (width > 0, height > 0)
+            if (rect.width > 0 && rect.height > 0) {
+                return el;
+            }
+        }
+        return (elements[0] as HTMLElement) || null;
+    } catch {
+        return null;
+    }
+};
+
 export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated } = useAuth();
     const [isActive, setIsActive] = useState(false);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [showWelcome, setShowWelcome] = useState(false);
     const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-    const resizeTimeoutRef = useRef<number | null>(null);
 
     // Check if tour is completed for this user
     useEffect(() => {
@@ -72,7 +89,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [isAuthenticated]);
 
-    // Handle spotlight target rect updates dynamically
+    // Handle spotlight target rect updates dynamically and instantaneously
     useEffect(() => {
         if (!isActive) {
             setTargetRect(null);
@@ -82,29 +99,35 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const updateRect = () => {
             const step = TOUR_STEPS[currentStepIndex];
             if (!step) return;
-            const element = document.querySelector(step.target);
+            const element = queryVisibleElement(step.target);
             if (element) {
-                // Smoothly center-scroll target if partially out of viewport
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Fetch coordinates once viewport shifts are complete
-                if (resizeTimeoutRef.current) window.clearTimeout(resizeTimeoutRef.current);
-                resizeTimeoutRef.current = window.setTimeout(() => {
-                    setTargetRect(element.getBoundingClientRect());
-                }, 200);
+                // Scroll instantly to avoid measurements during smooth-scrolling animations
+                element.scrollIntoView({ behavior: 'auto', block: 'center' });
+                setTargetRect(element.getBoundingClientRect());
             } else {
                 setTargetRect(null);
             }
         };
 
+        // Initial measurement
         updateRect();
-        window.addEventListener('resize', updateRect);
-        window.addEventListener('scroll', updateRect);
+
+        const handleLayoutUpdate = () => {
+            const step = TOUR_STEPS[currentStepIndex];
+            if (!step) return;
+            const element = queryVisibleElement(step.target);
+            if (element) {
+                setTargetRect(element.getBoundingClientRect());
+            }
+        };
+
+        // Listeners for layout adjustments
+        window.addEventListener('resize', handleLayoutUpdate);
+        window.addEventListener('scroll', handleLayoutUpdate);
         
         return () => {
-            window.removeEventListener('resize', updateRect);
-            window.removeEventListener('scroll', updateRect);
-            if (resizeTimeoutRef.current) window.clearTimeout(resizeTimeoutRef.current);
+            window.removeEventListener('resize', handleLayoutUpdate);
+            window.removeEventListener('scroll', handleLayoutUpdate);
         };
     }, [isActive, currentStepIndex]);
 
@@ -140,7 +163,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const activeStep = TOUR_STEPS[currentStepIndex];
 
-    // Compute absolute tooltip placement
+    // Compute absolute tooltip placement relative to the viewport coordinates
     const getTooltipPlacement = () => {
         if (!targetRect) return {};
         
@@ -251,7 +274,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                         y={targetRect.top - 6}
                                         width={targetRect.width + 12}
                                         height={targetRect.height + 12}
-                                        rx="16"
+                                        rx={Math.abs(targetRect.width - targetRect.height) < 4 ? "9999" : "16"}
                                         fill="black"
                                     />
                                 </mask>
