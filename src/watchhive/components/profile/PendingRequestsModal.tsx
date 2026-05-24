@@ -264,6 +264,18 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
                             </motion.div>
                         )}
                     </div>
+
+                    {/* Footer */}
+                    {requests.length > 0 && (
+                        <div className="px-6 py-4 border-t border-[#ffb700]/10 bg-white flex items-center justify-end">
+                            <button
+                                onClick={onClose}
+                                className="px-5 py-2.5 bg-slate-50 hover:bg-slate-100 text-[#2D2926]/60 hover:text-[#2D2926] border border-black/5 hover:border-black/10 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl transition-all active:scale-95 cursor-pointer"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    )}
                 </motion.div>
             </div>
         </AnimatePresence>
