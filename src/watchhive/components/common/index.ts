@@ -20,3 +20,4 @@ export * from './InstallPromptBanner';
 export * from './MovieDetailsModal';
 export { default as ScrollToTop } from './ScrollToTop';
 export * from './SearchMediaModal';
+export * from './QuickCurrentlyWatchingModal';

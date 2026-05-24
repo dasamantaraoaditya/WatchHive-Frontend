@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth, UIProvider, CustomAlertProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
-import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, MovieDetailsModal } from './components/common';
+import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, MovieDetailsModal, QuickCurrentlyWatchingModal } from './components/common';
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -191,7 +191,7 @@ const AppRoutes: React.FC = () => {
                         {/* Modals for Quick Actions */}
                         
                         <Modal
-                            isOpen={activeAction === 'log' || activeAction === 'watching'}
+                            isOpen={activeAction === 'log'}
                             onClose={closeAll}
                             title="Log your latest watch"
                             maxWidth="max-w-4xl"
@@ -200,9 +200,14 @@ const AppRoutes: React.FC = () => {
                                 onSuccess={closeAll}
                                 onCancel={closeAll}
                                 isModal={true}
-                                defaultIsWatching={activeAction === 'watching'}
                             />
                         </Modal>
+
+                        <QuickCurrentlyWatchingModal
+                            isOpen={activeAction === 'watching'}
+                            onClose={closeAll}
+                            onSuccess={closeAll}
+                        />
 
                         <SearchMediaModal
                             isOpen={(activeAction === 'watchlist' || activeAction === 'suggest') && !selectedMedia}

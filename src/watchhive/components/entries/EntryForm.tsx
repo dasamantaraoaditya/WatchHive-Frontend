@@ -521,7 +521,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                             )}
 
                             {/* Premium Snapping Star Rating */}
-                            <div className="flex flex-col gap-2.5 p-4.5 bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm">
+                            <div className={`flex flex-col gap-2.5 p-4 sm:p-4.5 ${isModal ? 'bg-[#FFF9F0]/40 rounded-3xl' : 'bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm'}`}>
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Rate this Cinematic Experience</label>
                                 <StarRating value={formData.rating} onChange={(v) => setFormData((prev) => ({ ...prev, rating: v }))} />
                                 
@@ -538,7 +538,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                             </div>
 
                             {/* Date Picker & Switches */}
-                            <div className="flex flex-col gap-3.5 p-4.5 bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm">
+                            <div className={`flex flex-col gap-3.5 p-4 sm:p-4.5 ${isModal ? 'bg-[#FFF9F0]/40 rounded-3xl' : 'bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm'}`}>
                                 <HiveDatePicker
                                     label="When did you watch this?"
                                     value={formData.watchedAt}
@@ -551,15 +551,15 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                     {/* Rewatch Toggle */}
                                     <label className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FFF9F0]/50 transition-all cursor-pointer group">
                                         <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">Seen it before?</span>
-                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Toggle if this is a repeat viewing</span>
+                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">Rewatch</span>
+                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Toggle if this is a repeat viewing of this movie or show</span>
                                         </div>
                                         <div className="flex items-center gap-2.5 flex-shrink-0">
                                             <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
                                                 ${formData.isRewatch 
                                                     ? 'bg-[#ffb700]/10 text-[#ffb700]' 
                                                     : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
-                                                {formData.isRewatch ? 'ON' : 'OFF'}
+                                                {formData.isRewatch ? 'YES' : 'NO'}
                                             </span>
                                             <div className="relative">
                                                 <input
@@ -576,15 +576,15 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                     {/* Currently Watching Toggle */}
                                     <label className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FFF9F0]/50 transition-all cursor-pointer group">
                                         <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#22c55e] transition-colors">Keep in Active Queue</span>
-                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Mark as currently watching / TV ongoing</span>
+                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#22c55e] transition-colors">Currently Watching</span>
+                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Keep in your active queue to track ongoing progress</span>
                                         </div>
                                         <div className="flex items-center gap-2.5 flex-shrink-0">
                                             <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
                                                 ${formData.isWatching 
                                                     ? 'bg-[#22c55e]/10 text-[#22c55e]' 
                                                     : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
-                                                {formData.isWatching ? 'ON' : 'OFF'}
+                                                {formData.isWatching ? 'YES' : 'NO'}
                                             </span>
                                             <div className="relative">
                                                 <input
@@ -602,7 +602,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                         </div>
 
                         {/* ── Right Column: Rich Review, Colorful Locations, Tags (7/12 cols) ── */}
-                        <div className="lg:col-span-7 flex flex-col gap-5 bg-[#FFF9F0]/25 p-5 md:p-6.5 rounded-[32px] border border-[#ffb700]/10 backdrop-blur-sm">
+                        <div className="lg:col-span-7 flex flex-col gap-5 bg-[#FFF9F0]/25 p-4.5 sm:p-5.5 md:p-6.5 rounded-[32px] border border-[#ffb700]/10 backdrop-blur-sm">
                             
                             {/* Rich Notebook Review */}
                             <div className="flex flex-col gap-2">
@@ -624,14 +624,14 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                             {/* Colorful Watch Location Brand Selectors */}
                             <div className="flex flex-col gap-2.5">
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Where did you watch it?</label>
-                                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                <div className="flex flex-wrap gap-2">
                                     {LOCATION_PRESETS.map((l) => {
                                         const isSelected = formData.watchLocation === l.value;
                                         return (
                                             <button
                                                 key={l.value}
                                                 type="button"
-                                                className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2 transition-all group/loc relative overflow-hidden cursor-pointer
+                                                className={`flex-1 min-w-[76px] sm:min-w-[85px] max-w-[120px] flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2 transition-all group/loc relative overflow-hidden cursor-pointer
                                                 ${isSelected 
                                                     ? 'bg-white border-[#ffb700] shadow-[0_4px_15px_-4px_rgba(255,183,0,0.22)] scale-[1.03]' 
                                                     : 'bg-white/50 border-[#ffb700]/10 text-[#2D2926]/60 hover:border-[#ffb700]/30 hover:bg-white hover:scale-[1.02]'}`}
