@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts';
+import { useAuth, useTour } from '../../contexts';
 import { Avatar } from './Avatar';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { followsService } from '../../services/follows.service';
@@ -8,6 +8,7 @@ import { PendingRequestsModal } from '../profile/PendingRequestsModal';
 
 export const HeaderActions: React.FC = () => {
     const { user, logout } = useAuth();
+    const { startTour } = useTour();
     const { unreadCount } = useNotifications();
     const navigate = useNavigate();
     const [profileOpen, setProfileOpen] = useState(false);
@@ -87,6 +88,16 @@ export const HeaderActions: React.FC = () => {
                                 <span className="material-symbols-outlined text-[20px] text-[#ffb700]">explore</span>
                                 Explore
                             </Link>
+                            <button
+                                onClick={() => {
+                                    setProfileOpen(false);
+                                    startTour();
+                                }}
+                                className="flex items-center gap-3 w-full text-left px-4 py-3 text-xs font-black uppercase tracking-widest text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors cursor-pointer"
+                            >
+                                <span className="material-symbols-outlined text-[20px] text-[#ffb700]">auto_awesome</span>
+                                Guided Tour
+                            </button>
                             <button 
                                 onClick={() => {
                                     setProfileOpen(false);
