@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import followsService from '../../services/follows.service';
 import { Avatar, BeeLoader } from '../common';
 import { Link } from 'react-router-dom';
+import { useCustomAlert } from '../../contexts';
 
 interface PendingRequestsModalProps {
     isOpen: boolean;
@@ -28,6 +29,7 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
     const [requests, setRequests] = useState<PendingRequest[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasHadRequests, setHasHadRequests] = useState(false);
+    const { alert } = useCustomAlert();
 
     useEffect(() => {
         if (isOpen) {
@@ -75,6 +77,8 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
             await followsService.acceptRequest(requestId);
             if (onRequestsUpdated) onRequestsUpdated();
             
+            await alert("You have accepted the follow request!", { title: "Request Approved", severity: "success" });
+            
             // Remove after brief delay for visual feedback
             setTimeout(() => {
                 setRequests(prev => prev.filter(req => req.id !== requestId));
@@ -97,6 +101,8 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
         try {
             await followsService.rejectRequest(requestId);
             if (onRequestsUpdated) onRequestsUpdated();
+            
+            await alert("You have declined the follow request.", { title: "Request Declined", severity: "warning" });
             
             // Remove after brief delay for visual feedback
             setTimeout(() => {
