@@ -95,9 +95,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                                 } else if (lower.includes('recently added') || lower.includes('recent add')) {
                                     shortLabel = 'Newest';
                                 } else if (lower.includes('title: a-z') || lower.includes('movie: a-z') || lower.includes('a-z')) {
-                                    shortLabel = 'Alphabetical (A-Z)';
+                                    shortLabel = 'A to Z';
                                 } else if (lower.includes('title: z-a') || lower.includes('movie: z-a') || lower.includes('z-a')) {
-                                    shortLabel = 'Reverse (Z-A)';
+                                    shortLabel = 'Z to A';
                                 }
                             } else {
                                 // Clean up desktop labels as well to keep them intuitive
