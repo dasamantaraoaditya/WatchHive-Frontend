@@ -221,7 +221,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                     {view === 'details' ? (
                         <>
                             {/* Hero Section with Backdrop */}
-                            <div className="relative -mx-8 -mt-8 h-64 md:h-96 overflow-hidden">
+                            <div className="relative -mx-6 -mt-6 md:-mx-8 md:-mt-8 h-48 md:h-96 overflow-hidden">
                                 {details.backdrop_path ? (
                                     <img 
                                         src={`https://image.tmdb.org/t/p/original${details.backdrop_path}`} 
@@ -237,13 +237,13 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                             </div>
 
                             {/* Content Section */}
-                            <div className="flex flex-col md:flex-row gap-8 relative -mt-32 md:-mt-48 z-10">
+                            <div className="flex flex-col md:flex-row gap-6 md:gap-8 relative -mt-20 md:-mt-48 z-10 px-1 md:px-0">
                                 {/* Poster Area (No Sidebar) */}
-                                <div className="w-48 md:w-64 flex-shrink-0 mx-auto md:mx-0">
+                                <div className="w-36 sm:w-48 md:w-64 flex-shrink-0 mx-auto md:mx-0">
                                     <motion.div 
                                         initial={{ y: 20, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
-                                        className="aspect-[2/3] rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-white"
+                                        className="aspect-[2/3] rounded-[24px] md:rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-white"
                                     >
                                         {details.poster_path ? (
                                             <img 
@@ -260,50 +260,50 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                 </div>
 
                                 {/* Text Info */}
-                                <div className="flex-1 flex flex-col pt-4 md:pt-16">
-                                    <div className="flex flex-wrap items-center gap-3 mb-2">
-                                        <span className="px-3 py-1 rounded-full bg-[#ffb700] text-white text-[10px] font-black uppercase tracking-widest">
+                                <div className="flex-1 flex flex-col pt-2 md:pt-16 min-w-0">
+                                    <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                                        <span className="px-2.5 py-0.5 md:px-3 md:py-1 rounded-full bg-[#ffb700] text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest">
                                             {mediaType === 'tv' ? 'TV SERIES' : 'MOVIE'}
                                         </span>
                                         {year && (
-                                            <span className="text-sm font-bold text-[#2D2926]/40">{year}</span>
+                                            <span className="text-xs md:text-sm font-bold text-[#2D2926]/40">{year}</span>
                                         )}
                                         <div className="flex items-center gap-1 text-[#ffb700]">
-                                            <span className="material-symbols-outlined text-base filled">star</span>
-                                            <span className="text-sm font-black">{details.vote_average.toFixed(1)}</span>
+                                            <span className="material-symbols-outlined text-sm md:text-base filled">star</span>
+                                            <span className="text-xs md:text-sm font-black">{details.vote_average.toFixed(1)}</span>
                                         </div>
                                     </div>
 
-                                    <h2 className="text-3xl md:text-5xl font-black text-[#2D2926] leading-tight mb-2 tracking-tight">
+                                    <h2 className="text-2xl md:text-5xl font-black text-[#2D2926] leading-tight mb-2 tracking-tight break-words">
                                         {title}
                                     </h2>
                                     
                                     {details.tagline && (
-                                        <p className="text-lg font-bold text-[#ffb700] italic mb-6">"{details.tagline}"</p>
+                                        <p className="text-sm md:text-lg font-bold text-[#ffb700] italic mb-4 md:mb-6">"{details.tagline}"</p>
                                     )}
 
-                                    <div className="flex flex-wrap gap-2 mb-6">
+                                    <div className="flex flex-wrap gap-1.5 md:gap-2 mb-4 md:mb-6">
                                         {details.genres.map(genre => (
-                                            <span key={genre.id} className="px-3 py-1.5 rounded-lg bg-[#2D2926]/5 text-[#2D2926]/40 text-[9px] font-black uppercase tracking-widest border border-[#2D2926]/5">
+                                            <span key={genre.id} className="px-2.5 py-1 rounded-lg bg-[#2D2926]/5 text-[#2D2926]/40 text-[8px] md:text-[9px] font-black uppercase tracking-widest border border-[#2D2926]/5">
                                                 {genre.name}
                                             </span>
                                         ))}
                                     </div>
 
                                     {/* Sync'd Action Bar (FeedCard Style) */}
-                                    <div className="flex flex-wrap items-center justify-between gap-6 py-6 border-y border-[#2D2926]/5 mb-8">
-                                        <div className="flex items-center gap-6 md:gap-8">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4 md:py-6 border-y border-[#2D2926]/5 mb-6 md:mb-8">
+                                        <div className="flex flex-wrap items-center gap-4 sm:gap-6 md:gap-8">
                                             {onAddToStack ? (
                                                 <button 
                                                     onClick={onAddToStack}
                                                     disabled={isInStack}
-                                                    className={`flex items-center gap-2.5 px-6 py-2.5 rounded-2xl font-black text-[11px] uppercase tracking-[0.15em] transition-all shadow-md ${
+                                                    className={`flex items-center gap-2 px-4 py-2 md:px-6 md:py-2.5 rounded-xl md:rounded-2xl font-black text-[10px] md:text-[11px] uppercase tracking-[0.15em] transition-all shadow-md ${
                                                         isInStack 
                                                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
                                                             : 'bg-[#ffb700] hover:brightness-105 text-white shadow-[#ffb700]/25'
                                                     }`}
                                                 >
-                                                    <span className="material-symbols-outlined text-[18px]">
+                                                    <span className="material-symbols-outlined text-[16px] md:text-[18px]">
                                                         {isInStack ? 'check_circle' : 'add_circle'}
                                                     </span>
                                                     <span>{isInStack ? 'Added to Stack' : 'Add to Stack'}</span>
@@ -312,13 +312,13 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                                 <>
                                                     <button 
                                                         onClick={handleWatchlistToggle}
-                                                        className={`flex items-center gap-2.5 group transition-all`}
+                                                        className="flex items-center gap-1.5 md:gap-2.5 group transition-all"
                                                         title={inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
                                                     >
-                                                        <span className={`material-symbols-outlined text-[22px] transition-all ${inWatchlist ? 'text-[#ffb700] filled' : 'text-[#2D2926]/40 group-hover:text-[#ffb700]'}`}>
+                                                        <span className={`material-symbols-outlined text-[20px] md:text-[22px] transition-all ${inWatchlist ? 'text-[#ffb700] filled' : 'text-[#2D2926]/40 group-hover:text-[#ffb700]'}`}>
                                                             {inWatchlist ? 'bookmark_added' : 'bookmark_add'}
                                                         </span>
-                                                        <span className={`text-[11px] font-black uppercase tracking-[0.15em] transition-colors ${inWatchlist ? 'text-[#ffb700]' : 'text-[#2D2926]/60 group-hover:text-[#2D2926]'}`}>
+                                                        <span className={`text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] transition-colors ${inWatchlist ? 'text-[#ffb700]' : 'text-[#2D2926]/60 group-hover:text-[#2D2926]'}`}>
                                                             {inWatchlist ? 'Saved' : 'Watchlist'}
                                                         </span>
                                                     </button>
@@ -327,51 +327,51 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
                                                         <button 
                                                             onClick={handleStartWatching}
                                                             disabled={isTransitioning}
-                                                            className="flex items-center gap-2.5 group transition-all disabled:opacity-50"
+                                                            className="flex items-center gap-1.5 md:gap-2.5 group transition-all disabled:opacity-50"
                                                             title="Start Watching (Move to Currently Watching)"
                                                         >
                                                             {isTransitioning ? (
-                                                                <span className="animate-spin text-[16px] text-[#ffb700]">⏳</span>
+                                                                <span className="animate-spin text-[14px] md:text-[16px] text-[#ffb700]">⏳</span>
                                                             ) : (
-                                                                <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#ffb700] transition-all">play_circle</span>
+                                                                <span className="material-symbols-outlined text-[20px] md:text-[22px] text-[#2D2926]/40 group-hover:text-[#ffb700] transition-all">play_circle</span>
                                                             )}
-                                                            <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Start Watching</span>
+                                                            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Start Watching</span>
                                                         </button>
                                                     )}
 
                                                     <button 
                                                         onClick={() => setView('log')}
-                                                        className="flex items-center gap-2.5 group transition-all"
+                                                        className="flex items-center gap-1.5 md:gap-2.5 group transition-all"
                                                     >
-                                                        <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#2D2926] transition-all">edit_note</span>
-                                                        <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Log Watch</span>
+                                                        <span className="material-symbols-outlined text-[20px] md:text-[22px] text-[#2D2926]/40 group-hover:text-[#2D2926] transition-all">edit_note</span>
+                                                        <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Log Watch</span>
                                                     </button>
 
                                                     <button 
                                                         onClick={() => setView('suggest')}
-                                                        className="flex items-center gap-2.5 group transition-all"
+                                                        className="flex items-center gap-1.5 md:gap-2.5 group transition-all"
                                                     >
-                                                        <span className="material-symbols-outlined text-[22px] text-[#2D2926]/40 group-hover:text-[#ffb700] transition-all">send</span>
-                                                        <span className="text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Suggest</span>
+                                                        <span className="material-symbols-outlined text-[20px] md:text-[22px] text-[#2D2926]/40 group-hover:text-[#ffb700] transition-all">send</span>
+                                                        <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.15em] text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Suggest</span>
                                                     </button>
                                                 </>
                                             )}
                                         </div>
 
-                                        <div className="flex items-center">
+                                        <div className="flex items-center sm:ml-auto">
                                             <button 
                                                 onClick={handleShare}
-                                                className="w-10 h-10 rounded-full flex items-center justify-center bg-[#2D2926]/5 text-[#2D2926]/40 hover:text-blue-500 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
+                                                className="w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center bg-[#2D2926]/5 text-[#2D2926]/40 hover:text-blue-500 hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
                                                 title="Share this movie"
                                             >
-                                                <span className="material-symbols-outlined text-[20px]">share</span>
+                                                <span className="material-symbols-outlined text-[18px] md:text-[20px]">share</span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div className="mb-8">
-                                        <h4 className="text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] mb-3">The Narrative</h4>
-                                        <p className="text-[#2D2926]/70 leading-relaxed font-medium text-lg">
+                                    <div className="mb-6 md:mb-8">
+                                        <h4 className="text-[9px] md:text-[10px] font-black text-[#2D2926]/30 uppercase tracking-[0.2em] mb-2.5">The Narrative</h4>
+                                        <p className="text-[#2D2926]/70 leading-relaxed font-medium text-base md:text-lg">
                                             {details.overview || "No transmission available for this cinematic entry."}
                                         </p>
                                     </div>
