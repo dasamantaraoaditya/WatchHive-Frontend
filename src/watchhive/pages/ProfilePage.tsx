@@ -476,21 +476,21 @@ export const ProfilePage: React.FC = () => {
 
                     {/* Format toggle and Actions */}
                     <div className="bg-slate-50 rounded-[32px] p-6 space-y-6 border border-black/5">
-                        <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
-                            <div>
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
                                 <p className="text-sm font-black text-slate-700">Export format</p>
-                                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                    {exportFormat === 'json' ? 'JSON — best for Hive backups' : 'CSV — for spreadsheets'}
+                                <p className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1 truncate">
+                                    {exportFormat === 'json' ? 'JSON' : 'CSV'}
                                 </p>
                             </div>
                             <button
                                 onClick={() => setExportFormat(f => f === 'json' ? 'csv' : 'json')}
-                                className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl p-1.5 transition-all shadow-sm self-start sm:self-auto"
+                                className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl p-1 sm:p-1.5 transition-all shadow-sm shrink-0"
                             >
                                 {(['json', 'csv'] as ExportFormat[]).map(fmt => (
                                     <span
                                         key={fmt}
-                                        className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                                        className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${
                                             exportFormat === fmt ? 'bg-[#ffb700] text-white shadow-md' : 'text-slate-400'
                                         }`}
                                     >
