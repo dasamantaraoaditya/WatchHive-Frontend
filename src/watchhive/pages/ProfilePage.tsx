@@ -476,7 +476,7 @@ export const ProfilePage: React.FC = () => {
 
                     {/* Format toggle and Actions */}
                     <div className="bg-slate-50 rounded-[32px] p-6 space-y-6 border border-black/5">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
                             <div>
                                 <p className="text-sm font-black text-slate-700">Export format</p>
                                 <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">
@@ -485,7 +485,7 @@ export const ProfilePage: React.FC = () => {
                             </div>
                             <button
                                 onClick={() => setExportFormat(f => f === 'json' ? 'csv' : 'json')}
-                                className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl p-1.5 transition-all shadow-sm"
+                                className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl p-1.5 transition-all shadow-sm self-start sm:self-auto"
                             >
                                 {(['json', 'csv'] as ExportFormat[]).map(fmt => (
                                     <span
@@ -500,11 +500,11 @@ export const ProfilePage: React.FC = () => {
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
                             <button
                                 onClick={handleExport}
                                 disabled={dataLoading || (!includeEntries && !includeLists)}
-                                className="flex items-center justify-center gap-2 py-5 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-[#ffb700]/20 disabled:opacity-40"
+                                className="flex items-center justify-center gap-2 py-5 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-[#ffb700]/20 disabled:opacity-40 w-full"
                             >
                                 {dataLoading ? <Skeleton variant="circle" width={16} height={16} /> : <span className="material-symbols-outlined text-lg">download</span>}
                                 Export Data
@@ -512,7 +512,7 @@ export const ProfilePage: React.FC = () => {
                             <button
                                 onClick={() => importFileRef.current?.click()}
                                 disabled={dataLoading}
-                                className="flex items-center justify-center gap-2 py-5 bg-white border-2 border-slate-100 text-slate-700 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-50 transition-all disabled:opacity-40"
+                                className="flex items-center justify-center gap-2 py-5 bg-white border-2 border-slate-100 text-slate-700 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-50 transition-all disabled:opacity-40 w-full"
                             >
                                 {dataLoading ? <Skeleton variant="circle" width={16} height={16} /> : <span className="material-symbols-outlined text-lg">upload</span>}
                                 Import Data
