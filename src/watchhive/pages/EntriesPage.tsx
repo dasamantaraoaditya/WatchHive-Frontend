@@ -9,7 +9,8 @@ import { WatchlistGrid } from '../components/profile';
 import { 
     SkeletonCard, 
     SkeletonGrid,
-    FilterBar
+    FilterBar,
+    MovieDetailsModal
 } from '../components/common';
 import { SuggestionsTab } from '../components/suggestions/SuggestionsTab';
 import { PageLayout } from '../components/layout';
@@ -31,6 +32,7 @@ export const EntriesPage: React.FC = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('watching');
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
+    const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
     const [watchingPagination, setWatchingPagination] = useState({ total: 0, limit: 20, offset: 0, hasMore: false });
     const [watchingSort, setWatchingSort] = useState('recent-desc');
@@ -232,6 +234,7 @@ export const EntriesPage: React.FC = () => {
                                             key={entry.id} 
                                             entry={entry}
                                             onComplete={handleComplete}
+                                            onClick={(e) => setSelectedEntry(e)}
                                         />
                                     ))}
                                 </div>
@@ -299,6 +302,15 @@ export const EntriesPage: React.FC = () => {
                         onCancel={handleCancel}
                     />
                 </div>
+            )}
+
+            {selectedEntry && (
+                <MovieDetailsModal
+                    isOpen={!!selectedEntry}
+                    onClose={() => setSelectedEntry(null)}
+                    tmdbId={selectedEntry.tmdbId}
+                    mediaType={selectedEntry.type === 'TV_SHOW' ? 'tv' : 'movie'}
+                />
             )}
         </PageLayout>
     );
