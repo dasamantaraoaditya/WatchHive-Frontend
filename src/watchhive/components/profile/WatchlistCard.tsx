@@ -22,6 +22,14 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const { removeFromList } = useWatchlist();
     const [isTransitioning, setIsTransitioning] = useState(false);
     const { confirm, alert } = useCustomAlert();
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    const [showMobileActions, setShowMobileActions] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 640);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleAddToWatching = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -129,7 +137,15 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         <>
             <div 
                 className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl bg-white border border-[#ffb700]/10 shadow-sm hover:shadow-md transition-all"
-                onClick={handleCardClick}
+                onClick={(e) => {
+                    if (isMobile) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowMobileActions(!showMobileActions);
+                    } else {
+                        handleCardClick();
+                    }
+                }}
             >
                 <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
                 {details.poster_path ? (
@@ -147,9 +163,30 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 {/* Overlay shadow for cinematic feel */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
+                {/* Mobile Central Eye Overlay */}
+                {isMobile && showMobileActions && (
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/45 backdrop-blur-[2.5px] transition-all duration-300 animate-[fade-in_0.2s_ease-out]">
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleCardClick();
+                            }}
+                            className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
+                            title="View details"
+                        >
+                            <span className="material-symbols-outlined text-[24px] font-bold">visibility</span>
+                        </button>
+                    </div>
+                )}
+
                 {/* Standardized Actions Layout */}
                 {!readOnly && (
-                    <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className={`absolute top-2 right-2 flex flex-col gap-2 z-20 transition-all duration-300
+                        ${isMobile 
+                            ? (showMobileActions ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-90 pointer-events-none') 
+                            : 'opacity-0 group-hover:opacity-100'}`}
+                    >
                         <button
                             onClick={handleAddToWatching}
                             disabled={isTransitioning}
