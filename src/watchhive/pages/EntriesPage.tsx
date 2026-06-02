@@ -29,7 +29,7 @@ export const EntriesPage: React.FC = () => {
     const navigate = useNavigate();
 
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('history');
+    const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('watching');
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
     const [watchingPagination, setWatchingPagination] = useState({ total: 0, limit: 20, offset: 0, hasMore: false });
@@ -154,16 +154,16 @@ export const EntriesPage: React.FC = () => {
                     {/* Navigation Tabs */}
                     <div className="flex border-b border-black/5 gap-0 md:gap-8 mt-4 overflow-x-auto no-scrollbar scroll-strip" style={{ scrollSnapType: 'x mandatory' }}>
                         <button 
-                            onClick={() => setActiveTab('history')}
-                            className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'history' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                            Watch History
-                        </button>
-                        <button 
                             onClick={() => setActiveTab('watching')}
                             className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'watching' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Currently Watching
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('history')}
+                            className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'history' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            Watch History
                         </button>
                         <button 
                             onClick={() => setActiveTab('watchlist')}
@@ -179,19 +179,6 @@ export const EntriesPage: React.FC = () => {
                         </button>
                     </div>
 
-                    {activeTab === 'history' && (
-                        <section className="flex flex-col gap-6 animate-fade-in mt-6">
-                            <EntryList 
-                                key={refreshKey} 
-                                onEdit={handleEdit}
-                                onAddNew={handleAddNew}
-                                searchQuery={searchQueries.history}
-                                onSearchChange={(val) => setSearchQueries(prev => ({ ...prev, history: val }))}
-                                filters={{ search: debouncedHistorySearch }}
-                            />
-                        </section>
-                    )}
-                    
                     {activeTab === 'watching' && (
                         <section className="flex flex-col gap-6 animate-fade-in mt-6">
                             <FilterBar 
@@ -255,8 +242,8 @@ export const EntriesPage: React.FC = () => {
 
                             {/* Loading more skeleton */}
                             {isWatchingLoading && watchingEntries.length > 0 && (
-                                <div className="watchlist-grid">
-                                    {[...Array(4)].map((_, i) => <SkeletonCard key={`watch-more-${i}`} />)}
+                                <div className="watchlist-grid mt-4">
+                                    {[...Array(3)].map((_, i) => <SkeletonCard key={`more-watching-${i}`} />)}
                                 </div>
                             )}
 
@@ -270,6 +257,19 @@ export const EntriesPage: React.FC = () => {
                                     <div className="h-px flex-1 bg-slate-100" />
                                 </div>
                             )}
+                        </section>
+                    )}
+
+                    {activeTab === 'history' && (
+                        <section className="flex flex-col gap-6 animate-fade-in mt-6">
+                            <EntryList 
+                                key={refreshKey} 
+                                onEdit={handleEdit}
+                                onAddNew={handleAddNew}
+                                searchQuery={searchQueries.history}
+                                onSearchChange={(val) => setSearchQueries(prev => ({ ...prev, history: val }))}
+                                filters={{ search: debouncedHistorySearch }}
+                            />
                         </section>
                     )}
 
