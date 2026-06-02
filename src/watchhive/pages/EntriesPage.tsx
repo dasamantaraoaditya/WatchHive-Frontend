@@ -228,25 +228,36 @@ export const EntriesPage: React.FC = () => {
                                     )}
                                 </div>
                             ) : (
-                                <>
-                                    <div className="watchlist-grid">
-                                        {filteredWatchingEntries.map(entry => (
-                                            <EntryCard 
-                                                key={entry.id} 
-                                                entry={entry}
-                                                onComplete={handleComplete}
-                                            />
-                                        ))}
-                                    </div>
+                                <div className="watchlist-grid">
+                                    {filteredWatchingEntries.map(entry => (
+                                        <EntryCard 
+                                            key={entry.id} 
+                                            entry={entry}
+                                            onComplete={handleComplete}
+                                        />
+                                    ))}
+                                </div>
+                            )}
 
-                                    <div ref={watchingObserverTarget} className="h-4 w-full mt-4" />
+                            {/* Sentinel — always rendered so observer attaches correctly */}
+                            <div ref={watchingObserverTarget} className="h-1 w-full" />
 
-                                    {isWatchingLoading && watchingEntries.length > 0 && (
-                                        <div className="watchlist-grid mt-4">
-                                            {[...Array(4)].map((_, i) => <SkeletonCard key={`watch-more-${i}`} />)}
-                                        </div>
-                                    )}
-                                </>
+                            {/* Loading more skeleton */}
+                            {isWatchingLoading && watchingEntries.length > 0 && (
+                                <div className="watchlist-grid">
+                                    {[...Array(4)].map((_, i) => <SkeletonCard key={`watch-more-${i}`} />)}
+                                </div>
+                            )}
+
+                            {/* End of list */}
+                            {!watchingPagination.hasMore && filteredWatchingEntries.length > 0 && !isWatchingLoading && (
+                                <div className="flex items-center gap-4 py-6">
+                                    <div className="h-px flex-1 bg-slate-100" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 flex items-center gap-1.5">
+                                        <span>🐝</span> All caught up
+                                    </span>
+                                    <div className="h-px flex-1 bg-slate-100" />
+                                </div>
                             )}
                         </section>
                     )}

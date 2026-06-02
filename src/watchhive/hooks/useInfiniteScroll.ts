@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 interface UseInfiniteScrollOptions {
     onLoadMore: () => void;
@@ -8,46 +8,60 @@ interface UseInfiniteScrollOptions {
     enabled?: boolean;
 }
 
+/**
+ * Infinite scroll hook using a callback ref pattern.
+ *
+ * Key design: `observerTarget` is a *callback ref* (not useRef). React calls it
+ * whenever the sentinel DOM node mounts or unmounts. That call updates `targetNode`
+ * state, which triggers the useEffect below — so the IntersectionObserver is always
+ * attached as soon as the sentinel enters the DOM, even if it starts hidden behind a
+ * conditional render.
+ */
 export const useInfiniteScroll = ({
     onLoadMore,
     hasMore,
     isLoading,
-    threshold = 0.5,
-    enabled = true
+    threshold = 0.1,
+    enabled = true,
 }: UseInfiniteScrollOptions) => {
-    const observerTarget = useRef<HTMLDivElement>(null);
+    // Keep the latest callback values in refs so the observer callback is always fresh
+    // without needing to be in the effect dependency array.
     const isLoadingRef = useRef(isLoading);
-    const hasMoreRef = useRef(hasMore);
+    const hasMoreRef   = useRef(hasMore);
     const onLoadMoreRef = useRef(onLoadMore);
 
-    // Keep refs updated without triggering re-renders or recreating the observer
     useEffect(() => {
-        isLoadingRef.current = isLoading;
-        hasMoreRef.current = hasMore;
+        isLoadingRef.current  = isLoading;
+        hasMoreRef.current    = hasMore;
         onLoadMoreRef.current = onLoadMore;
     }, [isLoading, hasMore, onLoadMore]);
 
+    // Track the sentinel node via state so React knows to re-run the observer effect.
+    const [targetNode, setTargetNode] = useState<HTMLDivElement | null>(null);
+
+    // Callback ref — React calls this with the DOM node on mount and null on unmount.
+    const observerTarget = useCallback((node: HTMLDivElement | null) => {
+        setTargetNode(node);
+    }, []);
+
     useEffect(() => {
-        const element = observerTarget.current;
-        if (!element || !enabled) return;
+        if (!targetNode || !enabled) return;
 
-        const observer = new IntersectionObserver((entries) => {
-            const [entry] = entries;
-            // Use refs to check latest state without needing to recreate the observer
-            if (entry.isIntersecting && hasMoreRef.current && !isLoadingRef.current) {
-                onLoadMoreRef.current();
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && hasMoreRef.current && !isLoadingRef.current) {
+                    onLoadMoreRef.current();
+                }
+            },
+            {
+                threshold,
+                rootMargin: '200px', // Start loading 200px before sentinel is visible
             }
-        }, {
-            threshold,
-            rootMargin: '100px', // Start loading before reaching the very bottom
-        });
+        );
 
-        observer.observe(element);
-
-        return () => {
-            if (element) observer.unobserve(element);
-        };
-    }, [threshold, enabled]); // Only recreate observer if threshold or enabled changes
+        observer.observe(targetNode);
+        return () => observer.disconnect();
+    }, [targetNode, enabled, threshold]);
 
     return { observerTarget };
 };

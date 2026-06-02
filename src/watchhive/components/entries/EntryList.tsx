@@ -510,29 +510,40 @@ export const EntryList: React.FC<EntryListProps> = ({
                     )}
                 </div>
             ) : (
-                <>
-                    <div className="watchlist-grid outline-none">
-                        {entries.map((entry) => (
-                            <EntryCard
-                                key={entry.id}
-                                entry={entry}
-                                onEdit={onEdit}
-                                onDelete={readOnly ? undefined : handleDelete}
-                                onClick={(entry, details) => setSelectedEntry({ entry, details })}
-                            />
-                        ))}
-                    </div>
+                <div className="watchlist-grid outline-none">
+                    {entries.map((entry) => (
+                        <EntryCard
+                            key={entry.id}
+                            entry={entry}
+                            onEdit={onEdit}
+                            onDelete={readOnly ? undefined : handleDelete}
+                            onClick={(entry, details) => setSelectedEntry({ entry, details })}
+                        />
+                    ))}
+                </div>
+            )}
 
-                    <div ref={observerTarget} className="h-4 w-full mt-4" />
+            {/* Sentinel — always rendered so the callback ref observer always attaches */}
+            <div ref={observerTarget} className="h-1 w-full" />
 
-                    {isLoading && entries.length > 0 && (
-                        <div className="watchlist-grid mt-4">
-                            {[...Array(4)].map((_, i) => (
-                                <SkeletonCard key={`more-${i}`} />
-                            ))}
-                        </div>
-                    )}
-                </>
+            {/* Loading more skeleton */}
+            {isLoading && entries.length > 0 && (
+                <div className="watchlist-grid">
+                    {[...Array(4)].map((_, i) => (
+                        <SkeletonCard key={`more-${i}`} />
+                    ))}
+                </div>
+            )}
+
+            {/* End of list */}
+            {!pagination.hasMore && entries.length > 0 && !isLoading && (
+                <div className="flex items-center gap-4 py-6">
+                    <div className="h-px flex-1 bg-slate-100" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-300 flex items-center gap-1.5">
+                        <span>🐝</span> All caught up
+                    </span>
+                    <div className="h-px flex-1 bg-slate-100" />
+                </div>
             )}
 
             <AnimatePresence>
