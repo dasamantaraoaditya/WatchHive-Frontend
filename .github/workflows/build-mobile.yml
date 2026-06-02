@@ -71,19 +71,23 @@ jobs:
       - name: Sync Capacitor iOS
         run: npx cap sync ios
 
-      - name: Install CocoaPods dependencies
+      - name: Resolve Swift Package Manager dependencies
         run: |
-          cd ios/App
-          pod install
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -resolvePackageDependencies \
+            -clonedSourcePackagesDirPath spm-cache
 
       - name: Build iOS App for Simulator
         run: |
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -sdk iphonesimulator \
             -configuration Debug \
             -derivedDataPath build \
+            -clonedSourcePackagesDirPath spm-cache \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
@@ -92,8 +96,8 @@ jobs:
 
       - name: Package iOS Simulator App
         run: |
-          cd build/Build/Products/Debug-iphonesimulator
-          zip -r ../../../../App-Simulator.zip App.app
+          APP_PATH=$(find build/Build/Products/Debug-iphonesimulator -name "*.app" -maxdepth 1 | head -1)
+          zip -r App-Simulator.zip "$APP_PATH"
 
       - name: Upload iOS App
         uses: actions/upload-artifact@v4
