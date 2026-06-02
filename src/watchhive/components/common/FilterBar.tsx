@@ -95,7 +95,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                             if (window.innerWidth < 640 || (window.matchMedia && window.matchMedia('(max-width: 640px)').matches)) {
                                 if (lower.includes('recently watched') || lower.includes('recent watch')) {
                                     shortLabel = 'Recent';
-                                } else if (lower.includes('oldest watched') || lower.includes('oldest watch')) {
+                                } else if (lower.includes('oldest')) {
                                     shortLabel = 'Oldest';
                                 } else if (lower.includes('highest rated') || lower.includes('highest rating') || lower.includes('top rated')) {
                                     shortLabel = 'Top Rated';
