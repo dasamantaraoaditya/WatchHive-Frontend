@@ -15,10 +15,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Java JDK 17
+      - name: Set up Java JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'zulu'
 
       - name: Set up Node.js
@@ -71,20 +71,29 @@ jobs:
       - name: Sync Capacitor iOS
         run: npx cap sync ios
 
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios/App
+          pod install
+
       - name: Build iOS App for Simulator
         run: |
-          xcodebuild -workspace ios/App/App.xcworkspace \
-                     -scheme App \
-                     -sdk iphonesimulator \
-                     -configuration Debug \
-                     -derivedDataPath build \
-                     -destination 'generic/platform=iOS Simulator' \
-                     build
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath build \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
 
       - name: Package iOS Simulator App
         run: |
           cd build/Build/Products/Debug-iphonesimulator
-          zip -r ../../../App-Simulator.zip App.app
+          zip -r ../../../../App-Simulator.zip App.app
 
       - name: Upload iOS App
         uses: actions/upload-artifact@v4
