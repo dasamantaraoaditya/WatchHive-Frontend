@@ -34,7 +34,7 @@ export const SearchUsersPage: React.FC = () => {
     }, [setPageTitle, setPageIcon]);
 
     const isOnline = useOnlineStatus();
-    const [searchMode, setSearchMode] = useState<SearchMode>('movies');
+    const [searchMode, setSearchMode] = useState<SearchMode>('users');
     const [query, setQuery] = useState('');
     
     // User Search State
@@ -160,20 +160,6 @@ export const SearchUsersPage: React.FC = () => {
                 {/* Mode Toggle - "Honey Switch" */}
                 <div className="bg-[#2D2926]/5 p-1.5 rounded-[24px] flex items-center gap-1 mt-4 border border-black/5 shadow-inner">
                     <button 
-                        onClick={() => setSearchMode('movies')}
-                        className={`relative px-6 py-2.5 rounded-[20px] text-[10px] font-black uppercase tracking-widest transition-all ${
-                            searchMode === 'movies' ? 'text-white' : 'text-slate-400 hover:text-slate-600'
-                        }`}
-                    >
-                        {searchMode === 'movies' && (
-                            <motion.div layoutId="searchModeBg" className="absolute inset-0 bg-[#ffb700] rounded-[20px] shadow-lg shadow-[#ffb700]/20" />
-                        )}
-                        <span className="relative z-10 flex items-center gap-2">
-                            <span className="material-symbols-outlined text-lg">movie</span>
-                            Movies
-                        </span>
-                    </button>
-                    <button 
                         onClick={() => setSearchMode('users')}
                         className={`relative px-6 py-2.5 rounded-[20px] text-[10px] font-black uppercase tracking-widest transition-all ${
                             searchMode === 'users' ? 'text-white' : 'text-slate-400 hover:text-slate-600'
@@ -185,6 +171,20 @@ export const SearchUsersPage: React.FC = () => {
                         <span className="relative z-10 flex items-center gap-2">
                             <span className="material-symbols-outlined text-lg">group</span>
                             People
+                        </span>
+                    </button>
+                    <button 
+                        onClick={() => setSearchMode('movies')}
+                        className={`relative px-6 py-2.5 rounded-[20px] text-[10px] font-black uppercase tracking-widest transition-all ${
+                            searchMode === 'movies' ? 'text-white' : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                    >
+                        {searchMode === 'movies' && (
+                            <motion.div layoutId="searchModeBg" className="absolute inset-0 bg-[#ffb700] rounded-[20px] shadow-lg shadow-[#ffb700]/20" />
+                        )}
+                        <span className="relative z-10 flex items-center gap-2">
+                            <span className="material-symbols-outlined text-lg">movie</span>
+                            Movies
                         </span>
                     </button>
                 </div>
