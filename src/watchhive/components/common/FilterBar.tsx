@@ -82,28 +82,31 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                             const lower = option.label.toLowerCase();
                             
                             if (window.innerWidth < 640 || (window.matchMedia && window.matchMedia('(max-width: 640px)').matches)) {
-                                if (lower.includes('recently watched') || lower.includes('recent')) {
+                                if (lower.includes('recently watched') || lower.includes('recent watch')) {
                                     shortLabel = 'Recent';
-                                } else if (lower.includes('oldest watched') || lower.includes('oldest')) {
+                                } else if (lower.includes('oldest watched') || lower.includes('oldest watch')) {
                                     shortLabel = 'Oldest';
-                                } else if (lower.includes('highest rated') || lower.includes('highest')) {
+                                } else if (lower.includes('highest rated') || lower.includes('highest rating') || lower.includes('top rated')) {
                                     shortLabel = 'Top Rated';
-                                } else if (lower.includes('lowest rated') || lower.includes('lowest')) {
+                                } else if (lower.includes('lowest rated') || lower.includes('lowest rating')) {
                                     shortLabel = 'Lowest';
+                                } else if (lower.includes('recently suggested') || lower.includes('recent suggest')) {
+                                    shortLabel = 'Suggested';
                                 } else if (lower.includes('recently added') || lower.includes('recent add')) {
                                     shortLabel = 'Newest';
-                                } else if (lower.includes('a-z')) {
-                                    shortLabel = 'A - Z';
-                                } else if (lower.includes('z-a')) {
-                                    shortLabel = 'Z - A';
+                                } else if (lower.includes('title: a-z') || lower.includes('movie: a-z') || lower.includes('a-z')) {
+                                    shortLabel = 'Alphabetical (A-Z)';
+                                } else if (lower.includes('title: z-a') || lower.includes('movie: z-a') || lower.includes('z-a')) {
+                                    shortLabel = 'Reverse (Z-A)';
                                 }
                             } else {
                                 // Clean up desktop labels as well to keep them intuitive
-                                if (lower.includes('recently watched')) shortLabel = 'Recent Watch';
-                                if (lower.includes('oldest watched')) shortLabel = 'Oldest Watch';
-                                if (lower.includes('highest rated')) shortLabel = 'Highest Rating';
-                                if (lower.includes('lowest rated')) shortLabel = 'Lowest Rating';
-                                if (lower.includes('recently added')) shortLabel = 'Newest Added';
+                                if (lower.includes('recently watched')) shortLabel = 'Recently Watched';
+                                if (lower.includes('oldest watched')) shortLabel = 'Oldest Watched';
+                                if (lower.includes('highest rated')) shortLabel = 'Highest Rated';
+                                if (lower.includes('lowest rated')) shortLabel = 'Lowest Rated';
+                                if (lower.includes('recently added')) shortLabel = 'Recently Added';
+                                if (lower.includes('recently suggested')) shortLabel = 'Recently Suggested';
                             }
                             
                             return (
