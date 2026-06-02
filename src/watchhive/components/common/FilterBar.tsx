@@ -62,42 +62,61 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     </div>
                 )}
                 
-                <div className="flex items-center gap-1 sm:gap-2 bg-white px-2 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-2xl border border-[#ffb700]/10 shadow-sm hover:border-[#ffb700]/30 transition-all group cursor-pointer">
-                    <span className="material-symbols-outlined text-[14px] sm:text-[18px] text-[#ffb700] font-bold">sort</span>
+                <div className="flex items-center gap-1 sm:gap-2 bg-[#ffb700]/5 hover:bg-[#ffb700]/10 px-2.5 py-1.5 sm:px-4 sm:py-2.5 rounded-lg sm:rounded-2xl border border-[#ffb700]/20 shadow-sm transition-all group cursor-pointer relative">
+                    <span className="material-symbols-outlined text-[13px] sm:text-[16px] text-[#b07d00] font-bold shrink-0">sort</span>
                     <select 
-                        className="bg-transparent border-none text-[8px] sm:text-[10px] font-black text-[#2D2926]/70 focus:ring-0 cursor-pointer p-0 pr-4 sm:pr-8 uppercase tracking-widest outline-none"
+                        className="bg-transparent border-none text-[9px] sm:text-[10px] font-black text-[#b07d00] focus:ring-0 cursor-pointer p-0 pr-4 sm:pr-6 uppercase tracking-widest outline-none appearance-none -webkit-appearance-none -moz-appearance-none"
                         value={sortBy}
                         onChange={(e) => onSortChange(e.target.value)}
+                        style={{
+                            appearance: 'none',
+                            WebkitAppearance: 'none',
+                            MozAppearance: 'none',
+                            paddingRight: '1rem',
+                            backgroundImage: 'none'
+                        }}
                     >
                         {sortOptions.map(option => {
                             // Map lengthy labels to super clean, intuitive, and short terms for mobile layout
                             let shortLabel = option.label;
+                            const lower = option.label.toLowerCase();
+                            
                             if (window.innerWidth < 640 || (window.matchMedia && window.matchMedia('(max-width: 640px)').matches)) {
-                                const lower = option.label.toLowerCase();
                                 if (lower.includes('recently watched') || lower.includes('recent')) {
                                     shortLabel = 'Recent';
                                 } else if (lower.includes('oldest watched') || lower.includes('oldest')) {
                                     shortLabel = 'Oldest';
                                 } else if (lower.includes('highest rated') || lower.includes('highest')) {
-                                    shortLabel = 'Highest';
+                                    shortLabel = 'Top Rated';
                                 } else if (lower.includes('lowest rated') || lower.includes('lowest')) {
                                     shortLabel = 'Lowest';
                                 } else if (lower.includes('recently added') || lower.includes('recent add')) {
-                                    shortLabel = 'Added';
+                                    shortLabel = 'Newest';
                                 } else if (lower.includes('a-z')) {
                                     shortLabel = 'A - Z';
                                 } else if (lower.includes('z-a')) {
                                     shortLabel = 'Z - A';
                                 }
+                            } else {
+                                // Clean up desktop labels as well to keep them intuitive
+                                if (lower.includes('recently watched')) shortLabel = 'Recent Watch';
+                                if (lower.includes('oldest watched')) shortLabel = 'Oldest Watch';
+                                if (lower.includes('highest rated')) shortLabel = 'Highest Rating';
+                                if (lower.includes('lowest rated')) shortLabel = 'Lowest Rating';
+                                if (lower.includes('recently added')) shortLabel = 'Newest Added';
                             }
                             
                             return (
-                                <option key={option.value} value={option.value}>
+                                <option key={option.value} value={option.value} className="bg-white text-slate-700 font-bold uppercase tracking-wider text-[11px] py-2">
                                     {shortLabel}
                                 </option>
                             );
                         })}
                     </select>
+                    {/* Floating mini arrow to prevent browser overlap issues */}
+                    <span className="material-symbols-outlined text-[10px] text-[#b07d00] pointer-events-none absolute right-1.5 sm:right-2.5 top-1/2 -translate-y-1/2 select-none">
+                        keyboard_arrow_down
+                    </span>
                 </div>
             </div>
         </div>
