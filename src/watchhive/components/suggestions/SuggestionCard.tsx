@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
-import { WatchlistButton, SkeletonCard } from '../common';
+import { WatchlistButton, SkeletonCard, MovieDetailsModal } from '../common';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
 
@@ -31,6 +31,15 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     const [isLoading, setIsLoading] = useState(true);
     const [isDismissing, setIsDismissing] = useState(false);
     const { confirm } = useCustomAlert();
+    const [showModal, setShowModal] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    const [showMobileActions, setShowMobileActions] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 640);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (preloadedDetails) {
@@ -105,81 +114,125 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     }, []);
 
     return (
-        <div className="watchlist-card group relative flex flex-col h-full bg-white rounded-3xl border border-[#ffb700]/10 overflow-hidden shadow-sm hover:shadow-md transition-all">
-            {/* Poster Wrapper */}
-            <div className="watchlist-card__poster-wrapper aspect-[2/3] relative overflow-hidden bg-stone-900">
-                {posterUrl ? (
-                    <img src={posterUrl} alt={title} className="watchlist-card__poster w-full h-full object-cover transition-transform group-hover:scale-105" />
-                ) : (
-                    <div className="w-full h-full bg-[#FFF9F0] flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[#2D2926]/20 text-5xl">movie</span>
-                    </div>
-                )}
-                
-                {/* Standardized Action Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                <div className="absolute top-2 right-2 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="watchlist-action-standard">
-                        <WatchlistButton 
-                            tmdbId={group.tmdbId} 
-                            mediaType={group.mediaType as any} 
-                            variant="icon"
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                        />
-                    </div>
+        <>
+            <div 
+                className="watchlist-card group relative flex flex-col h-full bg-white rounded-3xl border border-[#ffb700]/10 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
+                onClick={(e) => {
+                    if (isMobile) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowMobileActions(!showMobileActions);
+                    } else {
+                        setShowModal(true);
+                    }
+                }}
+            >
+                {/* Poster Wrapper */}
+                <div className="watchlist-card__poster-wrapper aspect-[2/3] relative overflow-hidden bg-stone-900">
+                    {posterUrl ? (
+                        <img src={posterUrl} alt={title} className="watchlist-card__poster w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    ) : (
+                        <div className="w-full h-full bg-[#FFF9F0] flex items-center justify-center">
+                            <span className="material-symbols-outlined text-[#2D2926]/20 text-5xl">movie</span>
+                        </div>
+                    )}
                     
-                    <button 
-                        onClick={handleDismiss}
-                        className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                        disabled={isDismissing}
-                        title="Dismiss Suggestion"
+                    {/* Standardized Action Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Mobile Central Eye Overlay */}
+                    {isMobile && showMobileActions && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/45 backdrop-blur-[2.5px] transition-all duration-300 animate-[fade-in_0.2s_ease-out]">
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowModal(true);
+                                }}
+                                className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
+                                title="View details"
+                            >
+                                <span className="material-symbols-outlined text-[24px] font-bold">visibility</span>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Actions overlay */}
+                    <div className={`absolute top-2 right-2 flex flex-col gap-2 z-20 transition-all duration-300
+                        ${isMobile 
+                            ? (showMobileActions ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-90 pointer-events-none') 
+                            : 'opacity-0 group-hover:opacity-100'}`}
                     >
-                        <span className="material-symbols-outlined text-[18px]">
-                            {isDismissing ? 'sync' : 'visibility_off'}
+                        <div className="watchlist-action-standard">
+                            <WatchlistButton 
+                                tmdbId={group.tmdbId} 
+                                mediaType={group.mediaType as any} 
+                                variant="icon"
+                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                            />
+                        </div>
+                        
+                        <button 
+                            onClick={handleDismiss}
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                            disabled={isDismissing}
+                            title="Dismiss Suggestion"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">
+                                {isDismissing ? 'sync' : 'visibility_off'}
+                            </span>
+                        </button>
+                    </div>
+
+                    {/* Badge Overlay */}
+                    <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
+                        <span className="bg-[#ffb700] text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider opacity-90">
+                            {group.suggestions.length > 1 ? `${group.suggestions.length} Suggestions` : 'Suggested'}
                         </span>
-                    </button>
+                    </div>
                 </div>
 
-                {/* Badge Overlay */}
-                <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
-                    <span className="bg-[#ffb700] text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider opacity-90">
-                        {group.suggestions.length > 1 ? `${group.suggestions.length} Suggestions` : 'Suggested'}
-                    </span>
-                </div>
-            </div>
-
-            {/* Info Section */}
-            <div className="p-4 flex flex-col flex-1 gap-1">
-                <h4 className="text-[13px] leading-tight font-black text-[#2D2926] truncate" title={title}>
-                    {title}
-                </h4>
-                <p className="text-[11px] text-[#2D2926]/60 line-clamp-2 leading-snug mt-1 italic">
-                    {details?.overview || 'No description available'}
-                </p>
-                
-                <div className="mt-auto pt-3 border-t border-[#ffb700]/10">
-                    <div className="flex flex-col gap-2">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-[#2D2926]/40">From your Hive</span>
-                        <div className="flex -space-x-2 overflow-hidden">
-                            {uniqueSuggestors.slice(0, 4).map(s => (
-                                <img 
-                                    key={s.id} 
-                                    src={s.profilePictureUrl || `https://ui-avatars.com/api/?name=${s.displayName || s.username}&background=ffb700&color=fff`} 
-                                    title={s.displayName || s.username}
-                                    className="inline-block h-7 w-7 rounded-full ring-2 ring-white object-cover bg-white" 
-                                    alt=""
-                                />
-                            ))}
-                            {uniqueSuggestors.length > 4 && (
-                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-[#2D2926] ring-2 ring-white">
-                                    +{uniqueSuggestors.length - 4}
-                                </div>
-                            )}
+                {/* Info Section */}
+                <div className="p-4 flex flex-col flex-1 gap-1">
+                    <h4 className="text-[13px] leading-tight font-black text-[#2D2926] truncate" title={title}>
+                        {title}
+                    </h4>
+                    <p className="text-[11px] text-[#2D2926]/60 line-clamp-2 leading-snug mt-1 italic">
+                        {details?.overview || 'No description available'}
+                    </p>
+                    
+                    <div className="mt-auto pt-3 border-t border-[#ffb700]/10">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-[#2D2926]/40">From your Hive</span>
+                            <div className="flex -space-x-2 overflow-hidden">
+                                {uniqueSuggestors.slice(0, 4).map(s => (
+                                    <img 
+                                        key={s.id} 
+                                        src={s.profilePictureUrl || `https://ui-avatars.com/api/?name=${s.displayName || s.username}&background=ffb700&color=fff`} 
+                                        title={s.displayName || s.username}
+                                        className="inline-block h-7 w-7 rounded-full ring-2 ring-white object-cover bg-white" 
+                                        alt=""
+                                    />
+                                ))}
+                                {uniqueSuggestors.length > 4 && (
+                                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-[#2D2926] ring-2 ring-white">
+                                        +{uniqueSuggestors.length - 4}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            <MovieDetailsModal 
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                tmdbId={group.tmdbId}
+                mediaType={group.mediaType as 'movie' | 'tv'}
+            />
+        </>
     );
 };
+
+export default SuggestionCard;

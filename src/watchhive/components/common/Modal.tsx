@@ -73,20 +73,32 @@ export const Modal: React.FC<ModalProps> = ({
                             <div className="w-12 h-1.5 bg-[#2D2926]/10 rounded-full" />
                         </div>
 
-                        {/* Header */}
-                        <div className={`flex items-center justify-between px-6 py-4 md:px-8 md:py-6 bg-[#FFF9F0]/80 backdrop-blur-sm border-b border-[#ffb700]/10`}>
-                            {title && (
-                                <h3 className="text-xl md:text-2xl font-black text-[#2D2926] tracking-tight">
-                                    {title}
-                                </h3>
-                            )}
+                        {/* Close button when no title is provided (absolute top-right floating) */}
+                        {!title && (
                             <button
                                 onClick={onClose}
-                                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[#ffb700]/10 text-[#ffb700] hover:bg-[#ffb700] hover:text-white transition-all transform hover:rotate-90 active:scale-95 shadow-sm"
+                                className="absolute top-4 right-4 md:top-6 md:right-6 z-[60] w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-white/85 text-[#2D2926] hover:bg-white hover:text-[#ffb700] hover:rotate-90 active:scale-95 shadow-md backdrop-blur-sm border border-[#ffb700]/10 transition-all"
+                                title="Close"
                             >
                                 <span className="material-symbols-outlined text-[20px] font-bold">close</span>
                             </button>
-                        </div>
+                        )}
+
+                        {/* Header (rendered only if title is provided to prevent unwanted layout space) */}
+                        {title && (
+                            <div className="flex items-center justify-between px-6 py-4 md:px-8 md:py-6 bg-[#FFF9F0]/80 backdrop-blur-sm border-b border-[#ffb700]/10 shrink-0">
+                                <h3 className="text-xl md:text-2xl font-black text-[#2D2926] tracking-tight pr-8">
+                                    {title}
+                                </h3>
+                                <button
+                                    onClick={onClose}
+                                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-2xl bg-[#ffb700]/10 text-[#ffb700] hover:bg-[#ffb700] hover:text-white transition-all transform hover:rotate-90 active:scale-95 shadow-sm shrink-0"
+                                    title="Close"
+                                >
+                                    <span className="material-symbols-outlined text-[20px] font-bold">close</span>
+                                </button>
+                            </div>
+                        )}
 
                         {/* Body */}
                         <div className="flex-1 overflow-y-auto p-6 md:p-8 no-scrollbar bg-white">
