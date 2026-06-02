@@ -298,6 +298,40 @@
     color: #dc2626;
 }
 
+/* Install App item — honey gold accent */
+.wh-nav__dropdown-item--install {
+    color: #b07d00;
+}
+
+.wh-nav__dropdown-item--install:hover {
+    background: rgba(255, 183, 0, 0.1);
+    color: #92660a;
+}
+
+.wh-nav__mobile-link--install {
+    color: #b07d00;
+}
+
+.wh-nav__mobile-link--install:hover {
+    background: rgba(255, 183, 0, 0.1);
+    color: #92660a;
+}
+
+/* Inline PWA badge pill */
+.wh-nav__install-badge {
+    margin-left: auto;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #92660a;
+    background: rgba(255, 183, 0, 0.18);
+    border: 1px solid rgba(255, 183, 0, 0.35);
+    border-radius: 4px;
+    padding: 1px 5px;
+    line-height: 1.5;
+}
+
 
 .wh-nav__dropdown-icon {
     width: 16px;

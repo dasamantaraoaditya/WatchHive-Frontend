@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts';
 import { Avatar } from '../common';
 import whLogo from '../../assets/images/watchhive-logo.png';
 import NotificationBell from '../notifications/NotificationBell';
+import { showInstallPrompt } from '../../../serviceWorkerRegistration';
 import './Navbar.css';
 
 export const Navbar: React.FC = () => {
@@ -13,6 +14,10 @@ export const Navbar: React.FC = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const profileRef = useRef<HTMLDivElement>(null);
+
+    // PWA install prompt state
+    const [isInstallReady, setIsInstallReady] = useState(false);
+    const [isInstalled, setIsInstalled] = useState(false);
 
     const handleLogout = () => {
         setProfileOpen(false);
@@ -30,6 +35,24 @@ export const Navbar: React.FC = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Listen for PWA install prompt availability
+    useEffect(() => {
+        const handleBeforeInstall = () => setIsInstallReady(true);
+        const handleAppInstalled = () => { setIsInstalled(true); setIsInstallReady(false); };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+        window.addEventListener('appinstalled', handleAppInstalled);
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+        };
+    }, []);
+
+    const handleInstall = async () => {
+        setProfileOpen(false);
+        setMobileOpen(false);
+        await showInstallPrompt();
+    };
 
     // Close mobile menu on route change
     useEffect(() => {
@@ -168,6 +191,23 @@ export const Navbar: React.FC = () => {
                                         My Entries
                                     </Link>
                                     <div className="wh-nav__dropdown-divider" />
+                                    
+                                    {/* Install App — only shown when browser exposes the install prompt */}
+                                    {isInstallReady && !isInstalled && (
+                                        <button
+                                            className="wh-nav__dropdown-item wh-nav__dropdown-item--install"
+                                            onClick={handleInstall}
+                                            id="nav-dropdown-install"
+                                        >
+                                            <svg viewBox="0 0 20 20" fill="currentColor" className="wh-nav__dropdown-icon">
+                                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                            <span>Install App</span>
+                                            <span className="wh-nav__install-badge">PWA</span>
+                                        </button>
+                                    )}
+
+                                    <div className="wh-nav__dropdown-divider" />
                                     <button
                                         className="wh-nav__dropdown-item wh-nav__dropdown-item--danger"
                                         onClick={handleLogout}
@@ -235,6 +275,20 @@ export const Navbar: React.FC = () => {
                     >
                         Entries
                     </Link>
+                    <div className="wh-nav__mobile-divider" />
+                    {isInstallReady && !isInstalled && (
+                        <button
+                            className="wh-nav__mobile-link wh-nav__mobile-link--install"
+                            onClick={handleInstall}
+                            id="nav-mobile-install"
+                        >
+                            <svg viewBox="0 0 20 20" fill="currentColor" style={{ width: 16, height: 16, marginRight: 8, flexShrink: 0, opacity: 0.8 }}>
+                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                            Install App
+                            <span className="wh-nav__install-badge" style={{ marginLeft: 8 }}>PWA</span>
+                        </button>
+                    )}
                     <div className="wh-nav__mobile-divider" />
                     <button className="wh-nav__mobile-link wh-nav__mobile-link--danger" onClick={handleLogout}>
                         Sign Out
