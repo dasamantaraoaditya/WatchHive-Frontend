@@ -1,66 +1,49 @@
 # WatchHive Frontend
 
-WatchHive is a premium, high-fidelity, and offline-resilient social movie tracking application tailored for true cinephiles. It enables movie tracking, psychological cataloging via MindLens Analytics, custom list-stack rankings, and real-time interaction through the Swarm Social Feed.
+WatchHive is a modern, premium, and offline-capable single-page application built for social movie tracking and cinematic analytics. 
 
-The project is built on **React 18**, **Vite**, **TypeScript**, and **Tailwind CSS**, optimized for both desktop browsers and standalone native Progressive Web App (PWA) environments.
-
----
-
-## 🌟 Key Features & Ecosystem
-
-### 1. Interactive Landing Page Sandbox
-- **MindLens Sandbox**: A responsive mood simulator dynamically computing and showing atmosphere resonance, dopamine focus, and existential depth.
-- **Swarm Feed Live Buzzing**: Clickable micro-feed card components demonstrating real-time social feedback and interactive "buzzing" likes.
-- **Cinematic Stacks Ranker**: Dragless ranking widgets enabling direct clicking of re-ordering keys (`▲`/`▼`) to re-arrange custom collections.
-
-### 2. MindLens Analytics Dashboard
-- Sifts through logged entries to compute and visualize custom psychological genre vectors.
-- Highlights atmospheric density, mood correlations, and matches your profile with tailored movie recommendations.
-
-### 3. Swarm Social Feed & Visibility Tiers
-- Real-time social feed with comment boards, profiles, and follower moderation.
-- Three privacy tiers to control your visibility footprint:
-  - **Public**: Anyone in the hive can search, read, and buzz your entries.
-  - **Followers Only**: Visibility is locked to approved follower accounts.
-  - **Strict Private**: Social modules are locked; logs are only visible to you.
-
-### 4. Cinematic Stacks & Collections
-- Drag-and-rank arrays allowing users to build and order their ultimate cinema sagas, franchise orders, or director timelines.
-
-### 5. Progressive Web App (PWA) Offline Sync
-- **Service Worker Caching**: Fully offline-capable caching layer using local indexed storage.
-- **Theater Resilience**: Syncs logged entries offline when internet is dead inside cinemas, automatically pushes queued logs once reconnected.
-- **Multi-Device Installation**: Embedded standalone installation alerts with setup instructions tailored for iOS Safari, Chrome, and Android.
-
-### 6. Mobile Adaptability
-- Comprehensive layout safety wrappers designed for PWA mobile viewport sizes.
-- **Mobile Central Eye Overlay**: Entry cards and watchlist cards in mobile mode feature a tap-triggered center-overlay actions display (eye-icon visibility, quick edit, dismiss controls) for elegant touch-screen use.
+This repository houses the client-side code, built with React, TypeScript, and Tailwind CSS. It is structured to be simple, modular, and easy for new developers to pick up and build on immediately.
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Framework**: React 18 + TypeScript (strict compilation checks)
-- **Tooling**: Vite (fast builds, hot-module replacement)
-- **Navigation**: React Router v6 (SPA routing with vercel redirections)
-- **Styling**: Tailwind CSS + Custom Vanilla CSS (fluid glassmorphism grids)
-- **Animations**: Framer Motion
-- **API Client**: Axios + JWT authentication & Google OAuth integrations
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Core** | React 18 + TypeScript | UI library using hooks and strict static typing. |
+| **Build Tool** | Vite | Ultra-fast development server and production bundler. |
+| **Routing** | React Router v6 | Declarative client-side routing. |
+| **Styling** | Tailwind CSS + Vanilla CSS | Utility classes and custom glassmorphic layout system. |
+| **HTTP Client** | Axios | Configured client with JWT header interceptors. |
+| **Offline Sync** | Vite PWA Plugin | Service worker support for offline caching and native app installation. |
 
 ---
 
-## 🚀 Getting Started
+## 📂 Project Architecture
 
-### 1. Prerequisites
-Ensure you have **Node.js (v18+)** installed.
+The core codebase is located under `src/watchhive/` and organized into five simple directories to separate concerns:
 
-### 2. Installation
-Clone the repository and install npm packages:
+- **`📂 components/`**: Reusable UI blocks and layouts.
+  - `auth/`: Login/signup UI layers.
+  - `common/`: Core elements (modals, datepickers, buttons, loading animations).
+  - `entries/`: Entry lists, item grids, and card components.
+  - `profile/`: User profile widgets and watchlist grids.
+- **`📂 contexts/`**: Global state providers (e.g., `AuthContext` for user sessions, `WatchlistContext` for user lists).
+- **`📂 pages/`**: High-level page views (e.g., `LandingPage`, `EntriesPage`, `FeedPage`, `SearchUsersPage`).
+- **`📂 services/`**: Logic files for API requests. All endpoints (Auth, Feed, Entries, Suggestions) query the API through `api.ts`.
+- **`📂 types/`**: Global TypeScript interfaces (user schema, API payloads).
+
+---
+
+## 🚀 Sourcing & Development
+
+### 1. Installation
+Clone the repository and install dependencies:
 ```bash
 npm install
 ```
 
-### 3. Environment Configuration
+### 2. Environment Setup
 Create a `.env` file in the root directory:
 ```env
 VITE_API_BASE_URL=http://localhost:5001
@@ -68,26 +51,23 @@ VITE_API_URL=http://localhost:5001/api/v1
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
 ```
 
-### 4. Running Locally
-Run the local Vite development server:
+### 3. Run Locally
+Start the local Vite development server:
 ```bash
 npm run dev
 ```
 
-### 5. Production Build & Validation
-Validate strict TypeScript checks and compile the production bundle:
+### 4. Build & Verify
+Before submitting any changes, verify strict TypeScript checks and compile the app:
 ```bash
 # Type check code
 npx tsc --noEmit
 
-# Compile assets
+# Bundle production assets
 npm run build
 ```
 
 ---
 
-## 🌐 Deployment & Architecture
-
-- **Frontend**: Automatically deployed on [Vercel](https://vercel.com) on push to the `main` branch. The `vercel.json` file handles single-page app rewrites to `index.html`.
-- **Backend API**: Hosted on [Railway](https://railway.app).
-- **Service Worker**: PWA logic is registered inside `serviceWorkerRegistration.ts` to manage install state hooks and background asset caching.
+## 📖 Additional Resources
+- **Detailed Diagrams**: To inspect sequence flows and full architecture maps, view [architecture.md](file:///Users/adityadasamantharao/Documents/Repos/WatchHive-Frontend/architecture.md).
