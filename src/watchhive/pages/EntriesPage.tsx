@@ -4,7 +4,7 @@ import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { entriesApi, Entry } from '../services/entries.service';
 import { EntryForm } from '../components/entries/EntryForm';
 import { EntryList, EntryCard } from '../components/entries/EntryList';
-import { useAuth, useUI } from '../contexts';
+import { useAuth, useUI, useCustomAlert } from '../contexts';
 import { WatchlistGrid } from '../components/profile';
 import { 
     SkeletonCard, 
@@ -30,6 +30,7 @@ export const EntriesPage: React.FC = () => {
     const navigate = useNavigate();
 
     const { user } = useAuth();
+    const { alert, confirm } = useCustomAlert();
     const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('watching');
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
@@ -125,6 +126,27 @@ export const EntriesPage: React.FC = () => {
         // The modal handles the actual update now. Just refresh the list.
         fetchWatching(0);
         setRefreshKey(prev => prev + 1);
+    };
+
+    const handleDeleteWatching = async (id: string) => {
+        const confirmed = await confirm('Are you sure you want to delete this currently watching session?', {
+            title: 'Delete Session',
+            confirmText: 'Delete',
+            severity: 'danger'
+        });
+        if (!confirmed) return;
+        try {
+            await entriesApi.deleteEntry(id);
+            setWatchingEntries((prev) => prev.filter((e) => e.id !== id));
+            if (selectedEntry?.id === id) {
+                setSelectedEntry(null);
+            }
+        } catch (err: any) {
+            await alert(err.response?.data?.error || 'Failed to delete entry', {
+                title: 'Error',
+                severity: 'error'
+            });
+        }
     };
 
     const sortedWatchingEntries = [...watchingEntries]
@@ -234,6 +256,7 @@ export const EntriesPage: React.FC = () => {
                                             key={entry.id} 
                                             entry={entry}
                                             onComplete={handleComplete}
+                                            onDelete={handleDeleteWatching}
                                             onClick={(e) => setSelectedEntry(e)}
                                         />
                                     ))}
