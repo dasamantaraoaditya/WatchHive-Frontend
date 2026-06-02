@@ -23,7 +23,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
     const [groups, setGroups] = useState<DetailedGroupedSuggestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [sortBy, setSortBy] = useState('recent');
+    const [sortBy, setSortBy] = useState('recent-desc');
     const PAGE_SIZE = 20;
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -43,10 +43,9 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                             ...group,
                             title: tmdbData.title || tmdbData.name || 'Untitled',
                             overview: tmdbData.overview || '',
-                            posterPath: tmdbData.poster_path
+                            posterPath: tmdbData.poster_path || null
                         };
-                    } catch (err) {
-                        console.error('Failed to fetch TMDb details for group:', group.tmdbId, err);
+                    } catch (e) {
                         return {
                             ...group,
                             title: 'Untitled',
@@ -78,9 +77,17 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
             );
         })
         .sort((a, b) => {
-            const dateA = new Date(a.suggestions[0]?.createdAt || 0).getTime();
-            const dateB = new Date(b.suggestions[0]?.createdAt || 0).getTime();
-            if (sortBy === 'recent') return dateB - dateA;
+            const [field, order] = sortBy.split('-') as [string, string];
+            if (field === 'recent') {
+                const dateA = new Date(a.suggestions[0]?.createdAt || 0).getTime();
+                const dateB = new Date(b.suggestions[0]?.createdAt || 0).getTime();
+                return order === 'desc' ? dateB - dateA : dateA - dateB;
+            }
+            if (field === 'title') {
+                const titleA = a.title || '';
+                const titleB = b.title || '';
+                return order === 'desc' ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
+            }
             return 0;
         });
 
@@ -112,7 +119,10 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                     sortBy={sortBy}
                     onSortChange={setSortBy}
                     sortOptions={[
-                        { value: 'recent', label: 'Recently Suggested' }
+                        { value: 'recent-desc', label: 'Recently Suggested' },
+                        { value: 'recent-asc', label: 'Oldest Suggested' },
+                        { value: 'title-asc', label: 'Title: A-Z' },
+                        { value: 'title-desc', label: 'Title: Z-A' }
                     ]}
                     count={0}
                     countLabel="Titles Suggested"
@@ -140,7 +150,10 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                 sortBy={sortBy}
                 onSortChange={setSortBy}
                 sortOptions={[
-                    { value: 'recent', label: 'Recently Suggested' }
+                    { value: 'recent-desc', label: 'Recently Suggested' },
+                    { value: 'recent-asc', label: 'Oldest Suggested' },
+                    { value: 'title-asc', label: 'Title: A-Z' },
+                    { value: 'title-desc', label: 'Title: Z-A' }
                 ]}
                 count={filteredGroups.length}
                 countLabel={searchQuery ? "Matching Suggestions" : "Titles Suggested"}

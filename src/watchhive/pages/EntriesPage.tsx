@@ -33,7 +33,7 @@ export const EntriesPage: React.FC = () => {
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
     const [watchingPagination, setWatchingPagination] = useState({ total: 0, limit: 20, offset: 0, hasMore: false });
-    const [watchingSort, setWatchingSort] = useState('recent');
+    const [watchingSort, setWatchingSort] = useState('recent-desc');
     const [searchQueries, setSearchQueries] = useState({
         history: '',
         watching: '',
@@ -127,8 +127,17 @@ export const EntriesPage: React.FC = () => {
 
     const sortedWatchingEntries = [...watchingEntries]
         .sort((a, b) => {
-            if (watchingSort === 'recent') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            if (watchingSort === 'title') return a.title.localeCompare(b.title);
+            const [field, order] = watchingSort.split('-') as [string, string];
+            if (field === 'recent') {
+                const dateA = new Date(a.createdAt || 0).getTime();
+                const dateB = new Date(b.createdAt || 0).getTime();
+                return order === 'desc' ? dateB - dateA : dateA - dateB;
+            }
+            if (field === 'title') {
+                const titleA = a.title || '';
+                const titleB = b.title || '';
+                return order === 'desc' ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
+            }
             return 0;
         });
 
@@ -192,8 +201,10 @@ export const EntriesPage: React.FC = () => {
                                 sortBy={watchingSort}
                                 onSortChange={setWatchingSort}
                                 sortOptions={[
-                                    { value: 'recent', label: 'Recently Added' },
-                                    { value: 'title', label: 'Title: A-Z' }
+                                    { value: 'recent-desc', label: 'Recently Added' },
+                                    { value: 'recent-asc', label: 'Oldest Added' },
+                                    { value: 'title-asc', label: 'Title: A-Z' },
+                                    { value: 'title-desc', label: 'Title: Z-A' }
                                 ]}
                                 count={filteredWatchingEntries.length}
                                 countLabel={searchQueries.watching ? "Matching Sessions" : "Active Sessions"}

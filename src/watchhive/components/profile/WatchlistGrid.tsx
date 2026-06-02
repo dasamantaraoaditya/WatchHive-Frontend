@@ -22,7 +22,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     readOnly = false
 }) => {
     const { watchlist: contextWatchlist, isLoading: contextLoading, hasLoaded: contextHasLoaded, fetchWatchlist, addToList } = useWatchlist();
-    const [sortBy, setSortBy] = useState('recent');
+    const [sortBy, setSortBy] = useState('recent-desc');
     const [showAddModal, setShowAddModal] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const PAGE_SIZE = 20;
@@ -53,8 +53,17 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
             return (item.title || '').toLowerCase().includes(searchQuery.toLowerCase());
         })
         .sort((a, b) => {
-            if (sortBy === 'recent') return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
-            if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '');
+            const [field, order] = sortBy.split('-') as [string, string];
+            if (field === 'recent') {
+                const dateA = new Date(a.addedAt || 0).getTime();
+                const dateB = new Date(b.addedAt || 0).getTime();
+                return order === 'desc' ? dateB - dateA : dateA - dateB;
+            }
+            if (field === 'title') {
+                const titleA = a.title || '';
+                const titleB = b.title || '';
+                return order === 'desc' ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
+            }
             return 0;
         });
 
@@ -86,8 +95,10 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                     sortBy={sortBy}
                     onSortChange={setSortBy}
                     sortOptions={[
-                        { value: 'recent', label: 'Recently Added' },
-                        { value: 'title', label: 'Title: A-Z' }
+                        { value: 'recent-desc', label: 'Recently Added' },
+                        { value: 'recent-asc', label: 'Oldest Added' },
+                        { value: 'title-asc', label: 'Title: A-Z' },
+                        { value: 'title-desc', label: 'Title: Z-A' }
                     ]}
                     count={0}
                     countLabel="Saved Titles"
@@ -108,8 +119,10 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                     sortBy={sortBy}
                     onSortChange={setSortBy}
                     sortOptions={[
-                        { value: 'recent', label: 'Recently Added' },
-                        { value: 'title', label: 'Title: A-Z' }
+                        { value: 'recent-desc', label: 'Recently Added' },
+                        { value: 'recent-asc', label: 'Oldest Added' },
+                        { value: 'title-asc', label: 'Title: A-Z' },
+                        { value: 'title-desc', label: 'Title: Z-A' }
                     ]}
                     count={filteredItems.length}
                     countLabel={searchQuery ? "Matching Titles" : "Saved Titles"}
