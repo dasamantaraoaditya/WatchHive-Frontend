@@ -13,7 +13,7 @@ export const PrivacyPolicyPage: React.FC = () => {
                     <h1 className="text-4xl font-black text-[#2D2926] tracking-tighter mb-4">Privacy Policy</h1>
                     <div className="inline-flex items-center gap-2 bg-[#ffb700]/10 text-[#ffb700] px-4 py-1.5 rounded-full border border-[#ffb700]/20">
                         <span className="material-symbols-outlined text-sm font-black">update</span>
-                        <span className="text-[10px] font-black uppercase tracking-widest">Last Updated: March 10, 2026</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest">Last Updated: June 2, 2026</span>
                     </div>
                 </header>
 
@@ -25,8 +25,8 @@ export const PrivacyPolicyPage: React.FC = () => {
                         </h2>
                         <p className="font-medium">
                             Welcome to WatchHive. We respect your privacy and are committed to protecting your personal data.
-                            This privacy policy will inform you about how we look after your personal data when you visit our website
-                            and tell you about your privacy rights and how the law protects you.
+                            This privacy policy will inform you about how we look after your personal data when you visit our website,
+                            use our offline-capable standalone Progressive Web Application (PWA), and engage with other members of the hive.
                         </p>
                     </section>
 
@@ -40,10 +40,11 @@ export const PrivacyPolicyPage: React.FC = () => {
                         </p>
                         <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {[
-                                { label: 'Identity Data', desc: 'Username, display name, and avatar.' },
+                                { label: 'Identity Data', desc: 'Username, display name, and custom profile avatar.' },
                                 { label: 'Contact Data', desc: 'Email address.' },
-                                { label: 'Technical Data', desc: 'IP address, login data, browser type.' },
-                                { label: 'Profile Data', desc: 'Watch history, ratings, reviews.' }
+                                { label: 'Technical Data', desc: 'IP address, login data, browser type, and standalone PWA state.' },
+                                { label: 'Profile Data', desc: 'Watch history, custom ratings, reviews, cinematic stacks, and likes.' },
+                                { label: 'Psychology Metrics', desc: 'MindLens mood and atmosphere attributes correlating to your watch patterns.' }
                             ].map((item, i) => (
                                 <li key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                                     <div className="text-xs font-black text-slate-900 uppercase tracking-widest mb-1">{item.label}</div>
@@ -56,21 +57,42 @@ export const PrivacyPolicyPage: React.FC = () => {
                     <section>
                         <h2 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-3">
                             <span className="w-8 h-8 rounded-lg bg-[#ffb700]/10 text-[#ffb700] flex items-center justify-center text-sm">3</span>
-                            How We Use Your Data
+                            Core Feature Analytics & MindLens
                         </h2>
-                        <p className="mb-4 font-medium">
-                            We use your data to provide the best hive experience:
+                        <p className="font-medium mb-3">
+                            WatchHive processes your cinematic logs to formulate the **MindLens Psychological Profile**:
                         </p>
-                        <div className="space-y-2">
+                        <div className="p-5 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/20 text-slate-700">
+                            <div className="flex gap-3 mb-2.5">
+                                <span className="material-symbols-outlined text-[#ffb700]">psychology</span>
+                                <h3 className="font-bold text-[14px] text-slate-900">MindLens Computation</h3>
+                            </div>
+                            <p className="text-[13px] font-semibold leading-relaxed">
+                                We utilize mood correlations, genre frequencies, and atmosphere ratings to construct visualization metrics. This analytical assessment is computed securely and used solely to build your dashboard graphics. We do **not** sell, rent, or distribute your MindLens datasets to advertisers or third-party marketing services.
+                            </p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                            <span className="w-8 h-8 rounded-lg bg-[#ffb700]/10 text-[#ffb700] flex items-center justify-center text-sm">4</span>
+                            Swarm Feed & Social Visibility Controls
+                        </h2>
+                        <p className="font-medium mb-3">
+                            Your rating updates, review logs, and cinematic stacks are shared on the community feed depending entirely on the **Privacy & Visibility level** you choose:
+                        </p>
+                        <div className="space-y-3">
                             {[
-                                'To provide the core services of WatchHive',
-                                'To manage your account and support',
-                                'To improve our website and algorithms',
-                                'To enable social interactions between users'
-                            ].map((text, i) => (
-                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                                    <span className="material-symbols-outlined text-[#ffb700] text-sm">check_circle</span>
-                                    <span className="text-[13px] font-bold text-slate-700">{text}</span>
+                                { title: 'Public Visiblity', desc: 'Any user of the hive can view your posts, reviews, ratings, and stacks, and buzz your entries.' },
+                                { title: 'Followers Only Visiblity', desc: 'Only approved follower accounts can browse your entries page or view your activity on the Swarm Feed.' },
+                                { title: 'Strict Private Visiblity', desc: 'Your watch history, MindLens profiles, and stacks are strictly visible only to you. Social features are completely restricted.' }
+                            ].map((level, i) => (
+                                <div key={i} className="flex gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                    <span className="material-symbols-outlined text-[#ffb700] text-lg">visibility</span>
+                                    <div className="text-left">
+                                        <div className="text-xs font-black text-slate-900 uppercase tracking-widest">{level.title}</div>
+                                        <div className="text-[12px] font-medium text-slate-500 mt-0.5">{level.desc}</div>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -78,10 +100,20 @@ export const PrivacyPolicyPage: React.FC = () => {
 
                     <section className="p-6 rounded-3xl bg-slate-900 text-white">
                         <h2 className="text-xl font-black mb-4 flex items-center gap-3">
-                            <span className="material-symbols-outlined text-[#ffb700]">google</span>
-                            Google OAuth
+                            <span className="material-symbols-outlined text-[#ffb700]">cloud_done</span>
+                            PWA Local Cache & Offline Logging
                         </h2>
-                        <p className="text-slate-400 font-medium text-sm leading-relaxed">
+                        <p className="text-slate-400 font-semibold text-[13px] leading-relaxed">
+                            To ensure high-resilience cataloging, our Progressive Web App (PWA) relies on client-side caching (IndexedDB/Local Storage). When you log a film offline, records are securely stored on your local device. Once a network connection is established, these records are synced automatically to our secure database servers.
+                        </p>
+                    </section>
+
+                    <section className="p-6 rounded-3xl bg-slate-100 text-slate-700 border border-slate-200">
+                        <h2 className="text-xl font-black mb-4 flex items-center gap-3 text-slate-900">
+                            <span className="material-symbols-outlined text-[#ffb700]">google</span>
+                            Google OAuth Integration
+                        </h2>
+                        <p className="font-semibold text-[13px] leading-relaxed text-slate-600">
                             WatchHive allows you to sign in using your Google account. When you use Google OAuth, we receive
                             your email address, name, and profile picture from Google. We use this information only to create
                             and manage your WatchHive account. We do not share this information with third parties for marketing purposes.
@@ -90,12 +122,12 @@ export const PrivacyPolicyPage: React.FC = () => {
 
                     <section>
                         <h2 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-3">
-                            <span className="w-8 h-8 rounded-lg bg-[#ffb700]/10 text-[#ffb700] flex items-center justify-center text-sm">5</span>
-                            Data Security
+                            <span className="w-8 h-8 rounded-lg bg-[#ffb700]/10 text-[#ffb700] flex items-center justify-center text-sm">7</span>
+                            Data Security & Encryption
                         </h2>
                         <p className="font-medium">
                             We have put in place appropriate security measures to prevent your personal data from being accidentally lost,
-                            used or accessed in an unauthorized way, altered or disclosed.
+                            used or accessed in an unauthorized way, altered or disclosed. All transfers are protected by standard Transport Layer Security (TLS) encryption protocols.
                         </p>
                     </section>
 
@@ -124,3 +156,4 @@ export const PrivacyPolicyPage: React.FC = () => {
     );
 };
 
+export default PrivacyPolicyPage;
