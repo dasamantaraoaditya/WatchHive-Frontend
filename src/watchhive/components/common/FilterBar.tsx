@@ -69,9 +69,34 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         value={sortBy}
                         onChange={(e) => onSortChange(e.target.value)}
                     >
-                        {sortOptions.map(option => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
+                        {sortOptions.map(option => {
+                            // Map lengthy labels to super clean, intuitive, and short terms for mobile layout
+                            let shortLabel = option.label;
+                            if (window.innerWidth < 640 || (window.matchMedia && window.matchMedia('(max-width: 640px)').matches)) {
+                                const lower = option.label.toLowerCase();
+                                if (lower.includes('recently watched') || lower.includes('recent')) {
+                                    shortLabel = 'Recent';
+                                } else if (lower.includes('oldest watched') || lower.includes('oldest')) {
+                                    shortLabel = 'Oldest';
+                                } else if (lower.includes('highest rated') || lower.includes('highest')) {
+                                    shortLabel = 'Highest';
+                                } else if (lower.includes('lowest rated') || lower.includes('lowest')) {
+                                    shortLabel = 'Lowest';
+                                } else if (lower.includes('recently added') || lower.includes('recent add')) {
+                                    shortLabel = 'Added';
+                                } else if (lower.includes('a-z')) {
+                                    shortLabel = 'A - Z';
+                                } else if (lower.includes('z-a')) {
+                                    shortLabel = 'Z - A';
+                                }
+                            }
+                            
+                            return (
+                                <option key={option.value} value={option.value}>
+                                    {shortLabel}
+                                </option>
+                            );
+                        })}
                     </select>
                 </div>
             </div>
