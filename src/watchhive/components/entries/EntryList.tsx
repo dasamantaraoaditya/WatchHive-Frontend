@@ -481,6 +481,7 @@ export const EntryList: React.FC<EntryListProps> = ({
                 ]}
                 count={pagination.total}
                 countLabel="Logged Titles"
+                isLoading={isLoading}
             />
 
             {entries.length === 0 ? (

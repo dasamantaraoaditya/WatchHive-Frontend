@@ -91,6 +91,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                     ]}
                     count={0}
                     countLabel="Saved Titles"
+                    isLoading={loading}
                 />
                 <SkeletonGrid count={6} />
             </div>
@@ -112,6 +113,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                     ]}
                     count={filteredItems.length}
                     countLabel={searchQuery ? "Matching Titles" : "Saved Titles"}
+                    isLoading={loading}
                 />
 
                 {filteredItems.length === 0 ? (

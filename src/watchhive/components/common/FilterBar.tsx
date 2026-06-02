@@ -14,6 +14,7 @@ interface FilterBarProps {
     placeholder?: string;
     count?: number;
     countLabel?: string;
+    isLoading?: boolean;
 }
 
 export const FilterBar: React.FC<FilterBarProps> = ({
@@ -24,15 +25,25 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     sortOptions,
     placeholder = "Search items...",
     count,
-    countLabel = "items"
+    countLabel = "items",
+    isLoading = false
 }) => {
     return (
         <div className={`flex flex-row items-center ${onSearchChange ? 'justify-between' : 'justify-end'} gap-1.5 sm:gap-4 py-1 w-full`}>
             {onSearchChange && (
                 <div className="flex-1 relative group max-w-2xl">
-                    <span className="material-symbols-outlined absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-[#2D2926]/40 group-focus-within:text-[#ffb700] transition-colors text-[14px] sm:text-[20px]">
-                        search
-                    </span>
+                    {isLoading ? (
+                        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                            <svg className="animate-spin h-3.5 w-3.5 sm:h-5 sm:w-5 text-[#ffb700]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    ) : (
+                        <span className="material-symbols-outlined absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-[#2D2926]/40 group-focus-within:text-[#ffb700] transition-colors text-[14px] sm:text-[20px]">
+                            search
+                        </span>
+                    )}
                     <input
                         type="text"
                         placeholder={placeholder}
@@ -41,7 +52,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         className="w-full pl-6.5 sm:pl-12 pr-6.5 sm:pr-12 py-1 sm:py-2.5 bg-slate-50 border border-[#ffb700]/10 rounded-md sm:rounded-2xl text-[10px] sm:text-[14px] font-medium text-[#2D2926] placeholder-[#2D2926]/30 focus:outline-none focus:ring-2 focus:ring-[#ffb700]/10 focus:border-[#ffb700]/30 transition-all shadow-sm group-hover:bg-white"
                         style={{ paddingLeft: '1.65rem' }}
                     />
-                    {search && (
+                    {search && !isLoading && (
                         <button
                             onClick={() => onSearchChange('')}
                             className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-4 text-slate-400 hover:text-[#ffb700] transition-colors"

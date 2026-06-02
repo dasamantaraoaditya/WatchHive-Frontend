@@ -116,6 +116,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                     ]}
                     count={0}
                     countLabel="Titles Suggested"
+                    isLoading={isLoading}
                 />
                 <SkeletonGrid count={4} />
             </section>
@@ -143,6 +144,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                 ]}
                 count={filteredGroups.length}
                 countLabel={searchQuery ? "Matching Suggestions" : "Titles Suggested"}
+                isLoading={isLoading}
             />
 
             {filteredGroups.length === 0 ? (
