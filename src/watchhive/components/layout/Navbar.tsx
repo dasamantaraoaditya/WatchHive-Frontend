@@ -18,6 +18,7 @@ export const Navbar: React.FC = () => {
     // PWA install prompt state
     const [isInstallReady, setIsInstallReady] = useState(false);
     const [isInstalled, setIsInstalled] = useState(false);
+    const [showInstallHint, setShowInstallHint] = useState(false);
 
     const handleLogout = () => {
         setProfileOpen(false);
@@ -49,9 +50,14 @@ export const Navbar: React.FC = () => {
     }, []);
 
     const handleInstall = async () => {
-        setProfileOpen(false);
-        setMobileOpen(false);
-        await showInstallPrompt();
+        if (isInstallReady) {
+            setProfileOpen(false);
+            setMobileOpen(false);
+            await showInstallPrompt();
+        } else {
+            // Show manual install hint
+            setShowInstallHint(h => !h);
+        }
     };
 
     // Close mobile menu on route change
@@ -191,20 +197,69 @@ export const Navbar: React.FC = () => {
                                         My Entries
                                     </Link>
                                     <div className="wh-nav__dropdown-divider" />
-                                    
-                                    {/* Install App — only shown when browser exposes the install prompt */}
-                                    {isInstallReady && !isInstalled && (
-                                        <button
-                                            className="wh-nav__dropdown-item wh-nav__dropdown-item--install"
-                                            onClick={handleInstall}
-                                            id="nav-dropdown-install"
-                                        >
+
+                                    {/* Install App — always visible, three states */}
+                                    {isInstalled ? (
+                                        <div className="wh-nav__dropdown-item wh-nav__dropdown-item--installed" style={{ cursor: 'default', pointerEvents: 'none' }} id="nav-dropdown-installed">
                                             <svg viewBox="0 0 20 20" fill="currentColor" className="wh-nav__dropdown-icon">
-                                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                             </svg>
-                                            <span>Install App</span>
-                                            <span className="wh-nav__install-badge">PWA</span>
-                                        </button>
+                                            <div className="wh-nav__install-text">
+                                                <span>App Installed</span>
+                                                <span className="wh-nav__install-sub">You're on the native experience 🎉</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <button
+                                                className={`wh-nav__dropdown-item wh-nav__dropdown-item--install`}
+                                                onClick={handleInstall}
+                                                id="nav-dropdown-install"
+                                                aria-expanded={showInstallHint}
+                                            >
+                                                <svg viewBox="0 0 20 20" fill="currentColor" className="wh-nav__dropdown-icon">
+                                                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                                <div className="wh-nav__install-text">
+                                                    <span>Install App</span>
+                                                    <span className="wh-nav__install-sub">⚡ Fast &nbsp;·&nbsp; 📶 Offline &nbsp;·&nbsp; 🔔 Alerts</span>
+                                                </div>
+                                                {isInstallReady ? (
+                                                    <span className="wh-nav__install-badge">Install</span>
+                                                ) : (
+                                                    <svg className={`wh-nav__install-chevron ${showInstallHint ? 'wh-nav__install-chevron--open' : ''}`} viewBox="0 0 16 16" fill="currentColor">
+                                                        <path d="M4.427 6.427a.75.75 0 011.06-.073L8 8.467l2.513-2.113a.75.75 0 11.964 1.15l-3 2.52a.75.75 0 01-.964 0l-3-2.52a.75.75 0 01-.086-1.077z" />
+                                                    </svg>
+                                                )}
+                                            </button>
+
+                                            {showInstallHint && !isInstallReady && (
+                                                <div className="wh-nav__install-panel">
+                                                    <p className="wh-nav__install-panel-title">Why install?</p>
+                                                    <div className="wh-nav__install-benefits">
+                                                        <span className="wh-nav__install-benefit">⚡ Opens instantly</span>
+                                                        <span className="wh-nav__install-benefit">📶 Works offline</span>
+                                                        <span className="wh-nav__install-benefit">🔔 Push alerts</span>
+                                                        <span className="wh-nav__install-benefit">🖥️ No browser bars</span>
+                                                    </div>
+                                                    <p className="wh-nav__install-panel-title" style={{ marginTop: '0.65rem' }}>How to install:</p>
+                                                    <div className="wh-nav__install-steps">
+                                                        <div className="wh-nav__install-step">
+                                                            <span className="wh-nav__install-step-label">Chrome / Edge</span>
+                                                            <span className="wh-nav__install-step-desc">Click <strong>⊕</strong> in the address bar</span>
+                                                        </div>
+                                                        <div className="wh-nav__install-step">
+                                                            <span className="wh-nav__install-step-label">Safari iOS</span>
+                                                            <span className="wh-nav__install-step-desc">Tap <strong>Share</strong> → Add to Home Screen</span>
+                                                        </div>
+                                                        <div className="wh-nav__install-step">
+                                                            <span className="wh-nav__install-step-label">Chrome Android</span>
+                                                            <span className="wh-nav__install-step-desc">Tap <strong>⋮</strong> → Add to Home screen</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
 
                                     <div className="wh-nav__dropdown-divider" />
@@ -276,19 +331,52 @@ export const Navbar: React.FC = () => {
                         Entries
                     </Link>
                     <div className="wh-nav__mobile-divider" />
-                    {isInstallReady && !isInstalled && (
-                        <button
-                            className="wh-nav__mobile-link wh-nav__mobile-link--install"
-                            onClick={handleInstall}
-                            id="nav-mobile-install"
-                        >
-                            <svg viewBox="0 0 20 20" fill="currentColor" style={{ width: 16, height: 16, marginRight: 8, flexShrink: 0, opacity: 0.8 }}>
-                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+
+                    {/* Install — always visible in mobile menu */}
+                    {isInstalled ? (
+                        <div className="wh-nav__mobile-link" style={{ cursor: 'default', color: '#16a34a', opacity: 0.8 }} id="nav-mobile-installed">
+                            <svg viewBox="0 0 20 20" fill="currentColor" style={{ width: 16, height: 16, marginRight: 8, flexShrink: 0 }}>
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
-                            Install App
-                            <span className="wh-nav__install-badge" style={{ marginLeft: 8 }}>PWA</span>
-                        </button>
+                            App Installed 🎉
+                        </div>
+                    ) : (
+                        <>
+                            <button
+                                className="wh-nav__mobile-link wh-nav__mobile-link--install"
+                                onClick={handleInstall}
+                                id="nav-mobile-install"
+                            >
+                                <svg viewBox="0 0 20 20" fill="currentColor" style={{ width: 16, height: 16, marginRight: 8, flexShrink: 0, opacity: 0.8 }}>
+                                    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                                Install App
+                                {isInstallReady ? (
+                                    <span className="wh-nav__install-badge" style={{ marginLeft: 'auto' }}>Install</span>
+                                ) : (
+                                    <span style={{ marginLeft: 'auto', fontSize: '0.7rem', color: '#b07d00', opacity: 0.7 }}>How?</span>
+                                )}
+                            </button>
+                            {showInstallHint && !isInstallReady && (
+                                <div className="wh-nav__install-panel" style={{ margin: '0 0.5rem 0.5rem' }}>
+                                    <p className="wh-nav__install-panel-title">Why install WatchHive?</p>
+                                    <div className="wh-nav__install-benefits">
+                                        <span className="wh-nav__install-benefit">⚡ Instant load</span>
+                                        <span className="wh-nav__install-benefit">📶 Offline</span>
+                                        <span className="wh-nav__install-benefit">🔔 Alerts</span>
+                                        <span className="wh-nav__install-benefit">🖥️ Fullscreen</span>
+                                    </div>
+                                    <p className="wh-nav__install-panel-title" style={{ marginTop: '0.5rem' }}>How to install:</p>
+                                    <div className="wh-nav__install-steps">
+                                        <div className="wh-nav__install-step"><span className="wh-nav__install-step-label">Chrome/Edge</span><span className="wh-nav__install-step-desc">Click <strong>⊕</strong> in address bar</span></div>
+                                        <div className="wh-nav__install-step"><span className="wh-nav__install-step-label">Safari iOS</span><span className="wh-nav__install-step-desc">Share → Add to Home Screen</span></div>
+                                        <div className="wh-nav__install-step"><span className="wh-nav__install-step-label">Android</span><span className="wh-nav__install-step-desc">⋮ → Add to Home screen</span></div>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
+
                     <div className="wh-nav__mobile-divider" />
                     <button className="wh-nav__mobile-link wh-nav__mobile-link--danger" onClick={handleLogout}>
                         Sign Out

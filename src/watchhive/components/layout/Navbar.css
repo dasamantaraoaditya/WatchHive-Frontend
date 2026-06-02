@@ -301,11 +301,53 @@
 /* Install App item — honey gold accent */
 .wh-nav__dropdown-item--install {
     color: #b07d00;
+    align-items: flex-start;
 }
 
 .wh-nav__dropdown-item--install:hover {
     background: rgba(255, 183, 0, 0.1);
     color: #92660a;
+}
+
+/* Installed state — green, non-interactive */
+.wh-nav__dropdown-item--installed {
+    color: #16a34a;
+    opacity: 0.85;
+    align-items: flex-start;
+}
+
+/* Two-line label block inside install item */
+.wh-nav__install-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.wh-nav__install-sub {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: #b07d00;
+    opacity: 0.75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Animated chevron for hint toggle */
+.wh-nav__install-chevron {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: #b07d00;
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+    margin-top: 2px;
+}
+
+.wh-nav__install-chevron--open {
+    transform: rotate(180deg);
 }
 
 .wh-nav__mobile-link--install {
@@ -320,16 +362,87 @@
 /* Inline PWA badge pill */
 .wh-nav__install-badge {
     margin-left: auto;
+    flex-shrink: 0;
     font-size: 0.6rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: #92660a;
     background: rgba(255, 183, 0, 0.18);
-    border: 1px solid rgba(255, 183, 0, 0.35);
+    border: 1px solid rgba(255, 183, 0, 0.4);
     border-radius: 4px;
-    padding: 1px 5px;
-    line-height: 1.5;
+    padding: 2px 6px;
+    line-height: 1.4;
+    align-self: center;
+}
+
+/* Expandable install hint panel */
+.wh-nav__install-panel {
+    margin: 0.2rem 0.25rem 0.4rem;
+    padding: 0.65rem 0.75rem;
+    background: rgba(255, 183, 0, 0.06);
+    border: 1px solid rgba(255, 183, 0, 0.2);
+    border-radius: 10px;
+    animation: wh-dropdown-in 0.15s ease-out;
+}
+
+.wh-nav__install-panel-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #b07d00;
+    margin: 0 0 0.4rem;
+}
+
+/* Benefit chips */
+.wh-nav__install-benefits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.1rem;
+}
+
+.wh-nav__install-benefit {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #92660a;
+    background: rgba(255, 183, 0, 0.14);
+    border-radius: 5px;
+    padding: 2px 7px;
+    white-space: nowrap;
+}
+
+/* Per-browser install steps */
+.wh-nav__install-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.wh-nav__install-step {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.wh-nav__install-step-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #b07d00;
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.wh-nav__install-step-desc {
+    font-size: 0.68rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.wh-nav__install-step-desc strong {
+    color: #374151;
+    font-weight: 700;
 }
 
 
