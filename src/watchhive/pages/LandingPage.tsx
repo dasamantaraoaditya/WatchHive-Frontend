@@ -38,6 +38,8 @@ const showcaseFeatures = [
     { icon: 'bookmark_added', title: 'Watchlists & Tags', desc: 'Organize your upcoming queue and invent custom tracking tags to filter your entire collection.' },
 ];
 
+import { showInstallPrompt, isInstallPromptReady } from '../../serviceWorkerRegistration';
+
 function useReveal(threshold = 0.15) {
     const ref = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
@@ -60,6 +62,38 @@ function useReveal(threshold = 0.15) {
 
 export const LandingPage: React.FC = () => {
     const [navSolid, setNavSolid] = useState(false);
+    const [isInstallReady, setIsInstallReady] = useState(false);
+    const [isInstalled, setIsInstalled] = useState(false);
+    const [showInstallHint, setShowInstallHint] = useState(false);
+
+    useEffect(() => {
+        const handleBeforeInstall = () => setIsInstallReady(true);
+        const handleAppInstalled = () => { setIsInstalled(true); setIsInstallReady(false); };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+        window.addEventListener('appinstalled', handleAppInstalled);
+
+        // Check if already running standalone
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+        if (isStandalone) {
+            setIsInstalled(true);
+        }
+
+        // Initialize state based on current deferredPrompt readiness
+        setIsInstallReady(isInstallPromptReady());
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+        };
+    }, []);
+
+    const handleInstall = async () => {
+        if (isInstallPromptReady() || isInstallReady) {
+            await showInstallPrompt();
+        } else {
+            setShowInstallHint(h => !h);
+        }
+    };
 
     useEffect(() => {
         const handler = () => {
@@ -127,11 +161,70 @@ export const LandingPage: React.FC = () => {
                         Start Watching
                         <span className="material-symbols-outlined text-[20px]">movie</span>
                     </Link>
-                    <a href="#posters" className="w-full sm:w-auto bg-white border border-[#ffb700]/20 text-[#2D2926] text-[16px] font-black tracking-wide px-8 py-4 rounded-2xl hover:bg-[#FFF9F0] hover:border-[#ffb700]/40 transition-all flex items-center justify-center gap-2">
-                        Explore Hive
-                        <span className="material-symbols-outlined text-[20px]">arrow_downward</span>
-                    </a>
+                    {isInstalled ? (
+                        <div className="w-full sm:w-auto bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-[16px] font-black tracking-wide px-8 py-4 rounded-2xl flex items-center justify-center gap-2">
+                            <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                            App Installed 🎉
+                        </div>
+                    ) : isInstallReady ? (
+                        <button 
+                            onClick={handleInstall}
+                            className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-[#ffb700] text-white text-[16px] font-black tracking-wide px-8 py-4 rounded-2xl shadow-[0_4px_14px_rgba(245,158,11,0.3)] hover:shadow-[0_6px_20px_rgba(245,158,11,0.5)] hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                        >
+                            Install App
+                            <span className="material-symbols-outlined text-[20px]">download</span>
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={handleInstall}
+                            className="w-full sm:w-auto bg-white border border-[#ffb700]/20 text-[#b07d00] text-[16px] font-black tracking-wide px-8 py-4 rounded-2xl hover:bg-[#FFF9F0] hover:border-[#ffb700]/40 transition-all flex items-center justify-center gap-2 relative group"
+                        >
+                            <span>Install App</span>
+                            <span className="material-symbols-outlined text-[20px] group-hover:translate-y-0.5 transition-transform">keyboard_arrow_down</span>
+                        </button>
+                    )}
                 </div>
+
+                {showInstallHint && !isInstallReady && !isInstalled && (
+                    <div className="mt-8 p-6 bg-white border border-[#ffb700]/20 rounded-3xl shadow-xl max-w-xl w-full z-20 animate-[wh-dropdown-in_0.2s_ease-out_forwards] flex flex-col gap-4 text-left">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h4 className="text-[11px] font-black text-[#b07d00] uppercase tracking-widest">Why Install WatchHive?</h4>
+                                <p className="text-xs text-[#2D2926]/50 font-medium mt-1">Get the complete standalone native mobile experience in one click.</p>
+                            </div>
+                            <button 
+                                onClick={() => setShowInstallHint(false)}
+                                className="text-slate-400 hover:text-[#ffb700] text-sm"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                            <span className="text-[10px] font-bold text-[#92660a] bg-[#ffb700]/10 rounded-lg px-2.5 py-1">⚡ Opens instantly</span>
+                            <span className="text-[10px] font-bold text-[#92660a] bg-[#ffb700]/10 rounded-lg px-2.5 py-1">📶 Works offline</span>
+                            <span className="text-[10px] font-bold text-[#92660a] bg-[#ffb700]/10 rounded-lg px-2.5 py-1">🔔 Push alerts</span>
+                            <span className="text-[10px] font-bold text-[#92660a] bg-[#ffb700]/10 rounded-lg px-2.5 py-1">🖥️ Fullscreen standalone</span>
+                        </div>
+                        <div className="h-px bg-slate-100 my-1" />
+                        <div className="flex flex-col gap-2.5">
+                            <h5 className="text-[9px] font-black text-[#b07d00] uppercase tracking-widest">How to install:</h5>
+                            <div className="flex flex-col gap-2">
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-[9px] font-black uppercase tracking-wider text-[#b07d00] w-24 shrink-0">Chrome / Edge</span>
+                                    <span className="text-xs text-[#6b7280]">Click <strong className="text-[#374151] font-bold">⊕</strong> in your browser's address bar</span>
+                                </div>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-[9px] font-black uppercase tracking-wider text-[#b07d00] w-24 shrink-0">Safari iOS</span>
+                                    <span className="text-xs text-[#6b7280]">Tap <strong className="text-[#374151] font-bold">Share</strong> → Add to Home Screen</span>
+                                </div>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-[9px] font-black uppercase tracking-wider text-[#b07d00] w-24 shrink-0">Android</span>
+                                    <span className="text-xs text-[#6b7280]">Tap <strong className="text-[#374151] font-bold">⋮</strong> → Add to Home screen</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Floating Posters via Native CSS keyframes injection below */}
                 <style>{`
