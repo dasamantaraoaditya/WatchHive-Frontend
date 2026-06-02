@@ -5,6 +5,7 @@ import { Avatar } from './Avatar';
 import { useNotifications } from '../../contexts/NotificationContext';
 import { followsService } from '../../services/follows.service';
 import { PendingRequestsModal } from '../profile/PendingRequestsModal';
+import { showInstallPrompt, isInstallPromptReady } from '../../../serviceWorkerRegistration';
 
 export const HeaderActions: React.FC = () => {
     const { user, logout } = useAuth();
@@ -15,6 +16,11 @@ export const HeaderActions: React.FC = () => {
     const profileRef = useRef<HTMLDivElement>(null);
     const [pendingCount, setPendingCount] = useState(0);
     const [pendingModalOpen, setPendingModalOpen] = useState(false);
+
+    // PWA install states
+    const [isInstallReady, setIsInstallReady] = useState(false);
+    const [isInstalled, setIsInstalled] = useState(false);
+    const [showInstallHint, setShowInstallHint] = useState(false);
 
     const fetchPendingCount = async () => {
         if (!user) return;
@@ -45,6 +51,38 @@ export const HeaderActions: React.FC = () => {
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
+
+    useEffect(() => {
+        const handleBeforeInstall = () => setIsInstallReady(true);
+        const handleAppInstalled = () => { setIsInstalled(true); setIsInstallReady(false); };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+        window.addEventListener('appinstalled', handleAppInstalled);
+
+        // Check if already running standalone
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+        if (isStandalone) {
+            setIsInstalled(true);
+        }
+
+        // Initialize state based on current deferredPrompt readiness
+        setIsInstallReady(isInstallPromptReady());
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+        };
+    }, []);
+
+    const handleInstall = async () => {
+        // Query the actual service worker registration deferredPrompt status
+        if (isInstallPromptReady() || isInstallReady) {
+            setProfileOpen(false);
+            await showInstallPrompt();
+        } else {
+            // Show manual install hint
+            setShowInstallHint(h => !h);
+        }
+    };
 
     const handleLogout = () => {
         setProfileOpen(false);
@@ -115,6 +153,75 @@ export const HeaderActions: React.FC = () => {
                                     </span>
                                 )}
                             </button>
+
+                            <div className="h-px bg-black/5 my-1 mx-2" />
+
+                            {/* PWA Install — always visible inside account dropdown */}
+                            {isInstalled ? (
+                                <div className="flex items-start gap-3 px-4 py-3 text-xs text-[#16a34a] bg-[#16a34a]/5 rounded-xl cursor-default pointer-events-none" id="header-dropdown-installed">
+                                    <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                                    <div className="flex flex-col gap-0.5">
+                                        <span className="font-black uppercase tracking-widest">App Installed</span>
+                                        <span className="text-[10px] text-[#16a34a]/85 font-medium">You're on the native experience 🎉</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <button
+                                        className="flex items-start justify-between w-full px-4 py-3 text-xs text-[#b07d00] hover:bg-[#ffb700]/10 rounded-xl transition-all text-left"
+                                        onClick={handleInstall}
+                                        id="header-dropdown-install"
+                                        aria-expanded={showInstallHint}
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <span className="material-symbols-outlined text-[20px] text-[#ffb700]">download</span>
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="font-black uppercase tracking-widest">Install App</span>
+                                                <span className="text-[9px] text-[#b07d00]/75 font-bold tracking-tight">⚡ Fast &nbsp;·&nbsp; 📶 Offline &nbsp;·&nbsp; 🔔 Alerts</span>
+                                            </div>
+                                        </div>
+                                        {isInstallReady ? (
+                                            <span className="bg-[#ffb700]/20 border border-[#ffb700]/40 text-[#92660a] px-2 py-0.5 rounded text-[9px] font-black tracking-wider uppercase self-center">Install</span>
+                                        ) : (
+                                            <span className={`material-symbols-outlined text-[18px] transition-transform duration-200 self-center ${showInstallHint ? 'rotate-180' : ''}`}>
+                                                keyboard_arrow_down
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {showInstallHint && !isInstallReady && (
+                                        <div className="mx-2 mb-2 p-3 bg-[#ffb700]/5 border border-[#ffb700]/20 rounded-xl animate-slide-up flex flex-col gap-2.5">
+                                            <div className="flex flex-col gap-1.5">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-[#b07d00] m-0">Why install?</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">⚡ Opens instantly</span>
+                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">📶 Works offline</span>
+                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">🔔 Push alerts</span>
+                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">🖥️ No browser bars</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col gap-1.5">
+                                                <p className="text-[9px] font-black uppercase tracking-widest text-[#b07d00] m-0">How to install:</p>
+                                                <div className="flex flex-col gap-1.5">
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className="text-[9px] font-black uppercase tracking-wider text-[#b07d00] w-[70px] shrink-0">Chrome/Edge</span>
+                                                        <span className="text-[10px] text-[#6b7280] leading-snug">Click <strong className="text-[#374151] font-bold">⊕</strong> in address bar</span>
+                                                    </div>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className="text-[9px] font-black uppercase tracking-wider text-[#b07d00] w-[70px] shrink-0">Safari iOS</span>
+                                                        <span className="text-[10px] text-[#6b7280] leading-snug">Tap <strong className="text-[#374151] font-bold">Share</strong> → Add to Home Screen</span>
+                                                    </div>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className="text-[9px] font-black uppercase tracking-wider text-[#b07d00] w-[70px] shrink-0">Android</span>
+                                                        <span className="text-[10px] text-[#6b7280] leading-snug">Tap <strong className="text-[#374151] font-bold">⋮</strong> → Add to Home screen</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+
                             <div className="h-px bg-black/5 my-1 mx-2" />
                             <button onClick={handleLogout} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
                                 <span className="material-symbols-outlined text-[20px]">logout</span>
