@@ -97,8 +97,7 @@ jobs:
       - name: Package iOS Simulator App
         run: |
           cd build/Build/Products/Debug-iphonesimulator
-          APP_NAME=$(find . -name "*.app" -maxdepth 1 | head -1)
-          zip -r ../../../../App-Simulator.zip "$APP_NAME"
+          zip -r ../../../../App-Simulator.zip App.app
 
       - name: Upload iOS App
         uses: actions/upload-artifact@v4
