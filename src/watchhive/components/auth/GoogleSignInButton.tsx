@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -44,15 +44,15 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     callbackRef.current = onSuccess;
     errorRef.current = onError;
 
-    // Initialize native GoogleAuth plugin on load
+    // Initialize native SocialLogin plugin on load
     useEffect(() => {
         if (Capacitor.isNativePlatform()) {
-            GoogleAuth.initialize({
-                clientId: GOOGLE_CLIENT_ID,
-                scopes: ['profile', 'email'],
-                grantOfflineAccess: true,
+            SocialLogin.initialize({
+                google: {
+                    webClientId: GOOGLE_CLIENT_ID,
+                }
             }).catch(err => {
-                console.warn('Native GoogleAuth init warning:', err);
+                console.warn('Native SocialLogin init warning:', err);
             });
         }
     }, []);
@@ -60,11 +60,21 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     const handleNativeGoogleSignIn = async () => {
         if (disabled) return;
         try {
-            const user = await GoogleAuth.signIn();
-            if (user && user.authentication.idToken) {
-                callbackRef.current(user.authentication.idToken);
+            const result = await SocialLogin.login({
+                provider: 'google',
+                options: {
+                    scopes: ['profile', 'email']
+                }
+            });
+            if (result.provider === 'google' && result.result.responseType === 'online') {
+                const idToken = result.result.idToken;
+                if (idToken) {
+                    callbackRef.current(idToken);
+                } else {
+                    errorRef.current('Google Sign-In failed: No ID Token returned');
+                }
             } else {
-                errorRef.current('Google Sign-In failed');
+                errorRef.current('Google Sign-In failed: Offline mode not supported');
             }
         } catch (err: any) {
             console.error('Native Google Sign-In error:', err);

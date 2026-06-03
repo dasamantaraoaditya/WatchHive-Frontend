@@ -17,7 +17,7 @@
         "@capacitor/android": "^8.3.4",
         "@capacitor/core": "^8.3.4",
         "@capacitor/ios": "^8.3.4",
-        "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
+        "@capgo/capacitor-social-login": "^8.3.22",
         "axios": "^1.6.5",
         "clsx": "^2.1.1",
         "framer-motion": "^10.18.0",
