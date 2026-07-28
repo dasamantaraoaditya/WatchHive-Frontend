@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BeeLoader, ErrorState } from '../components/common';
@@ -8,6 +8,7 @@ import { EntryForm } from '../components/entries/EntryForm';
 import { SuggestUserSelector } from '../components/suggestions/SuggestUserSelector';
 import { useUI, useCustomAlert } from '../contexts';
 import { entriesApi } from '../services/entries.service';
+import { PageLayout } from '../components/layout';
 
 interface MovieDetails {
     id: number;
@@ -72,8 +73,6 @@ export const MovieDetailsPage: React.FC = () => {
         initialAction === 'log' ? 'log' : initialAction === 'suggest' ? 'suggest' : 'details'
     );
     const [isTransitioning, setIsTransitioning] = useState(false);
-    const [isNavVisible, setIsNavVisible] = useState(true);
-    const lastScrollY = useRef(0);
 
     useEffect(() => {
         setPageTitle(mediaType === 'tv' ? 'TV Details' : 'Movie Details');
@@ -99,21 +98,9 @@ export const MovieDetailsPage: React.FC = () => {
         fetchDetails();
     }, [tmdbId, mediaType]);
 
-    // Handle scroll for sticky navbar visibility
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const currentY = e.currentTarget.scrollTop;
-        if (currentY > lastScrollY.current && currentY > 60) {
-            if (isNavVisible) setIsNavVisible(false);
-        } else if (currentY < lastScrollY.current) {
-            if (!isNavVisible) setIsNavVisible(true);
-        }
-        lastScrollY.current = currentY;
-    };
-
     const title = details?.title || details?.name || 'Loading...';
     const year = (details?.release_date || details?.first_air_date || '').substring(0, 4);
     const runtime = details?.runtime ? `${details.runtime}m` : details?.episode_run_time?.[0] ? `${details.episode_run_time[0]}m` : null;
-    const primaryGenre = details?.genres?.[0]?.name;
     const inWatchlist = tmdbId ? isInWatchlist(tmdbId) : false;
 
     const posterUrl = details?.poster_path
@@ -201,106 +188,117 @@ export const MovieDetailsPage: React.FC = () => {
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } }}
-            exit={{ opacity: 0, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } }}
-            onScroll={handleScroll}
-            className="fixed inset-0 z-[100] flex flex-col bg-[#FFF9F0] overflow-y-auto no-scrollbar font-display"
-        >
-            {/* Sticky Top Bar with Back Button */}
-            <div
-                className={`sticky top-4 md:top-6 z-50 flex justify-between items-center px-4 md:px-8 pointer-events-none w-full max-w-full transition-all duration-300 ease-in-out ${
-                    isNavVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-                }`}
-            >
-                <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    onClick={() => navigate(-1)}
-                    className="w-11 h-11 rounded-full bg-white/40 border border-[#ffb700]/20 flex items-center justify-center text-[#ffb700] hover:bg-white/80 transition-all shadow-md backdrop-blur-md pointer-events-auto"
-                    title="Back"
-                >
-                    <span className="material-symbols-outlined text-[26px] ml-1">arrow_back_ios</span>
-                </motion.button>
-
-                {/* Right Action Icons */}
-                <div className="flex items-center gap-2 pointer-events-auto">
+        <PageLayout maxWidth="5xl">
+            <div className="space-y-6 pb-12 animate-fade-in">
+                {/* Back Button Toolbar — clearly visible inside main layout */}
+                <div className="flex items-center justify-between pt-2">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-white border border-[#ffb700]/20 rounded-2xl text-xs font-black uppercase tracking-widest text-[#2D2926] shadow-sm hover:bg-[#FFF9F0] transition-all group"
+                    >
+                        <span className="material-symbols-outlined text-base group-hover:-translate-x-1 transition-transform">
+                            arrow_back
+                        </span>
+                        Back
+                    </button>
+                    
                     <button
                         onClick={handleShare}
-                        className="w-10 h-10 rounded-full bg-white/40 border border-[#ffb700]/20 flex items-center justify-center text-[#2D2926] hover:bg-white/80 transition-all shadow-md backdrop-blur-md"
+                        className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-[#ffb700]/20 text-[#2D2926]/60 hover:text-[#ffb700] transition-all shadow-xs"
                         title="Share"
                     >
                         <span className="material-symbols-outlined text-[20px]">share</span>
                     </button>
                 </div>
-            </div>
 
-            {loading ? (
-                <div className="py-32 flex flex-col items-center justify-center">
-                    <BeeLoader size="large" message="Sourcing cinematic intelligence..." />
-                </div>
-            ) : error ? (
-                <div className="py-20 px-6 max-w-md mx-auto">
-                    <ErrorState message={error} onRetry={() => window.location.reload()} />
-                </div>
-            ) : details ? (
-                <>
-                    {view === 'details' ? (
-                        <>
-                            {/* Cinematic Hero Header (Expanded Card Style) */}
-                            <div className="relative w-full h-[55vh] md:h-[65vh] shrink-0 bg-[#FFF9F0] -mt-[60px]">
-                                {backdropUrl && (
-                                    <motion.img
-                                        src={backdropUrl}
-                                        alt={title}
-                                        className="absolute inset-0 w-full h-full object-cover object-top md:object-center"
-                                    />
-                                )}
+                {loading ? (
+                    <div className="py-24 flex flex-col items-center justify-center bg-white rounded-[32px] border border-[#ffb700]/15 shadow-sm">
+                        <BeeLoader size="large" message="Sourcing cinematic intelligence..." />
+                    </div>
+                ) : error ? (
+                    <div className="py-12 bg-white rounded-[32px] border border-[#ffb700]/15 shadow-sm">
+                        <ErrorState message={error} onRetry={() => window.location.reload()} />
+                    </div>
+                ) : details ? (
+                    <div className="bg-white rounded-[32px] border border-[#ffb700]/15 shadow-sm overflow-hidden relative">
+                        {view === 'details' ? (
+                            <>
+                                {/* Hero Backdrop Header */}
+                                <div className="relative w-full h-[40vh] md:h-[50vh] bg-[#FFF9F0] overflow-hidden">
+                                    {backdropUrl ? (
+                                        <motion.img
+                                            initial={{ scale: 1.05, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            transition={{ duration: 0.5 }}
+                                            src={backdropUrl}
+                                            alt={title}
+                                            className="w-full h-full object-cover object-top md:object-center"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-[#2D2926]/5 text-[#2D2926]/20">
+                                            <span className="material-symbols-outlined text-6xl">movie</span>
+                                        </div>
+                                    )}
 
-                                {/* Gradient Overlays */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#FFF9F0] via-[#FFF9F0]/60 to-transparent" />
-                                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
-
-                                {/* Title & Hero Meta at Bottom */}
-                                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex flex-col gap-3 max-w-6xl mx-auto">
-                                    <div className="flex items-center gap-2">
-                                        <span className="px-3 py-1 rounded-full bg-[#ffb700] text-white text-[10px] font-black uppercase tracking-widest shadow-xs">
-                                            {mediaType === 'tv' ? 'TV SERIES' : 'MOVIE'}
-                                        </span>
-                                        {details.vote_average > 0 && (
-                                            <span className="px-3 py-1 rounded-full bg-white/80 border border-[#ffb700]/20 text-[#ffb700] text-[10px] font-black flex items-center gap-1 shadow-xs">
-                                                ⭐ {details.vote_average.toFixed(1)}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <h1 className="text-3xl md:text-5xl font-black text-[#2D2926] tracking-tight drop-shadow-xs leading-tight">
-                                        {title}
-                                    </h1>
-
-                                    <div className="flex items-center gap-4 text-[#2D2926]/70 font-bold text-xs md:text-sm uppercase tracking-[0.2em]">
-                                        {primaryGenre && <span>{primaryGenre}</span>}
-                                        {primaryGenre && year && <span className="opacity-40">•</span>}
-                                        {year && <span>{year}</span>}
-                                        {year && runtime && <span className="opacity-40">•</span>}
-                                        {runtime && <span>{runtime}</span>}
-                                    </div>
+                                    {/* Gradient Overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
                                 </div>
-                            </div>
 
-                            {/* Main Content Body */}
-                            <div className="px-6 md:px-10 pb-24 pt-4 flex flex-col gap-8 w-full max-w-6xl mx-auto relative z-10">
-                                {/* Interactive Quick Action Bar */}
-                                <div className="flex flex-wrap items-center justify-between gap-4 p-5 bg-white rounded-3xl border border-[#ffb700]/20 shadow-sm">
-                                    <div className="flex flex-wrap items-center gap-3 md:gap-4">
+                                {/* Content Body */}
+                                <div className="p-6 md:p-10 relative -mt-24 md:-mt-32 z-10 space-y-8">
+                                    {/* Title & Core Meta */}
+                                    <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+                                        {/* Poster */}
+                                        {posterUrl && (
+                                            <div className="w-36 md:w-48 shrink-0 rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-white mx-auto md:mx-0">
+                                                <img src={posterUrl} alt={title} className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
+
+                                        <div className="flex-1 min-w-0 pt-2 md:pt-16">
+                                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                <span className="px-3 py-1 rounded-full bg-[#ffb700] text-white text-[10px] font-black uppercase tracking-widest shadow-xs">
+                                                    {mediaType === 'tv' ? 'TV SERIES' : 'MOVIE'}
+                                                </span>
+                                                {details.vote_average > 0 && (
+                                                    <span className="px-3 py-1 rounded-full bg-[#FFF9F0] border border-[#ffb700]/20 text-[#ffb700] text-[10px] font-black flex items-center gap-1">
+                                                        ⭐ {details.vote_average.toFixed(1)}
+                                                    </span>
+                                                )}
+                                                {year && <span className="text-xs font-bold text-[#2D2926]/40">{year}</span>}
+                                            </div>
+
+                                            <h1 className="text-3xl md:text-5xl font-black text-[#2D2926] tracking-tight leading-tight mb-2">
+                                                {title}
+                                            </h1>
+
+                                            {details.tagline && (
+                                                <p className="text-sm md:text-base font-bold text-[#ffb700] italic mb-4">
+                                                    "{details.tagline}"
+                                                </p>
+                                            )}
+
+                                            <div className="flex flex-wrap gap-2 mb-6">
+                                                {details.genres.map(genre => (
+                                                    <span
+                                                        key={genre.id}
+                                                        className="px-3 py-1 rounded-xl bg-[#FFF9F0] text-[#2D2926]/70 text-[10px] font-black uppercase tracking-widest border border-[#ffb700]/15"
+                                                    >
+                                                        {genre.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Action Bar */}
+                                    <div className="flex flex-wrap items-center gap-3 p-4 bg-[#FFF9F0]/60 rounded-3xl border border-[#ffb700]/15">
                                         <button
                                             onClick={handleWatchlistToggle}
                                             className={`px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-xs ${
                                                 inWatchlist
                                                     ? 'bg-[#ffb700] text-white'
-                                                    : 'bg-[#FFF9F0] text-[#2D2926] hover:bg-[#ffb700]/10 border border-[#ffb700]/15'
+                                                    : 'bg-white text-[#2D2926] hover:bg-[#ffb700]/10 border border-[#ffb700]/15'
                                             }`}
                                         >
                                             <span className="material-symbols-outlined text-[18px]">
@@ -313,7 +311,7 @@ export const MovieDetailsPage: React.FC = () => {
                                             <button
                                                 onClick={handleStartWatching}
                                                 disabled={isTransitioning}
-                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/15 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs"
+                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-white text-[#2D2926] border border-[#ffb700]/15 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs"
                                             >
                                                 <span className="material-symbols-outlined text-[18px] text-[#ffb700]">
                                                     play_circle
@@ -332,204 +330,203 @@ export const MovieDetailsPage: React.FC = () => {
 
                                         <button
                                             onClick={() => setView('suggest')}
-                                            className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/15 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs"
+                                            className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-white text-[#2D2926] border border-[#ffb700]/15 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs"
                                         >
                                             <span className="material-symbols-outlined text-[18px] text-[#ffb700]">send</span>
                                             Suggest
                                         </button>
                                     </div>
-                                </div>
 
-                                {/* Synopsis Section */}
-                                <div className="flex flex-col gap-3">
-                                    <h3 className="text-[#ffb700] text-xs font-bold uppercase tracking-[0.3em] flex items-center gap-3">
-                                        <span className="w-8 h-[2px] bg-[#ffb700]"></span>
-                                        Synopsis
-                                    </h3>
-                                    <p className="text-[#2D2926]/80 text-lg md:text-xl leading-relaxed font-serif tracking-wide">
-                                        {details.overview || 'No synopsis available for this title.'}
-                                    </p>
-                                </div>
-
-                                {/* Metadata Grid Cards (Expanded Card Style) */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
-                                        <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">
-                                            TMDb Rating
-                                        </span>
-                                        <span className="text-[#2D2926] text-2xl font-black">
-                                            {details.vote_average ? `⭐ ${details.vote_average.toFixed(1)}` : '-'}
-                                        </span>
+                                    {/* Synopsis */}
+                                    <div className="space-y-2">
+                                        <h3 className="text-[#ffb700] text-xs font-bold uppercase tracking-[0.3em] flex items-center gap-3">
+                                            <span className="w-8 h-[2px] bg-[#ffb700]"></span>
+                                            Synopsis
+                                        </h3>
+                                        <p className="text-[#2D2926]/80 text-lg md:text-xl leading-relaxed font-serif tracking-wide">
+                                            {details.overview || 'No synopsis available for this title.'}
+                                        </p>
                                     </div>
-                                    <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
-                                        <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">
-                                            Release Date
-                                        </span>
-                                        <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide">
-                                            {formatDate(details.release_date || details.first_air_date)}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
-                                        <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">
-                                            Runtime
-                                        </span>
-                                        <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide">
-                                            {runtime || 'N/A'}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
-                                        <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">
-                                            Format
-                                        </span>
-                                        <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide uppercase">
-                                            {mediaType === 'tv'
-                                                ? `${details.number_of_seasons || 1} Season(s)`
-                                                : 'Feature Film'}
-                                        </span>
-                                    </div>
-                                </div>
 
-                                {/* Where to Watch Section */}
-                                {(() => {
-                                    const watchProvidersData = details['watch/providers']?.results;
-                                    const localProviders = watchProvidersData
-                                        ? watchProvidersData.IN || watchProvidersData.US || Object.values(watchProvidersData)[0]
-                                        : null;
-
-                                    if (!localProviders) return null;
-
-                                    const streamingProviders = localProviders.flatrate || localProviders.free || [];
-                                    const rentProviders = localProviders.rent || [];
-                                    const buyProviders = localProviders.buy || [];
-
-                                    if (!streamingProviders.length && !rentProviders.length && !buyProviders.length) return null;
-
-                                    return (
-                                        <div className="flex flex-col gap-4 bg-white p-6 md:p-8 rounded-3xl border border-[#ffb700]/20 shadow-sm relative overflow-hidden group">
-                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ffb700]/40 via-[#ffb700] to-[#ffb700]/40 opacity-80"></div>
-                                            <h3 className="text-[#2D2926]/50 text-xs font-bold uppercase tracking-[0.3em]">
-                                                Where to Watch
-                                            </h3>
-                                            <div className="flex flex-col gap-4">
-                                                {streamingProviders.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Stream:</span>
-                                                        {streamingProviders.map((p: any) => (
-                                                            <a
-                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                key={p.provider_id}
-                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
-                                                                title={p.provider_name}
-                                                            >
-                                                                <img
-                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
-                                                                    alt={p.provider_name}
-                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
-                                                                />
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {rentProviders.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Rent:</span>
-                                                        {rentProviders.map((p: any) => (
-                                                            <a
-                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                key={p.provider_id}
-                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
-                                                                title={p.provider_name}
-                                                            >
-                                                                <img
-                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
-                                                                    alt={p.provider_name}
-                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
-                                                                />
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {buyProviders.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Buy:</span>
-                                                        {buyProviders.map((p: any) => (
-                                                            <a
-                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                key={p.provider_id}
-                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
-                                                                title={p.provider_name}
-                                                            >
-                                                                <img
-                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
-                                                                    alt={p.provider_name}
-                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
-                                                                />
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
+                                    {/* Metadata Grid */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="flex flex-col gap-1 p-5 rounded-3xl bg-[#FFF9F0]/60 border border-[#ffb700]/15 shadow-xs">
+                                            <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">
+                                                TMDb Rating
+                                            </span>
+                                            <span className="text-[#2D2926] text-2xl font-black">
+                                                {details.vote_average ? `⭐ ${details.vote_average.toFixed(1)}` : '-'}
+                                            </span>
                                         </div>
-                                    );
-                                })()}
-                            </div>
-                        </>
-                    ) : view === 'log' ? (
-                        <div className="px-6 md:px-10 py-12 max-w-4xl mx-auto w-full animate-[fade-in_0.3s_ease-out]">
-                            <div className="flex items-center gap-4 mb-8">
-                                <button
-                                    onClick={() => setView('details')}
-                                    className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-[#ffb700]/20 text-[#2D2926] hover:bg-[#FFF9F0] transition-colors"
-                                >
-                                    <span className="material-symbols-outlined">arrow_back</span>
-                                </button>
-                                <div>
-                                    <h3 className="text-2xl font-black text-[#2D2926]">Log Your Watch</h3>
-                                    <p className="text-xs font-bold text-[#2D2926]/40 uppercase tracking-widest">
-                                        Adding entry for {title}
-                                    </p>
-                                </div>
-                            </div>
+                                        <div className="flex flex-col gap-1 p-5 rounded-3xl bg-[#FFF9F0]/60 border border-[#ffb700]/15 shadow-xs">
+                                            <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">
+                                                Release Date
+                                            </span>
+                                            <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide">
+                                                {formatDate(details.release_date || details.first_air_date)}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col gap-1 p-5 rounded-3xl bg-[#FFF9F0]/60 border border-[#ffb700]/15 shadow-xs">
+                                            <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">
+                                                Runtime
+                                            </span>
+                                            <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide">
+                                                {runtime || 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col gap-1 p-5 rounded-3xl bg-[#FFF9F0]/60 border border-[#ffb700]/15 shadow-xs">
+                                            <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">
+                                                Format
+                                            </span>
+                                            <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide uppercase">
+                                                {mediaType === 'tv'
+                                                    ? `${details.number_of_seasons || 1} Season(s)`
+                                                    : 'Feature Film'}
+                                            </span>
+                                        </div>
+                                    </div>
 
-                            <EntryForm
-                                prefillData={{
-                                    tmdbId: tmdbId!,
-                                    title,
-                                    type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
-                                    posterPath: details.poster_path,
-                                    overview: details.overview,
-                                }}
-                                isModal={false}
-                                onSuccess={() => setView('details')}
-                                onCancel={() => setView('details')}
-                            />
-                        </div>
-                    ) : (
-                        <div className="px-6 md:px-10 py-12 max-w-4xl mx-auto w-full animate-[fade-in_0.3s_ease-out]">
-                            <SuggestUserSelector
-                                tmdbId={tmdbId!}
-                                mediaType={mediaType}
-                                title={title}
-                                onBack={() => setView('details')}
-                                onSuccess={async () => {
-                                    await alert(`Suggestion for ${title} sent!`, {
-                                        title: 'Suggestion Sent',
-                                        severity: 'success',
-                                    });
-                                    setView('details');
-                                }}
-                            />
-                        </div>
-                    )}
-                </>
-            ) : null}
-        </motion.div>
+                                    {/* Where to Watch */}
+                                    {(() => {
+                                        const watchProvidersData = details['watch/providers']?.results;
+                                        const localProviders = watchProvidersData
+                                            ? watchProvidersData.IN || watchProvidersData.US || Object.values(watchProvidersData)[0]
+                                            : null;
+
+                                        if (!localProviders) return null;
+
+                                        const streamingProviders = localProviders.flatrate || localProviders.free || [];
+                                        const rentProviders = localProviders.rent || [];
+                                        const buyProviders = localProviders.buy || [];
+
+                                        if (!streamingProviders.length && !rentProviders.length && !buyProviders.length) return null;
+
+                                        return (
+                                            <div className="flex flex-col gap-4 bg-[#FFF9F0]/60 p-6 md:p-8 rounded-3xl border border-[#ffb700]/15">
+                                                <h3 className="text-[#2D2926]/50 text-xs font-bold uppercase tracking-[0.3em]">
+                                                    Where to Watch
+                                                </h3>
+                                                <div className="flex flex-col gap-4">
+                                                    {streamingProviders.length > 0 && (
+                                                        <div className="flex flex-wrap items-center gap-3">
+                                                            <span className="text-xs font-bold text-[#2D2926]/60 w-16">Stream:</span>
+                                                            {streamingProviders.map((p: any) => (
+                                                                <a
+                                                                    href={getDirectLink(p.provider_name, localProviders.link || '', title)}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    key={p.provider_id}
+                                                                    className="shrink-0 hover:scale-105 transition-transform duration-200"
+                                                                    title={p.provider_name}
+                                                                >
+                                                                    <img
+                                                                        src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
+                                                                        alt={p.provider_name}
+                                                                        className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
+                                                                    />
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {rentProviders.length > 0 && (
+                                                        <div className="flex flex-wrap items-center gap-3">
+                                                            <span className="text-xs font-bold text-[#2D2926]/60 w-16">Rent:</span>
+                                                            {rentProviders.map((p: any) => (
+                                                                <a
+                                                                    href={getDirectLink(p.provider_name, localProviders.link || '', title)}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    key={p.provider_id}
+                                                                    className="shrink-0 hover:scale-105 transition-transform duration-200"
+                                                                    title={p.provider_name}
+                                                                >
+                                                                    <img
+                                                                        src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
+                                                                        alt={p.provider_name}
+                                                                        className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
+                                                                    />
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {buyProviders.length > 0 && (
+                                                        <div className="flex flex-wrap items-center gap-3">
+                                                            <span className="text-xs font-bold text-[#2D2926]/60 w-16">Buy:</span>
+                                                            {buyProviders.map((p: any) => (
+                                                                <a
+                                                                    href={getDirectLink(p.provider_name, localProviders.link || '', title)}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    key={p.provider_id}
+                                                                    className="shrink-0 hover:scale-105 transition-transform duration-200"
+                                                                    title={p.provider_name}
+                                                                >
+                                                                    <img
+                                                                        src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
+                                                                        alt={p.provider_name}
+                                                                        className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
+                                                                    />
+                                                                </a>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            </>
+                        ) : view === 'log' ? (
+                            <div className="p-6 md:p-10 animate-[fade-in_0.3s_ease-out]">
+                                <div className="flex items-center gap-4 mb-8">
+                                    <button
+                                        onClick={() => setView('details')}
+                                        className="w-10 h-10 rounded-full flex items-center justify-center bg-[#FFF9F0] border border-[#ffb700]/20 text-[#2D2926] hover:bg-white transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined">arrow_back</span>
+                                    </button>
+                                    <div>
+                                        <h3 className="text-2xl font-black text-[#2D2926]">Log Your Watch</h3>
+                                        <p className="text-xs font-bold text-[#2D2926]/40 uppercase tracking-widest">
+                                            Adding entry for {title}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <EntryForm
+                                    prefillData={{
+                                        tmdbId: tmdbId!,
+                                        title,
+                                        type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                                        posterPath: details.poster_path,
+                                        overview: details.overview,
+                                    }}
+                                    isModal={false}
+                                    onSuccess={() => setView('details')}
+                                    onCancel={() => setView('details')}
+                                />
+                            </div>
+                        ) : (
+                            <div className="p-6 md:p-10 animate-[fade-in_0.3s_ease-out]">
+                                <SuggestUserSelector
+                                    tmdbId={tmdbId!}
+                                    mediaType={mediaType}
+                                    title={title}
+                                    onBack={() => setView('details')}
+                                    onSuccess={async () => {
+                                        await alert(`Suggestion for ${title} sent!`, {
+                                            title: 'Suggestion Sent',
+                                            severity: 'success',
+                                        });
+                                        setView('details');
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                ) : null}
+            </div>
+        </PageLayout>
     );
 };
 
