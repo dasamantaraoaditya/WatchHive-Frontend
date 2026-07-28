@@ -59,6 +59,22 @@ export const UserProfilePage: React.FC = () => {
         fetchUser();
     }, [id, currentUser, navigate, setPageTitle, setPageIcon]);
 
+    // Select first enabled tab automatically
+    useEffect(() => {
+        if (profileUser) {
+            const availableTabs = [
+                { id: 'entries', show: profileUser.showWatchEntries },
+                { id: 'watching', show: profileUser.showCurrentlyWatching },
+                { id: 'watchlist', show: profileUser.showWatchlist },
+                { id: 'rankings', show: profileUser.showRankings !== false }
+            ].filter(t => t.show || (currentUser && currentUser.id === profileUser.id));
+
+            if (availableTabs.length > 0 && !availableTabs.some(t => t.id === activeTab)) {
+                setActiveTab(availableTabs[0].id as any);
+            }
+        }
+    }, [profileUser, currentUser]);
+
     // Fetch watchlist if active
     useEffect(() => {
         if (activeTab === 'watchlist' && id && watchlistItems === null) {
