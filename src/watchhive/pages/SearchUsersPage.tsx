@@ -280,96 +280,130 @@ export const SearchUsersPage: React.FC = () => {
 
                 {/* Deep Search Control Bar */}
                 {searchMode === 'movies' && (
-                    <div className="w-full max-w-2xl flex flex-col gap-3 mt-4 animate-fade-in">
-                        <div className="flex items-center justify-between px-2">
+                    <div className="w-full max-w-2xl flex flex-col gap-3 mt-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2 px-2">
                             <button
                                 type="button"
-                                onClick={() => setIsDeepSearch(!isDeepSearch)}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                onClick={() => setIsDeepSearch(prev => !prev)}
+                                className={`flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                                     isDeepSearch 
-                                        ? 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20 scale-102' 
-                                        : 'bg-white border-2 border-black/5 text-slate-600 hover:border-[#ffb700] hover:text-[#ffb700]'
+                                        ? 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/30 scale-[1.02]' 
+                                        : 'bg-white border-2 border-black/5 text-[#2D2926] hover:border-[#ffb700] hover:text-[#ffb700] shadow-sm'
                                 }`}
                             >
-                                <span className="material-symbols-outlined text-base">saved_search</span>
-                                {isDeepSearch ? 'Deep Search Active 🔎' : 'Enable Deep Search 🔎'}
+                                <span className={`material-symbols-outlined text-lg transition-transform duration-300 ${isDeepSearch ? 'rotate-180 text-white' : 'text-[#ffb700]'}`}>
+                                    tune
+                                </span>
+                                <span>{isDeepSearch ? 'Deep Search Active' : 'Deep Search Filters'}</span>
+                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${isDeepSearch ? 'bg-white/20 text-white' : 'bg-[#ffb700]/15 text-[#ffb700]'}`}>
+                                    {isDeepSearch ? 'ON' : 'OFF'}
+                                </span>
                             </button>
 
                             {isDeepSearch && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setSelectedYear('');
-                                        setSelectedGenreId(0);
-                                        setSelectedMediaType('all');
-                                        setSelectedSortBy('popularity.desc');
-                                    }}
-                                    className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors"
-                                >
-                                    Reset Filters ✕
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    {(selectedYear || selectedGenreId > 0 || selectedMediaType !== 'all') && (
+                                        <span className="text-[10px] font-black text-[#ffb700] bg-[#ffb700]/10 px-3 py-1 rounded-full uppercase tracking-wider">
+                                            Filters Active
+                                        </span>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedYear('');
+                                            setSelectedGenreId(0);
+                                            setSelectedMediaType('all');
+                                            setSelectedSortBy('popularity.desc');
+                                        }}
+                                        className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors px-2 py-1"
+                                    >
+                                        Reset ✕
+                                    </button>
+                                </div>
                             )}
                         </div>
 
-                        {isDeepSearch && (
-                            <div className="p-4 bg-white/90 backdrop-blur-md border border-[#ffb700]/20 rounded-3xl shadow-xl flex flex-col sm:flex-row flex-wrap items-center gap-3 text-left">
-                                {/* Year Filter */}
-                                <div className="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[110px]">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Release Year</label>
-                                    <input
-                                        type="number"
-                                        min="1900"
-                                        max="2030"
-                                        placeholder="e.g. 2024"
-                                        value={selectedYear}
-                                        onChange={(e) => setSelectedYear(e.target.value)}
-                                        className="w-full px-3 py-2 bg-slate-50 border border-black/5 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700]"
-                                    />
-                                </div>
+                        <AnimatePresence>
+                            {isDeepSearch && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0, scale: 0.96 }}
+                                    animate={{ height: 'auto', opacity: 1, scale: 1 }}
+                                    exit={{ height: 0, opacity: 0, scale: 0.96 }}
+                                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="p-4 sm:p-5 bg-white/95 backdrop-blur-xl border-2 border-[#ffb700]/25 rounded-[28px] shadow-xl shadow-[#ffb700]/5 flex flex-col sm:flex-row flex-wrap items-center gap-4 text-left">
+                                        {/* Year Filter */}
+                                        <div className="flex flex-col gap-1.5 w-full sm:w-auto flex-1 min-w-[120px]">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-xs text-[#ffb700]">calendar_today</span>
+                                                Release Year
+                                            </label>
+                                            <input
+                                                type="number"
+                                                min="1900"
+                                                max="2030"
+                                                placeholder="e.g. 2024"
+                                                value={selectedYear}
+                                                onChange={(e) => setSelectedYear(e.target.value)}
+                                                className="w-full px-3.5 py-2.5 bg-[#FFF9F0]/60 border border-[#ffb700]/20 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] focus:bg-white transition-all"
+                                            />
+                                        </div>
 
-                                {/* Genre Filter */}
-                                <div className="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[140px]">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Genre</label>
-                                    <select
-                                        value={selectedGenreId}
-                                        onChange={(e) => setSelectedGenreId(Number(e.target.value))}
-                                        className="w-full px-3 py-2 bg-slate-50 border border-black/5 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] cursor-pointer"
-                                    >
-                                        {TMDB_GENRES.map(g => (
-                                            <option key={g.id} value={g.id}>{g.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
+                                        {/* Genre Filter */}
+                                        <div className="flex flex-col gap-1.5 w-full sm:w-auto flex-1 min-w-[150px]">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-xs text-[#ffb700]">theater_comedy</span>
+                                                Genre
+                                            </label>
+                                            <select
+                                                value={selectedGenreId}
+                                                onChange={(e) => setSelectedGenreId(Number(e.target.value))}
+                                                className="w-full px-3.5 py-2.5 bg-[#FFF9F0]/60 border border-[#ffb700]/20 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] focus:bg-white cursor-pointer transition-all"
+                                            >
+                                                {TMDB_GENRES.map(g => (
+                                                    <option key={g.id} value={g.id}>{g.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
 
-                                {/* Format Filter */}
-                                <div className="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[110px]">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Type</label>
-                                    <select
-                                        value={selectedMediaType}
-                                        onChange={(e) => setSelectedMediaType(e.target.value as any)}
-                                        className="w-full px-3 py-2 bg-slate-50 border border-black/5 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] cursor-pointer"
-                                    >
-                                        <option value="all">All Types</option>
-                                        <option value="movie">Movies Only</option>
-                                        <option value="tv">TV Series</option>
-                                    </select>
-                                </div>
+                                        {/* Format Filter */}
+                                        <div className="flex flex-col gap-1.5 w-full sm:w-auto flex-1 min-w-[120px]">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-xs text-[#ffb700]">movie</span>
+                                                Format
+                                            </label>
+                                            <select
+                                                value={selectedMediaType}
+                                                onChange={(e) => setSelectedMediaType(e.target.value as any)}
+                                                className="w-full px-3.5 py-2.5 bg-[#FFF9F0]/60 border border-[#ffb700]/20 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] focus:bg-white cursor-pointer transition-all"
+                                            >
+                                                <option value="all">All Types</option>
+                                                <option value="movie">Movies Only</option>
+                                                <option value="tv">TV Series</option>
+                                            </select>
+                                        </div>
 
-                                {/* Sort Order */}
-                                <div className="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[130px]">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Sort By</label>
-                                    <select
-                                        value={selectedSortBy}
-                                        onChange={(e) => setSelectedSortBy(e.target.value)}
-                                        className="w-full px-3 py-2 bg-slate-50 border border-black/5 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] cursor-pointer"
-                                    >
-                                        <option value="popularity.desc">🔥 Popularity</option>
-                                        <option value="primary_release_date.desc">📅 Release Date</option>
-                                        <option value="vote_average.desc">⭐ Highest Rating</option>
-                                    </select>
-                                </div>
-                            </div>
-                        )}
+                                        {/* Sort Order */}
+                                        <div className="flex flex-col gap-1.5 w-full sm:w-auto flex-1 min-w-[140px]">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-xs text-[#ffb700]">sort</span>
+                                                Sort By
+                                            </label>
+                                            <select
+                                                value={selectedSortBy}
+                                                onChange={(e) => setSelectedSortBy(e.target.value)}
+                                                className="w-full px-3.5 py-2.5 bg-[#FFF9F0]/60 border border-[#ffb700]/20 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] focus:bg-white cursor-pointer transition-all"
+                                            >
+                                                <option value="popularity.desc">🔥 Popularity</option>
+                                                <option value="primary_release_date.desc">📅 Release Date</option>
+                                                <option value="vote_average.desc">⭐ Highest Rating</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 )}
             </div>
