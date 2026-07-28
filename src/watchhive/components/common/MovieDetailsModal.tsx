@@ -32,7 +32,7 @@ export const MovieDetailsModal: React.FC<MovieDetailsModalProps> = ({
             onClose();
             const mType = mediaType || 'movie';
             const actionQuery = initialView && initialView !== 'details' ? `?action=${initialView}` : '';
-            navigate(`/watch-hive/details/${mType}/${tmdbId}${actionQuery}`);
+            navigate(`/watch-hive/details/${mType}/${tmdbId}${actionQuery}`, { replace: true });
         }
     }, [isOpen, tmdbId, mediaType, initialView, navigate, onClose]);
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Modal } from './Modal';
 import apiClient from '../../services/api';
-import { MovieDetailsModal } from './MovieDetailsModal';
 
 interface TmdbResult {
     id: number;
@@ -27,16 +27,12 @@ export const SearchMediaModal: React.FC<SearchMediaModalProps> = ({
     onClose,
     title,
 }) => {
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<TmdbResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // Movie Details Modal
-    const [selectedDetailTmdbId, setSelectedDetailTmdbId] = useState<number | null>(null);
-    const [selectedDetailMediaType, setSelectedDetailMediaType] = useState<'movie' | 'tv' | null>(null);
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     // Reset when opened
     useEffect(() => {
@@ -73,9 +69,9 @@ export const SearchMediaModal: React.FC<SearchMediaModalProps> = ({
     };
 
     const handleSelectResult = (result: TmdbResult) => {
-        setSelectedDetailTmdbId(result.id);
-        setSelectedDetailMediaType(result.media_type === 'tv' ? 'tv' : 'movie');
-        setIsDetailsOpen(true);
+        onClose();
+        const mType = result.media_type === 'tv' ? 'tv' : 'movie';
+        navigate(`/watch-hive/details/${mType}/${result.id}`);
     };
 
     const yearOf = (r: TmdbResult) => {
@@ -132,17 +128,6 @@ export const SearchMediaModal: React.FC<SearchMediaModalProps> = ({
                     ))}
                 </div>
             </div>
-
-            <MovieDetailsModal
-                isOpen={isDetailsOpen}
-                onClose={() => {
-                    setIsDetailsOpen(false);
-                    setSelectedDetailTmdbId(null);
-                    setSelectedDetailMediaType(null);
-                }}
-                tmdbId={selectedDetailTmdbId}
-                mediaType={selectedDetailMediaType}
-            />
         </Modal>
     );
 };

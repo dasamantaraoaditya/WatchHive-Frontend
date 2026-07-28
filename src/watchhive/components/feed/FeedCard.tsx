@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { FeedItem } from '../../services/feed.service';
 import { useTmdbDetails } from '../../hooks/useTmdbDetails';
-import { Link } from 'react-router-dom';
-import { Avatar, WatchlistButton, MovieDetailsModal } from '../common';
+import { Link, useNavigate } from 'react-router-dom';
+import { Avatar, WatchlistButton } from '../common';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
 import whLogo from '../../assets/images/watchhive-logo.png';
@@ -16,6 +16,7 @@ const TMDB_POSTER_IMG = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BACKDROP_IMG = 'https://image.tmdb.org/t/p/w780';
 
 export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
+    const navigate = useNavigate();
     const isSuggestion = item.type === 'SUGGESTION';
     const entryData = isSuggestion ? null : item.data;
     const targetTmdbId = isSuggestion ? item.data.id : entryData?.tmdbId;
@@ -25,13 +26,11 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [likeCount, setLikeCount] = useState<number>(entryData?._count?.likes || 0);
     const [commentCount, setCommentCount] = useState<number>(entryData?._count?.comments || 0);
     const [showComments, setShowComments] = useState<boolean>(false);
-    const [showMovieDetailsModal, setShowMovieDetailsModal] = useState<boolean>(false);
     const [showShareFeedback, setShowShareFeedback] = useState<boolean>(false);
     const [isCommented, setIsCommented] = useState<boolean>(entryData?.isCommented || false);
     const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
 
-    // Only fetch details if it's an ENTRY (suggestions come with poster_path usually), OR if the user expands the card
-    const shouldFetchDetails = !isSuggestion || showMovieDetailsModal;
+    const shouldFetchDetails = !isSuggestion;
     const fetchTmdbId = shouldFetchDetails ? targetTmdbId : null;
     const mediaTypeFallback = (item.data as any)?.media_type?.toUpperCase() === 'TV' ? 'TV_SHOW' : 'MOVIE';
     const normMediaType = (() => {
@@ -198,7 +197,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     {' '}
                                     <button 
                                         type="button"
-                                        onClick={() => setShowMovieDetailsModal(true)}
+                                        onClick={() => targetTmdbId && navigate(`/watch-hive/details/${normMediaType}/${targetTmdbId}`)}
                                         className="font-extrabold text-[#2D2926] hover:text-[#ffb700] hover:underline transition-colors bg-transparent border-none p-0 inline align-baseline text-left cursor-pointer font-display"
                                     >
                                         {title}
@@ -216,7 +215,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
                 {/* Content: Poster Image */}
                 {posterUrl && (
-                    <div className="feed-card-poster-container cursor-pointer" onClick={() => setShowMovieDetailsModal(true)}>
+                    <div className="feed-card-poster-container cursor-pointer" onClick={() => targetTmdbId && navigate(`/watch-hive/details/${normMediaType}/${targetTmdbId}`)}>
                         <div className="feed-card-poster-gradient"></div>
                         <img
                             src={posterUrl}
@@ -337,15 +336,6 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         setCommentCount(prev => prev + 1);
                         setIsCommented(true);
                     }}
-                />
-            )}
-
-            {showMovieDetailsModal && targetTmdbId && (
-                <MovieDetailsModal
-                    isOpen={showMovieDetailsModal}
-                    onClose={() => setShowMovieDetailsModal(false)}
-                    tmdbId={targetTmdbId}
-                    mediaType={normMediaType}
                 />
             )}
         </>

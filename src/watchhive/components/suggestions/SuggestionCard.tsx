@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
-import { WatchlistButton, SkeletonCard, MovieDetailsModal } from '../common';
+import { WatchlistButton, SkeletonCard } from '../common';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
 
@@ -27,11 +28,11 @@ interface TmdbDetails {
 }
 
 export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange, preloadedDetails }) => {
+    const navigate = useNavigate();
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDismissing, setIsDismissing] = useState(false);
     const { confirm } = useCustomAlert();
-    const [showModal, setShowModal] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
     const [showMobileActions, setShowMobileActions] = useState(false);
 
@@ -123,7 +124,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                         e.stopPropagation();
                         setShowMobileActions(!showMobileActions);
                     } else {
-                        setShowModal(true);
+                        navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`);
                     }
                 }}
             >
@@ -147,7 +148,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                                 type="button"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    setShowModal(true);
+                                    navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`);
                                 }}
                                 className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
                                 title="View details"
@@ -224,13 +225,6 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     </div>
                 </div>
             </div>
-
-            <MovieDetailsModal 
-                isOpen={showModal}
-                onClose={() => setShowModal(false)}
-                tmdbId={group.tmdbId}
-                mediaType={group.mediaType as 'movie' | 'tv'}
-            />
         </>
     );
 };

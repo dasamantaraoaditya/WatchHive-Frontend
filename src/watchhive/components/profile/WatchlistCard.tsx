@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import apiClient from '../../services/api.js';
 import { MovieDetailsModal } from '../common';
@@ -15,6 +16,7 @@ interface WatchlistCardProps {
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
 
 export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie', readOnly = false }) => {
+    const navigate = useNavigate();
     const [details, setDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -103,8 +105,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     };
 
     const handleCardClick = () => {
-        setModalView('details');
-        setShowModal(true);
+        navigate(`/watch-hive/details/${mediaType}/${tmdbId}`);
     };
 
     const handleRemove = async (e: React.MouseEvent) => {
