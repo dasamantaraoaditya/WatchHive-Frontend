@@ -9,8 +9,7 @@ import { WatchlistGrid } from '../components/profile';
 import { 
     SkeletonCard, 
     SkeletonGrid,
-    FilterBar,
-    MovieDetailsModal
+    FilterBar
 } from '../components/common';
 import { SuggestionsTab } from '../components/suggestions/SuggestionsTab';
 import { PageLayout } from '../components/layout';
@@ -53,7 +52,6 @@ export const EntriesPage: React.FC = () => {
         setSearchParams({ tab }, { replace: true });
     };
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
-    const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
     const [watchingPagination, setWatchingPagination] = useState({ total: 0, limit: 20, offset: 0, hasMore: false });
     const [watchingSort, setWatchingSort] = useState('recent-desc');
@@ -158,9 +156,6 @@ export const EntriesPage: React.FC = () => {
         try {
             await entriesApi.deleteEntry(id);
             setWatchingEntries((prev) => prev.filter((e) => e.id !== id));
-            if (selectedEntry?.id === id) {
-                setSelectedEntry(null);
-            }
         } catch (err: any) {
             await alert(err.response?.data?.error || 'Failed to delete entry', {
                 title: 'Error',
@@ -277,7 +272,7 @@ export const EntriesPage: React.FC = () => {
                                             entry={entry}
                                             onComplete={handleComplete}
                                             onDelete={handleDeleteWatching}
-                                            onClick={(e) => setSelectedEntry(e)}
+                                            onClick={(e) => navigate(`/watch-hive/details/${e.type === 'TV_SHOW' ? 'tv' : 'movie'}/${e.tmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
                                         />
                                     ))}
                                 </div>
@@ -345,15 +340,6 @@ export const EntriesPage: React.FC = () => {
                         onCancel={handleCancel}
                     />
                 </div>
-            )}
-
-            {selectedEntry && (
-                <MovieDetailsModal
-                    isOpen={!!selectedEntry}
-                    onClose={() => setSelectedEntry(null)}
-                    tmdbId={selectedEntry.tmdbId}
-                    mediaType={selectedEntry.type === 'TV_SHOW' ? 'tv' : 'movie'}
-                />
             )}
         </PageLayout>
     );
