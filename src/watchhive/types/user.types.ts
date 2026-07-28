@@ -12,6 +12,7 @@ export interface User {
     showWatchEntries: boolean;
     showCurrentlyWatching: boolean;
     showWatchlist: boolean;
+    showRankings?: boolean;
     xp: number;
     level: number;
     badges: Badge[];
@@ -56,4 +57,5 @@ export interface UpdateUserData {
     showWatchEntries?: boolean;
     showCurrentlyWatching?: boolean;
     showWatchlist?: boolean;
+    showRankings?: boolean;
 }

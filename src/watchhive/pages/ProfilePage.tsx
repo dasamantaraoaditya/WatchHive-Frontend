@@ -397,7 +397,8 @@ export const ProfilePage: React.FC = () => {
                             {[
                                 { id: 'showWatchEntries', label: 'Show Watch Entries', icon: 'history', desc: 'Display your movie/show history' },
                                 { id: 'showCurrentlyWatching', label: 'Currently Watching', icon: 'visibility', desc: 'Show what you are eyeing right now' },
-                                { id: 'showWatchlist', label: 'Show Watchlist', icon: 'list_alt', desc: 'Let others see your future picks' }
+                                { id: 'showWatchlist', label: 'Show Watchlist', icon: 'list_alt', desc: 'Let others see your future picks' },
+                                { id: 'showRankings', label: 'Show Rankings & Stacks', icon: 'format_list_numbered', desc: 'Allow others to view your ranked stacks' }
                             ].map((item) => (
                                 <div key={item.id} className="flex items-center justify-between p-4 rounded-3xl bg-white border border-slate-100 group transition-all hover:bg-slate-50/50">
                                     <div className="flex items-center gap-3">

@@ -8,7 +8,7 @@ import { FollowListModal } from '../components/profile/FollowListModal';
 import { useAuth, useUI } from '../contexts';
 import { SuggestMovieModal } from '../components/suggestions/SuggestMovieModal';
 import { ProfileSkeleton } from '../components/common/Skeleton';
-import { listsApi, ListItem } from '../services/lists.service';
+import { listsApi, ListItem, List } from '../services/lists.service';
 import { WatchlistGrid } from '../components/profile/WatchlistGrid';
 import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
@@ -23,7 +23,7 @@ export const UserProfilePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
-    const [activeTab, setActiveTab] = useState<'entries' | 'watching' | 'watchlist'>('entries');
+    const [activeTab, setActiveTab] = useState<'entries' | 'watching' | 'watchlist' | 'rankings'>('entries');
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isHoveredRequested, setIsHoveredRequested] = useState(false);
 
@@ -31,6 +31,8 @@ export const UserProfilePage: React.FC = () => {
     const [watchlistItems, setWatchlistItems] = useState<ListItem[] | null>(null);
     const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
 
+    const [userRankings, setUserRankings] = useState<List[] | null>(null);
+    const [isRankingsLoading, setIsRankingsLoading] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -74,6 +76,24 @@ export const UserProfilePage: React.FC = () => {
             fetchWatchlist();
         }
     }, [activeTab, id, watchlistItems]);
+
+    // Fetch user rankings if active
+    useEffect(() => {
+        if (activeTab === 'rankings' && id && userRankings === null) {
+            const fetchRankings = async () => {
+                setIsRankingsLoading(true);
+                try {
+                    const data = await listsApi.getUserRankings(id);
+                    setUserRankings(data || []);
+                } catch (err) {
+                    console.error('Failed to fetch user rankings', err);
+                } finally {
+                    setIsRankingsLoading(false);
+                }
+            };
+            fetchRankings();
+        }
+    }, [activeTab, id, userRankings]);
 
     const handleFollowToggle = async () => {
         if (!profileUser) return;
@@ -310,7 +330,8 @@ export const UserProfilePage: React.FC = () => {
                         {[
                             { id: 'entries', label: 'Entries', show: profileUser.showWatchEntries },
                             { id: 'watching', label: 'Watching', show: profileUser.showCurrentlyWatching },
-                            { id: 'watchlist', label: 'Watchlist', show: profileUser.showWatchlist }
+                            { id: 'watchlist', label: 'Watchlist', show: profileUser.showWatchlist },
+                            { id: 'rankings', label: 'Rankings Stacks', show: profileUser.showRankings !== false }
                         ].filter(t => t.show || (currentUser && currentUser.id === profileUser.id)).map(tab => (
                             <button 
                                 key={tab.id}
@@ -364,6 +385,69 @@ export const UserProfilePage: React.FC = () => {
                                         <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Saved for Later</h3>
                                     </div>
                                     <WatchlistGrid items={watchlistItems || []} isLoading={isWatchlistLoading} readOnly />
+                                </>
+                            )}
+                            {activeTab === 'rankings' && (
+                                <>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-[#ffb700]">
+                                                <span className="material-symbols-outlined text-lg">format_list_numbered</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Cinematic Stacks & Rankings</h3>
+                                                <p className="text-xs text-slate-400 font-bold">Publicly ranked collections by @{profileUser.username}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {isRankingsLoading ? (
+                                        <div className="py-12 flex justify-center">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ffb700]"></div>
+                                        </div>
+                                    ) : !userRankings || userRankings.length === 0 ? (
+                                        <div className="bg-white border border-black/5 rounded-3xl p-12 text-center text-slate-400 font-bold">
+                                            <span className="material-symbols-outlined text-4xl mb-2 text-slate-300">format_list_numbered</span>
+                                            <p>No public ranking stacks yet.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {userRankings.map(stack => (
+                                                <div key={stack.id} className="bg-white border border-black/5 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <h4 className="text-lg font-black text-[#2D2926]">{stack.name}</h4>
+                                                        <span className="px-3 py-1 bg-[#ffb700]/10 text-[#ffb700] rounded-full text-[10px] font-black uppercase tracking-wider">
+                                                            {stack.items?.length || 0} Items
+                                                        </span>
+                                                    </div>
+                                                    {stack.description && (
+                                                        <p className="text-xs text-slate-500 font-medium mb-4 line-clamp-2">{stack.description}</p>
+                                                    )}
+                                                    <div className="space-y-2 mt-4">
+                                                        {(stack.items || []).slice(0, 5).map((item, idx) => (
+                                                            <div 
+                                                                key={item.id || idx}
+                                                                onClick={() => navigate(`/watch-hive/movie/${item.tmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
+                                                                className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-[#ffb700]/5 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-[#ffb700]/20"
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className={`w-6 h-6 rounded-full text-[11px] font-black flex items-center justify-center ${
+                                                                        idx === 0 ? 'bg-amber-400 text-white shadow-xs' : idx === 1 ? 'bg-slate-300 text-slate-700' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-slate-200 text-slate-600'
+                                                                    }`}>
+                                                                        #{idx + 1}
+                                                                    </span>
+                                                                    <span className="text-xs font-bold text-[#2D2926] line-clamp-1">
+                                                                        {item.title || `Media #${item.tmdbId}`}
+                                                                    </span>
+                                                                </div>
+                                                                <span className="material-symbols-outlined text-sm text-slate-400">chevron_right</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </>
                             )}
                         </div>

@@ -83,6 +83,10 @@ export const listsApi = {
 
     getUserWatchlist: async (userId: string): Promise<List> => {
         return await apiClient.get<List>(`/users/${userId}/watchlist`);
+    },
+
+    getUserRankings: async (userId: string): Promise<List[]> => {
+        return await apiClient.get<List[]>(`/lists/user/${userId}/rankings`);
     }
 };
 
