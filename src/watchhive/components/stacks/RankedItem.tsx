@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ListItem } from '../../services/lists.service';
 import apiClient from '../../services/api';
@@ -26,8 +27,16 @@ interface RankedItemProps {
 const tmdbCache = new Map<number, TmdbDetails>();
 
 export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, onRemove, onMove }) => {
+    const navigate = useNavigate();
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
+
+    const handleItemClick = () => {
+        const type = item.mediaType === 'tv' ? 'tv' : 'movie';
+        navigate(`/watch-hive/details/${type}/${item.tmdbId}`, {
+            state: { from: window.location.pathname + window.location.search }
+        });
+    };
 
     useEffect(() => {
         if (tmdbCache.has(item.tmdbId)) {
@@ -77,36 +86,42 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, 
                 {rank}
             </div>
 
-            {/* Poster Wrap */}
-            <div className="ranked-item__poster-wrap">
-                {posterUrl && !imgError ? (
-                    <img
-                        src={posterUrl}
-                        alt={item.title || 'Movie'}
-                        className="ranked-item__poster"
-                        onError={() => setImgError(true)}
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-[#2D2926]/20 bg-[#f8f8f8]">
-                        <span className="material-symbols-outlined text-3xl">movie_edit</span>
-                    </div>
-                )}
-            </div>
-
-            <div className="ranked-item__content min-w-0 pr-2">
-                <div className="flex items-center gap-2 mb-1">
-                    <span className="ranked-item__badge flex-shrink-0">
-                        {item.mediaType === 'tv' ? 'TV' : 'Film'}
-                    </span>
-                    {year && <span className="text-[10px] font-bold text-[#2D2926]/30 flex-shrink-0">{year}</span>}
+            {/* Poster & Title Content - Clickable */}
+            <div
+                onClick={handleItemClick}
+                className="flex items-center gap-3.5 flex-grow min-w-0 cursor-pointer group/item"
+                title="Click to view details"
+            >
+                <div className="ranked-item__poster-wrap group-hover/item:scale-105 transition-transform">
+                    {posterUrl && !imgError ? (
+                        <img
+                            src={posterUrl}
+                            alt={item.title || 'Movie'}
+                            className="ranked-item__poster"
+                            onError={() => setImgError(true)}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#2D2926]/20 bg-[#f8f8f8]">
+                            <span className="material-symbols-outlined text-3xl">movie_edit</span>
+                        </div>
+                    )}
                 </div>
-                <h4 className="ranked-item__title truncate w-full">
-                    {details?.title || details?.name || item.title || 'Unknown Title'}
-                </h4>
-                <div className="ranked-item__meta">
-                    {details?.genres?.[0] && <span>{details.genres[0]}</span>}
-                    {details?.genres?.[0] && details?.genres?.[1] && <span>•</span>}
-                    {details?.genres?.[1] && <span>{details.genres[1]}</span>}
+
+                <div className="ranked-item__content min-w-0 pr-2">
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="ranked-item__badge flex-shrink-0">
+                            {item.mediaType === 'tv' ? 'TV' : 'Film'}
+                        </span>
+                        {year && <span className="text-[10px] font-bold text-[#2D2926]/30 flex-shrink-0">{year}</span>}
+                    </div>
+                    <h4 className="ranked-item__title truncate w-full group-hover/item:text-[#ffb700] transition-colors">
+                        {details?.title || details?.name || item.title || 'Unknown Title'}
+                    </h4>
+                    <div className="ranked-item__meta">
+                        {details?.genres?.[0] && <span>{details.genres[0]}</span>}
+                        {details?.genres?.[0] && details?.genres?.[1] && <span>•</span>}
+                        {details?.genres?.[1] && <span>{details.genres[1]}</span>}
+                    </div>
                 </div>
             </div>
 

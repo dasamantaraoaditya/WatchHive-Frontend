@@ -447,7 +447,10 @@ export const UserProfilePage: React.FC = () => {
                                                             return (
                                                                 <div 
                                                                     key={item.id || idx}
-                                                                    onClick={() => navigate(`/watch-hive/movie/${item.tmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
+                                                                    onClick={() => {
+                                                                        const type = item.mediaType === 'tv' ? 'tv' : 'movie';
+                                                                        navigate(`/watch-hive/details/${type}/${item.tmdbId}`, { state: { from: window.location.pathname + window.location.search } });
+                                                                    }}
                                                                     className="flex items-center justify-between p-3 bg-slate-50 hover:bg-[#ffb700]/10 rounded-2xl cursor-pointer transition-all border border-black/5 hover:border-[#ffb700]/30 shadow-2xs group"
                                                                 >
                                                                     <div className="flex items-center gap-3.5 min-w-0">
