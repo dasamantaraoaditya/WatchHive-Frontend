@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { User } from '../types/user.types';
 import userService from '../services/userService';
 import followsService from '../services/follows.service';
@@ -15,6 +15,9 @@ import { PageLayout } from '../components/layout';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const tabFromUrl = searchParams.get('tab') as 'entries' | 'watching' | 'watchlist' | 'rankings' | null;
+
     const { user: currentUser } = useAuth();
     const { setPageTitle, setPageIcon } = useUI();
     const navigate = useNavigate();
@@ -23,7 +26,23 @@ export const UserProfilePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
-    const [activeTab, setActiveTab] = useState<'entries' | 'watching' | 'watchlist' | 'rankings'>('entries');
+    
+    const [activeTab, setActiveTabState] = useState<'entries' | 'watching' | 'watchlist' | 'rankings'>(
+        tabFromUrl && ['entries', 'watching', 'watchlist', 'rankings'].includes(tabFromUrl) ? tabFromUrl : 'entries'
+    );
+
+    const setActiveTab = (tab: 'entries' | 'watching' | 'watchlist' | 'rankings') => {
+        setActiveTabState(tab);
+        setSearchParams({ tab }, { replace: true });
+    };
+
+    // Keep active tab state in sync with URL search params (e.g. when navigating back)
+    useEffect(() => {
+        if (tabFromUrl && ['entries', 'watching', 'watchlist', 'rankings'].includes(tabFromUrl)) {
+            setActiveTabState(tabFromUrl);
+        }
+    }, [tabFromUrl]);
+
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isHoveredRequested, setIsHoveredRequested] = useState(false);
 
@@ -59,7 +78,7 @@ export const UserProfilePage: React.FC = () => {
         fetchUser();
     }, [id, currentUser, navigate, setPageTitle, setPageIcon]);
 
-    // Select first enabled tab automatically
+    // Select first enabled tab automatically if no tab in URL
     useEffect(() => {
         if (profileUser) {
             const availableTabs = [
@@ -69,11 +88,11 @@ export const UserProfilePage: React.FC = () => {
                 { id: 'rankings', show: profileUser.showRankings !== false }
             ].filter(t => t.show || (currentUser && currentUser.id === profileUser.id));
 
-            if (availableTabs.length > 0 && !availableTabs.some(t => t.id === activeTab)) {
+            if (!tabFromUrl && availableTabs.length > 0 && !availableTabs.some(t => t.id === activeTab)) {
                 setActiveTab(availableTabs[0].id as any);
             }
         }
-    }, [profileUser, currentUser]);
+    }, [profileUser, currentUser, tabFromUrl, activeTab]);
 
     // Fetch watchlist if active
     useEffect(() => {
