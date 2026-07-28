@@ -332,9 +332,9 @@ export const SearchUsersPage: React.FC = () => {
                                     transition={{ duration: 0.25, ease: 'easeInOut' }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="p-4 sm:p-5 bg-white/95 backdrop-blur-xl border-2 border-[#ffb700]/25 rounded-[28px] shadow-xl shadow-[#ffb700]/5 flex flex-col sm:flex-row flex-wrap items-center gap-4 text-left">
+                                    <div className="p-4 sm:p-5 bg-white/95 backdrop-blur-xl border-2 border-[#ffb700]/25 rounded-[28px] shadow-xl shadow-[#ffb700]/5 grid grid-cols-2 gap-3.5 sm:flex sm:flex-row sm:flex-wrap items-center text-left">
                                         {/* Year Filter */}
-                                        <div className="flex flex-col gap-1.5 w-full sm:w-auto flex-1 min-w-[120px]">
+                                        <div className="flex flex-col gap-1.5 col-span-1 sm:flex-1 min-w-[110px]">
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
                                                 <span className="material-symbols-outlined text-xs text-[#ffb700]">calendar_today</span>
                                                 Release Year
@@ -350,25 +350,8 @@ export const SearchUsersPage: React.FC = () => {
                                             />
                                         </div>
 
-                                        {/* Genre Filter */}
-                                        <div className="flex flex-col gap-1.5 w-full sm:w-auto flex-1 min-w-[150px]">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
-                                                <span className="material-symbols-outlined text-xs text-[#ffb700]">theater_comedy</span>
-                                                Genre
-                                            </label>
-                                            <select
-                                                value={selectedGenreId}
-                                                onChange={(e) => setSelectedGenreId(Number(e.target.value))}
-                                                className="w-full px-3.5 py-2.5 bg-[#FFF9F0]/60 border border-[#ffb700]/20 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] focus:bg-white cursor-pointer transition-all"
-                                            >
-                                                {TMDB_GENRES.map(g => (
-                                                    <option key={g.id} value={g.id}>{g.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
                                         {/* Format Filter */}
-                                        <div className="flex flex-col gap-1.5 w-full sm:w-auto flex-1 min-w-[120px]">
+                                        <div className="flex flex-col gap-1.5 col-span-1 sm:flex-1 min-w-[110px]">
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
                                                 <span className="material-symbols-outlined text-xs text-[#ffb700]">movie</span>
                                                 Format
@@ -384,8 +367,25 @@ export const SearchUsersPage: React.FC = () => {
                                             </select>
                                         </div>
 
+                                        {/* Genre Filter */}
+                                        <div className="flex flex-col gap-1.5 col-span-2 sm:col-span-1 sm:flex-1 min-w-[140px]">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-xs text-[#ffb700]">theater_comedy</span>
+                                                Genre
+                                            </label>
+                                            <select
+                                                value={selectedGenreId}
+                                                onChange={(e) => setSelectedGenreId(Number(e.target.value))}
+                                                className="w-full px-3.5 py-2.5 bg-[#FFF9F0]/60 border border-[#ffb700]/20 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] focus:bg-white cursor-pointer transition-all"
+                                            >
+                                                {TMDB_GENRES.map(g => (
+                                                    <option key={g.id} value={g.id}>{g.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
                                         {/* Sort Order */}
-                                        <div className="flex flex-col gap-1.5 w-full sm:w-auto flex-1 min-w-[140px]">
+                                        <div className="flex flex-col gap-1.5 col-span-2 sm:col-span-1 sm:flex-1 min-w-[140px]">
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1 flex items-center gap-1">
                                                 <span className="material-symbols-outlined text-xs text-[#ffb700]">sort</span>
                                                 Sort By

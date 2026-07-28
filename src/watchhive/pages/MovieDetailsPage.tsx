@@ -226,11 +226,11 @@ export const MovieDetailsPage: React.FC = () => {
             animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } }}
             exit={{ opacity: 0, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } }}
             onScroll={handleScroll}
-            className="fixed inset-y-0 right-0 left-0 md:left-[256px] z-[100] flex flex-col bg-[#FFF9F0] overflow-y-auto no-scrollbar font-display"
+            className="fixed inset-y-0 right-0 left-0 md:left-[256px] z-[100] flex flex-col bg-[#FFF9F0] overflow-y-auto no-scrollbar font-display pb-32 md:pb-24"
         >
             {/* Sticky Navigation Bar — with round arrow_back_ios button */}
             <div
-                className={`sticky top-4 md:top-6 z-50 flex justify-between items-start px-4 md:px-6 pointer-events-none w-full max-w-full transition-all duration-300 ease-in-out ${
+                className={`sticky top-3 md:top-6 z-50 flex justify-between items-start px-4 md:px-6 pointer-events-none w-full max-w-full transition-all duration-300 ease-in-out ${
                     isNavVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
                 }`}
             >
@@ -240,7 +240,7 @@ export const MovieDetailsPage: React.FC = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 }}
                     onClick={handleBack}
-                    className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-[#ffb700] hover:bg-white/30 transition-all pointer-events-auto shadow-sm backdrop-blur-sm"
+                    className="w-11 h-11 rounded-full bg-white/40 border border-white/30 flex items-center justify-center text-[#ffb700] hover:bg-white/60 active:scale-95 transition-all pointer-events-auto shadow-md backdrop-blur-md"
                     title="Back"
                 >
                     <span className="material-symbols-outlined text-[26px] ml-1">arrow_back_ios</span>
@@ -253,7 +253,7 @@ export const MovieDetailsPage: React.FC = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.2 }}
                         onClick={handleShare}
-                        className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-[#2D2926] hover:bg-white/30 transition-all pointer-events-auto shadow-sm backdrop-blur-sm"
+                        className="w-11 h-11 rounded-full bg-white/40 border border-white/30 flex items-center justify-center text-[#2D2926] hover:bg-white/60 active:scale-95 transition-all pointer-events-auto shadow-md backdrop-blur-md"
                         title="Share"
                     >
                         <span className="material-symbols-outlined text-[20px]">share</span>

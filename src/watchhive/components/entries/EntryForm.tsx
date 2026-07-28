@@ -550,9 +550,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 ))}
 
                                                 {/* Deep Search Callout Banner */}
-                                                <div className="p-2.5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-t border-[#ffb700]/15 flex items-center justify-between gap-2 text-xs font-bold text-[#2D2926] mt-1">
+                                                <div className="p-3 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-t border-[#ffb700]/15 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 text-xs font-bold text-[#2D2926] mt-1.5">
                                                     <div className="flex items-center gap-1.5 text-slate-600 font-semibold text-[11px] min-w-0">
-                                                        <span className="text-amber-500 flex-shrink-0">💡</span>
+                                                        <span className="text-amber-500 flex-shrink-0 text-sm">💡</span>
                                                         <span className="truncate">Can't find exact match? Try <strong>Deep Search</strong></span>
                                                     </div>
                                                     <button
@@ -561,7 +561,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                             setShowResults(false);
                                                             navigate(`/watch-hive/search?mode=movies&deep=true&q=${encodeURIComponent(searchQuery)}`);
                                                         }}
-                                                        className="px-2.5 py-1 bg-[#ffb700] hover:bg-[#ffc83b] text-white rounded-xl font-black text-[9px] uppercase tracking-wider shadow-sm transition-all whitespace-nowrap flex-shrink-0 cursor-pointer"
+                                                        className="w-full sm:w-auto px-3.5 py-2 bg-[#ffb700] hover:bg-[#ffc83b] active:scale-95 text-white rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all text-center cursor-pointer flex-shrink-0"
                                                     >
                                                         Deep Search 🔎
                                                     </button>
