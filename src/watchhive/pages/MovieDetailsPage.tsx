@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BeeLoader, ErrorState } from '../components/common';
 import apiClient from '../services/api';
@@ -56,6 +56,7 @@ export const MovieDetailsPage: React.FC = () => {
     const { mediaType: paramMediaType, tmdbId: paramTmdbId } = useParams<{ mediaType: string; tmdbId: string }>();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { setPageTitle, setPageIcon } = useUI();
     const { alert, confirm } = useCustomAlert();
     const { addToList, removeFromList, isInWatchlist } = useWatchlist();
@@ -201,6 +202,17 @@ export const MovieDetailsPage: React.FC = () => {
         }
     };
 
+    const handleBack = () => {
+        const fromPath = (location.state as any)?.from;
+        if (fromPath) {
+            navigate(fromPath);
+        } else if (window.history.length > 1) {
+            navigate(-1);
+        } else {
+            navigate('/watch-hive/feed');
+        }
+    };
+
     const formatDate = (dateString?: string) => {
         if (!dateString) return 'TBA';
         const date = new Date(dateString);
@@ -227,7 +239,7 @@ export const MovieDetailsPage: React.FC = () => {
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 }}
-                    onClick={() => navigate(-1)}
+                    onClick={handleBack}
                     className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-[#ffb700] hover:bg-white/30 transition-all pointer-events-auto shadow-sm backdrop-blur-sm"
                     title="Back"
                 >

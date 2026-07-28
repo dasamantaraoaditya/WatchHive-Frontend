@@ -197,7 +197,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     {' '}
                                     <button 
                                         type="button"
-                                        onClick={() => targetTmdbId && navigate(`/watch-hive/details/${normMediaType}/${targetTmdbId}`)}
+                                        onClick={() => targetTmdbId && navigate(`/watch-hive/details/${normMediaType}/${targetTmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
                                         className="font-extrabold text-[#2D2926] hover:text-[#ffb700] hover:underline transition-colors bg-transparent border-none p-0 inline align-baseline text-left cursor-pointer font-display"
                                     >
                                         {title}
@@ -215,7 +215,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
                 {/* Content: Poster Image */}
                 {posterUrl && (
-                    <div className="feed-card-poster-container cursor-pointer" onClick={() => targetTmdbId && navigate(`/watch-hive/details/${normMediaType}/${targetTmdbId}`)}>
+                    <div className="feed-card-poster-container cursor-pointer" onClick={() => targetTmdbId && navigate(`/watch-hive/details/${normMediaType}/${targetTmdbId}`, { state: { from: window.location.pathname + window.location.search } })}>
                         <div className="feed-card-poster-gradient"></div>
                         <img
                             src={posterUrl}

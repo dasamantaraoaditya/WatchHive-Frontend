@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from '../types/user.types';
 import userService from '../services/userService';
-import { Avatar, ErrorState, EmptyState, MovieDetailsModal } from '../components/common';
+import { Avatar, ErrorState, EmptyState } from '../components/common';
 import { useUI } from '../contexts';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
@@ -26,6 +26,7 @@ interface TmdbResult {
 type SearchMode = 'users' | 'movies';
 
 export const SearchUsersPage: React.FC = () => {
+    const navigate = useNavigate();
     const { setPageTitle, setPageIcon } = useUI();
 
     useEffect(() => {
@@ -50,8 +51,6 @@ export const SearchUsersPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Modal State
-    const [selectedMovie, setSelectedMovie] = useState<{ id: number; type: 'movie' | 'tv' } | null>(null);
     const [hoveredRequestedUserId, setHoveredRequestedUserId] = useState<string | null>(null);
 
     // Debounce search
@@ -284,7 +283,7 @@ export const SearchUsersPage: React.FC = () => {
                             {movieResults.map(movie => (
                                 <button
                                     key={movie.id}
-                                    onClick={() => setSelectedMovie({ id: movie.id, type: movie.media_type as 'movie' | 'tv' })}
+                                    onClick={() => navigate(`/watch-hive/details/${movie.media_type === 'tv' ? 'tv' : 'movie'}/${movie.id}`, { state: { from: window.location.pathname + window.location.search } })}
                                     className="group flex items-center gap-4 p-4 bg-white border border-black/5 rounded-[32px] text-left shadow-sm hover:shadow-xl hover:shadow-black/5 hover:-translate-y-1 transition-all duration-300 active:scale-[0.98]"
                                 >
                                     <div className="w-20 h-28 bg-slate-50 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm transition-transform group-hover:scale-105">
@@ -347,13 +346,6 @@ export const SearchUsersPage: React.FC = () => {
                     </div>
                 )}
             </div>
-
-            <MovieDetailsModal 
-                isOpen={!!selectedMovie}
-                onClose={() => setSelectedMovie(null)}
-                tmdbId={selectedMovie?.id || null}
-                mediaType={selectedMovie?.type || null}
-            />
         </PageLayout>
     );
 };

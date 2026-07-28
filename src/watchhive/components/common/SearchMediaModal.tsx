@@ -71,7 +71,7 @@ export const SearchMediaModal: React.FC<SearchMediaModalProps> = ({
     const handleSelectResult = (result: TmdbResult) => {
         onClose();
         const mType = result.media_type === 'tv' ? 'tv' : 'movie';
-        navigate(`/watch-hive/details/${mType}/${result.id}`);
+        navigate(`/watch-hive/details/${mType}/${result.id}`, { state: { from: window.location.pathname + window.location.search } });
     };
 
     const yearOf = (r: TmdbResult) => {

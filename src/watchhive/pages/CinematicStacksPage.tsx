@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { listsApi, List, ListItem } from '../services/lists.service';
 import { RankedItem } from '../components/stacks/RankedItem';
 import { RankedItemSkeleton } from '../components/stacks/RankedItemSkeleton';
 import { SearchItemSkeleton } from '../components/stacks/SearchItemSkeleton';
 import { StackCardSkeleton } from '../components/stacks/StackCardSkeleton';
-import { BeeLoader, ErrorState, Modal, MovieDetailsModal } from '../components/common';
+import { BeeLoader, ErrorState, Modal } from '../components/common';
 import { useUI, useCustomAlert } from '../contexts';
 import apiClient from '../services/api';
 import { PageLayout } from '../components/layout';
@@ -22,6 +23,7 @@ interface TmdbResult {
 }
 
 export const CinematicStacksPage: React.FC = () => {
+    const navigate = useNavigate();
     const { setPageTitle, setPageIcon } = useUI();
     const { alert, confirm } = useCustomAlert();
 
@@ -52,11 +54,6 @@ export const CinematicStacksPage: React.FC = () => {
     const [searchResults, setSearchResults] = useState<TmdbResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // Movie Details Modal
-    const [selectedDetailTmdbId, setSelectedDetailTmdbId] = useState<number | null>(null);
-    const [selectedDetailMediaType, setSelectedDetailMediaType] = useState<'movie' | 'tv' | null>(null);
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     const loadLists = useCallback(async () => {
         try {
@@ -302,9 +299,8 @@ export const CinematicStacksPage: React.FC = () => {
                                                 whileTap={{ scale: 0.98 }}
                                                 key={result.id}
                                                 onClick={() => {
-                                                    setSelectedDetailTmdbId(result.id);
-                                                    setSelectedDetailMediaType(result.media_type === 'tv' ? 'tv' : 'movie');
-                                                    setIsDetailsOpen(true);
+                                                    setIsSearchOpen(false);
+                                                    navigate(`/watch-hive/details/${result.media_type === 'tv' ? 'tv' : 'movie'}/${result.id}`, { state: { from: window.location.pathname + window.location.search } });
                                                 }}
                                                 className="p-4 rounded-[28px] bg-white border border-black/5 hover:border-[#ffb700]/30 flex items-center gap-4 text-left transition-all shadow-sm hover:shadow-xl hover:shadow-black/5"
                                             >
@@ -326,7 +322,17 @@ export const CinematicStacksPage: React.FC = () => {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <span className="material-symbols-outlined text-[#ffb700] bg-slate-50 w-10 h-10 rounded-full flex items-center justify-center">add</span>
+                                                <button
+                                                     type="button"
+                                                     onClick={(e) => {
+                                                         e.stopPropagation();
+                                                         handleAddItem(result);
+                                                     }}
+                                                     className="material-symbols-outlined text-[#ffb700] bg-slate-50 hover:bg-[#ffb700] hover:text-white transition-colors w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer"
+                                                     title="Add to stack"
+                                                 >
+                                                     add
+                                                 </button>
                                             </motion.button>
                                         ))}
                                     </div>
@@ -577,29 +583,6 @@ export const CinematicStacksPage: React.FC = () => {
                     </div>
                 </Modal>
 
-                <MovieDetailsModal
-                    isOpen={isDetailsOpen}
-                    onClose={() => {
-                        setIsDetailsOpen(false);
-                        setSelectedDetailTmdbId(null);
-                        setSelectedDetailMediaType(null);
-                    }}
-                    tmdbId={selectedDetailTmdbId}
-                    mediaType={selectedDetailMediaType}
-                    onAddToStack={async () => {
-                        if (selectedDetailTmdbId && selectedDetailMediaType) {
-                            await handleAddItem({
-                                id: selectedDetailTmdbId,
-                                media_type: selectedDetailMediaType,
-                                poster_path: null
-                            });
-                            setIsDetailsOpen(false);
-                            setSelectedDetailTmdbId(null);
-                            setSelectedDetailMediaType(null);
-                        }
-                    }}
-                    isInStack={items.some(item => item.tmdbId === selectedDetailTmdbId)}
-                />
             </div>
         </PageLayout>
     );
