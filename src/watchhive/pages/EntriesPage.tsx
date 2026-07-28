@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { entriesApi, Entry } from '../services/entries.service';
 import { EntryForm } from '../components/entries/EntryForm';
@@ -28,10 +28,30 @@ export const EntriesPage: React.FC = () => {
     const [refreshKey, setRefreshKey] = useState(0);
     const location = useLocation();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const { user } = useAuth();
     const { alert, confirm } = useCustomAlert();
-    const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>('watching');
+
+    const paramTab = searchParams.get('tab') || searchParams.get('activeTab');
+    const initialTab = (paramTab && ['history', 'watching', 'watchlist', 'suggestions'].includes(paramTab))
+        ? (paramTab as 'history' | 'watching' | 'watchlist' | 'suggestions')
+        : 'watching';
+
+    const [activeTab, setActiveTab] = useState<'history' | 'watching' | 'watchlist' | 'suggestions'>(initialTab);
+
+    // Keep activeTab in sync with URL searchParams
+    useEffect(() => {
+        const urlTab = searchParams.get('tab') || searchParams.get('activeTab');
+        if (urlTab && ['history', 'watching', 'watchlist', 'suggestions'].includes(urlTab)) {
+            setActiveTab(urlTab as any);
+        }
+    }, [searchParams]);
+
+    const handleTabSwitch = (tab: 'history' | 'watching' | 'watchlist' | 'suggestions') => {
+        setActiveTab(tab);
+        setSearchParams({ tab }, { replace: true });
+    };
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [selectedEntry, setSelectedEntry] = useState<Entry | null>(null);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
@@ -178,25 +198,25 @@ export const EntriesPage: React.FC = () => {
                     {/* Navigation Tabs */}
                     <div className="flex border-b border-black/5 gap-0 md:gap-8 mt-4 overflow-x-auto no-scrollbar scroll-strip" style={{ scrollSnapType: 'x mandatory' }}>
                         <button 
-                            onClick={() => setActiveTab('watching')}
+                            onClick={() => handleTabSwitch('watching')}
                             className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'watching' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Currently Watching
                         </button>
                         <button 
-                            onClick={() => setActiveTab('history')}
+                            onClick={() => handleTabSwitch('history')}
                             className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'history' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Watch History
                         </button>
                         <button 
-                            onClick={() => setActiveTab('watchlist')}
+                            onClick={() => handleTabSwitch('watchlist')}
                             className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'watchlist' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Watchlist
                         </button>
                         <button 
-                            onClick={() => setActiveTab('suggestions')}
+                            onClick={() => handleTabSwitch('suggestions')}
                             className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'suggestions' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
                         >
                             Suggestions
