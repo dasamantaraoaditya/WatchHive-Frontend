@@ -10,3 +10,6 @@ export { MindLensPage } from './MindLensPage';
 export { default as NotificationsPage } from './NotificationsPage';
 export { CinematicStacksPage } from './CinematicStacksPage';
 export { PrivacyPolicyPage } from './PrivacyPolicyPage';
+export { ForgotPasswordPage } from './ForgotPasswordPage';
+export { ResetPasswordPage } from './ResetPasswordPage';
+

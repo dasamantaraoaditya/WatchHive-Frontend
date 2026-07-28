@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts';
 import { GoogleSignInButton } from '../components/auth';
@@ -7,6 +7,7 @@ import whLogo from '../assets/images/watchhive-logo.png';
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
     const { login, googleLogin } = useAuth();
+    const emailInputRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -16,6 +17,8 @@ export const LoginPage: React.FC = () => {
     const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    // When true, the user has a Google-only account and should use Google Sign-In
+    const [isGoogleOnlyAccount, setIsGoogleOnlyAccount] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -23,6 +26,8 @@ export const LoginPage: React.FC = () => {
         if (errors[name as keyof typeof errors]) {
             setErrors((prev) => ({ ...prev, [name]: undefined }));
         }
+        // Clear the google-only state when user types a different email
+        if (name === 'email') setIsGoogleOnlyAccount(false);
     };
 
     const validate = () => {
@@ -44,13 +49,21 @@ export const LoginPage: React.FC = () => {
         if (!validate()) return;
         setIsLoading(true);
         setErrors({});
+        setIsGoogleOnlyAccount(false);
         try {
             await login(formData);
             navigate('/watch-hive/feed');
         } catch (error: any) {
-            setErrors({
-                general: error.response?.data?.error || 'Login failed. Please check your credentials.',
-            });
+            const data = error.response?.data;
+            if (data?.code === 'google_only_account') {
+                // Structured error: the account exists but has no password (Google-only)
+                setIsGoogleOnlyAccount(true);
+                setErrors({});
+            } else {
+                setErrors({
+                    general: data?.error || 'Login failed. Please check your credentials.',
+                });
+            }
         } finally {
             setIsLoading(false);
         }
@@ -59,6 +72,7 @@ export const LoginPage: React.FC = () => {
     const handleGoogleSuccess = async (idToken: string) => {
         setIsGoogleLoading(true);
         setErrors({});
+        setIsGoogleOnlyAccount(false);
         try {
             await googleLogin(idToken);
             navigate('/watch-hive/feed');
@@ -73,6 +87,12 @@ export const LoginPage: React.FC = () => {
 
     const handleGoogleError = (error: string) => {
         setErrors({ general: error });
+    };
+
+    /** Called when Google Sign-In is blocked — scroll to / focus the email input */
+    const handleGoogleFallback = () => {
+        emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        emailInputRef.current?.focus();
     };
 
     return (
@@ -96,10 +116,32 @@ export const LoginPage: React.FC = () => {
                     {/* Top Accent Gradient */}
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#ffb700] to-transparent opacity-50"></div>
 
+                    {/* General error banner */}
                     {errors.general && (
                         <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-start gap-3 text-rose-600 text-[14px] font-bold">
                             <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
                             <span>{errors.general}</span>
+                        </div>
+                    )}
+
+                    {/* Google-only account recovery banner */}
+                    {isGoogleOnlyAccount && (
+                        <div className="mb-6 p-4 rounded-2xl bg-blue-50 border border-blue-100 flex flex-col gap-3">
+                            <div className="flex items-start gap-3">
+                                <span className="material-symbols-outlined text-blue-500 text-[20px] shrink-0 mt-0.5">info</span>
+                                <div>
+                                    <p className="text-[14px] font-bold text-blue-700">This account uses Google Sign-In</p>
+                                    <p className="text-[12px] font-medium text-blue-600/80 mt-0.5">
+                                        Sign in with Google below, or use "Forgot password?" to set a password as backup.
+                                    </p>
+                                </div>
+                            </div>
+                            <Link
+                                to={`/watch-hive/forgot-password?email=${encodeURIComponent(formData.email)}`}
+                                className="text-[12px] font-bold text-blue-600 hover:text-blue-700 underline underline-offset-2 transition-colors ml-8"
+                            >
+                                Set a password for this account →
+                            </Link>
                         </div>
                     )}
 
@@ -108,6 +150,7 @@ export const LoginPage: React.FC = () => {
                         <GoogleSignInButton
                             onSuccess={handleGoogleSuccess}
                             onError={handleGoogleError}
+                            onFallback={handleGoogleFallback}
                             text="signin_with"
                             disabled={isLoading || isGoogleLoading}
                         />
@@ -126,6 +169,7 @@ export const LoginPage: React.FC = () => {
                             </label>
                             <input
                                 id="email"
+                                ref={emailInputRef}
                                 type="email"
                                 name="email"
                                 placeholder="you@example.com"

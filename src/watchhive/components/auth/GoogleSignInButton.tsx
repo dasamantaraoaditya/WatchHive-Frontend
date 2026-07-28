@@ -23,6 +23,8 @@ declare global {
 interface GoogleSignInButtonProps {
     onSuccess: (idToken: string) => void;
     onError: (error: string) => void;
+    /** Called when Google Sign-In fails/is blocked — lets parent scroll to/focus the email form */
+    onFallback?: () => void;
     text?: 'signin_with' | 'signup_with' | 'continue_with';
     disabled?: boolean;
 }
@@ -30,6 +32,7 @@ interface GoogleSignInButtonProps {
 export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
     onSuccess,
     onError,
+    onFallback,
     text = 'continue_with',
     disabled = false,
 }) => {
@@ -236,14 +239,28 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 
     if (scriptError) {
         return (
-            <div className="w-full flex flex-col items-center justify-center p-4 border border-rose-200 bg-rose-50 rounded-2xl gap-2">
-                <span className="material-symbols-outlined text-rose-500 text-[24px]">shield_lock</span>
-                <p className="text-[13px] font-bold text-rose-600 text-center">
-                    Google Sign-In was blocked by your browser's Adblocker or Tracking Prevention (like Edge Shields).
-                </p>
-                <p className="text-[12px] font-semibold text-rose-500/80 text-center">
-                    Please disable it for this site and refresh the page to continue.
-                </p>
+            <div className="w-full flex flex-col items-start gap-3 p-4 border border-amber-200 bg-amber-50 rounded-2xl">
+                <div className="flex items-start gap-2">
+                    <span className="material-symbols-outlined text-amber-500 text-[20px] shrink-0 mt-0.5">shield_lock</span>
+                    <div>
+                        <p className="text-[13px] font-bold text-amber-700">
+                            Google Sign-In was blocked by your browser.
+                        </p>
+                        <p className="text-[12px] font-medium text-amber-600/80 mt-0.5">
+                            An ad blocker or privacy extension may be preventing it.
+                        </p>
+                    </div>
+                </div>
+                {onFallback && (
+                    <button
+                        type="button"
+                        onClick={onFallback}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-amber-200 rounded-xl text-[13px] font-bold text-amber-700 hover:bg-amber-50 transition-colors"
+                    >
+                        <span className="material-symbols-outlined text-[16px]">email</span>
+                        Sign in with email instead
+                    </button>
+                )}
             </div>
         );
     }

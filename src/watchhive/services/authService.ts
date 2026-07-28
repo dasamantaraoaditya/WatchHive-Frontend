@@ -37,6 +37,21 @@ export const authService = {
         return response;
     },
 
+    /** Request a password reset email for the given address */
+    async forgotPassword(email: string): Promise<{ message: string; devToken?: string }> {
+        return apiClient.post<{ message: string; devToken?: string }>('/auth/forgot-password', { email });
+    },
+
+    /** Complete a password reset using the token from the reset email link */
+    async resetPassword(token: string, email: string, newPassword: string): Promise<{ message: string }> {
+        return apiClient.post<{ message: string }>('/auth/reset-password', { token, email, newPassword });
+    },
+
+    /** Set a backup password on a Google-only account (requires auth token) */
+    async setPassword(newPassword: string): Promise<{ message: string }> {
+        return apiClient.post<{ message: string }>('/auth/set-password', { newPassword });
+    },
+
     isAuthenticated(): boolean {
         return !!apiClient.getAccessToken();
     },

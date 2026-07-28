@@ -6,7 +6,7 @@ import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, S
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage } from './pages';
+import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage } from './pages';
 import { ScrollToTop } from './components/common';
 import './index.css';
 
@@ -86,6 +86,15 @@ const AppRoutes: React.FC = () => {
                             <SignupPage />
                         </PublicRoute>
                     }
+                />
+
+                <Route
+                    path="/watch-hive/forgot-password"
+                    element={<ForgotPasswordPage />}
+                />
+                <Route
+                    path="/watch-hive/reset-password"
+                    element={<ResetPasswordPage />}
                 />
 
                 {/* Protected Routes */}

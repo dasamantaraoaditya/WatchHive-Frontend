@@ -17,6 +17,9 @@ export interface User {
     badges: Badge[];
     createdAt: string;
     updatedAt: string;
+    // Auth capability flags — set by the backend, never expose raw googleId/passwordHash
+    hasGoogleLinked?: boolean;
+    hasPassword?: boolean;
     isFollowing?: boolean;
     isRequested?: boolean;
     isIncomingRequest?: boolean;
