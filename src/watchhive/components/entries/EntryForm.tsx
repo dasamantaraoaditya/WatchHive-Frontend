@@ -1,7 +1,60 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { entriesApi, CreateEntryData, Entry } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import { HiveDatePicker } from '../common/HiveDatePicker';
+
+export function calculateFuzzyScore(query: string, targetTitle: string): number {
+    if (!query || !targetTitle) return 0;
+    const q = query.toLowerCase().trim();
+    const t = targetTitle.toLowerCase().trim();
+
+    if (q === t) return 100;
+    if (t.startsWith(q)) return 95;
+    if (t.includes(q)) return 85;
+
+    const cleanQ = q.replace(/[^a-z0-9]/g, '');
+    const cleanT = t.replace(/[^a-z0-9]/g, '');
+
+    if (cleanT.includes(cleanQ)) return 80;
+
+    const qWords = q.split(/\s+/);
+    const tWords = t.split(/\s+/);
+    let matchedWords = 0;
+    for (const qw of qWords) {
+        if (tWords.some(tw => tw.includes(qw) || qw.includes(tw))) {
+            matchedWords++;
+        }
+    }
+    const tokenScore = (matchedWords / qWords.length) * 70;
+
+    const editDist = levenshteinDistance(cleanQ, cleanT);
+    const maxLen = Math.max(cleanQ.length, cleanT.length);
+    const similarityRatio = maxLen > 0 ? (1 - editDist / maxLen) * 60 : 0;
+
+    return Math.max(tokenScore, similarityRatio);
+}
+
+function levenshteinDistance(a: string, b: string): number {
+    const matrix: number[][] = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
 
 interface EntryFormProps {
     entry?: Entry;
@@ -270,6 +323,7 @@ const toLocalISOString = (dateInput: Date | string | number) => {
 };
 
 export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false, defaultIsWatching = false }) => {
+    const navigate = useNavigate();
     const isEditing = !!entry;
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -329,11 +383,18 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         setIsSearching(true);
         try {
             const data: any = await apiClient.get(`/tmdb/search/multi?query=${encodeURIComponent(q)}`);
-            const results: TmdbResult[] = (data.results || [])
-                .filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv')
-                .slice(0, 8);
-            setSearchResults(results);
-            setShowResults(results.length > 0);
+            const rawResults: TmdbResult[] = (data.results || [])
+                .filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv');
+
+            // Smart fuzzy ranking for typos and misspellings
+            const fuzzySorted = [...rawResults].sort((a, b) => {
+                const scoreA = calculateFuzzyScore(q, a.title || a.name || '');
+                const scoreB = calculateFuzzyScore(q, b.title || b.name || '');
+                return scoreB - scoreA;
+            }).slice(0, 8);
+
+            setSearchResults(fuzzySorted);
+            setShowResults(true);
         } catch {
             setSearchResults([]);
         } finally {
@@ -487,6 +548,24 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                         </div>
                                                     </button>
                                                 ))}
+
+                                                {/* Deep Search Callout Banner */}
+                                                <div className="p-2.5 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border-t border-[#ffb700]/15 flex items-center justify-between gap-2 text-xs font-bold text-[#2D2926] mt-1">
+                                                    <div className="flex items-center gap-1.5 text-slate-600 font-semibold text-[11px] min-w-0">
+                                                        <span className="text-amber-500 flex-shrink-0">💡</span>
+                                                        <span className="truncate">Can't find exact match? Try <strong>Deep Search</strong></span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setShowResults(false);
+                                                            navigate(`/watch-hive/search?mode=movies&deep=true&q=${encodeURIComponent(searchQuery)}`);
+                                                        }}
+                                                        className="px-2.5 py-1 bg-[#ffb700] hover:bg-[#ffc83b] text-white rounded-xl font-black text-[9px] uppercase tracking-wider shadow-sm transition-all whitespace-nowrap flex-shrink-0 cursor-pointer"
+                                                    >
+                                                        Deep Search 🔎
+                                                    </button>
+                                                </div>
                                             </div>
                                         )}
                                     </div>

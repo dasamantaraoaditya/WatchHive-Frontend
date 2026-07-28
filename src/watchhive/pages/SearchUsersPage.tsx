@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User } from '../types/user.types';
 import userService from '../services/userService';
 import { Avatar, ErrorState, EmptyState } from '../components/common';
+import { calculateFuzzyScore } from '../components/entries/EntryForm';
 import { useUI } from '../contexts';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
@@ -25,6 +26,25 @@ interface TmdbResult {
 
 type SearchMode = 'users' | 'movies';
 
+const TMDB_GENRES = [
+    { id: 0, name: 'All Genres' },
+    { id: 28, name: 'Action 💥' },
+    { id: 12, name: 'Adventure 🗺️' },
+    { id: 16, name: 'Animation 🎨' },
+    { id: 35, name: 'Comedy 😂' },
+    { id: 80, name: 'Crime 🕵️' },
+    { id: 99, name: 'Documentary 📹' },
+    { id: 18, name: 'Drama 🎭' },
+    { id: 10751, name: 'Family 👨‍👩‍👧' },
+    { id: 14, name: 'Fantasy 🪄' },
+    { id: 27, name: 'Horror 👻' },
+    { id: 10402, name: 'Music 🎵' },
+    { id: 9648, name: 'Mystery 🔍' },
+    { id: 10749, name: 'Romance ❤️' },
+    { id: 878, name: 'Sci-Fi 🚀' },
+    { id: 53, name: 'Thriller ⚡' },
+];
+
 export const SearchUsersPage: React.FC = () => {
     const navigate = useNavigate();
     const { setPageTitle, setPageIcon } = useUI();
@@ -34,9 +54,21 @@ export const SearchUsersPage: React.FC = () => {
         setPageIcon('explore');
     }, [setPageTitle, setPageIcon]);
 
+    const [searchParams] = useSearchParams();
     const isOnline = useOnlineStatus();
-    const [searchMode, setSearchMode] = useState<SearchMode>('users');
-    const [query, setQuery] = useState('');
+    const initialMode = searchParams.get('mode') === 'movies' ? 'movies' : 'users';
+    const initialDeep = searchParams.get('deep') === 'true';
+    const initialQuery = searchParams.get('q') || '';
+
+    const [searchMode, setSearchMode] = useState<SearchMode>(initialMode);
+    const [query, setQuery] = useState(initialQuery);
+
+    // Deep Search Filters
+    const [isDeepSearch, setIsDeepSearch] = useState(initialDeep);
+    const [selectedYear, setSelectedYear] = useState<string>('');
+    const [selectedGenreId, setSelectedGenreId] = useState<number>(0);
+    const [selectedMediaType, setSelectedMediaType] = useState<'all' | 'movie' | 'tv'>('all');
+    const [selectedSortBy, setSelectedSortBy] = useState<string>('popularity.desc');
     
     // User Search State
     const [userResults, setUserResults] = useState<User[]>([]);
@@ -53,22 +85,8 @@ export const SearchUsersPage: React.FC = () => {
 
     const [hoveredRequestedUserId, setHoveredRequestedUserId] = useState<string | null>(null);
 
-    // Debounce search
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (query.trim()) {
-                handleSearch(1);
-            } else {
-                setUserResults([]);
-                setMovieResults([]);
-                setLoading(false);
-            }
-        }, 400);
-        return () => clearTimeout(timer);
-    }, [query, searchMode]);
-
     const handleSearch = useCallback(async (pageNum = 1) => {
-        if (!query.trim()) return;
+        if (!query.trim() && !isDeepSearch) return;
         setLoading(true);
         setError(null);
         try {
@@ -82,14 +100,53 @@ export const SearchUsersPage: React.FC = () => {
                 setUserHasMore(hasMore);
                 setUserPage(pageNum);
             } else {
-                const data: any = await apiClient.get(`/tmdb/search/multi?query=${encodeURIComponent(query)}&page=${pageNum}`);
-                const filtered = (data.results || []).filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv');
+                let filtered: TmdbResult[] = [];
+                let hasMoreRes = false;
+
+                if (isDeepSearch) {
+                    const params = new URLSearchParams();
+                    if (query.trim()) params.set('query', query.trim());
+                    if (selectedYear) params.set('year', selectedYear);
+                    if (selectedGenreId) params.set('genreId', selectedGenreId.toString());
+                    if (selectedMediaType !== 'all') params.set('mediaType', selectedMediaType);
+                    params.set('sortBy', selectedSortBy);
+                    params.set('page', pageNum.toString());
+
+                    const data: any = await apiClient.get(`/tmdb/discover?${params.toString()}`);
+                    const raw = (data.results || []).map((r: any) => ({
+                        ...r,
+                        media_type: r.media_type || (selectedMediaType === 'tv' ? 'tv' : 'movie')
+                    }));
+
+                    if (query.trim()) {
+                        filtered = [...raw].sort((a, b) => {
+                            const scoreA = calculateFuzzyScore(query, a.title || a.name || '');
+                            const scoreB = calculateFuzzyScore(query, b.title || b.name || '');
+                            return scoreB - scoreA;
+                        });
+                    } else {
+                        filtered = raw;
+                    }
+                    hasMoreRes = data.page < data.total_pages;
+                } else {
+                    const data: any = await apiClient.get(`/tmdb/search/multi?query=${encodeURIComponent(query)}&page=${pageNum}`);
+                    const raw = (data.results || []).filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv');
+                    
+                    // Smart fuzzy ranking for typos and misspellings
+                    filtered = [...raw].sort((a, b) => {
+                        const scoreA = calculateFuzzyScore(query, a.title || a.name || '');
+                        const scoreB = calculateFuzzyScore(query, b.title || b.name || '');
+                        return scoreB - scoreA;
+                    });
+                    hasMoreRes = data.page < data.total_pages;
+                }
+
                 if (pageNum === 1) {
                     setMovieResults(filtered);
                 } else {
                     setMovieResults(prev => [...prev, ...filtered]);
                 }
-                setMovieHasMore(data.page < data.total_pages);
+                setMovieHasMore(hasMoreRes);
                 setMoviePage(pageNum);
             }
         } catch (err: any) {
@@ -98,7 +155,21 @@ export const SearchUsersPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [query, searchMode]);
+    }, [query, searchMode, isDeepSearch, selectedYear, selectedGenreId, selectedMediaType, selectedSortBy]);
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (query.trim() || isDeepSearch) {
+                handleSearch(1);
+            } else {
+                setUserResults([]);
+                setMovieResults([]);
+                setLoading(false);
+            }
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [query, searchMode, isDeepSearch, selectedYear, selectedGenreId, selectedMediaType, selectedSortBy, handleSearch]);
 
     const { observerTarget } = useInfiniteScroll({
         onLoadMore: () => handleSearch((searchMode === 'users' ? userPage : moviePage) + 1),
@@ -206,6 +277,101 @@ export const SearchUsersPage: React.FC = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Deep Search Control Bar */}
+                {searchMode === 'movies' && (
+                    <div className="w-full max-w-2xl flex flex-col gap-3 mt-4 animate-fade-in">
+                        <div className="flex items-center justify-between px-2">
+                            <button
+                                type="button"
+                                onClick={() => setIsDeepSearch(!isDeepSearch)}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                    isDeepSearch 
+                                        ? 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20 scale-102' 
+                                        : 'bg-white border-2 border-black/5 text-slate-600 hover:border-[#ffb700] hover:text-[#ffb700]'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-base">saved_search</span>
+                                {isDeepSearch ? 'Deep Search Active 🔎' : 'Enable Deep Search 🔎'}
+                            </button>
+
+                            {isDeepSearch && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedYear('');
+                                        setSelectedGenreId(0);
+                                        setSelectedMediaType('all');
+                                        setSelectedSortBy('popularity.desc');
+                                    }}
+                                    className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors"
+                                >
+                                    Reset Filters ✕
+                                </button>
+                            )}
+                        </div>
+
+                        {isDeepSearch && (
+                            <div className="p-4 bg-white/90 backdrop-blur-md border border-[#ffb700]/20 rounded-3xl shadow-xl flex flex-col sm:flex-row flex-wrap items-center gap-3 text-left">
+                                {/* Year Filter */}
+                                <div className="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[110px]">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Release Year</label>
+                                    <input
+                                        type="number"
+                                        min="1900"
+                                        max="2030"
+                                        placeholder="e.g. 2024"
+                                        value={selectedYear}
+                                        onChange={(e) => setSelectedYear(e.target.value)}
+                                        className="w-full px-3 py-2 bg-slate-50 border border-black/5 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700]"
+                                    />
+                                </div>
+
+                                {/* Genre Filter */}
+                                <div className="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[140px]">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Genre</label>
+                                    <select
+                                        value={selectedGenreId}
+                                        onChange={(e) => setSelectedGenreId(Number(e.target.value))}
+                                        className="w-full px-3 py-2 bg-slate-50 border border-black/5 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] cursor-pointer"
+                                    >
+                                        {TMDB_GENRES.map(g => (
+                                            <option key={g.id} value={g.id}>{g.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Format Filter */}
+                                <div className="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[110px]">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Type</label>
+                                    <select
+                                        value={selectedMediaType}
+                                        onChange={(e) => setSelectedMediaType(e.target.value as any)}
+                                        className="w-full px-3 py-2 bg-slate-50 border border-black/5 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] cursor-pointer"
+                                    >
+                                        <option value="all">All Types</option>
+                                        <option value="movie">Movies Only</option>
+                                        <option value="tv">TV Series</option>
+                                    </select>
+                                </div>
+
+                                {/* Sort Order */}
+                                <div className="flex flex-col gap-1 w-full sm:w-auto flex-1 min-w-[130px]">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Sort By</label>
+                                    <select
+                                        value={selectedSortBy}
+                                        onChange={(e) => setSelectedSortBy(e.target.value)}
+                                        className="w-full px-3 py-2 bg-slate-50 border border-black/5 rounded-xl font-bold text-xs text-[#2D2926] outline-none focus:border-[#ffb700] cursor-pointer"
+                                    >
+                                        <option value="popularity.desc">🔥 Popularity</option>
+                                        <option value="primary_release_date.desc">📅 Release Date</option>
+                                        <option value="vote_average.desc">⭐ Highest Rating</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {!isOnline && <ErrorState message="You are offline. Universal search requires a connection." />}
