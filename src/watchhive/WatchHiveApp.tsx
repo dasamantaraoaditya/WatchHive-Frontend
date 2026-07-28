@@ -6,7 +6,7 @@ import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, S
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage } from './pages';
+import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage, MovieDetailsPage } from './pages';
 import { ScrollToTop } from './components/common';
 import './index.css';
 
@@ -162,6 +162,14 @@ const AppRoutes: React.FC = () => {
                     element={
                         <ProtectedRoute>
                             <NotificationsPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/watch-hive/details/:mediaType/:tmdbId"
+                    element={
+                        <ProtectedRoute>
+                            <MovieDetailsPage />
                         </ProtectedRoute>
                     }
                 />
