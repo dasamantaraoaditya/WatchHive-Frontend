@@ -439,26 +439,65 @@ export const UserProfilePage: React.FC = () => {
                                                     {stack.description && (
                                                         <p className="text-xs text-slate-500 font-medium mb-4 line-clamp-2">{stack.description}</p>
                                                     )}
-                                                    <div className="space-y-2 mt-4">
-                                                        {(stack.items || []).slice(0, 5).map((item, idx) => (
-                                                            <div 
-                                                                key={item.id || idx}
-                                                                onClick={() => navigate(`/watch-hive/movie/${item.tmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
-                                                                className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-[#ffb700]/5 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-[#ffb700]/20"
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <span className={`w-6 h-6 rounded-full text-[11px] font-black flex items-center justify-center ${
-                                                                        idx === 0 ? 'bg-amber-400 text-white shadow-xs' : idx === 1 ? 'bg-slate-300 text-slate-700' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-slate-200 text-slate-600'
-                                                                    }`}>
-                                                                        #{idx + 1}
-                                                                    </span>
-                                                                    <span className="text-xs font-bold text-[#2D2926] line-clamp-1">
-                                                                        {item.title || `Media #${item.tmdbId}`}
-                                                                    </span>
+                                                    <div className="space-y-2.5 mt-4">
+                                                        {(stack.items || []).map((item, idx) => {
+                                                            const posterUrl = item.posterPath ? `https://image.tmdb.org/t/p/w185${item.posterPath}` : null;
+                                                            const year = item.releaseDate ? new Date(item.releaseDate).getFullYear() : null;
+
+                                                            return (
+                                                                <div 
+                                                                    key={item.id || idx}
+                                                                    onClick={() => navigate(`/watch-hive/movie/${item.tmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
+                                                                    className="flex items-center justify-between p-3 bg-slate-50 hover:bg-[#ffb700]/10 rounded-2xl cursor-pointer transition-all border border-black/5 hover:border-[#ffb700]/30 shadow-2xs group"
+                                                                >
+                                                                    <div className="flex items-center gap-3.5 min-w-0">
+                                                                        <span className={`w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 shadow-xs ${
+                                                                            idx === 0 
+                                                                                ? 'bg-[#ffb700] text-white ring-2 ring-[#ffb700]/30' 
+                                                                                : idx === 1 
+                                                                                ? 'bg-slate-300 text-slate-800' 
+                                                                                : idx === 2 
+                                                                                ? 'bg-amber-700 text-white' 
+                                                                                : 'bg-slate-200 text-slate-600'
+                                                                        }`}>
+                                                                            #{idx + 1}
+                                                                        </span>
+
+                                                                        {posterUrl ? (
+                                                                            <img 
+                                                                                src={posterUrl} 
+                                                                                alt={item.title || 'Movie'} 
+                                                                                className="w-10 h-14 object-cover rounded-lg shadow-sm shrink-0 border border-black/5 group-hover:scale-105 transition-transform" 
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="w-10 h-14 bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 shrink-0">
+                                                                                <span className="material-symbols-outlined text-lg">movie</span>
+                                                                            </div>
+                                                                        )}
+
+                                                                        <div className="flex flex-col min-w-0">
+                                                                            <span className="text-sm font-black text-[#2D2926] group-hover:text-[#ffb700] transition-colors truncate">
+                                                                                {item.title || `Movie #${item.tmdbId}`}
+                                                                            </span>
+                                                                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400">
+                                                                                {year && <span>{year}</span>}
+                                                                                {year && item.voteAverage && <span>•</span>}
+                                                                                {item.voteAverage && (
+                                                                                    <span className="flex items-center gap-0.5 text-amber-500 font-extrabold">
+                                                                                        <span className="material-symbols-outlined text-[13px]">star</span>
+                                                                                        {Number(item.voteAverage).toFixed(1)}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-400 group-hover:text-[#ffb700] group-hover:bg-[#ffb700]/10 transition-all shrink-0 ml-2">
+                                                                        <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                                                                    </div>
                                                                 </div>
-                                                                <span className="material-symbols-outlined text-sm text-slate-400">chevron_right</span>
-                                                            </div>
-                                                        ))}
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             ))}

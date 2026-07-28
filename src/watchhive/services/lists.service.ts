@@ -15,6 +15,9 @@ export interface ListItem {
     tags?: string[];
     watchedAt?: string;
     title?: string;
+    posterPath?: string | null;
+    releaseDate?: string | null;
+    voteAverage?: number | null;
 }
 
 export interface List {
