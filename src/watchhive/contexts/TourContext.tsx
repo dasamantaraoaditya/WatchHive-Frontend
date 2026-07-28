@@ -194,19 +194,30 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const activeStep = TOUR_STEPS[currentStepIndex];
+    const isMovieDetailsPage = typeof window !== 'undefined' && window.location.pathname.includes('/details/');
 
     // Compute boundary-safe tooltip position — no CSS transforms, clamps within viewport
     const getTooltipStyle = (): React.CSSProperties => {
-        if (!targetRect) return {};
-
-        // Mobile: centered bottom drawer
+        // Mobile: centered bottom drawer that fits all mobile screen sizes cleanly
         if (window.innerWidth < 768) {
             return {
                 position: 'fixed',
-                left: '16px',
-                right: '16px',
-                bottom: '80px',
-                zIndex: 2000
+                left: '12px',
+                right: '12px',
+                bottom: '16px',
+                width: 'calc(100vw - 24px)',
+                maxWidth: 'none',
+                zIndex: 3000
+            };
+        }
+
+        if (!targetRect) {
+            return {
+                position: 'fixed',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                zIndex: 3000
             };
         }
 
@@ -244,24 +255,24 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         left = Math.max(PAD, Math.min(left, vw - TW - PAD));
         top  = Math.max(PAD, Math.min(top,  vh - TH - PAD));
 
-        return { position: 'fixed', left: `${left}px`, top: `${top}px`, zIndex: 2000 };
+        return { position: 'fixed', left: `${left}px`, top: `${top}px`, zIndex: 3000 };
     };
 
     return (
         <TourContext.Provider value={{ isActive, currentStepIndex, startTour, nextStep, prevStep, skipTour }}>
             {children}
 
-            {/* Welcome Banner Dialog (Non-Intrusive) */}
+            {/* Welcome Banner Dialog (Non-Intrusive, Mobile-Friendly) */}
             <AnimatePresence>
                 {showWelcome && (
                     <motion.div
                         initial={{ opacity: 0, y: 50, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 50, scale: 0.95 }}
-                        className="fixed bottom-6 left-6 max-w-sm bg-white border border-[#ffb700]/25 rounded-[24px] shadow-[0_15px_40px_rgba(255,183,0,0.15)] p-5 z-[2100] flex flex-col gap-4 font-sans border-l-4 border-l-[#ffb700]"
+                        className="fixed bottom-4 left-3 right-3 md:left-6 md:right-auto md:max-w-sm bg-white/95 backdrop-blur-xl border border-[#ffb700]/30 rounded-[28px] shadow-[0_20px_50px_rgba(255,183,0,0.2)] p-5 z-[3000] flex flex-col gap-4 font-sans border-l-4 border-l-[#ffb700]"
                     >
                         <div className="flex gap-3">
-                            <span className="material-symbols-outlined text-[#ffb700] text-3xl font-bold">auto_awesome</span>
+                            <span className="material-symbols-outlined text-[#ffb700] text-3xl font-bold flex-shrink-0">auto_awesome</span>
                             <div className="flex flex-col gap-0.5 min-w-0">
                                 <h4 className="text-sm font-black text-[#2D2926]">Welcome to WatchHive! 🐝</h4>
                                 <p className="text-[11px] font-bold text-[#2D2926]/60 leading-relaxed mt-1">
@@ -289,34 +300,39 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             {/* Guided Tour Backdrop & Spotlight */}
             <AnimatePresence>
-                {isActive && targetRect && (
+                {isActive && (
                     <>
-                        {/* Masked Spotlight SVG */}
-                        <svg className="fixed inset-0 pointer-events-none z-[1900] w-full h-full">
-                            <defs>
-                                <mask id="tour-spotlight-mask">
-                                    {/* White matches outside (darken) */}
-                                    <rect width="100%" height="100%" fill="white" />
-                                    {/* Black cuts out (spotlight clear space) */}
-                                    <rect
-                                        x={targetRect.left - 6}
-                                        y={targetRect.top - 6}
-                                        width={targetRect.width + 12}
-                                        height={targetRect.height + 12}
-                                        rx={Math.abs(targetRect.width - targetRect.height) < 4 ? "9999" : "16"}
-                                        fill="black"
-                                    />
-                                </mask>
-                            </defs>
-                            {/* Spotlight Background Overlay */}
-                            <rect
-                                width="100%"
-                                height="100%"
-                                fill="rgba(45, 41, 38, 0.4)"
-                                mask="url(#tour-spotlight-mask)"
-                                className="pointer-events-auto cursor-default"
+                        {/* Masked Spotlight SVG — only cut holes if NOT in Movie Details view and target is valid */}
+                        {!isMovieDetailsPage && targetRect && targetRect.width > 10 && targetRect.height > 10 ? (
+                            <svg className="fixed inset-0 pointer-events-none z-[2400] w-full h-full">
+                                <defs>
+                                    <mask id="tour-spotlight-mask">
+                                        <rect width="100%" height="100%" fill="white" />
+                                        <rect
+                                            x={targetRect.left - 6}
+                                            y={targetRect.top - 6}
+                                            width={targetRect.width + 12}
+                                            height={targetRect.height + 12}
+                                            rx={Math.abs(targetRect.width - targetRect.height) < 4 ? "9999" : "16"}
+                                            fill="black"
+                                        />
+                                    </mask>
+                                </defs>
+                                <rect
+                                    width="100%"
+                                    height="100%"
+                                    fill="rgba(45, 41, 38, 0.4)"
+                                    mask="url(#tour-spotlight-mask)"
+                                    className="pointer-events-auto cursor-default"
+                                />
+                            </svg>
+                        ) : (
+                            /* Translucent subtle overlay when in movie view or no target */
+                            <div 
+                                className="fixed inset-0 bg-black/25 backdrop-blur-[1px] z-[2400] pointer-events-auto cursor-default transition-all"
+                                onClick={(e) => e.stopPropagation()}
                             />
-                        </svg>
+                        )}
 
                         {/* Interactive Tooltip Card */}
                         <motion.div
@@ -326,11 +342,11 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 280 }}
                             style={getTooltipStyle()}
-                            className="w-[320px] md:w-[340px] bg-white border border-[#ffb700]/20 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.22)] p-5 flex flex-col gap-4 font-sans select-none border-t-4 border-t-[#ffb700]"
+                            className="w-[calc(100vw-24px)] md:w-[340px] max-w-[360px] bg-white/95 backdrop-blur-xl border border-[#ffb700]/30 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.25)] p-5 flex flex-col gap-4 font-sans select-none border-t-4 border-t-[#ffb700] z-[3000]"
                         >
                             {/* Step Count & Skip */}
                             <div className="flex items-center justify-between">
-                                <span className="px-2 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md text-[9px] font-black uppercase tracking-wider">
+                                <span className="px-2.5 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md text-[9px] font-black uppercase tracking-wider">
                                     Step {currentStepIndex + 1} of {TOUR_STEPS.length}
                                 </span>
                                 <button
@@ -352,17 +368,17 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             </div>
 
                             {/* Tooltip Navigation */}
-                            <div className="flex items-center justify-between pt-2 border-t border-[#ffb700]/10 mt-1">
+                            <div className="flex items-center justify-between pt-2.5 border-t border-[#ffb700]/10 mt-1">
                                 <button
                                     onClick={prevStep}
                                     disabled={currentStepIndex === 0}
-                                    className="px-3 py-1.5 bg-neutral-50 hover:bg-neutral-100 disabled:opacity-30 disabled:pointer-events-none text-neutral-500 text-[9px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
+                                    className="px-3.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 disabled:opacity-30 disabled:pointer-events-none text-neutral-600 text-[9px] font-black uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
                                 >
                                     Back
                                 </button>
                                 <button
                                     onClick={nextStep}
-                                    className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-lg transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer"
+                                    className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer"
                                 >
                                     <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</span>
                                     <span className="material-symbols-outlined text-[10px] font-bold">arrow_forward</span>
