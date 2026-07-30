@@ -68,6 +68,7 @@ export const WatchHistoryCompareModal: React.FC<WatchHistoryCompareModalProps> =
     const [data, setData] = useState<CompareResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isPrivacyRestricted, setIsPrivacyRestricted] = useState(false);
     const [activeTab, setActiveTab] = useState<'common' | 'userA' | 'userB'>('common');
     const [posters, setPosters] = useState<Record<number, string>>({});
 
@@ -104,9 +105,17 @@ export const WatchHistoryCompareModal: React.FC<WatchHistoryCompareModalProps> =
                 );
                 setPosters(posterMap);
             } catch (err: any) {
-                console.error('Compare API failed, attempting direct entry comparison fallback:', err);
+                console.error('Compare API failed:', err);
+
+                // If backend explicitly returned 403 (Privacy restriction), enforce boundary
+                if (err.response?.status === 403) {
+                    setIsPrivacyRestricted(true);
+                    setError(err.response?.data?.error || 'This user has restricted access to their watch history.');
+                    return;
+                }
+
                 try {
-                    // Fallback: Fetch target user entries & current user entries directly
+                    // Fallback for network/server glitches only
                     const [targetEntriesRes, userEntriesRes]: [any, any] = await Promise.all([
                         apiClient.get(`/entries?userId=${targetUserId}&limit=100`),
                         apiClient.get(`/entries?limit=100`)
@@ -190,6 +199,16 @@ export const WatchHistoryCompareModal: React.FC<WatchHistoryCompareModalProps> =
                 {loading ? (
                     <div className="py-20 flex flex-col items-center justify-center">
                         <BeeLoader size="large" message="Cross-referencing viewing histories..." />
+                    </div>
+                ) : isPrivacyRestricted ? (
+                    <div className="py-16 text-center px-6">
+                        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl mx-auto mb-4">
+                            🔒
+                        </div>
+                        <h4 className="text-lg font-black text-[#2D2926] mb-2">Privacy Restricted</h4>
+                        <p className="text-xs font-bold text-slate-400 max-w-sm mx-auto leading-relaxed">
+                            {error}
+                        </p>
                     </div>
                 ) : error ? (
                     <div className="py-16 text-center px-6">
