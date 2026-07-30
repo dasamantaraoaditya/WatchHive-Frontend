@@ -118,15 +118,14 @@ export const pushNotificationService = {
     },
 
     /**
-     * Check if active push subscription exists on this device
+     * Send a test push notification to current user
      */
-    hasActiveSubscription: async (): Promise<boolean> => {
-        if (!pushNotificationService.isSupported()) return false;
+    sendTestNotification: async (): Promise<boolean> => {
         try {
-            const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.getSubscription();
-            return !!subscription;
-        } catch {
+            await api.post('/push/test');
+            return true;
+        } catch (err) {
+            console.error('[Push] Error sending test notification:', err);
             return false;
         }
     }
