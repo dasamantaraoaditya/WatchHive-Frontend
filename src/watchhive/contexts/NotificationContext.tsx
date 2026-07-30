@@ -3,6 +3,7 @@ import notificationsService, { Notification } from '../services/notifications.se
 import followsService from '../services/follows.service';
 import { useAuth } from './AuthContext';
 import { NotificationToast } from '../components/notifications/NotificationToast';
+import { PushPromptModal } from '../components/notifications/PushPromptModal';
 import pushNotificationService from '../services/pushNotification.service';
 
 interface NotificationContextType {
@@ -204,6 +205,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }}>
             {children}
             <NotificationToast toast={toast} onClose={() => setToast(null)} />
+            <PushPromptModal />
         </NotificationContext.Provider>
     );
 };
