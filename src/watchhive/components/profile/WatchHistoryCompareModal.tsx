@@ -108,7 +108,7 @@ export const WatchHistoryCompareModal: React.FC<WatchHistoryCompareModalProps> =
                 try {
                     // Fallback: Fetch target user entries & current user entries directly
                     const [targetEntriesRes, userEntriesRes]: [any, any] = await Promise.all([
-                        apiClient.get(`/entries/user/${targetUserId}?limit=100`),
+                        apiClient.get(`/entries?userId=${targetUserId}&limit=100`),
                         apiClient.get(`/entries?limit=100`)
                     ]);
 
