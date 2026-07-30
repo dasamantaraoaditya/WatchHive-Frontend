@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BeeLoader, Button } from '../components/common';
 import { useUI } from '../contexts';
 import { PageLayout } from '../components/layout';
+import { PushOptInBanner } from '../components/notifications/PushOptInBanner';
 
 const NotificationsPage: React.FC = () => {
     const {
@@ -190,6 +191,7 @@ const NotificationsPage: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col gap-3">
+                    <PushOptInBanner />
                     {loading && notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">
                             <BeeLoader size="small" message="Loading your activity..." />

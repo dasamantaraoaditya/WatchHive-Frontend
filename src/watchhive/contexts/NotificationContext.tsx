@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import notificationsService, { Notification } from '../services/notifications.service';
 import followsService from '../services/follows.service';
 import { useAuth } from './AuthContext';
+import { NotificationToast } from '../components/notifications/NotificationToast';
+import pushNotificationService from '../services/pushNotification.service';
 
 interface NotificationContextType {
     notifications: Notification[];
@@ -14,6 +16,10 @@ interface NotificationContextType {
     markAllAsRead: () => Promise<void>;
     acceptFollowRequest: (requestId: string, notificationId: string) => Promise<void>;
     rejectFollowRequest: (requestId: string, notificationId: string) => Promise<void>;
+    isPushSupported: boolean;
+    pushPermission: NotificationPermission;
+    subscribePush: () => Promise<boolean>;
+    unsubscribePush: () => Promise<boolean>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -24,6 +30,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(false);
     const [page, setPage] = useState(1);
+    const [toast, setToast] = useState<{ id: string; notification: Notification } | null>(null);
+
+    const [pushPermission, setPushPermission] = useState<NotificationPermission>(
+        pushNotificationService.getPermissionState()
+    );
+    const isPushSupported = pushNotificationService.isSupported();
+
     const { user } = useAuth();
 
     const fetchNotifications = useCallback(async (pageNum = 1) => {
@@ -37,9 +50,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 setNotifications(prev => [...prev, ...data.notifications]);
             }
             setUnreadCount(data.unreadCount);
-            setHasMore(data.pagination.page * data.pagination.limit < data.unreadCount + data.notifications.length); // Simple heuristic or use total if available
-            // Better: notificationsService response has pagination, but let's check hasMore
-            // If we got fewer than limit, hasMore = false.
             setHasMore(data.notifications.length === data.pagination.limit);
             setPage(pageNum);
         } catch (error) {
@@ -99,15 +109,80 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
     };
 
+    const subscribePush = async () => {
+        const success = await pushNotificationService.subscribe();
+        setPushPermission(pushNotificationService.getPermissionState());
+        return success;
+    };
+
+    const unsubscribePush = async () => {
+        const success = await pushNotificationService.unsubscribe();
+        setPushPermission(pushNotificationService.getPermissionState());
+        return success;
+    };
+
+    // Initial fetch & SSE Real-time connection setup
     useEffect(() => {
-        if (user) {
-            fetchNotifications();
-            const interval = setInterval(fetchNotifications, 60000);
-            return () => clearInterval(interval);
-        } else {
+        if (!user) {
             setNotifications([]);
             setUnreadCount(0);
+            return;
         }
+
+        fetchNotifications(1);
+
+        // Connect via SSE for instant in-app delivery
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+        const sseUrl = `${backendUrl.replace(/\/api\/v1\/?$/, '')}/api/v1/notifications/stream?token=${encodeURIComponent(token)}`;
+
+        let eventSource: EventSource | null = null;
+        try {
+            eventSource = new EventSource(sseUrl);
+
+            eventSource.addEventListener('connected', (e: any) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data.unreadCount !== undefined) {
+                        setUnreadCount(data.unreadCount);
+                    }
+                } catch {}
+            });
+
+            eventSource.addEventListener('notification', (e: any) => {
+                try {
+                    const newNotification: Notification = JSON.parse(e.data);
+                    setNotifications(prev => [newNotification, ...prev]);
+                    setUnreadCount(prev => prev + 1);
+                    setToast({ id: `${newNotification.id}-${Date.now()}`, notification: newNotification });
+                } catch (err) {
+                    console.error('[SSE] Error processing notification event:', err);
+                }
+            });
+
+            eventSource.addEventListener('unread-count', (e: any) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data.count !== undefined) {
+                        setUnreadCount(data.count);
+                    }
+                } catch {}
+            });
+
+            eventSource.onerror = (err) => {
+                console.warn('[SSE] EventSource connection issue. Auto-reconnecting...', err);
+            };
+        } catch (err) {
+            console.error('[SSE] Failed to establish EventSource:', err);
+        }
+
+        return () => {
+            if (eventSource) {
+                eventSource.close();
+            }
+        };
     }, [user, fetchNotifications]);
 
     return (
@@ -121,9 +196,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             markAsRead,
             markAllAsRead,
             acceptFollowRequest,
-            rejectFollowRequest
+            rejectFollowRequest,
+            isPushSupported,
+            pushPermission,
+            subscribePush,
+            unsubscribePush
         }}>
             {children}
+            <NotificationToast toast={toast} onClose={() => setToast(null)} />
         </NotificationContext.Provider>
     );
 };

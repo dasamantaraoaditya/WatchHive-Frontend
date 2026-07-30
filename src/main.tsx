@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import WatchHiveApp from './watchhive/WatchHiveApp';
-import { setupInstallPrompt } from './serviceWorkerRegistration';
+import { setupInstallPrompt, registerServiceWorker } from './serviceWorkerRegistration';
 
-// Setup the install prompt for "Add to Home Screen"
+// Register service worker & setup PWA install prompt
+registerServiceWorker();
 setupInstallPrompt();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
