@@ -10,6 +10,7 @@ import { SuggestMovieModal } from '../components/suggestions/SuggestMovieModal';
 import { ProfileSkeleton } from '../components/common/Skeleton';
 import { listsApi, ListItem, List } from '../services/lists.service';
 import { WatchlistGrid } from '../components/profile/WatchlistGrid';
+import { WatchHistoryCompareModal } from '../components/profile/WatchHistoryCompareModal';
 import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
 
@@ -44,6 +45,7 @@ export const UserProfilePage: React.FC = () => {
     }, [tabFromUrl]);
 
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
+    const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
     const [isHoveredRequested, setIsHoveredRequested] = useState(false);
 
     // Dynamic data for tabs
@@ -355,6 +357,16 @@ export const UserProfilePage: React.FC = () => {
                                     </button>
                                 </div>
                             )}
+
+                            {!isOwner && canViewEntries && (
+                                <button
+                                    onClick={() => setIsCompareModalOpen(true)}
+                                    className="w-full font-black py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-[#ffb700]/10 to-amber-500/10 border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 hover:border-[#ffb700] transition-all text-[9px] uppercase tracking-[0.12em] shadow-2xs flex items-center justify-center gap-2 cursor-pointer mt-1"
+                                >
+                                    <span className="material-symbols-outlined text-[16px] text-[#ffb700]">compare_arrows</span>
+                                    Compare Watch Histories
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -565,6 +577,13 @@ export const UserProfilePage: React.FC = () => {
                         onSuccess={() => {
                             console.log('Suggestion sent successfully!');
                         }}
+                    />
+                )}
+                {profileUser && (
+                    <WatchHistoryCompareModal
+                        isOpen={isCompareModalOpen}
+                        onClose={() => setIsCompareModalOpen(false)}
+                        targetUserId={profileUser.id}
                     />
                 )}
             </div>
