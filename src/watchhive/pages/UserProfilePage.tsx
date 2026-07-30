@@ -350,22 +350,22 @@ export const UserProfilePage: React.FC = () => {
                                     </button>
                                     <button 
                                         onClick={() => setIsSuggestModalOpen(true)}
-                                        className="flex-1 font-black py-2.5 px-4 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/5 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-md shadow-black/5 flex items-center justify-center gap-1.5 cursor-pointer"
+                                        className="flex-1 font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/5 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-sm flex items-center justify-center gap-1 cursor-pointer"
                                     >
                                         <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
                                         Suggest
                                     </button>
+                                    {!isOwner && canViewEntries && (
+                                        <button
+                                            onClick={() => setIsCompareModalOpen(true)}
+                                            className="flex-1 font-black py-2.5 px-3 rounded-xl bg-white border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700] hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-sm flex items-center justify-center gap-1 cursor-pointer"
+                                            title="Compare Watch Histories"
+                                        >
+                                            <span className="material-symbols-outlined text-[14px] text-[#ffb700]">compare_arrows</span>
+                                            Compare
+                                        </button>
+                                    )}
                                 </div>
-                            )}
-
-                            {!isOwner && canViewEntries && (
-                                <button
-                                    onClick={() => setIsCompareModalOpen(true)}
-                                    className="w-full font-black py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-[#ffb700]/10 to-amber-500/10 border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 hover:border-[#ffb700] transition-all text-[9px] uppercase tracking-[0.12em] shadow-2xs flex items-center justify-center gap-2 cursor-pointer mt-1"
-                                >
-                                    <span className="material-symbols-outlined text-[16px] text-[#ffb700]">compare_arrows</span>
-                                    Compare Watch Histories
-                                </button>
                             )}
                         </div>
                     </div>
