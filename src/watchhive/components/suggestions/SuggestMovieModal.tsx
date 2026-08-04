@@ -191,7 +191,11 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[#ffb700]/10 flex items-center justify-between bg-white shrink-0">
                     <div>
-                        <h2 className="text-lg sm:text-xl font-black text-[#2D2926]">Suggest a Title</h2>
+                        <h2 className="text-lg sm:text-xl font-black text-[#2D2926]">
+                            {selectedMovie
+                                ? `Suggest this ${selectedMovie.media_type === 'tv' ? 'Series' : 'Movie'}`
+                                : 'Suggest a Movie or Series'}
+                        </h2>
                         <p className="text-xs font-bold text-slate-400">
                             {toUserName
                                 ? `Recommending to ${toUserName}`

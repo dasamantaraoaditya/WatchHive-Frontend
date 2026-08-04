@@ -118,7 +118,9 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                         <span className="material-symbols-outlined text-xl">arrow_back</span>
                     </button>
                     <div>
-                        <h3 className="text-lg sm:text-xl font-black text-[#2D2926]">Suggest "{title}"</h3>
+                        <h3 className="text-lg sm:text-xl font-black text-[#2D2926]">
+                            Suggest this {mediaType === 'tv' ? 'Series' : 'Movie'}
+                        </h3>
                         <p className="text-[10px] font-bold text-[#2D2926]/40 uppercase tracking-widest">
                             Select friends from your hive
                         </p>
