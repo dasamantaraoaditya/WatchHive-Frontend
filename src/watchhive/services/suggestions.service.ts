@@ -24,7 +24,8 @@ export interface GroupedSuggestion {
 }
 
 export interface CreateSuggestionData {
-    toUserId: string;
+    toUserId?: string;
+    toUserIds?: string[];
     tmdbId: number;
     title: string;
     mediaType?: 'movie' | 'tv';
