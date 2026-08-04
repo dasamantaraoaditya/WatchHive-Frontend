@@ -4,6 +4,7 @@ import apiClient from '../../services/api.js';
 import { SuggestionCard } from './SuggestionCard';
 import { SkeletonCard, SkeletonGrid, ErrorState, FilterBar } from '../common';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
+import { SuggestMovieModal } from './SuggestMovieModal';
 
 interface SuggestionsTabProps {
     searchQuery?: string;
@@ -24,6 +25,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('recent-desc');
+    const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const PAGE_SIZE = 20;
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -143,6 +145,34 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
 
     return (
         <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
+            <SuggestMovieModal 
+                isOpen={isSuggestModalOpen} 
+                onClose={() => setIsSuggestModalOpen(false)} 
+                onSuccess={fetchSuggestions}
+            />
+            {/* Header Action Banner */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 bg-[#FFF9F0] border border-[#ffb700]/30 rounded-3xl shadow-xs">
+                <div className="flex items-center gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-[#ffb700]/20 flex items-center justify-center text-[#ffb700] text-xl shrink-0">
+                        🎬
+                    </div>
+                    <div>
+                        <h3 className="text-base font-black text-[#2D2926]">Recommendations Hub</h3>
+                        <p className="text-xs font-bold text-slate-500">
+                            Suggest movies & TV shows to friends or view their recommendations
+                        </p>
+                    </div>
+                </div>
+
+                <button
+                    onClick={() => setIsSuggestModalOpen(true)}
+                    className="px-4 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center gap-2 cursor-pointer shrink-0 self-end sm:self-center"
+                >
+                    <span className="material-symbols-outlined text-lg">auto_awesome</span>
+                    <span>Suggest to Friends</span>
+                </button>
+            </div>
+
             <FilterBar 
                 search={searchQuery}
                 onSearchChange={onSearchChange}
@@ -161,21 +191,28 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
             />
 
             {filteredGroups.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
-                    <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
+                <div className="flex flex-col items-center justify-center py-16 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                    <div className="w-20 h-20 rounded-full bg-[#FFF9F0] flex items-center justify-center mb-5 border border-[#ffb700]/20 relative">
                         <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
-                        <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">
+                        <span className="material-symbols-outlined text-4xl text-[#ffb700] relative z-10">
                             {searchQuery ? "travel_explore" : "auto_awesome"}
                         </span>
                     </div>
                     <h3 className="text-2xl font-black text-[#2D2926] mb-2">
                         {searchQuery ? "No matching suggestions" : "No suggestions yet"}
                     </h3>
-                    <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed">
+                    <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
                         {searchQuery
                             ? `We couldn't find any suggestions matching "${searchQuery}"`
-                            : "When friends from your hive suggest movies or shows, they'll appear here!"}
+                            : "Be the first to break the ice! Suggest great movies and shows to your friends in the hive."}
                     </p>
+                    <button
+                        onClick={() => setIsSuggestModalOpen(true)}
+                        className="bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-[#ffb700]/20 flex items-center gap-2 cursor-pointer"
+                    >
+                        <span className="material-symbols-outlined text-lg">auto_awesome</span>
+                        <span>Suggest a Movie to Friends</span>
+                    </button>
                 </div>
                 ) : (
                 <>

@@ -7,6 +7,7 @@ import { BeeLoader } from '../common';
 import { User } from '../../types';
 
 interface SuggestMovieModalProps {
+    isOpen?: boolean;
     toUserId?: string;
     toUserName?: string;
     onClose: () => void;
@@ -25,11 +26,14 @@ interface TmdbResult {
 }
 
 export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
+    isOpen = true,
     toUserId,
     toUserName,
     onClose,
     onSuccess
 }) => {
+    if (!isOpen) return null;
+
     const { user: currentUser } = useAuth();
 
     // Movie Search State
