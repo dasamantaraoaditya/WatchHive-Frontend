@@ -78,7 +78,7 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ toast, onC
                 exit={{ opacity: 0, y: -20, scale: 0.95 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
                 onClick={handleClick}
-                className="fixed top-5 right-5 z-50 max-w-sm w-full bg-white/95 backdrop-blur-md p-4 rounded-2xl border-2 border-[#ffb700] shadow-xl cursor-pointer flex items-center gap-3.5 group hover:bg-[#FFF9F0] transition-colors"
+                className="fixed top-4 left-3 right-3 sm:left-auto sm:right-5 sm:max-w-sm z-50 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border-2 border-[#ffb700] shadow-xl cursor-pointer flex items-center gap-3 group hover:bg-[#FFF9F0] transition-colors"
             >
                 <div className="w-10 h-10 rounded-xl bg-[#ffb700]/15 border border-[#ffb700]/30 flex items-center justify-center text-[#ffb700] shrink-0">
                     <span className="material-symbols-outlined text-xl">{getIcon()}</span>
