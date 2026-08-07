@@ -19,7 +19,6 @@ This document outlines the technology stack, directory structure, data flow, and
 | **HTTP Client** | **Axios** | Promise-based HTTP client to interact with the backend Express API. Features JWT authorization interceptors. |
 | **Animations** | **Framer Motion**| A production-ready motion library for React to handle UI animations smoothly. |
 | **PWA Support** | **Vite PWA Plugin**| Enables Progressive Web App features such as offline support, service workers, and caching capabilities (`vite-plugin-pwa`). |
-| **Mobile Wrapper** | **Capacitor (v8)**| Cross-platform wrapper that builds the web bundle into native iOS and Android packages. |
 | **State Mgt.** | **React Context** | Used across the App for managing global states (e.g. `AuthContext`, `NotificationContext`, `WatchlistContext`, `TourContext`). |
 | **Testing** | **Playwright** | Used for End-to-End (E2E) testing (`@playwright/test`). |
 | **Styling** | **Vanilla CSS** | Standard CSS used for component and page-level styling, alongside Tailwind CSS classes. |
@@ -70,13 +69,11 @@ graph LR
 
     Backend[("Backend API<br/>http://localhost:5001")]:::backendNode
     SW{{"Service Worker<br/>(Vite PWA Offline Support)"}}:::serviceNode
-    Cap["Capacitor Native Bridge<br/>(iOS & Android wrappers)"]:::serviceNode
 
     %% Core Data Flow Lines
     Client -->|Initial Load| Main
     Client -->|Intercepts Requests| SW
     SW -.->|Serves Cached Assets| Client
-    Client -->|Device API Bridge| Cap
 
     Main --> Router
     Router --> AuthCtx
@@ -202,13 +199,4 @@ sequenceDiagram
     Component-->>User: Renders Feed Items dynamically
 ```
 
----
 
-## Mobile App Architecture (Capacitor)
-
-The repository hosts cross-platform wrapper projects that package the compiled web assets:
-
-- **Source Asset Synchronization**: Running `npm run cap:sync` compiles the TypeScript codebase into static files within `/dist` and copies them directly into native assets directories:
-  - **iOS**: Copied to the `ios/App/public/` folder.
-  - **Android**: Copied to the `android/app/src/main/assets/public/` folder.
-- **Config**: Configured via `capacitor.config.ts` using `com.watchhive.app` bundle ID, specifying build paths, target assets, and native plugin settings.

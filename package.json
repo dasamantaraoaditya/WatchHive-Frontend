@@ -8,16 +8,9 @@
         "build": "tsc && vite build",
         "preview": "vite preview",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        "test:ui": "playwright test --ui-host=localhost --ui-port=9323",
-        "cap:sync": "npm run build && npx cap sync",
-        "cap:open-ios": "npx cap open ios",
-        "cap:open-android": "npx cap open android"
+        "test:ui": "playwright test --ui-host=localhost --ui-port=9323"
     },
     "dependencies": {
-        "@capacitor/android": "^8.3.4",
-        "@capacitor/core": "^8.3.4",
-        "@capacitor/ios": "^8.3.4",
-        "@capgo/capacitor-social-login": "^8.3.22",
         "axios": "^1.6.5",
         "clsx": "^2.1.1",
         "framer-motion": "^10.18.0",
@@ -27,7 +20,6 @@
         "tailwind-merge": "^3.5.0"
     },
     "devDependencies": {
-        "@capacitor/cli": "^8.3.4",
         "@playwright/test": "^1.59.0",
         "@types/react": "^18.2.43",
         "@types/react-dom": "^18.2.17",

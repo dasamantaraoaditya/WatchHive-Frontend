@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">WatchHive</string>
-    <string name="title_activity_main">WatchHive</string>
-    <string name="package_name">com.watchhive.app</string>
-    <string name="custom_url_scheme">com.watchhive.app</string>
-</resources>
