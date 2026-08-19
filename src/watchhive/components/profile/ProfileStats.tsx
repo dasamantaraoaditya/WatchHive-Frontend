@@ -46,12 +46,6 @@ export const ProfileStats: React.FC = () => {
         fetchStats();
     }, [days, type, genre, minRating]);
 
-    if (loading && !data) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20">
-                <BeeLoader size="small" message="Parsing Hive History..." />
-            </div>
-        );
     const timeframes = [
         { label: '7d', value: 7 },
         { label: '30d', value: 30 },
@@ -59,6 +53,14 @@ export const ProfileStats: React.FC = () => {
         { label: '1y', value: 365 },
         { label: 'All Time', value: 0 },
     ];
+
+    if (loading && !data) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20">
+                <BeeLoader size="small" message="Parsing Hive History..." />
+            </div>
+        );
+    }
 
     if (!data || data.summary.totalCount === 0) {
         return (
