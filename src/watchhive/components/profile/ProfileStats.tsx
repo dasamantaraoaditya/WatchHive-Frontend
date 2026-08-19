@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { userService } from '../../services';
 import { BeeLoader } from '../common';
+import { DailyLogInspectorModal } from '../mindlens/DailyLogInspectorModal';
 
 interface StatsData {
     summary: {
@@ -28,6 +29,7 @@ export const ProfileStats: React.FC = () => {
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
 
     const [hoveredDay, setHoveredDay] = useState<number | null>(null);
+    const [selectedDayForModal, setSelectedDayForModal] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -234,7 +236,13 @@ export const ProfileStats: React.FC = () => {
                                 width={chartWidth / data.timeSeries.length}
                                 height={chartHeight}
                                 fill="transparent"
+                                className="cursor-pointer"
                                 onMouseEnter={() => setHoveredDay(i)}
+                                onClick={() => {
+                                    if (data.timeSeries[i] && data.timeSeries[i].count > 0) {
+                                        setSelectedDayForModal(i);
+                                    }
+                                }}
                              />
                         ))}
                     </svg>
@@ -249,15 +257,15 @@ export const ProfileStats: React.FC = () => {
                                 transform: 'translate(-50%, -110%)'
                             }}
                         >
-                            <div className="bg-[#2D2926] text-white p-4 rounded-2xl shadow-2xl min-w-[200px] border border-white/10">
+                            <div className="bg-[#2D2926] text-white p-4 rounded-2xl shadow-2xl min-w-[210px] max-w-[280px] border border-white/10">
                                 <p className="text-[10px] font-black text-[#ffb700] uppercase tracking-widest mb-2 border-b border-white/5 pb-2">
                                     {new Date(data.timeSeries[hoveredDay].date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                 </p>
-                                <div className="space-y-3 mt-3 max-h-[150px] overflow-y-auto no-scrollbar">
+                                <div className="space-y-2 mt-2 max-h-[160px] overflow-y-auto no-scrollbar">
                                     {data.timeSeries[hoveredDay].items?.map((item, idx) => (
-                                        <div key={idx} className="flex flex-col">
-                                            <span className="text-[13px] font-black leading-tight truncate">{item.title}</span>
-                                            <div className="flex items-center gap-2 mt-1">
+                                        <div key={idx} className="flex flex-col border-b border-white/5 pb-1.5 last:border-b-0">
+                                            <span className="text-[12px] font-black leading-tight truncate">{item.title}</span>
+                                            <div className="flex items-center gap-2 mt-0.5">
                                                 <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{item.type === 'MOVIE' ? 'Movie' : 'TV'}</span>
                                                 {item.watchedAt && (
                                                     <>
@@ -277,9 +285,9 @@ export const ProfileStats: React.FC = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-3 pt-2 border-t border-white/5 flex justify-between items-center">
-                                    <span className="text-[10px] font-black text-white/40 uppercase">Day's Total</span>
-                                    <span className="text-[12px] font-black">{data.timeSeries[hoveredDay].count}</span>
+                                <div className="mt-3 pt-2 border-t border-white/10 flex justify-between items-center">
+                                    <span className="text-[9px] font-black text-[#ffb700] uppercase">Click point to inspect</span>
+                                    <span className="text-[12px] font-black">{data.timeSeries[hoveredDay].count} {data.timeSeries[hoveredDay].count === 1 ? 'log' : 'logs'}</span>
                                 </div>
                             </div>
                             <div className="w-4 h-4 bg-[#2D2926] rotate-45 absolute -bottom-2 left-1/2 -ml-2"></div>
@@ -287,9 +295,19 @@ export const ProfileStats: React.FC = () => {
                     )}
                 </div>
 
-                <p className="text-center text-[10px] font-black text-[#2D2926]/20 uppercase tracking-[0.3em] mt-12 pb-4">
-                    Hover over chart points to inspect watched titles
+                <p className="text-center text-[10px] font-black text-[#2D2926]/40 uppercase tracking-[0.2em] mt-12 pb-4">
+                    Click any point on the chart to inspect full daily watch logs
                 </p>
+
+                {selectedDayForModal !== null && data.timeSeries[selectedDayForModal] && (
+                    <DailyLogInspectorModal
+                        isOpen={selectedDayForModal !== null}
+                        onClose={() => setSelectedDayForModal(null)}
+                        dateStr={data.timeSeries[selectedDayForModal].date}
+                        count={data.timeSeries[selectedDayForModal].count}
+                        items={data.timeSeries[selectedDayForModal].items || []}
+                    />
+                )}
             </div>
 
             {/* Viewing Rhythm (Time of Day Distribution) */}

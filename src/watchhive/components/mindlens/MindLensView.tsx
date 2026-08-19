@@ -3,6 +3,7 @@ import { mindLensApi, MindLensData } from '../../services/mindlens.service';
 import { MindLensHighlightsSkeleton } from '../common/Skeleton';
 import { Link } from 'react-router-dom';
 import { ProfileStats } from '../profile';
+import { DailyLogInspectorModal } from './DailyLogInspectorModal';
 
 export const MindLensView: React.FC = () => {
     const [data, setData] = useState<MindLensData | null>(null);
@@ -13,6 +14,7 @@ export const MindLensView: React.FC = () => {
     // Frequency chart & image fallback controls
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
     const [hoveredDayIndex, setHoveredDayIndex] = useState<number | null>(null);
+    const [selectedDayForModal, setSelectedDayForModal] = useState<number | null>(null);
     const [imageError, setImageError] = useState(false);
 
     useEffect(() => {
@@ -376,7 +378,7 @@ export const MindLensView: React.FC = () => {
                                         })
                                     )}
 
-                                    {/* Invisible Overlay for Mouse Hover */}
+                                    {/* Invisible Overlay for Mouse Hover & Click */}
                                     {timeSeries.map((_, i) => (
                                         <rect
                                             key={i}
@@ -385,7 +387,13 @@ export const MindLensView: React.FC = () => {
                                             width={chartWidth / timeSeries.length}
                                             height={chartHeight}
                                             fill="transparent"
+                                            className="cursor-pointer"
                                             onMouseEnter={() => setHoveredDayIndex(i)}
+                                            onClick={() => {
+                                                if (timeSeries[i] && timeSeries[i].count > 0) {
+                                                    setSelectedDayForModal(i);
+                                                }
+                                            }}
                                         />
                                     ))}
                                 </svg>
@@ -400,20 +408,32 @@ export const MindLensView: React.FC = () => {
                                             transform: 'translate(-50%, -115%)',
                                         }}
                                     >
-                                        <div className="bg-[#2D2926] text-white px-3.5 py-2.5 rounded-2xl shadow-xl border border-white/10 min-w-[150px] text-center">
+                                        <div className="bg-[#2D2926] text-white p-3.5 rounded-2xl shadow-xl border border-white/10 min-w-[180px] max-w-[250px] text-center">
                                             <p className="text-[10px] font-black text-[#ffb700] uppercase tracking-widest mb-1">
                                                 {new Date(timeSeries[hoveredDayIndex].date).toLocaleDateString(undefined, {
                                                     month: 'short',
                                                     day: 'numeric',
+                                                    year: 'numeric',
                                                 })}
                                             </p>
-                                            <p className="text-xs font-black text-white">
+                                            <p className="text-xs font-black text-white mb-1.5">
                                                 {timeSeries[hoveredDayIndex].count} {timeSeries[hoveredDayIndex].count === 1 ? 'watch' : 'watches'}
                                             </p>
+
                                             {timeSeries[hoveredDayIndex].items && timeSeries[hoveredDayIndex].items!.length > 0 && (
-                                                <p className="text-[10px] font-medium text-white/60 truncate max-w-[160px] mt-1">
-                                                    {timeSeries[hoveredDayIndex].items![0].title}
-                                                </p>
+                                                <div className="space-y-1 text-left max-h-[140px] overflow-y-auto no-scrollbar pt-1.5 border-t border-white/10">
+                                                    {timeSeries[hoveredDayIndex].items!.slice(0, 3).map((item, i) => (
+                                                        <div key={i} className="flex items-center justify-between text-[11px] gap-2">
+                                                            <span className="text-white/90 font-bold truncate max-w-[150px]">{item.title}</span>
+                                                            {item.rating && <span className="text-[#ffb700] font-black text-[10px]">★{item.rating}</span>}
+                                                        </div>
+                                                    ))}
+                                                    {timeSeries[hoveredDayIndex].items!.length > 3 && (
+                                                        <p className="text-[10px] font-black text-[#ffb700] pt-1 text-center">
+                                                            + {timeSeries[hoveredDayIndex].items!.length - 3} more • Click date to inspect
+                                                        </p>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -421,9 +441,20 @@ export const MindLensView: React.FC = () => {
                             </div>
 
                             <p className="text-center text-[10px] font-black text-[#2D2926]/30 uppercase tracking-widest mt-4">
-                                Hover over data points to inspect daily logs
+                                Click any date point on the chart to inspect full daily logs
                             </p>
                         </div>
+                    )}
+
+                    {/* Modal for detailed Inspection */}
+                    {selectedDayForModal !== null && timeSeries[selectedDayForModal] && (
+                        <DailyLogInspectorModal
+                            isOpen={selectedDayForModal !== null}
+                            onClose={() => setSelectedDayForModal(null)}
+                            dateStr={timeSeries[selectedDayForModal].date}
+                            count={timeSeries[selectedDayForModal].count}
+                            items={timeSeries[selectedDayForModal].items || []}
+                        />
                     )}
 
                     {/* Behavioral Trails Section */}
