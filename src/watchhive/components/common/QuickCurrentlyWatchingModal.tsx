@@ -94,8 +94,8 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
             });
 
             // Display beautiful success alert
-            await alert(`"${title}" has been successfully added to your Currently Watching list!`, {
-                title: 'Watching Started',
+            await alert(`"${title}" has been added to your Currently Watching log!`, {
+                title: 'Marked as Watching',
                 severity: 'success',
                 confirmText: 'Awesome'
             });
@@ -103,8 +103,8 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
             if (onSuccess) onSuccess();
             onClose();
         } catch (err) {
-            console.error('Failed to quick add to currently watching', err);
-            await alert(`Failed to add "${title}" to your list. Please try again.`, {
+            console.error('Failed to add to currently watching log', err);
+            await alert(`Failed to add "${title}" to your log. Please try again.`, {
                 title: 'Error',
                 severity: 'error'
             });
@@ -119,11 +119,11 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Start Watching (Quick Add)">
+        <Modal isOpen={isOpen} onClose={onClose} title="Log Currently Watching">
             {!selectedMovie ? (
                 <div className="flex flex-col gap-4">
                     <p className="text-[#2D2926]/60 text-xs font-bold uppercase tracking-wider mb-1">
-                        Select a movie or TV show to start watching right now:
+                        Select a movie or TV show to add to your currently watching log:
                     </p>
                     <div className="relative">
                         <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#ffb700] text-[24px]">search</span>
@@ -194,7 +194,7 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
                                 {yearOf(selectedMovie) && <span>• {yearOf(selectedMovie)}</span>}
                             </div>
                             <p className="text-[11px] leading-relaxed text-[#2D2926]/60 mt-2 font-bold line-clamp-2">
-                                {selectedMovie.overview || "No transmission available for this cinematic entry."}
+                                {selectedMovie.overview || "No description available for this cinematic entry."}
                             </p>
                         </div>
                     </div>
@@ -218,12 +218,12 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
                             {isSubmitting ? (
                                 <>
                                     <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-white"></div>
-                                    Starting...
+                                    Adding...
                                 </>
                             ) : (
                                 <>
-                                    <span className="material-symbols-outlined text-sm font-bold">play_circle</span>
-                                    Add to Currently Watching
+                                    <span className="material-symbols-outlined text-sm font-bold">visibility</span>
+                                    Log Currently Watching
                                 </>
                             )}
                         </button>

@@ -40,9 +40,9 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         if (isTransitioning) return;
 
         const title = details?.title || details?.name || 'this title';
-        const confirmed = await confirm(`Would you like to start watching "${title}"? This will move it from your watchlist to your Currently Watching list.`, {
-            title: 'Start Watching',
-            confirmText: 'Start Watching',
+        const confirmed = await confirm(`Would you like to move "${title}" to your Currently Watching log?`, {
+            title: 'Log as Currently Watching',
+            confirmText: 'Move to Currently Watching',
             severity: 'primary'
         });
         if (!confirmed) return;
@@ -65,14 +65,14 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
             await removeFromList(tmdbId);
 
             // Display beautiful success alert
-            await alert(`"${title}" has been successfully moved to your Currently Watching list!`, {
-                title: 'Watching Started',
+            await alert(`"${title}" has been added to your Currently Watching log!`, {
+                title: 'Marked as Watching',
                 severity: 'success',
                 confirmText: 'Awesome'
             });
         } catch (err) {
             console.error('Failed to move item to currently watching', err);
-            await alert(`Failed to start watching "${title}". Please try again.`, {
+            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
                 title: 'Error',
                 severity: 'error'
             });
@@ -192,13 +192,13 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                             onClick={handleAddToWatching}
                             disabled={isTransitioning}
                             className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors disabled:opacity-50"
-                            title="Start Watching (Move to Currently Watching)"
+                            title="Log as Currently Watching"
                         >
                             {isTransitioning ? (
                                 <span className="animate-spin text-[12px] text-[#ffb700]">⏳</span>
                             ) : (
                                 <span className="material-symbols-outlined text-[18px]">
-                                    play_arrow
+                                    visibility
                                 </span>
                             )}
                         </button>

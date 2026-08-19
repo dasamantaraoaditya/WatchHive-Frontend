@@ -252,7 +252,7 @@ export const EntriesPage: React.FC = () => {
                                     <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
                                         {searchQueries.watching 
                                             ? `We couldn't find any active sessions matching "${searchQueries.watching}"` 
-                                            : "The hive is quiet. Start watching a movie or TV show to track your active sessions!"}
+                                            : "The hive is quiet. Log a movie or TV show you are currently watching to track your active sessions!"}
                                     </p>
                                     {!searchQueries.watching && (
                                         <button

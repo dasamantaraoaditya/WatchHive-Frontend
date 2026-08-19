@@ -238,8 +238,8 @@ export const MovieDetailsPage: React.FC = () => {
         if (!tmdbId || isTransitioning) return;
 
         const confirmed = await confirm(
-            `Would you like to start watching "${title}"? This will move it to your Currently Watching list.`,
-            { title: 'Start Watching', confirmText: 'Start Watching', severity: 'primary' }
+            `Would you like to move "${title}" to your Currently Watching log?`,
+            { title: 'Log as Currently Watching', confirmText: 'Move to Currently Watching', severity: 'primary' }
         );
         if (!confirmed) return;
 
@@ -254,14 +254,14 @@ export const MovieDetailsPage: React.FC = () => {
                 startedAt: new Date().toISOString(),
             });
             await removeFromList(tmdbId);
-            await alert(`"${title}" has been moved to your Currently Watching list!`, {
-                title: 'Watching Started',
+            await alert(`"${title}" has been added to your Currently Watching log!`, {
+                title: 'Marked as Watching',
                 severity: 'success',
                 confirmText: 'Awesome',
             });
         } catch (err) {
-            console.error('Failed to start watching:', err);
-            await alert(`Failed to start watching "${title}". Please try again.`, {
+            console.error('Failed to add to currently watching log:', err);
+            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
                 title: 'Error',
                 severity: 'error',
             });
@@ -443,9 +443,9 @@ export const MovieDetailsPage: React.FC = () => {
                                                 className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/15 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs"
                                             >
                                                 <span className="material-symbols-outlined text-[18px] text-[#ffb700]">
-                                                    play_circle
-                                                </span>
-                                                Start Watching
+                                                     visibility
+                                                 </span>
+                                                 Log Currently Watching
                                             </button>
                                         )}
 
