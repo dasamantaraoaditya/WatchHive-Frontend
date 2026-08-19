@@ -228,6 +228,12 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         {isImageLoading && (
                             <div className="absolute inset-0 skeleton" style={{ zIndex: 0, borderBottomLeftRadius: '0', borderBottomRightRadius: '0' }} />
                         )}
+                        {entryData?.isWatching && (
+                            <div className="absolute top-3 left-3 z-10 bg-amber-500/95 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-lg border border-amber-300/40 flex items-center gap-1.5 animate-pulse select-none">
+                                <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
+                                Currently Watching
+                            </div>
+                        )}
                         <div className="feed-card-poster-badges">
                             <div className="flex flex-col gap-2">
                                 {rating && (

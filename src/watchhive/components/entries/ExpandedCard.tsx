@@ -167,7 +167,16 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                     </div>
                     <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Status</span>
-                        <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide">{entry.isWatching ? 'Watching' : 'Completed'}</span>
+                        <div className="mt-1">
+                            {entry.isWatching ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-widest border border-amber-300/60 shadow-sm">
+                                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                                    In Watching Phase
+                                </span>
+                            ) : (
+                                <span className="text-[#2D2926] text-sm font-bold">Completed</span>
+                            )}
+                        </div>
                     </div>
                     {entry.watchLocation && (
                         <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">

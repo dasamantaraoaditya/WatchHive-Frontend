@@ -194,17 +194,32 @@ export const EntryCard: React.FC<{
                         )}
                     </div>
 
-                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+                    <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1.5 z-10 max-w-[85%]">
                         <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90`}>
                             {ti.emoji}
                         </span>
+                        {entry.isWatching && (
+                            <span className="bg-amber-500/90 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 animate-pulse border border-amber-300/40 select-none">
+                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping shrink-0" />
+                                Currently Watching
+                            </span>
+                        )}
                     </div>
                 </div>
 
                 <motion.div layoutId={`card-content-${entry.id}`} className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white">
-                    <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={entry.title}>
-                        {entry.title}
-                    </motion.h4>
+                    <div className="flex items-start justify-between gap-1">
+                        <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={entry.title}>
+                            {entry.title}
+                        </motion.h4>
+                    </div>
+
+                    {entry.isWatching && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-md text-[8px] font-black uppercase tracking-widest my-0.5 w-fit">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                            In Watching Phase
+                        </div>
+                    )}
                     <div className="text-[10px] text-[#2D2926]/40 dark:text-stone-400 font-bold mb-1.5 flex items-center justify-between">
                         <span>{formatDate(entry.watchedAt)}</span>
                         {entry.watchLocation && (
