@@ -52,24 +52,87 @@ export const ProfileStats: React.FC = () => {
                 <BeeLoader size="small" message="Parsing Hive History..." />
             </div>
         );
-    }
+    const timeframes = [
+        { label: '7d', value: 7 },
+        { label: '30d', value: 30 },
+        { label: '90d', value: 90 },
+        { label: '1y', value: 365 },
+        { label: 'All Time', value: 0 },
+    ];
 
     if (!data || data.summary.totalCount === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-                <div className="w-20 h-20 rounded-[28px] bg-[#ffb700]/5 flex items-center justify-center mb-6 border border-[#ffb700]/10">
-                    <span className="material-symbols-outlined text-4xl text-[#ffb700]/30">analytics</span>
+            <div className="flex flex-col gap-8 animate-[fade-in_0.3s_ease-out]">
+                {/* Unified Filter Toolbar */}
+                <div className="flex flex-wrap items-center gap-4 bg-white border border-[#ffb700]/10 p-5 rounded-[28px] shadow-sm">
+                    <div className="flex items-center gap-1.5 mr-4 flex-wrap">
+                        {timeframes.map(tf => (
+                            <button 
+                                key={tf.value}
+                                onClick={() => setDays(tf.value)}
+                                className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === tf.value ? 'bg-[#ffb700] text-white shadow-md' : 'bg-[#FFF9F0] text-[#2D2926]/40 hover:text-[#2D2926]'}`}
+                            >
+                                {tf.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                        <select 
+                            value={type} 
+                            onChange={(e) => setType(e.target.value)}
+                            className="bg-[#FFF9F0] border border-[#ffb700]/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#2D2926] outline-none"
+                        >
+                            <option value="">All Types</option>
+                            <option value="MOVIE">Movies Only</option>
+                            <option value="TV_SHOW">TV Only</option>
+                        </select>
+
+                        <select 
+                            value={genre} 
+                            onChange={(e) => setGenre(e.target.value)}
+                            className="bg-[#FFF9F0] border border-[#ffb700]/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#2D2926] outline-none max-w-[150px]"
+                        >
+                            <option value="">All Genres</option>
+                            {(data?.availableGenres || []).map(g => <option key={g} value={g}>{g}</option>)}
+                        </select>
+
+                        <select 
+                            value={minRating} 
+                            onChange={(e) => setMinRating(Number(e.target.value))}
+                            className="bg-[#FFF9F0] border border-[#ffb700]/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#2D2926] outline-none"
+                        >
+                            <option value="0">Any Rating</option>
+                            {[9, 8, 7, 6, 5].map(r => <option key={r} value={r}>{r}+ Stars</option>)}
+                        </select>
+                    </div>
                 </div>
-                <h3 className="text-xl font-black text-[#2D2926] tracking-tight mb-2">Filters Too Strict?</h3>
-                <p className="text-[#2D2926]/40 font-bold max-w-[300px] text-sm leading-relaxed mb-6">
-                    We couldn't find any watches matching your current filters. Try relaxing them!
-                </p>
-                <button 
-                    onClick={() => { setType(''); setGenre(''); setMinRating(0); setDays(30); }}
-                    className="px-6 py-2.5 bg-[#ffb700] text-white text-[10px] font-black rounded-xl uppercase tracking-widest"
-                >
-                    Clear All Filters
-                </button>
+
+                <div className="flex flex-col items-center justify-center py-16 text-center px-4 bg-white rounded-[32px] border border-[#ffb700]/15 shadow-sm">
+                    <div className="w-16 h-16 rounded-[24px] bg-[#ffb700]/10 flex items-center justify-center mb-4 border border-[#ffb700]/20 text-[#ffb700]">
+                        <span className="material-symbols-outlined text-3xl">analytics</span>
+                    </div>
+                    <h3 className="text-xl font-black text-[#2D2926] tracking-tight mb-2">No Matches for Selected Range</h3>
+                    <p className="text-[#2D2926]/50 font-bold max-w-sm text-xs leading-relaxed mb-6">
+                        No watch entries found for the selected {days === 0 ? 'All Time' : `${days}-day`} timeframe and filters. Try switching to <strong>All Time</strong> or clearing filters!
+                    </p>
+                    <div className="flex gap-3">
+                        {days !== 0 && (
+                            <button 
+                                onClick={() => setDays(0)}
+                                className="px-5 py-2.5 bg-[#ffb700] text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-md hover:bg-[#2D2926] transition-colors"
+                            >
+                                View All-Time Analytics
+                            </button>
+                        )}
+                        <button 
+                            onClick={() => { setType(''); setGenre(''); setMinRating(0); setDays(0); }}
+                            className="px-5 py-2.5 bg-[#FFF9F0] border border-[#ffb700]/30 text-[#ffb700] text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-[#ffb700] hover:text-white transition-colors"
+                        >
+                            Clear All Filters
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -93,14 +156,14 @@ export const ProfileStats: React.FC = () => {
             
             {/* Unified Filter Toolbar */}
             <div className="flex flex-wrap items-center gap-4 bg-white border border-[#ffb700]/10 p-5 rounded-[28px] shadow-sm">
-                <div className="flex items-center gap-2 mr-4">
-                    {[7, 30, 90].map(d => (
+                <div className="flex items-center gap-1.5 mr-4 flex-wrap">
+                    {timeframes.map(tf => (
                         <button 
-                            key={d}
-                            onClick={() => setDays(d)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === d ? 'bg-[#ffb700] text-white shadow-md' : 'bg-[#FFF9F0] text-[#2D2926]/40 hover:text-[#2D2926]'}`}
+                            key={tf.value}
+                            onClick={() => setDays(tf.value)}
+                            className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === tf.value ? 'bg-[#ffb700] text-white shadow-md' : 'bg-[#FFF9F0] text-[#2D2926]/40 hover:text-[#2D2926]'}`}
                         >
-                            {d}d
+                            {tf.label}
                         </button>
                     ))}
                 </div>
