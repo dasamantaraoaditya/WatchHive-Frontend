@@ -75,10 +75,19 @@ export const CinematicStacksPage: React.FC = () => {
 
     const loadRankedList = async (listId: string) => {
         setIsLoading(true);
+        setItems([]);
         try {
             const response = await listsApi.getRankedList(listId);
             setCurrentList(response.list);
-            setItems(response.items);
+
+            const seen = new Set<number>();
+            const uniqueItems = (response.items || []).filter(item => {
+                if (seen.has(item.tmdbId)) return false;
+                seen.add(item.tmdbId);
+                return true;
+            });
+
+            setItems(uniqueItems);
         } catch (err) {
             setError('Failed to load ranked items');
         } finally {
