@@ -32,7 +32,8 @@ export const EntryCard: React.FC<{
     onDelete?: (id: string) => void;
     onComplete?: (entry: Entry) => void;
     onClick?: (entry: Entry, details: TmdbDetails | null) => void;
-}> = ({ entry, onEdit, onDelete: _onDelete, onComplete: _onComplete, onClick }) => {
+    showWatchingBadge?: boolean;
+}> = ({ entry, onEdit, onDelete: _onDelete, onComplete: _onComplete, onClick, showWatchingBadge = false }) => {
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
@@ -198,7 +199,7 @@ export const EntryCard: React.FC<{
                         <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90`}>
                             {ti.emoji}
                         </span>
-                        {entry.isWatching && (
+                        {entry.isWatching && showWatchingBadge && (
                             <span className="bg-[#ffb700] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-md border border-white/20 select-none">
                                 Currently Watching
                             </span>
@@ -558,6 +559,7 @@ export const EntryList: React.FC<EntryListProps> = ({
                         <EntryCard
                             key={entry.id}
                             entry={entry}
+                            showWatchingBadge={true}
                             onEdit={onEdit}
                             onDelete={readOnly ? undefined : handleDelete}
                             onClick={(entry, details) => setSelectedEntry({ entry, details })}
