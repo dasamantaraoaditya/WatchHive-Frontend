@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 export interface TourStep {
@@ -54,6 +55,16 @@ const TOUR_STEPS: TourStep[] = [
     }
 ];
 
+const STEP_ROUTES: (string | null)[] = [
+    '/watch-hive/feed',
+    '/watch-hive/entries?tab=watching',
+    '/watch-hive/search?tab=users',
+    null,
+    '/watch-hive/profile',
+    '/watch-hive/mindlens',
+    '/watch-hive/search?tab=media',
+];
+
 interface TourContextType {
     isActive: boolean;
     currentStepIndex: number;
@@ -91,6 +102,7 @@ const queryVisibleElement = (selector: string): HTMLElement | null => {
 
 export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
     const [isActive, setIsActive] = useState(false);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [showWelcome, setShowWelcome] = useState(false);
@@ -114,6 +126,15 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [isAuthenticated]);
 
+    // Auto-navigate to relevant route when step changes
+    useEffect(() => {
+        if (!isActive) return;
+        const targetRoute = STEP_ROUTES[currentStepIndex];
+        if (targetRoute) {
+            navigate(targetRoute);
+        }
+    }, [isActive, currentStepIndex, navigate]);
+
     // Handle spotlight target rect updates dynamically and instantaneously
     useEffect(() => {
         if (!isActive) {
@@ -126,7 +147,6 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!step) return;
             const element = queryVisibleElement(step.target);
             if (element) {
-                // Scroll instantly to avoid measurements during smooth-scrolling animations
                 element.scrollIntoView({ behavior: 'auto', block: 'center' });
                 setTargetRect(element.getBoundingClientRect());
             } else {
@@ -134,8 +154,8 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         };
 
-        // Initial measurement
-        updateRect();
+        // Delay measurement slightly after route navigation for DOM stability
+        const timer = setTimeout(updateRect, 150);
 
         const handleLayoutUpdate = () => {
             const step = TOUR_STEPS[currentStepIndex];
@@ -146,11 +166,11 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         };
 
-        // Listeners for layout adjustments
         window.addEventListener('resize', handleLayoutUpdate);
         window.addEventListener('scroll', handleLayoutUpdate);
         
         return () => {
+            clearTimeout(timer);
             window.removeEventListener('resize', handleLayoutUpdate);
             window.removeEventListener('scroll', handleLayoutUpdate);
         };
@@ -190,19 +210,37 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const activeStep = TOUR_STEPS[currentStepIndex];
     const isMovieDetailsPage = typeof window !== 'undefined' && window.location.pathname.includes('/details/');
 
-    // Compute boundary-safe tooltip position — no CSS transforms, clamps within viewport
+    // Compute boundary-safe tooltip position — mobile-optimized top/bottom positioning
     const getTooltipStyle = (): React.CSSProperties => {
-        // Mobile: centered bottom drawer that fits all mobile screen sizes cleanly
-        if (window.innerWidth < 768) {
-            return {
-                position: 'fixed',
-                left: '12px',
-                right: '12px',
-                bottom: '16px',
-                width: 'calc(100vw - 24px)',
-                maxWidth: 'none',
-                zIndex: 3000
-            };
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // Mobile optimization: position tooltip away from target so target is 100% visible
+        if (vw < 768) {
+            const targetY = targetRect ? (targetRect.top + targetRect.height / 2) : (vh / 2);
+            // If target is in lower half of screen (e.g. bottom nav or FAB), place tooltip at TOP
+            if (targetY > vh / 2) {
+                return {
+                    position: 'fixed',
+                    left: '12px',
+                    right: '12px',
+                    top: '72px',
+                    width: 'calc(100vw - 24px)',
+                    maxWidth: 'none',
+                    zIndex: 3000
+                };
+            } else {
+                // Target is in upper half of screen (e.g. header avatar), place tooltip at BOTTOM
+                return {
+                    position: 'fixed',
+                    left: '12px',
+                    right: '12px',
+                    bottom: '84px',
+                    width: 'calc(100vw - 24px)',
+                    maxWidth: 'none',
+                    zIndex: 3000
+                };
+            }
         }
 
         if (!targetRect) {
@@ -216,11 +254,9 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const gap = 14;
-        const PAD = 16; // min distance from any viewport edge
+        const PAD = 16;
         const TW = tooltipRef.current?.offsetWidth ?? 340;
         const TH = tooltipRef.current?.offsetHeight ?? 220;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
 
         let left: number;
         let top: number;
@@ -245,7 +281,6 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 break;
         }
 
-        // Clamp so the tooltip never overflows any edge
         left = Math.max(PAD, Math.min(left, vw - TW - PAD));
         top  = Math.max(PAD, Math.min(top,  vh - TH - PAD));
 
@@ -296,18 +331,18 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             <AnimatePresence>
                 {isActive && (
                     <>
-                        {/* Masked Spotlight SVG — only cut holes if NOT in Movie Details view and target is valid */}
+                        {/* Masked Spotlight SVG with Golden Glow Ring */}
                         {!isMovieDetailsPage && targetRect && targetRect.width > 10 && targetRect.height > 10 ? (
                             <svg className="fixed inset-0 pointer-events-none z-[2400] w-full h-full">
                                 <defs>
                                     <mask id="tour-spotlight-mask">
                                         <rect width="100%" height="100%" fill="white" />
                                         <rect
-                                            x={targetRect.left - 6}
-                                            y={targetRect.top - 6}
-                                            width={targetRect.width + 12}
-                                            height={targetRect.height + 12}
-                                            rx={Math.abs(targetRect.width - targetRect.height) < 4 ? "9999" : "16"}
+                                            x={targetRect.left - 8}
+                                            y={targetRect.top - 8}
+                                            width={targetRect.width + 16}
+                                            height={targetRect.height + 16}
+                                            rx={Math.abs(targetRect.width - targetRect.height) < 8 ? "9999" : "18"}
                                             fill="black"
                                         />
                                     </mask>
@@ -315,20 +350,33 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 <rect
                                     width="100%"
                                     height="100%"
-                                    fill="rgba(45, 41, 38, 0.4)"
+                                    fill="rgba(30, 27, 25, 0.65)"
                                     mask="url(#tour-spotlight-mask)"
                                     className="pointer-events-auto cursor-default"
+                                />
+                                {/* Pulsing Golden Ring Framing Highlighted Target */}
+                                <rect
+                                    x={targetRect.left - 8}
+                                    y={targetRect.top - 8}
+                                    width={targetRect.width + 16}
+                                    height={targetRect.height + 16}
+                                    rx={Math.abs(targetRect.width - targetRect.height) < 8 ? "9999" : "18"}
+                                    fill="none"
+                                    stroke="#ffb700"
+                                    strokeWidth="3"
+                                    className="animate-pulse pointer-events-none"
+                                    style={{ filter: 'drop-shadow(0 0 10px rgba(255, 183, 0, 0.9))' }}
                                 />
                             </svg>
                         ) : (
                             /* Translucent subtle overlay when in movie view or no target */
                             <div 
-                                className="fixed inset-0 bg-black/25 backdrop-blur-[1px] z-[2400] pointer-events-auto cursor-default transition-all"
+                                className="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-[2400] pointer-events-auto cursor-default transition-all"
                                 onClick={(e) => e.stopPropagation()}
                             />
                         )}
 
-                        {/* Interactive Tooltip Card */}
+                        {/* Interactive Mobile-Friendly Tooltip Card */}
                         <motion.div
                             ref={tooltipRef}
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -336,33 +384,41 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 280 }}
                             style={getTooltipStyle()}
-                            className="w-[calc(100vw-24px)] md:w-[340px] max-w-[360px] bg-white/95 backdrop-blur-xl border border-[#ffb700]/30 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.25)] p-5 flex flex-col gap-4 font-sans select-none border-t-4 border-t-[#ffb700] z-[3000]"
+                            className="w-[calc(100vw-24px)] md:w-[340px] max-w-[360px] bg-white/95 backdrop-blur-xl border border-[#ffb700]/30 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-4 md:p-5 flex flex-col gap-3 font-sans select-none border-t-4 border-t-[#ffb700] z-[3000]"
                         >
-                            {/* Step Count & Skip */}
-                            <div className="flex items-center justify-between">
-                                <span className="px-2.5 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md text-[9px] font-black uppercase tracking-wider">
-                                    Step {currentStepIndex + 1} of {TOUR_STEPS.length}
-                                </span>
-                                <button
-                                    onClick={skipTour}
-                                    className="text-[9px] font-black text-neutral-400 hover:text-[#ffb700] uppercase tracking-wider transition-colors cursor-pointer"
-                                >
-                                    Skip Tour
-                                </button>
+                            {/* Step Indicator & Progress Bar */}
+                            <div className="flex flex-col gap-1.5">
+                                <div className="flex items-center justify-between">
+                                    <span className="px-2.5 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md text-[9px] font-black uppercase tracking-wider">
+                                        Step {currentStepIndex + 1} of {TOUR_STEPS.length}
+                                    </span>
+                                    <button
+                                        onClick={skipTour}
+                                        className="text-[9px] font-black text-neutral-400 hover:text-[#ffb700] uppercase tracking-wider transition-colors cursor-pointer"
+                                    >
+                                        Skip Tour
+                                    </button>
+                                </div>
+                                <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                                    <div 
+                                        className="bg-[#ffb700] h-full transition-all duration-300 rounded-full"
+                                        style={{ width: `${((currentStepIndex + 1) / TOUR_STEPS.length) * 100}%` }}
+                                    />
+                                </div>
                             </div>
 
                             {/* Title & Description */}
                             <div className="flex flex-col gap-1">
-                                <h4 className="text-[14px] font-black text-[#2D2926] tracking-tight flex items-center gap-1.5">
+                                <h4 className="text-[13px] md:text-[14px] font-black text-[#2D2926] tracking-tight flex items-center gap-1.5">
                                     {activeStep.title}
                                 </h4>
-                                <p className="text-[11px] leading-relaxed text-[#2D2926]/75 font-bold mt-1">
+                                <p className="text-[11px] leading-relaxed text-[#2D2926]/75 font-bold">
                                     {activeStep.content}
                                 </p>
                             </div>
 
                             {/* Tooltip Navigation */}
-                            <div className="flex items-center justify-between pt-2.5 border-t border-[#ffb700]/10 mt-1">
+                            <div className="flex items-center justify-between pt-2 border-t border-[#ffb700]/10 mt-0.5">
                                 <button
                                     onClick={prevStep}
                                     disabled={currentStepIndex === 0}
@@ -372,7 +428,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 </button>
                                 <button
                                     onClick={nextStep}
-                                    className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer"
+                                    className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer active:scale-95"
                                 >
                                     <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</span>
                                     <span className="material-symbols-outlined text-[10px] font-bold">arrow_forward</span>
