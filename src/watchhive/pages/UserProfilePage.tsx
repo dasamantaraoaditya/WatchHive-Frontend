@@ -146,7 +146,14 @@ export const UserProfilePage: React.FC = () => {
             nextFollowing = false;
             nextRequested = false;
         } else {
-            nextRequested = true;
+            const isPrivateAccount = profileUser.privacyLevel === 'FOLLOWERS_ONLY' || 
+                                     profileUser.privacyLevel === 'PRIVATE' || 
+                                     profileUser.isPrivate;
+            if (isPrivateAccount) {
+                nextRequested = true;
+            } else {
+                nextFollowing = true;
+            }
         }
 
         setProfileUser(prev => prev ? ({ ...prev, isFollowing: nextFollowing, isRequested: nextRequested }) : null);

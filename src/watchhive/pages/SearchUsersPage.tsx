@@ -195,7 +195,14 @@ export const SearchUsersPage: React.FC = () => {
             nextFollowing = false;
             nextRequested = false;
         } else {
-            nextRequested = true;
+            const isPrivateAccount = targetUser.privacyLevel === 'FOLLOWERS_ONLY' || 
+                                     targetUser.privacyLevel === 'PRIVATE' || 
+                                     targetUser.isPrivate;
+            if (isPrivateAccount) {
+                nextRequested = true;
+            } else {
+                nextFollowing = true;
+            }
         }
 
         setUserResults(prev => prev.map(u =>
@@ -206,7 +213,12 @@ export const SearchUsersPage: React.FC = () => {
             if (originalFollowing || originalRequested) {
                 await userService.unfollowUser(targetUser.id);
             } else {
-                await userService.followUser(targetUser.id);
+                const response: any = await userService.followUser(targetUser.id);
+                if (response && response.status === 'following') {
+                    setUserResults(prev => prev.map(u =>
+                        u.id === targetUser.id ? { ...u, isFollowing: true, isRequested: false } : u
+                    ));
+                }
             }
         } catch (err) {
             setUserResults(prev => prev.map(u =>
