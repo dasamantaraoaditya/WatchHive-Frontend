@@ -11,51 +11,45 @@ export interface TourStep {
 
 const TOUR_STEPS: TourStep[] = [
     {
-        target: '#nav-brand, .wh-sidebar__brand',
-        title: 'Welcome to WatchHive 🐝',
-        content: 'Your personal cinematic universe — log every movie & show you watch, track what\'s next, discover what your friends are buzzing about, and build curated ranked lists. All in one hive.',
-        placement: 'bottom'
-    },
-    {
-        target: '[title="Quick Actions"]',
-        title: 'Quick Add — Your Hive Switch ⚡',
-        content: 'Tap the golden ⊕ button anytime to instantly log a new watch entry, mark something as Currently Watching, add to your Watchlist, or suggest a title to a friend — all without leaving your current page.',
-        placement: 'left'
+        target: '.wh-sidebar__link[href*="feed"], .wh-bottom-nav__link[href*="feed"], #nav-link-feed',
+        title: 'Step 1: Home & Social Feed 🏠',
+        content: 'Home is your central hub! Here you can explore your main activity feed, discover trending recommendations, and read real reviews from people in your swarm.',
+        placement: 'right'
     },
     {
         target: '.wh-sidebar__link[href*="entries"], .wh-bottom-nav__link[href*="entries"], #nav-link-entries',
-        title: 'Entries — Your Watch Log 🎬',
-        content: 'Every quick-add lands here. Browse your full history across three tabs: Watched (completed titles with ratings), Currently Watching (in-progress shows), and Watchlist (your backlog). Filter, search, and edit any entry.',
+        title: 'Step 2: Activity Tabs 🎬',
+        content: 'Your activity is organized in four clear tabs: Currently Watching (active sessions), Watch History (completed entries & ratings), Suggestions (titles recommended by friends), and Watchlist (saved backlog).',
         placement: 'right'
-    },
-    {
-        target: '.wh-sidebar__link[href*="mindlens"], .wh-bottom-nav__link[href*="mindlens"], #nav-link-mindlens',
-        title: 'MindLens — Deep Intelligence 🧠',
-        content: 'Your personal analytics engine. See genre heatmaps, binge patterns, average ratings by category, watch streaks, and AI-powered recommendations — all computed from your unique viewing history.',
-        placement: 'right'
-    },
-    {
-        target: '.wh-sidebar__link[href*="feed"], .wh-bottom-nav__link[href*="feed"], #nav-link-feed',
-        title: 'Feed — Your Social Hive 🏠',
-        content: 'See what people you follow are watching in real time. React to entries, discover hidden gems your friends rated highly, and get personalised suggestions based on your swarm\'s collective taste.',
-        placement: 'right'
-    },
-    {
-        target: '.wh-sidebar__link[href*="rankings"], .wh-bottom-nav__link[href*="rankings"]',
-        title: 'Rankings — Build Your Stack 🏆',
-        content: 'Create and rank your all-time favourites into curated Stack Lists — "Top 10 Thrillers", "Best Comfort Watches" and more. Drag to reorder, add cover art, and share your taste with followers.',
-        placement: 'right'
-    },
-    {
-        target: '#nav-profile-trigger, .wh-sidebar__user',
-        title: 'Profile & Privacy ⚙️',
-        content: 'Click your avatar to visit your profile. Manage your display name, bio, and profile picture. Use Privacy Settings to control who can follow you — toggle Follow Requests on to approve followers manually.',
-        placement: 'bottom'
     },
     {
         target: '.wh-sidebar__link[href*="search"], .wh-bottom-nav__link[href*="search"], #nav-link-search',
-        title: 'Search — Discover & Connect 🔍',
-        content: 'Search any movie or TV show to instantly log it via Quick Add. Switch to the Users tab to find friends by username, view their public profiles, and send follow requests to join their hive.',
+        title: 'Step 3: Search & Follow People 👥',
+        content: 'Want to build your swarm? Open Search and switch to the Users tab to find people by username or display name, view their activity, and send follow requests!',
+        placement: 'right'
+    },
+    {
+        target: '[title="Quick Actions"]',
+        title: 'Step 4: Quick Add — Hive Switch ⚡',
+        content: 'Tap the golden ⊕ button anytime to quickly: Log a completed watch entry, Log a currently watching title, Suggest a movie to a friend, or Bookmark to your Watchlist.',
+        placement: 'left'
+    },
+    {
+        target: '#nav-profile-trigger, .wh-sidebar__user',
+        title: 'Step 5: Profile & Privacy Controls ⚙️',
+        content: 'Click your avatar to open your Profile! Customize your bio and avatar, and control account visibility — choose Public, Followers Only, or Private with manual follow request approvals.',
+        placement: 'bottom'
+    },
+    {
+        target: '.wh-sidebar__link[href*="mindlens"], .wh-bottom-nav__link[href*="mindlens"], #nav-link-mindlens',
+        title: 'Step 6: MindLens & Personal Rankings 🧠🏆',
+        content: 'Explore MindLens for AI-powered viewing taste analysis and genre insights. Head to Rankings to curate and share top-tier lists ("Top 10 Thrillers", "Fav Comfort Shows").',
+        placement: 'right'
+    },
+    {
+        target: '.wh-sidebar__link[href*="search"], .wh-bottom-nav__link[href*="search"], #nav-link-search',
+        title: 'Step 7: Search Movies & TV Details 🔍',
+        content: 'Search any movie or TV show to inspect rich detail pages — view cast & crew, streaming platform availability (Where to Watch), ratings, seasons, and episode guides!',
         placement: 'right'
     }
 ];
@@ -276,7 +270,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             <div className="flex flex-col gap-0.5 min-w-0">
                                 <h4 className="text-sm font-black text-[#2D2926]">Welcome to WatchHive! 🐝</h4>
                                 <p className="text-[11px] font-bold text-[#2D2926]/60 leading-relaxed mt-1">
-                                    Take a quick 8-step tour to discover everything — from logging watches to analytics, rankings, and connecting with your swarm.
+                                    Take a quick 7-step guided tour to learn how to navigate your feed, activity logs, finding friends, Quick Add, profile privacy, MindLens AI analytics, and movie details!
                                 </p>
                             </div>
                         </div>
