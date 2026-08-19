@@ -24,8 +24,8 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
     };
 
     const actionButtons = [
-        { icon: 'edit_note', label: 'Log Watch', onClick: () => handleAction(onLogWatch), color: 'text-blue-500', bg: 'bg-blue-50' },
-        { icon: 'visibility', label: 'Currently Watching', onClick: () => handleAction(onCurrentlyWatching), color: 'text-green-500', bg: 'bg-green-50' },
+        { icon: 'edit_note', label: 'Log a Entry', onClick: () => handleAction(onLogWatch), color: 'text-blue-500', bg: 'bg-blue-50' },
+        { icon: 'visibility', label: 'Add Currently Watching', onClick: () => handleAction(onCurrentlyWatching), color: 'text-green-500', bg: 'bg-green-50' },
         { icon: 'send', label: 'Suggest', onClick: () => handleAction(onSuggest), color: 'text-purple-500', bg: 'bg-purple-50' },
         { icon: 'bookmark_add', label: 'Add to Watchlist', onClick: () => handleAction(onWatchlist), color: 'text-[#ffb700]', bg: 'bg-[#ffb700]/10' },
     ];
@@ -39,7 +39,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[1400] bg-black/20 backdrop-blur-sm"
+                        className="fixed inset-0 z-[1400] bg-black/40 backdrop-blur-sm"
                         onClick={() => setIsOpen(false)}
                     />
                 )}
@@ -48,7 +48,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
             <motion.div 
                 initial={{ scale: 0, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                className="fixed bottom-24 md:bottom-8 right-8 z-[1500] flex flex-col items-end gap-4"
+                className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-[1500] flex flex-col items-end gap-4"
             >
                 {/* Secondary Action Buttons */}
                 <AnimatePresence>
@@ -65,16 +65,16 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: 20 }}
-                                    transition={{ delay: i * 0.05 }}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
+                                    transition={{ delay: i * 0.04 }}
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.97 }}
                                     onClick={btn.onClick}
-                                    className="flex items-center gap-3 group"
+                                    className="flex items-center gap-3 cursor-pointer select-none"
                                 >
-                                    <span className="bg-white px-3 py-1.5 rounded-lg shadow-md text-xs font-bold text-[#2D2926] opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="bg-[#1A1A1A] text-white px-3.5 py-1.5 rounded-xl shadow-xl text-xs font-semibold whitespace-nowrap border border-white/10 tracking-wide">
                                         {btn.label}
                                     </span>
-                                    <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-lg border border-black/5 ${btn.color}`}>
+                                    <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-xl border border-black/5 ${btn.color}`}>
                                         <span className="material-symbols-outlined text-xl">{btn.icon}</span>
                                     </div>
                                 </motion.button>
