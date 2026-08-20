@@ -557,6 +557,7 @@ export const EntryList: React.FC<EntryListProps> = ({
                             <span className="material-symbols-outlined text-base font-bold">add</span>
                             Log a Watch
                         </button>
+                    )}
                 </div>
             ) : (
                 <div className="watchlist-grid outline-none">
