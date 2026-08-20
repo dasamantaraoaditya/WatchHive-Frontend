@@ -126,6 +126,7 @@ export const EntriesPage: React.FC = () => {
     const handleSuccess = () => {
         setShowForm(false);
         setEditingEntry(undefined);
+        fetchWatching(0);
         setRefreshKey((prev) => prev + 1);
     };
 

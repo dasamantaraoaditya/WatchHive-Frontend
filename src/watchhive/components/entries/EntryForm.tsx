@@ -443,11 +443,17 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
         try {
             let savedEntry: Entry;
+            const payload = { ...formData };
+            // If user has provided a rating or review, or is logging a completed watch, ensure isWatching is set to false
+            if (payload.rating !== undefined || (payload.review && payload.review.trim().length > 0)) {
+                payload.isWatching = false;
+            }
+
             if (isEditing && entry) {
-                const { tmdbId, ...updateData } = formData;
+                const { tmdbId, ...updateData } = payload;
                 savedEntry = await entriesApi.updateEntry(entry.id, updateData);
             } else {
-                savedEntry = await entriesApi.createEntry(formData as CreateEntryData);
+                savedEntry = await entriesApi.createEntry(payload as CreateEntryData);
             }
             onSuccess?.(savedEntry);
         } catch (err: any) {
