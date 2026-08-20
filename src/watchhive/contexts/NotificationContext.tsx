@@ -10,6 +10,7 @@ interface NotificationContextType {
     notifications: Notification[];
     unreadCount: number;
     loading: boolean;
+    error: string | null;
     hasMore: boolean;
     fetchNotifications: (page?: number) => Promise<void>;
     fetchMore: () => Promise<void>;
@@ -29,6 +30,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(false);
     const [page, setPage] = useState(1);
     const [toast, setToast] = useState<{ id: string; notification: Notification } | null>(null);
@@ -43,6 +45,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const fetchNotifications = useCallback(async (pageNum = 1) => {
         if (!user) return;
         setLoading(true);
+        setError(null);
         try {
             const data = await notificationsService.getNotifications(pageNum);
             if (pageNum === 1) {
@@ -53,8 +56,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             setUnreadCount(data.unreadCount);
             setHasMore(data.notifications.length === data.pagination.limit);
             setPage(pageNum);
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error);
+        } catch (err: any) {
+            console.error('Failed to fetch notifications:', err);
+            setError('Unable to connect to WatchHive servers right now. Please check your connection or try again later.');
         } finally {
             setLoading(false);
         }
@@ -191,6 +195,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             notifications,
             unreadCount,
             loading,
+            error,
             hasMore,
             fetchNotifications,
             fetchMore,

@@ -88,13 +88,15 @@ export const EntriesPage: React.FC = () => {
     const fetchWatching = useCallback(async (offset = 0) => {
         if (!user) return;
         setIsWatchingLoading(true);
+        setWatchingError(null);
         try {
             const response = await entriesApi.getEntries({ userId: user.id, isWatching: true, limit: 20, offset });
             const filtered = response.entries.filter((e: Entry) => e.isWatching);
             setWatchingEntries(prev => offset > 0 ? [...prev, ...filtered] : filtered);
             setWatchingPagination(response.pagination);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to fetch watching entries', err);
+            setWatchingError('Unable to connect to WatchHive servers right now. Please try again later.');
         } finally {
             setIsWatchingLoading(false);
         }
@@ -236,7 +238,13 @@ export const EntriesPage: React.FC = () => {
                                 countLabel={searchQueries.watching ? "Matching Sessions" : "Active Sessions"}
                             />
                             
-                            {isWatchingLoading && watchingEntries.length === 0 ? (
+                            {watchingError ? (
+                                <ErrorState 
+                                    title="The Hive is Currently Down"
+                                    message="Unable to load your active watching sessions right now. Please check your connection or try again later."
+                                    onRetry={() => fetchWatching(0)}
+                                />
+                            ) : isWatchingLoading && watchingEntries.length === 0 ? (
                                 <SkeletonGrid count={3} />
                             ) : filteredWatchingEntries.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">

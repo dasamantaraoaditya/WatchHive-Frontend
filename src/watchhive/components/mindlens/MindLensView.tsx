@@ -17,20 +17,23 @@ export const MindLensView: React.FC = () => {
     const [selectedDayForModal, setSelectedDayForModal] = useState<number | null>(null);
     const [imageError, setImageError] = useState(false);
 
-    useEffect(() => {
-        const fetchInsights = async () => {
-            try {
-                const response = await mindLensApi.getInsights();
-                setData(response);
-            } catch (err) {
-                console.error(err);
-                setError('Failed to load MindLens insights.');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchInsights();
+    const fetchInsights = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await mindLensApi.getInsights();
+            setData(response);
+        } catch (err: any) {
+            console.error(err);
+            setError('Unable to connect to WatchHive servers right now. Please check your connection or try again later.');
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchInsights();
+    }, [fetchInsights]);
 
     const formatInsight = (text: string) => {
         const parts = text.split(/(\*\*.*?\*\*)/g);
@@ -64,14 +67,11 @@ export const MindLensView: React.FC = () => {
 
     if (error || !data) {
         return (
-            <div className="bg-white border border-[#ffb700]/10 shadow-sm rounded-[32px] p-12 text-center">
-                <div className="text-4xl mb-4">⚠️</div>
-                <h3 className="text-xl font-black text-[#2D2926] mb-2">Something went wrong</h3>
-                <p className="text-[#2D2926]/60 font-medium mb-6">{error || 'Could not retrieve data at this time.'}</p>
-                <button onClick={() => window.location.reload()} className="px-6 py-2.5 bg-[#ffb700] text-white text-xs font-black rounded-xl uppercase tracking-widest shadow-md">
-                    Try Again
-                </button>
-            </div>
+            <ErrorState 
+                title="The Hive is Currently Down"
+                message={error || "Unable to retrieve MindLens insights right now. Please try again later."}
+                onRetry={fetchInsights}
+            />
         );
     }
 

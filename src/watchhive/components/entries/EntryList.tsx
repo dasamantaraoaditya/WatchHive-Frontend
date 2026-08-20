@@ -527,7 +527,13 @@ export const EntryList: React.FC<EntryListProps> = ({
                 isLoading={isLoading}
             />
 
-            {entries.length === 0 ? (
+            {error ? (
+                <ErrorState 
+                    title="The Hive is Currently Down"
+                    message="Unable to load your watch history right now. Please check your internet connection or try again later."
+                    onRetry={() => loadEntries()}
+                />
+            ) : entries.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm animate-[fade-in_0.3s_ease-out]">
                     <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
                         <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
@@ -551,7 +557,6 @@ export const EntryList: React.FC<EntryListProps> = ({
                             <span className="material-symbols-outlined text-base font-bold">add</span>
                             Log a Watch
                         </button>
-                    )}
                 </div>
             ) : (
                 <div className="watchlist-grid outline-none">

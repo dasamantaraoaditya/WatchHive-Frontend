@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { userService } from '../../services';
-import { BeeLoader } from '../common';
+import { BeeLoader, ErrorState } from '../common';
 import { DailyLogInspectorModal } from '../mindlens/DailyLogInspectorModal';
 
 interface StatsData {
@@ -22,6 +22,7 @@ interface StatsData {
 export const ProfileStats: React.FC = () => {
     const [data, setData] = useState<StatsData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [days, setDays] = useState(30);
     const [type, setType] = useState<string>('');
     const [genre, setGenre] = useState<string>('');
@@ -31,18 +32,21 @@ export const ProfileStats: React.FC = () => {
     const [hoveredDay, setHoveredDay] = useState<number | null>(null);
     const [selectedDayForModal, setSelectedDayForModal] = useState<number | null>(null);
 
+    const fetchStats = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await userService.getDetailedStats(days, type || undefined, genre || undefined, minRating || undefined);
+            setData(res);
+        } catch (err: any) {
+            console.error('Failed to fetch stats:', err);
+            setError('Unable to connect to WatchHive servers right now. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchStats = async () => {
-            setLoading(true);
-            try {
-                const res = await userService.getDetailedStats(days, type || undefined, genre || undefined, minRating || undefined);
-                setData(res);
-            } catch (err) {
-                console.error('Failed to fetch stats:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchStats();
     }, [days, type, genre, minRating]);
 
@@ -53,6 +57,16 @@ export const ProfileStats: React.FC = () => {
         { label: '1y', value: 365 },
         { label: 'All Time', value: 0 },
     ];
+
+    if (error) {
+        return (
+            <ErrorState 
+                title="The Hive is Currently Down"
+                message="Unable to load detailed analytics right now. Please check your connection or try again later."
+                onRetry={fetchStats}
+            />
+        );
+    }
 
     if (loading && !data) {
         return (

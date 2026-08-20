@@ -537,7 +537,13 @@ export const SearchUsersPage: React.FC = () => {
                     )}
                 </AnimatePresence>
 
-                {!loading && query.trim() !== '' && (searchMode === 'users' ? userResults : movieResults).length === 0 && (
+                {error ? (
+                    <ErrorState
+                        title="The Hive is Currently Down"
+                        message="Unable to perform search right now. Please check your internet connection or try again later."
+                        onRetry={() => handleSearch(1)}
+                    />
+                ) : !loading && query.trim() !== '' && (searchMode === 'users' ? userResults : movieResults).length === 0 && (
                     <div className="py-20 text-center animate-fade-in">
                         <EmptyState
                             title={`No ${searchMode} found`}

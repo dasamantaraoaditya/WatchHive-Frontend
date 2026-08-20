@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { Link, useNavigate } from 'react-router-dom';
-import { BeeLoader, Button } from '../components/common';
+import { BeeLoader, Button, ErrorState } from '../components/common';
 import { useUI } from '../contexts';
 import { PageLayout } from '../components/layout';
 import { PushOptInBanner } from '../components/notifications/PushOptInBanner';
@@ -11,6 +11,7 @@ const NotificationsPage: React.FC = () => {
     const {
         notifications,
         loading,
+        error,
         hasMore,
         fetchNotifications,
         fetchMore,
@@ -192,7 +193,13 @@ const NotificationsPage: React.FC = () => {
 
                 <div className="flex flex-col gap-3">
                     <PushOptInBanner />
-                    {loading && notifications.length === 0 ? (
+                    {error ? (
+                        <ErrorState
+                            title="The Hive is Currently Down"
+                            message={error}
+                            onRetry={() => fetchNotifications(1)}
+                        />
+                    ) : loading && notifications.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">
                             <BeeLoader size="small" message="Loading your activity..." />
                         </div>
