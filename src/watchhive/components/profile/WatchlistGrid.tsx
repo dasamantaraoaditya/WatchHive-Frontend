@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import { WatchlistCard } from './WatchlistCard';
 import './Profile.css';
-import { SkeletonCard, SkeletonGrid, FilterBar, SearchMediaModal } from '../common';
+import { SkeletonCard, SkeletonGrid, FilterBar, SearchMediaModal, ErrorState } from '../common';
 import { ListItem } from '../../services/lists.service';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
@@ -21,7 +21,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     onSearchChange,
     readOnly = false
 }) => {
-    const { watchlist: contextWatchlist, isLoading: contextLoading, hasLoaded: contextHasLoaded, fetchWatchlist, addToList } = useWatchlist();
+    const { watchlist: contextWatchlist, isLoading: contextLoading, hasLoaded: contextHasLoaded, error: contextError, fetchWatchlist, addToList } = useWatchlist();
     const [sortBy, setSortBy] = useState('recent-desc');
     const [showAddModal, setShowAddModal] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
@@ -129,7 +129,13 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                     isLoading={loading}
                 />
 
-                {filteredItems.length === 0 ? (
+                {contextError && !propItems ? (
+                    <ErrorState
+                        title="The Hive is Currently Down"
+                        message={contextError}
+                        onRetry={() => fetchWatchlist()}
+                    />
+                ) : filteredItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
                         <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
                             <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
