@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { mindLensApi, MindLensData } from '../../services/mindlens.service';
 import { MindLensHighlightsSkeleton } from '../common/Skeleton';
+import { ErrorState } from '../common';
 import { Link } from 'react-router-dom';
 import { ProfileStats } from '../profile';
 import { DailyLogInspectorModal } from './DailyLogInspectorModal';

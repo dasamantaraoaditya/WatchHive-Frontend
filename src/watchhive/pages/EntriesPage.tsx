@@ -9,7 +9,8 @@ import { WatchlistGrid } from '../components/profile';
 import { 
     SkeletonCard, 
     SkeletonGrid,
-    FilterBar
+    FilterBar,
+    ErrorState
 } from '../components/common';
 import { SuggestionsTab } from '../components/suggestions/SuggestionsTab';
 import { PageLayout } from '../components/layout';
@@ -53,6 +54,7 @@ export const EntriesPage: React.FC = () => {
     };
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
+    const [watchingError, setWatchingError] = useState<string | null>(null);
     const [watchingPagination, setWatchingPagination] = useState({ total: 0, limit: 20, offset: 0, hasMore: false });
     const [watchingSort, setWatchingSort] = useState('recent-desc');
     const [searchQueries, setSearchQueries] = useState({
