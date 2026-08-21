@@ -393,7 +393,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 }
             }).catch(err => console.error('Failed to load prefilled suggested user:', err));
         } else if (!targetUserId && !suggestedUser && formData.tmdbId > 0) {
-            suggestionsApi.getSuggestions().then(groups => {
+            suggestionsApi.getMySuggestions().then(groups => {
                 const matchGroup = (groups || []).find(g => Number(g.tmdbId) === Number(formData.tmdbId));
                 if (matchGroup && matchGroup.suggestors && matchGroup.suggestors.length > 0) {
                     const s = matchGroup.suggestors[0];
