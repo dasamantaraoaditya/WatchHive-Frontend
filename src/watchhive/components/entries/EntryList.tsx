@@ -6,8 +6,9 @@ import {
     SkeletonGrid,
     ErrorState,
     FilterBar,
-    MovieDetailsModal
+    Modal
 } from '../common';
+import { EntryForm } from './EntryForm';
 import '../profile/Profile.css';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -260,22 +261,35 @@ export const EntryCard: React.FC<{
                 </motion.div>
             </motion.div>
 
-            <MovieDetailsModal
-                isOpen={isCompleting}
-                onClose={() => setIsCompleting(false)}
-                tmdbId={entry.tmdbId}
-                mediaType={entry.type === 'TV_SHOW' ? 'tv' : 'movie'}
-                initialView="log"
-                existingEntry={{
-                    ...entry,
-                    isWatching: false,
-                    watchedAt: new Date().toISOString()
-                }}
-                onLogSuccess={() => {
-                    if (_onComplete) _onComplete(entry);
-                    setIsCompleting(false);
-                }}
-            />
+            {isCompleting && (
+                <Modal
+                    isOpen={isCompleting}
+                    onClose={() => setIsCompleting(false)}
+                    title="Log your watch"
+                    maxWidth="max-w-4xl"
+                >
+                    <EntryForm
+                        isModal={true}
+                        entry={{
+                            ...entry,
+                            isWatching: false
+                        }}
+                        prefillData={{
+                            tmdbId: entry.tmdbId,
+                            title: entry.title,
+                            type: entry.type,
+                            posterPath: entry.posterPath,
+                            suggestedByUserId: entry.suggestedByUserId || entry.suggestedByUser?.id || null,
+                            suggestedByUser: entry.suggestedByUser || null,
+                        }}
+                        onSuccess={() => {
+                            setIsCompleting(false);
+                            if (_onComplete) _onComplete(entry);
+                        }}
+                        onCancel={() => setIsCompleting(false)}
+                    />
+                </Modal>
+            )}
         </>
     );
 };
