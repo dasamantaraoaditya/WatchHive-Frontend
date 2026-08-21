@@ -230,6 +230,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                             <WatchlistButton 
                                 tmdbId={group.tmdbId} 
                                 mediaType={group.mediaType as any} 
+                                suggestedByUserId={uniqueSuggestors[0]?.id}
                                 variant="icon"
                                 className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
                             />

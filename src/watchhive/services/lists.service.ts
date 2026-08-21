@@ -66,8 +66,8 @@ export const listsApi = {
         return await apiClient.get<RankedListResponse>(`/lists/${listId}/ranked${query}`);
     },
 
-    addToStack: async (listId: string, tmdbId: number, mediaType: 'movie' | 'tv' = 'movie'): Promise<ListItem> => {
-        return await apiClient.post<ListItem>(`/lists/${listId}/items`, { tmdbId, mediaType });
+    addToStack: async (listId: string, tmdbId: number, mediaType: 'movie' | 'tv' = 'movie', suggestedByUserId?: string | null): Promise<ListItem> => {
+        return await apiClient.post<ListItem>(`/lists/${listId}/items`, { tmdbId, mediaType, suggestedByUserId });
     },
 
     removeFromStack: async (listId: string, tmdbId: number): Promise<void> => {
@@ -79,8 +79,8 @@ export const listsApi = {
     },
 
     // Aliases for the default watchlist
-    addToWatchlist: async (listId: string, tmdbId: number, mediaType?: 'movie' | 'tv'): Promise<ListItem> => {
-        return await listsApi.addToStack(listId, tmdbId, mediaType);
+    addToWatchlist: async (listId: string, tmdbId: number, mediaType?: 'movie' | 'tv', suggestedByUserId?: string | null): Promise<ListItem> => {
+        return await listsApi.addToStack(listId, tmdbId, mediaType, suggestedByUserId);
     },
 
     removeFromWatchlist: async (listId: string, tmdbId: number): Promise<void> => {

@@ -7,7 +7,7 @@ interface WatchlistContextType {
     isLoading: boolean;
     hasLoaded: boolean;
     error: string | null;
-    addToList: (tmdbId: number, mediaType?: 'movie' | 'tv') => Promise<void>;
+    addToList: (tmdbId: number, mediaType?: 'movie' | 'tv', suggestedByUserId?: string | null) => Promise<void>;
     removeFromList: (tmdbId: number) => Promise<void>;
     isInWatchlist: (tmdbId: number) => boolean;
     fetchWatchlist: () => Promise<void>;
@@ -67,7 +67,7 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
     }, [isAuthenticated, fetchWatchlist]);
 
-    const addToList = async (tmdbId: number, mediaType: 'movie' | 'tv' = 'movie') => {
+    const addToList = async (tmdbId: number, mediaType: 'movie' | 'tv' = 'movie', suggestedByUserId?: string | null) => {
         if (!isAuthenticated) return;
 
         // If watchlist is null (not fetched yet or error), try fetch first? 
@@ -100,12 +100,13 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 mediaType,
                 listId: targetList.id,
                 orderIndex: 0,
+                suggestedByUserId: suggestedByUserId || null,
                 addedAt: new Date().toISOString()
             }]
         });
 
         try {
-            const newItem = await listsApi.addToWatchlist(targetList.id, tmdbId, mediaType);
+            const newItem = await listsApi.addToWatchlist(targetList.id, tmdbId, mediaType, suggestedByUserId);
             setWatchlist(prev => prev ? {
                 ...prev,
                 items: (prev.items || []).map(i => i.id === tempId ? newItem : i)

@@ -6,6 +6,7 @@ import './WatchlistButton.css';
 interface WatchlistButtonProps {
     tmdbId: number;
     mediaType?: 'movie' | 'tv';
+    suggestedByUserId?: string | null;
     className?: string;
     variant?: 'icon' | 'button';
 }
@@ -13,6 +14,7 @@ interface WatchlistButtonProps {
 export const WatchlistButton: React.FC<WatchlistButtonProps> = ({
     tmdbId,
     mediaType = 'movie',
+    suggestedByUserId,
     className = '',
     variant = 'button'
 }) => {
@@ -31,7 +33,7 @@ export const WatchlistButton: React.FC<WatchlistButtonProps> = ({
             if (inList) {
                 await removeFromList(tmdbId);
             } else {
-                await addToList(tmdbId, mediaType);
+                await addToList(tmdbId, mediaType, suggestedByUserId);
             }
         } finally {
             setLocalLoading(false);

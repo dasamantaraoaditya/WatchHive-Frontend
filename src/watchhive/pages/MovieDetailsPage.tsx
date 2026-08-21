@@ -246,12 +246,14 @@ export const MovieDetailsPage: React.FC = () => {
         setIsTransitioning(true);
         try {
             const apiType = mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
+            const suggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id;
             await entriesApi.createEntry({
                 tmdbId,
                 title,
                 type: apiType,
                 isWatching: true,
                 startedAt: new Date().toISOString(),
+                suggestedByUserId: suggestedByUserId || null,
             });
             await removeFromList(tmdbId);
             await alert(`"${title}" has been added to your Currently Watching log!`, {
@@ -273,10 +275,11 @@ export const MovieDetailsPage: React.FC = () => {
     const handleWatchlistToggle = async () => {
         if (!tmdbId) return;
         try {
+            const suggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id;
             if (inWatchlist) {
                 await removeFromList(tmdbId);
             } else {
-                await addToList(tmdbId, mediaType);
+                await addToList(tmdbId, mediaType, suggestedByUserId);
             }
         } catch (err) {
             console.error('Watchlist action failed', err);
@@ -795,6 +798,8 @@ export const MovieDetailsPage: React.FC = () => {
                                     type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
                                     posterPath: details.poster_path,
                                     overview: details.overview,
+                                    suggestedByUserId: location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || null,
+                                    suggestedByUser: location.state?.suggestedByUser || null,
                                 }}
                                 isModal={false}
                                 onSuccess={() => setView('details')}
