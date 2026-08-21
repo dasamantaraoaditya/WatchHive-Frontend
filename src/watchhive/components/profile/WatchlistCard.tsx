@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import apiClient from '../../services/api.js';
-import { MovieDetailsModal } from '../common';
+import { MovieDetailsModal, Modal } from '../common';
 import { entriesApi } from '../../services/entries.service';
 import { EntryForm } from '../entries/EntryForm';
 import './Profile.css';
@@ -269,25 +269,32 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         />
 
         {showEntryForm && (
-            <EntryForm
-                isModal={true}
-                prefillData={{
-                    tmdbId,
-                    title: details.title || details.name,
-                    type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
-                    posterPath: details.poster_path,
-                    overview: details.overview,
-                    suggestedByUserId: suggestedByUser?.id || null,
-                    suggestedByUser: suggestedByUser || null,
-                }}
-                onSuccess={async () => {
-                    setShowEntryForm(false);
-                    if (!readOnly) {
-                        await removeFromList(tmdbId);
-                    }
-                }}
-                onCancel={() => setShowEntryForm(false)}
-            />
+            <Modal
+                isOpen={showEntryForm}
+                onClose={() => setShowEntryForm(false)}
+                title="Log your watch"
+                maxWidth="max-w-4xl"
+            >
+                <EntryForm
+                    isModal={true}
+                    prefillData={{
+                        tmdbId,
+                        title: details.title || details.name,
+                        type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                        posterPath: details.poster_path,
+                        overview: details.overview,
+                        suggestedByUserId: suggestedByUser?.id || null,
+                        suggestedByUser: suggestedByUser || null,
+                    }}
+                    onSuccess={async () => {
+                        setShowEntryForm(false);
+                        if (!readOnly) {
+                            await removeFromList(tmdbId);
+                        }
+                    }}
+                    onCancel={() => setShowEntryForm(false)}
+                />
+            </Modal>
         )}
         </>
     );

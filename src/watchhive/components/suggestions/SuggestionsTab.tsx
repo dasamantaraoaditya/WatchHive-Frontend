@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { suggestionsApi, GroupedSuggestion } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import { SuggestionCard } from './SuggestionCard';
-import { SkeletonCard, SkeletonGrid, ErrorState, FilterBar } from '../common';
+import { SkeletonCard, SkeletonGrid, ErrorState, FilterBar, Modal } from '../common';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { SuggestMovieModal } from './SuggestMovieModal';
 import { EntryForm } from '../entries/EntryForm';
@@ -259,24 +259,31 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
             )}
 
             {entryFormPrefill && (
-                <EntryForm
-                    isModal={true}
-                    prefillData={{
-                        tmdbId: entryFormPrefill.tmdbId,
-                        title: entryFormPrefill.title,
-                        type: entryFormPrefill.type,
-                        posterPath: entryFormPrefill.posterPath,
-                        suggestedByUserId: entryFormPrefill.suggestedByUserId,
-                    }}
-                    onSuccess={async () => {
-                        if (entryFormPrefill.suggestionIds) {
-                            await Promise.all(entryFormPrefill.suggestionIds.map(id => suggestionsApi.deleteSuggestion(id)));
-                        }
-                        setEntryFormPrefill(null);
-                        fetchSuggestions();
-                    }}
-                    onCancel={() => setEntryFormPrefill(null)}
-                />
+                <Modal
+                    isOpen={!!entryFormPrefill}
+                    onClose={() => setEntryFormPrefill(null)}
+                    title="Log your watch"
+                    maxWidth="max-w-4xl"
+                >
+                    <EntryForm
+                        isModal={true}
+                        prefillData={{
+                            tmdbId: entryFormPrefill.tmdbId,
+                            title: entryFormPrefill.title,
+                            type: entryFormPrefill.type,
+                            posterPath: entryFormPrefill.posterPath,
+                            suggestedByUserId: entryFormPrefill.suggestedByUserId,
+                        }}
+                        onSuccess={async () => {
+                            if (entryFormPrefill.suggestionIds) {
+                                await Promise.all(entryFormPrefill.suggestionIds.map(id => suggestionsApi.deleteSuggestion(id)));
+                            }
+                            setEntryFormPrefill(null);
+                            fetchSuggestions();
+                        }}
+                        onCancel={() => setEntryFormPrefill(null)}
+                    />
+                </Modal>
             )}
         </section>
     );
