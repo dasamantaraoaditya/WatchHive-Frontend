@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
+import { entriesApi } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import { WatchlistButton, SkeletonCard } from '../common';
 import '../profile/Profile.css';
@@ -9,6 +10,7 @@ import { useCustomAlert } from '../../contexts';
 interface SuggestionCardProps {
     group: GroupedSuggestion;
     onStatusChange?: () => void;
+    onLogEntry?: (prefill: { tmdbId: number; title: string; type: 'MOVIE' | 'TV_SHOW'; posterPath?: string | null; suggestedByUserId?: string | null; suggestionIds?: string[] }) => void;
     preloadedDetails?: {
         title: string;
         overview: string;
@@ -27,12 +29,12 @@ interface TmdbDetails {
     genres: string[];
 }
 
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange, preloadedDetails }) => {
+export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange, onLogEntry, preloadedDetails }) => {
     const navigate = useNavigate();
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDismissing, setIsDismissing] = useState(false);
-    const { confirm } = useCustomAlert();
+    const { confirm, alert } = useCustomAlert();
     const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
     const [showMobileActions, setShowMobileActions] = useState(false);
 
@@ -78,13 +80,79 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
         fetchDetails();
     }, [group.tmdbId, group.mediaType, preloadedDetails]);
 
-    const handleDismiss = async () => {
+    // De-duplicate suggestors
+    const uniqueSuggestors = group.suggestors.reduce((acc: any[], current) => {
+        if (!acc.find(s => s.id === current.id)) acc.push(current);
+        return acc;
+    }, []);
+
+    const handleAddToWatching = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isDismissing) return;
+
+        const title = details?.title || details?.name || 'this title';
+        const confirmed = await confirm(`Would you like to move "${title}" to your Currently Watching log?`, {
+            title: 'Log as Currently Watching',
+            confirmText: 'Move to Currently Watching',
+            severity: 'primary'
+        });
+        if (!confirmed) return;
+
+        setIsDismissing(true);
+        try {
+            const apiType = group.mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
+            const suggestorId = uniqueSuggestors[0]?.id;
+            await entriesApi.createEntry({
+                tmdbId: group.tmdbId,
+                title: details?.title || details?.name || title,
+                type: apiType,
+                isWatching: true,
+                startedAt: new Date().toISOString(),
+                suggestedByUserId: suggestorId
+            });
+            await Promise.all(group.suggestions.map(s => suggestionsApi.deleteSuggestion(s.id)));
+            await alert(`"${title}" has been added to your Currently Watching log!`, {
+                title: 'Marked as Watching',
+                severity: 'success',
+                confirmText: 'Awesome'
+            });
+            onStatusChange?.();
+        } catch (err) {
+            console.error('Failed to move item to currently watching', err);
+            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
+                title: 'Error',
+                severity: 'error'
+            });
+        } finally {
+            setIsDismissing(false);
+        }
+    };
+
+    const handleMarkAsWatched = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const apiType = group.mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
+        const title = details?.title || details?.name || 'Untitled';
+        onLogEntry?.({
+            tmdbId: group.tmdbId,
+            title,
+            type: apiType,
+            posterPath: details?.poster_path,
+            suggestedByUserId: uniqueSuggestors[0]?.id,
+            suggestionIds: group.suggestions.map(s => s.id)
+        });
+    };
+
+    const handleDelete = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (isDismissing) return;
         
-        const title = details?.title || 'this title';
-        const confirmed = await confirm(`Dismiss suggestions for "${title}"?`, {
-            title: 'Dismiss Suggestion',
-            confirmText: 'Dismiss',
+        const title = details?.title || details?.name || 'this title';
+        const confirmed = await confirm(`Delete suggestions for "${title}"?`, {
+            title: 'Delete Suggestion',
+            confirmText: 'Delete',
             severity: 'warning'
         });
         if (!confirmed) return;
@@ -95,7 +163,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
             await Promise.all(group.suggestions.map(s => suggestionsApi.deleteSuggestion(s.id)));
             onStatusChange?.();
         } catch (err) {
-            console.error('Failed to dismiss suggestions', err);
+            console.error('Failed to delete suggestions', err);
         } finally {
             setIsDismissing(false);
         }
@@ -107,12 +175,6 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
 
     const posterUrl = details?.poster_path ? `https://image.tmdb.org/t/p/w342${details.poster_path}` : null;
     const title = details?.title || details?.name || 'Untitled';
-    
-    // De-duplicate suggestors
-    const uniqueSuggestors = group.suggestors.reduce((acc: any[], current) => {
-        if (!acc.find(s => s.id === current.id)) acc.push(current);
-        return acc;
-    }, []);
 
     return (
         <>
@@ -172,15 +234,33 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                                 className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
                             />
                         </div>
+
+                        <button 
+                            onClick={handleAddToWatching}
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                            disabled={isDismissing}
+                            title="Log as Currently Watching"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
+
+                        <button 
+                            onClick={handleMarkAsWatched}
+                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
+                            disabled={isDismissing}
+                            title="Mark as Watched"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                        </button>
                         
                         <button 
-                            onClick={handleDismiss}
+                            onClick={handleDelete}
                             className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
                             disabled={isDismissing}
-                            title="Dismiss Suggestion"
+                            title="Delete Suggestion"
                         >
                             <span className="material-symbols-outlined text-[18px]">
-                                {isDismissing ? 'sync' : 'visibility_off'}
+                                {isDismissing ? 'sync' : 'delete'}
                             </span>
                         </button>
                     </div>

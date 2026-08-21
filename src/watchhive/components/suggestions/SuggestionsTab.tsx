@@ -5,6 +5,7 @@ import { SuggestionCard } from './SuggestionCard';
 import { SkeletonCard, SkeletonGrid, ErrorState, FilterBar } from '../common';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { SuggestMovieModal } from './SuggestMovieModal';
+import { EntryForm } from '../entries/EntryForm';
 
 interface SuggestionsTabProps {
     searchQuery?: string;
@@ -26,6 +27,14 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('recent-desc');
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
+    const [entryFormPrefill, setEntryFormPrefill] = useState<{
+        tmdbId: number;
+        title: string;
+        type: 'MOVIE' | 'TV_SHOW';
+        posterPath?: string | null;
+        suggestedByUserId?: string | null;
+        suggestionIds?: string[];
+    } | null>(null);
     const PAGE_SIZE = 20;
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -222,6 +231,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                                 key={`${group.mediaType}-${group.tmdbId}`} 
                                 group={group} 
                                 onStatusChange={fetchSuggestions}
+                                onLogEntry={(prefill) => setEntryFormPrefill(prefill)}
                                 preloadedDetails={{
                                     title: group.title,
                                     overview: group.overview,
@@ -246,6 +256,27 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                         </p>
                     </div>
                 </>
+            )}
+
+            {entryFormPrefill && (
+                <EntryForm
+                    isModal={true}
+                    prefillData={{
+                        tmdbId: entryFormPrefill.tmdbId,
+                        title: entryFormPrefill.title,
+                        type: entryFormPrefill.type,
+                        posterPath: entryFormPrefill.posterPath,
+                        suggestedByUserId: entryFormPrefill.suggestedByUserId,
+                    }}
+                    onSuccess={async () => {
+                        if (entryFormPrefill.suggestionIds) {
+                            await Promise.all(entryFormPrefill.suggestionIds.map(id => suggestionsApi.deleteSuggestion(id)));
+                        }
+                        setEntryFormPrefill(null);
+                        fetchSuggestions();
+                    }}
+                    onCancel={() => setEntryFormPrefill(null)}
+                />
             )}
         </section>
     );
