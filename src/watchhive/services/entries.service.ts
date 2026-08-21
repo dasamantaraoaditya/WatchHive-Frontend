@@ -1,9 +1,18 @@
 import apiClient from './api.js';
 
+export interface SuggestedUser {
+    id: string;
+    username: string;
+    displayName: string | null;
+    profilePictureUrl: string | null;
+}
+
 // Entry types
 export interface Entry {
     id: string;
     userId: string;
+    suggestedByUserId?: string | null;
+    suggestedByUser?: SuggestedUser | null;
     tmdbId: number;
     title: string;
     type: 'MOVIE' | 'TV_SHOW' | 'EPISODE';
@@ -43,6 +52,7 @@ export interface CreateEntryData {
     startedAt?: string;
     completedAt?: string;
     watchLocation?: string;
+    suggestedByUserId?: string | null;
 }
 
 export interface UpdateEntryData {
@@ -57,6 +67,7 @@ export interface UpdateEntryData {
     startedAt?: string;
     completedAt?: string;
     watchLocation?: string;
+    suggestedByUserId?: string | null;
 }
 
 export interface GetEntriesParams {

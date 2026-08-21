@@ -195,14 +195,29 @@ export const EntryCard: React.FC<{
                         )}
                     </div>
 
-                    <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1.5 z-10 max-w-[85%]">
-                        <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90`}>
+                    <div className="absolute top-2 left-2 flex items-center gap-1.5 z-20">
+                        <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90 select-none`}>
                             {ti.emoji}
                         </span>
                         {entry.isWatching && showWatchingBadge && (
-                            <span className="bg-[#ffb700] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow-md border border-white/20 select-none">
-                                Currently Watching
-                            </span>
+                            <div 
+                                className="relative group/watching flex items-center justify-center cursor-pointer"
+                                title="Watching"
+                            >
+                                {/* Animated ping ring behind the icon */}
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-[#ffb700] opacity-75 animate-ping" />
+                                
+                                {/* Animated Eye Badge */}
+                                <span className="relative inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#ffb700] text-white shadow-md border border-white/30 backdrop-blur-sm transition-transform duration-300 group-hover/watching:scale-110">
+                                    <span className="material-symbols-outlined text-[13px] font-black animate-pulse">visibility</span>
+                                </span>
+
+                                {/* Tooltip on Hover */}
+                                <div className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 hidden group-hover/watching:flex items-center px-2 py-1 bg-[#2D2926] text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-xl z-30 pointer-events-none whitespace-nowrap">
+                                    <span className="w-1.5 h-1.5 bg-[#ffb700] rounded-full mr-1.5 animate-pulse" />
+                                    Watching
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>

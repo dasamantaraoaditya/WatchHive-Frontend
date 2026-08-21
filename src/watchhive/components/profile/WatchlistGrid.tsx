@@ -172,6 +172,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                                     key={item.id}
                                     tmdbId={item.tmdbId}
                                     mediaType={item.mediaType as 'movie' | 'tv' || 'movie'}
+                                    suggestedByUser={item.suggestedByUser}
                                     readOnly={readOnly}
                                 />
                             ))}

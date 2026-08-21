@@ -276,6 +276,26 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     </div>
                 )}
 
+                {/* Suggested By Banner (WatchHive Standard) */}
+                {entryData?.suggestedByUser && (
+                    <div className="feed-card-suggested-box">
+                        <div className="feed-card-suggested-label">
+                            <span className="material-symbols-outlined text-[18px] text-[#ffb700]">lightbulb</span>
+                            <span>Suggested By</span>
+                        </div>
+                        <Link to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} className="feed-card-suggested-user">
+                            {entryData.suggestedByUser.profilePictureUrl ? (
+                                <img src={entryData.suggestedByUser.profilePictureUrl} alt="" className="feed-card-suggested-avatar" />
+                            ) : (
+                                <div className="feed-card-suggested-avatar-fallback">
+                                    {(entryData.suggestedByUser.displayName?.[0] || entryData.suggestedByUser.username[0]).toUpperCase()}
+                                </div>
+                            )}
+                            <span>@{entryData.suggestedByUser.username}</span>
+                        </Link>
+                    </div>
+                )}
+
 
 
                 {/* Actions Bar */}

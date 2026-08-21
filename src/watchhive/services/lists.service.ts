@@ -1,4 +1,5 @@
 import apiClient from './api.js';
+import { SuggestedUser } from './entries.service.js';
 
 export type ListType = 'WATCHLIST' | 'RANKING_STACK' | 'COLLECTION';
 
@@ -8,6 +9,8 @@ export interface ListItem {
     tmdbId: number;
     mediaType?: string;
     orderIndex: number;
+    suggestedByUserId?: string | null;
+    suggestedByUser?: SuggestedUser | null;
     addedAt: string;
     // Metadata from entries (if joined)
     localRating?: string;

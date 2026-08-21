@@ -11,11 +11,17 @@ interface WatchlistCardProps {
     tmdbId: number;
     mediaType?: string;
     readOnly?: boolean;
+    suggestedByUser?: {
+        id: string;
+        username: string;
+        displayName?: string | null;
+        profilePictureUrl?: string | null;
+    } | null;
 }
 
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
 
-export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie', readOnly = false }) => {
+export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie', readOnly = false, suggestedByUser = null }) => {
     const navigate = useNavigate();
     const [details, setDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -231,6 +237,12 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
             </div>
             <div className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white border-t border-slate-50">
                 <h4 className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={title}>{title}</h4>
+                {suggestedByUser && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200/70 rounded-md text-[#2D2926] text-[9px] font-bold w-fit mt-0.5">
+                        <span>💡 Suggested by</span>
+                        <span className="font-black text-amber-800">@{suggestedByUser.username}</span>
+                    </div>
+                )}
                 <div className="watchlist-card__meta text-[11px] font-bold mt-1 text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
                     <span>{year || 'Coming Soon'}</span>
                     {rating && (
