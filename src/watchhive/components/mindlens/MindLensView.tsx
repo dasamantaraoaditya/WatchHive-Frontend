@@ -500,6 +500,121 @@ export const MindLensView: React.FC = () => {
                         </div>
                     )}
 
+                    {/* Suggestion Influence & Recommender Network Section */}
+                    {data.suggestionAnalytics && (
+                        <div className="bg-gradient-to-br from-amber-50/60 via-white to-orange-50/30 border border-[#ffb700]/25 shadow-sm rounded-[32px] p-6 md:p-8">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="material-symbols-outlined text-[#ffb700] text-2xl">insights</span>
+                                        <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Suggestion Influence & Network Impact</h3>
+                                    </div>
+                                    <p className="text-xs font-medium text-[#2D2926]/60">
+                                        Discover who recommended your favorite movies and how your friends shape your watch history
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-3 bg-white/80 border border-[#ffb700]/20 px-4 py-2 rounded-2xl shrink-0">
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[10px] font-black uppercase text-[#2D2926]/40">Overall Conversion</span>
+                                        <span className="text-sm font-black text-[#2D2926]">
+                                            {data.suggestionAnalytics.summary.overallConversionRate}%
+                                        </span>
+                                    </div>
+                                    <div className="w-[1px] h-6 bg-[#ffb700]/20" />
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[10px] font-black uppercase text-[#2D2926]/40">Watched / Suggested</span>
+                                        <span className="text-sm font-black text-[#ffb700]">
+                                            {data.suggestionAnalytics.summary.totalSuggestionsWatched} / {data.suggestionAnalytics.summary.totalSuggestionsReceived}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Recommenders Leaderboard Cards */}
+                            {data.suggestionAnalytics.recommenders && data.suggestionAnalytics.recommenders.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {data.suggestionAnalytics.recommenders.map((rec, rank) => (
+                                        <div 
+                                            key={rec.userId} 
+                                            className="bg-white border border-[#ffb700]/20 rounded-2xl p-4 flex flex-col justify-between shadow-xs hover:shadow-md hover:border-[#ffb700]/40 transition-all relative overflow-hidden"
+                                        >
+                                            {/* Rank Badge */}
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2.5">
+                                                    <span className={`w-6 h-6 rounded-full font-black text-[11px] flex items-center justify-center ${rank === 0 ? 'bg-[#ffb700] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}>
+                                                        #{rank + 1}
+                                                    </span>
+                                                    <Link to={`/watch-hive/profile/${rec.userId}`} className="flex items-center gap-2 group/user min-w-0">
+                                                        {rec.profilePictureUrl ? (
+                                                            <img src={rec.profilePictureUrl} alt="" className="w-8 h-8 rounded-full object-cover border border-[#ffb700]/30" />
+                                                        ) : (
+                                                            <div className="w-8 h-8 rounded-full bg-[#ffb700] text-white font-black text-xs flex items-center justify-center">
+                                                                {(rec.displayName?.[0] || rec.username[0]).toUpperCase()}
+                                                            </div>
+                                                        )}
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="text-xs font-black text-[#2D2926] group-hover/user:text-[#ffb700] transition-colors truncate">
+                                                                {rec.displayName || rec.username}
+                                                            </span>
+                                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">
+                                                                @{rec.username}
+                                                            </span>
+                                                        </div>
+                                                    </Link>
+                                                </div>
+
+                                                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/60 shrink-0">
+                                                    {rec.badge}
+                                                </span>
+                                            </div>
+
+                                            {/* Metrics Stats */}
+                                            <div className="grid grid-cols-3 gap-2 py-2.5 border-y border-[#ffb700]/10 text-center my-1 bg-[#FFF9F0]/40 rounded-xl">
+                                                <div>
+                                                    <span className="text-[9px] font-bold text-[#2D2926]/40 uppercase block">Suggested</span>
+                                                    <span className="text-xs font-black text-[#2D2926]">{rec.totalSuggested}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[9px] font-bold text-[#2D2926]/40 uppercase block">Watched</span>
+                                                    <span className="text-xs font-black text-[#22c55e]">{rec.watchedCount}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[9px] font-bold text-[#2D2926]/40 uppercase block">Avg Rating</span>
+                                                    <span className="text-xs font-black text-[#ffb700]">
+                                                        {rec.avgRating ? `★ ${rec.avgRating}` : '-'}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Conversion Rate Bar */}
+                                            <div className="mt-2.5">
+                                                <div className="flex justify-between text-[10px] font-bold mb-1">
+                                                    <span className="text-[#2D2926]/50">Conversion Rate</span>
+                                                    <span className="text-[#2D2926] font-black">{rec.conversionRate}%</span>
+                                                </div>
+                                                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                    <div 
+                                                        className="h-full bg-gradient-to-r from-[#ffb700] to-emerald-500 rounded-full transition-all duration-500" 
+                                                        style={{ width: `${Math.min(rec.conversionRate, 100)}%` }} 
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 bg-white/60 rounded-2xl border border-dashed border-[#ffb700]/30">
+                                    <span className="material-symbols-outlined text-3xl text-[#ffb700]/50 mb-2">group_add</span>
+                                    <p className="text-sm font-bold text-[#2D2926]">No suggestion influence tracked yet</p>
+                                    <p className="text-xs text-[#2D2926]/50 mt-1 max-w-md mx-auto">
+                                        When your friends recommend titles to you or tag you in log entries, their influence score and taste conversion will appear here!
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* Aesthetic Profile & Insights Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Behavioral Verbal Insights */}
