@@ -4,6 +4,7 @@ import { useWatchlist } from '../../contexts/WatchlistContext';
 import apiClient from '../../services/api.js';
 import { MovieDetailsModal } from '../common';
 import { entriesApi } from '../../services/entries.service';
+import { EntryForm } from '../entries/EntryForm';
 import './Profile.css';
 import { useCustomAlert } from '../../contexts';
 
@@ -27,6 +28,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [modalView, setModalView] = useState<'details' | 'log'>('details');
+    const [showEntryForm, setShowEntryForm] = useState(false);
     const { removeFromList } = useWatchlist();
     const [isTransitioning, setIsTransitioning] = useState(false);
     const { confirm, alert } = useCustomAlert();
@@ -58,13 +60,14 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         try {
             const apiType = mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
             
-            // Create currently watching entry
+            // Create currently watching entry with preserved suggestedByUserId
             await entriesApi.createEntry({
                 tmdbId,
                 title: details.title || details.name,
                 type: apiType,
                 isWatching: true,
-                startedAt: new Date().toISOString()
+                startedAt: new Date().toISOString(),
+                suggestedByUserId: suggestedByUser?.id || null
             });
 
             // Remove from watchlist
@@ -264,6 +267,28 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 }
             }}
         />
+
+        {showEntryForm && (
+            <EntryForm
+                isModal={true}
+                prefillData={{
+                    tmdbId,
+                    title: details.title || details.name,
+                    type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                    posterPath: details.poster_path,
+                    overview: details.overview,
+                    suggestedByUserId: suggestedByUser?.id || null,
+                    suggestedByUser: suggestedByUser || null,
+                }}
+                onSuccess={async () => {
+                    setShowEntryForm(false);
+                    if (!readOnly) {
+                        await removeFromList(tmdbId);
+                    }
+                }}
+                onCancel={() => setShowEntryForm(false)}
+            />
+        )}
         </>
     );
 };

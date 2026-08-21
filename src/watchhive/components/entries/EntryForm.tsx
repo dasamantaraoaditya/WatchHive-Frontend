@@ -60,7 +60,15 @@ function levenshteinDistance(a: string, b: string): number {
 
 interface EntryFormProps {
     entry?: Entry;
-    prefillData?: { tmdbId: number; title: string; type: 'MOVIE' | 'TV_SHOW'; posterPath?: string | null; overview?: string | null };
+    prefillData?: { 
+        tmdbId: number; 
+        title: string; 
+        type: 'MOVIE' | 'TV_SHOW'; 
+        posterPath?: string | null; 
+        overview?: string | null;
+        suggestedByUserId?: string | null;
+        suggestedByUser?: SuggestedUser | null;
+    };
     onSuccess?: (entry: Entry) => void;
     onCancel?: () => void;
     isModal?: boolean;
@@ -351,7 +359,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         isRewatch: entry?.isRewatch || false,
         isWatching: entry?.isWatching || defaultIsWatching,
         watchLocation: entry?.watchLocation || '',
-        suggestedByUserId: entry?.suggestedByUserId || undefined,
+        suggestedByUserId: entry?.suggestedByUserId || prefillData?.suggestedByUserId || undefined,
     });
 
     // ── UI state ──
@@ -365,7 +373,27 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [suggestedUser, setSuggestedUser] = useState<SuggestedUser | null>(entry?.suggestedByUser || null);
+    const [suggestedUser, setSuggestedUser] = useState<SuggestedUser | null>(
+        entry?.suggestedByUser || prefillData?.suggestedByUser || null
+    );
+
+    // Auto-fetch suggested user profile if only ID is available
+    useEffect(() => {
+        const targetUserId = formData.suggestedByUserId || entry?.suggestedByUserId || prefillData?.suggestedByUserId;
+        if (targetUserId && !suggestedUser) {
+            userService.getUserProfile(targetUserId).then(profile => {
+                if (profile) {
+                    setSuggestedUser({
+                        id: profile.id,
+                        username: profile.username,
+                        displayName: profile.displayName,
+                        profilePictureUrl: profile.profilePictureUrl
+                    });
+                }
+            }).catch(err => console.error('Failed to load prefilled suggested user:', err));
+        }
+    }, [formData.suggestedByUserId, entry?.suggestedByUserId, prefillData?.suggestedByUserId]);
+
     const [showSuggestorPicker, setShowSuggestorPicker] = useState(false);
     const [suggestorSearchQuery, setSuggestorSearchQuery] = useState('');
     const [suggestorResults, setSuggestorResults] = useState<SuggestedUser[]>([]);
