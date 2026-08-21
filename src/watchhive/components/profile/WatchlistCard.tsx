@@ -110,8 +110,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const handleMarkAsWatched = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setModalView('log');
-        setShowModal(true);
+        setShowEntryForm(true);
     };
 
     const handleCardClick = () => {
