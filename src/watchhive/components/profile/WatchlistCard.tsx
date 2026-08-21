@@ -12,6 +12,7 @@ interface WatchlistCardProps {
     tmdbId: number;
     mediaType?: string;
     readOnly?: boolean;
+    suggestedByUserId?: string | null;
     suggestedByUser?: {
         id: string;
         username: string;
@@ -22,7 +23,7 @@ interface WatchlistCardProps {
 
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
 
-export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie', readOnly = false, suggestedByUser = null }) => {
+export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie', readOnly = false, suggestedByUserId = null, suggestedByUser = null }) => {
     const navigate = useNavigate();
     const [details, setDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -283,7 +284,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                         type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
                         posterPath: details.poster_path,
                         overview: details.overview,
-                        suggestedByUserId: suggestedByUser?.id || null,
+                        suggestedByUserId: suggestedByUser?.id || suggestedByUserId || null,
                         suggestedByUser: suggestedByUser || null,
                     }}
                     onSuccess={async () => {

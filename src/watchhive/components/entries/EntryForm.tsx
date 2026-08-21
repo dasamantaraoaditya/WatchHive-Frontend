@@ -5,6 +5,7 @@ import apiClient from '../../services/api.js';
 import { HiveDatePicker } from '../common/HiveDatePicker';
 import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services/userService';
+import { suggestionsApi } from '../../services/suggestions.service';
 
 export function calculateFuzzyScore(query: string, targetTitle: string): number {
     if (!query || !targetTitle) return 0;
@@ -377,7 +378,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         entry?.suggestedByUser || prefillData?.suggestedByUser || null
     );
 
-    // Auto-fetch suggested user profile if only ID is available
+    // Auto-fetch suggested user profile if only ID is available, or check matching suggestions
     useEffect(() => {
         const targetUserId = formData.suggestedByUserId || entry?.suggestedByUserId || prefillData?.suggestedByUserId;
         if (targetUserId && !suggestedUser) {
@@ -391,8 +392,22 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                     });
                 }
             }).catch(err => console.error('Failed to load prefilled suggested user:', err));
+        } else if (!targetUserId && !suggestedUser && formData.tmdbId > 0) {
+            suggestionsApi.getSuggestions().then(groups => {
+                const matchGroup = (groups || []).find(g => Number(g.tmdbId) === Number(formData.tmdbId));
+                if (matchGroup && matchGroup.suggestors && matchGroup.suggestors.length > 0) {
+                    const s = matchGroup.suggestors[0];
+                    setSuggestedUser({
+                        id: s.id,
+                        username: s.username,
+                        displayName: s.displayName,
+                        profilePictureUrl: s.profilePictureUrl
+                    });
+                    setFormData(prev => ({ ...prev, suggestedByUserId: s.id }));
+                }
+            }).catch(err => console.error('Failed to check matching suggestions for tmdbId:', err));
         }
-    }, [formData.suggestedByUserId, entry?.suggestedByUserId, prefillData?.suggestedByUserId]);
+    }, [formData.suggestedByUserId, formData.tmdbId, entry?.suggestedByUserId, prefillData?.suggestedByUserId]);
 
     const [showSuggestorPicker, setShowSuggestorPicker] = useState(false);
     const [suggestorSearchQuery, setSuggestorSearchQuery] = useState('');
