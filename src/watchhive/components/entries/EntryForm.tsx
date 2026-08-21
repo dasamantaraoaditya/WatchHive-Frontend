@@ -382,16 +382,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     useEffect(() => {
         const targetUserId = formData.suggestedByUserId || entry?.suggestedByUserId || prefillData?.suggestedByUserId;
         if (targetUserId && !suggestedUser) {
-            userService.getUserProfile(targetUserId).then(profile => {
+            userService.getUser(targetUserId).then((profile: any) => {
                 if (profile) {
                     setSuggestedUser({
                         id: profile.id,
                         username: profile.username,
-                        displayName: profile.displayName,
-                        profilePictureUrl: profile.profilePictureUrl
+                        displayName: profile.displayName || null,
+                        profilePictureUrl: profile.profilePictureUrl || null
                     });
                 }
-            }).catch(err => console.error('Failed to load prefilled suggested user:', err));
+            }).catch((err: any) => console.error('Failed to load prefilled suggested user:', err));
         } else if (!targetUserId && !suggestedUser && formData.tmdbId > 0) {
             suggestionsApi.getMySuggestions().then(groups => {
                 const matchGroup = (groups || []).find(g => Number(g.tmdbId) === Number(formData.tmdbId));
@@ -400,12 +400,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                     setSuggestedUser({
                         id: s.id,
                         username: s.username,
-                        displayName: s.displayName,
-                        profilePictureUrl: s.profilePictureUrl
+                        displayName: s.displayName || null,
+                        profilePictureUrl: s.profilePictureUrl || null
                     });
                     setFormData(prev => ({ ...prev, suggestedByUserId: s.id }));
                 }
-            }).catch(err => console.error('Failed to check matching suggestions for tmdbId:', err));
+            }).catch((err: any) => console.error('Failed to check matching suggestions for tmdbId:', err));
         }
     }, [formData.suggestedByUserId, formData.tmdbId, entry?.suggestedByUserId, prefillData?.suggestedByUserId]);
 

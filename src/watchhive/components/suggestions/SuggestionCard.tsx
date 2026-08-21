@@ -30,7 +30,7 @@ interface TmdbDetails {
     genres: string[];
 }
 
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange, onLogEntry, preloadedDetails }) => {
+export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange, preloadedDetails }) => {
     const navigate = useNavigate();
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -323,10 +323,10 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                         isModal={true}
                         prefillData={{
                             tmdbId: group.tmdbId,
-                            title: details?.title || details?.name || group.title || 'Untitled',
+                            title: details?.title || details?.name || preloadedDetails?.title || 'Untitled',
                             type: group.mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
-                            posterPath: details?.poster_path || group.posterPath,
-                            overview: details?.overview || group.overview,
+                            posterPath: details?.poster_path || preloadedDetails?.poster_path || null,
+                            overview: details?.overview || preloadedDetails?.overview || null,
                             suggestedByUserId: uniqueSuggestors[0]?.id || null,
                             suggestedByUser: uniqueSuggestors[0] || null,
                         }}

@@ -28,7 +28,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const [details, setDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [modalView, setModalView] = useState<'details' | 'log'>('details');
+    const [modalView] = useState<'details' | 'log'>('details');
     const [showEntryForm, setShowEntryForm] = useState(false);
     const { removeFromList } = useWatchlist();
     const [isTransitioning, setIsTransitioning] = useState(false);
@@ -290,7 +290,12 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                         posterPath: details.poster_path,
                         overview: details.overview,
                         suggestedByUserId: suggestedByUser?.id || suggestedByUserId || null,
-                        suggestedByUser: suggestedByUser || null,
+                        suggestedByUser: suggestedByUser ? {
+                            id: suggestedByUser.id,
+                            username: suggestedByUser.username,
+                            displayName: suggestedByUser.displayName || null,
+                            profilePictureUrl: suggestedByUser.profilePictureUrl || null,
+                        } : null,
                     }}
                     onSuccess={async () => {
                         setShowEntryForm(false);

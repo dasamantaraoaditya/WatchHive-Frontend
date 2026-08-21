@@ -277,8 +277,8 @@ export const EntryCard: React.FC<{
                         prefillData={{
                             tmdbId: entry.tmdbId,
                             title: entry.title,
-                            type: entry.type,
-                            posterPath: entry.posterPath,
+                            type: (entry.type === 'EPISODE' ? 'TV_SHOW' : entry.type) as 'MOVIE' | 'TV_SHOW',
+                            posterPath: (entry as any).posterPath || null,
                             suggestedByUserId: entry.suggestedByUserId || entry.suggestedByUser?.id || null,
                             suggestedByUser: entry.suggestedByUser || null,
                         }}
