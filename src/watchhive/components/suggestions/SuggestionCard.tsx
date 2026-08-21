@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
 import { entriesApi } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { WatchlistButton, SkeletonCard } from '../common';
+import { WatchlistButton, SkeletonCard, Modal } from '../common';
+import { EntryForm } from '../entries/EntryForm';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
 
@@ -34,6 +35,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDismissing, setIsDismissing] = useState(false);
+    const [showEntryForm, setShowEntryForm] = useState(false);
     const { confirm, alert } = useCustomAlert();
     const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
     const [showMobileActions, setShowMobileActions] = useState(false);
@@ -132,16 +134,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     const handleMarkAsWatched = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        const apiType = group.mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
-        const title = details?.title || details?.name || 'Untitled';
-        onLogEntry?.({
-            tmdbId: group.tmdbId,
-            title,
-            type: apiType,
-            posterPath: details?.poster_path,
-            suggestedByUserId: uniqueSuggestors[0]?.id,
-            suggestionIds: group.suggestions.map(s => s.id)
-        });
+        setShowEntryForm(true);
     };
 
     const handleDelete = async (e: React.MouseEvent) => {
@@ -306,6 +299,38 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     </div>
                 </div>
             </div>
+
+            {showEntryForm && (
+                <Modal
+                    isOpen={showEntryForm}
+                    onClose={() => setShowEntryForm(false)}
+                    title="Log your watch"
+                    maxWidth="max-w-4xl"
+                >
+                    <EntryForm
+                        isModal={true}
+                        prefillData={{
+                            tmdbId: group.tmdbId,
+                            title: details?.title || details?.name || group.title || 'Untitled',
+                            type: group.mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                            posterPath: details?.poster_path || group.posterPath,
+                            overview: details?.overview || group.overview,
+                            suggestedByUserId: uniqueSuggestors[0]?.id || null,
+                            suggestedByUser: uniqueSuggestors[0] || null,
+                        }}
+                        onSuccess={async () => {
+                            setShowEntryForm(false);
+                            try {
+                                await Promise.all(group.suggestions.map(s => suggestionsApi.deleteSuggestion(s.id)));
+                            } catch (err) {
+                                console.error('Failed to delete suggestions on log:', err);
+                            }
+                            onStatusChange?.();
+                        }}
+                        onCancel={() => setShowEntryForm(false)}
+                    />
+                </Modal>
+            )}
         </>
     );
 };
