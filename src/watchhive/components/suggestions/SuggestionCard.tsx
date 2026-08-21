@@ -179,7 +179,13 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                         e.stopPropagation();
                         setShowMobileActions(!showMobileActions);
                     } else {
-                        navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { state: { from: window.location.pathname + window.location.search } });
+                        navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { 
+                            state: { 
+                                suggestedByUserId: uniqueSuggestors[0]?.id,
+                                suggestedByUser: uniqueSuggestors[0],
+                                from: window.location.pathname + window.location.search 
+                            } 
+                        });
                     }
                 }}
             >
@@ -203,7 +209,13 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                                 type="button"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { state: { from: window.location.pathname + window.location.search } });
+                                    navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { 
+                                        state: { 
+                                            suggestedByUserId: uniqueSuggestors[0]?.id,
+                                            suggestedByUser: uniqueSuggestors[0],
+                                            from: window.location.pathname + window.location.search 
+                                        } 
+                                    });
                                 }}
                                 className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
                                 title="View details"

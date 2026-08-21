@@ -114,7 +114,13 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     };
 
     const handleCardClick = () => {
-        navigate(`/watch-hive/details/${mediaType}/${tmdbId}`, { state: { from: window.location.pathname + window.location.search } });
+        navigate(`/watch-hive/details/${mediaType}/${tmdbId}`, { 
+            state: { 
+                suggestedByUserId: suggestedByUser?.id || suggestedByUserId,
+                suggestedByUser,
+                from: window.location.pathname + window.location.search 
+            } 
+        });
     };
 
     const handleRemove = async (e: React.MouseEvent) => {
