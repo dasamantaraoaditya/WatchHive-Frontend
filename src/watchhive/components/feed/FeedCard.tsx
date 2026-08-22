@@ -212,17 +212,12 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                             className="inline-flex items-center gap-1.5 font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            {entryData.suggestedByUser.profilePictureUrl ? (
-                                                <img 
-                                                    src={entryData.suggestedByUser.profilePictureUrl} 
-                                                    alt={entryData.suggestedByUser.username} 
-                                                    className="w-4 h-4 rounded-full object-cover border border-black/10 shrink-0" 
-                                                />
-                                            ) : (
-                                                <div className="w-4 h-4 rounded-full bg-[#ffb700] text-white flex items-center justify-center text-[9px] font-black shrink-0">
-                                                    {(entryData.suggestedByUser.displayName?.[0] || entryData.suggestedByUser.username[0]).toUpperCase()}
-                                                </div>
-                                            )}
+                                            <Avatar
+                                                src={entryData.suggestedByUser.profilePictureUrl}
+                                                name={entryData.suggestedByUser.displayName || entryData.suggestedByUser.username}
+                                                size="xxs"
+                                                showBorder={false}
+                                            />
                                             <span>@{entryData.suggestedByUser.username}</span>
                                         </Link>
                                     </div>

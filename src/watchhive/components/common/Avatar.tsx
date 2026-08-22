@@ -4,7 +4,7 @@ import './Avatar.css';
 interface AvatarProps {
     src?: string | null;
     name: string;
-    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
     className?: string;
     onClick?: () => void;
     showBorder?: boolean;
