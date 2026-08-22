@@ -78,14 +78,29 @@ export const EntriesPage: React.FC = () => {
         if (location.state?.openForm) {
             setShowForm(true);
             setEditingEntry(undefined);
-            navigate(location.pathname, { replace: true, state: { ...location.state, openForm: false } });
+            navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: { ...location.state, openForm: false } });
         }
         const stateTab = location.state?.activeTab;
         if (stateTab && ['history', 'watching', 'watchlist', 'suggestions'].includes(stateTab)) {
             setActiveTab(stateTab as any);
-            navigate(location.pathname, { replace: true, state: {} });
+            setSearchParams({ tab: stateTab }, { replace: true });
         }
-    }, [location.state, navigate, location.pathname]);
+    }, [location.state, navigate, location.pathname, location.search, setSearchParams]);
+
+    // Save & restore scroll position for activeTab
+    useEffect(() => {
+        const key = `scroll_entries_${activeTab}`;
+        const savedScroll = sessionStorage.getItem(key);
+        if (savedScroll) {
+            setTimeout(() => window.scrollTo(0, parseInt(savedScroll, 10)), 50);
+        }
+
+        const handleScroll = () => {
+            sessionStorage.setItem(`scroll_entries_${activeTab}`, window.scrollY.toString());
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [activeTab]);
 
     const fetchWatching = useCallback(async (offset = 0) => {
         if (!user) return;

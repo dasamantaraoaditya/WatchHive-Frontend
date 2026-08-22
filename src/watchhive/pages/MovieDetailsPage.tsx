@@ -310,10 +310,10 @@ export const MovieDetailsPage: React.FC = () => {
         const fromPath = (location.state as any)?.from;
         if (fromPath) {
             navigate(fromPath);
-        } else if (window.history.length > 1) {
+        } else if (window.history.length > 2) {
             navigate(-1);
         } else {
-            navigate('/watch-hive/feed');
+            navigate('/watch-hive/entries?tab=watching');
         }
     };
 

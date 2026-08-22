@@ -181,7 +181,8 @@ const AppRoutes: React.FC = () => {
                         </ProtectedRoute>
                     }
                 />
-                <Route path="/watch-hive/suggestions" element={<Navigate to="/watch-hive/entries" state={{ activeTab: 'suggestions' }} replace />} />
+                <Route path="/watch-hive/suggestions" element={<Navigate to="/watch-hive/entries?tab=suggestions" replace />} />
+                <Route path="/watch-hive/watchlist" element={<Navigate to="/watch-hive/entries?tab=watchlist" replace />} />
 
                 {/* Landing Page — shown to unauthenticated visitors */}
                 <Route
