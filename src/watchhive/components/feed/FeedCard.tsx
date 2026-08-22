@@ -184,7 +184,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     <div className="feed-card-header-info flex-1 min-w-0 pr-2">
                         <div className="flex flex-col md:flex-row md:items-start md:justify-between w-full gap-2">
                             <div className="flex flex-col min-w-[0] pr-2">
-                                <p className="feed-card-header-text">
+                                <p className="feed-card-header-text leading-snug">
                                     {isSuggestion ? (
                                         <span className="font-bold text-[#2D2926]">{displayName}</span>
                                     ) : (
@@ -202,21 +202,24 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     >
                                         {title}
                                     </button>
-                                    {entryData?.suggestedByUser && (
-                                        <span className="inline-flex items-center gap-1 ml-1.5 text-[#2D2926]/70 font-medium text-xs">
-                                            <span>suggested by</span>
-                                            <Link 
-                                                to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} 
-                                                className="font-extrabold text-[#ffb700] hover:underline transition-colors"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                @{entryData.suggestedByUser.username}
-                                            </Link>
-                                        </span>
-                                    )}
                                 </p>
+
+                                {entryData?.suggestedByUser && (
+                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-[#2D2926]/60 font-medium">
+                                        <span className="text-[11px] font-semibold text-[#2D2926]/60">Suggested by</span>
+                                        <Link 
+                                            to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} 
+                                            className="font-bold text-[#ffb700] hover:underline transition-colors inline-flex items-center gap-1 bg-[#ffb700]/10 px-2 py-0.5 rounded-md border border-[#ffb700]/20"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <span className="material-symbols-outlined text-[13px]">lightbulb</span>
+                                            <span>@{entryData.suggestedByUser.username}</span>
+                                        </Link>
+                                    </div>
+                                )}
+
                                 {metadataString && (
-                                    <p className="text-xs text-[#2D2926]/50 mt-0.5 font-semibold">
+                                    <p className="text-xs text-[#2D2926]/50 mt-1 font-semibold">
                                         {metadataString}
                                     </p>
                                 )}
