@@ -202,6 +202,18 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     >
                                         {title}
                                     </button>
+                                    {entryData?.suggestedByUser && (
+                                        <span className="inline-flex items-center gap-1 ml-1.5 text-[#2D2926]/70 font-medium text-xs">
+                                            <span>suggested by</span>
+                                            <Link 
+                                                to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} 
+                                                className="font-extrabold text-[#ffb700] hover:underline transition-colors"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                @{entryData.suggestedByUser.username}
+                                            </Link>
+                                        </span>
+                                    )}
                                 </p>
                                 {metadataString && (
                                     <p className="text-xs text-[#2D2926]/50 mt-0.5 font-semibold">
@@ -273,26 +285,6 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             </p>
                             <p className="insight-text">"{review}"</p>
                         </div>
-                    </div>
-                )}
-
-                {/* Suggested By Banner (WatchHive Standard) */}
-                {entryData?.suggestedByUser && (
-                    <div className="feed-card-suggested-box">
-                        <div className="feed-card-suggested-label">
-                            <span className="material-symbols-outlined text-[18px] text-[#ffb700]">lightbulb</span>
-                            <span>Suggested By</span>
-                        </div>
-                        <Link to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} className="feed-card-suggested-user">
-                            {entryData.suggestedByUser.profilePictureUrl ? (
-                                <img src={entryData.suggestedByUser.profilePictureUrl} alt="" className="feed-card-suggested-avatar" />
-                            ) : (
-                                <div className="feed-card-suggested-avatar-fallback">
-                                    {(entryData.suggestedByUser.displayName?.[0] || entryData.suggestedByUser.username[0]).toUpperCase()}
-                                </div>
-                            )}
-                            <span>@{entryData.suggestedByUser.username}</span>
-                        </Link>
                     </div>
                 )}
 
