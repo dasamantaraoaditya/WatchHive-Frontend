@@ -205,14 +205,24 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                 </p>
 
                                 {entryData?.suggestedByUser && (
-                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-[#2D2926]/60 font-medium">
-                                        <span className="text-[11px] font-semibold text-[#2D2926]/60">Suggested by</span>
+                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-[#2D2926]/70 font-medium">
+                                        <span className="text-[11px] font-medium text-[#2D2926]/60">Suggested by</span>
                                         <Link 
                                             to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} 
-                                            className="font-bold text-[#ffb700] hover:underline transition-colors inline-flex items-center gap-1 bg-[#ffb700]/10 px-2 py-0.5 rounded-md border border-[#ffb700]/20"
+                                            className="inline-flex items-center gap-1.5 font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            <span className="material-symbols-outlined text-[13px]">lightbulb</span>
+                                            {entryData.suggestedByUser.profilePictureUrl ? (
+                                                <img 
+                                                    src={entryData.suggestedByUser.profilePictureUrl} 
+                                                    alt={entryData.suggestedByUser.username} 
+                                                    className="w-4 h-4 rounded-full object-cover border border-black/10 shrink-0" 
+                                                />
+                                            ) : (
+                                                <div className="w-4 h-4 rounded-full bg-[#ffb700] text-white flex items-center justify-center text-[9px] font-black shrink-0">
+                                                    {(entryData.suggestedByUser.displayName?.[0] || entryData.suggestedByUser.username[0]).toUpperCase()}
+                                                </div>
+                                            )}
                                             <span>@{entryData.suggestedByUser.username}</span>
                                         </Link>
                                     </div>
