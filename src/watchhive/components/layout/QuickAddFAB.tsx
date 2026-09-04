@@ -48,7 +48,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
             <motion.div 
                 initial={{ scale: 0, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-[1500] flex flex-col items-end gap-4"
+                className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-[1500] flex flex-col items-end gap-4 pointer-events-none"
             >
                 {/* Secondary Action Buttons */}
                 <AnimatePresence>
@@ -57,7 +57,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
-                            className="flex flex-col items-end gap-3 mb-2"
+                            className="flex flex-col items-end gap-3 mb-2 pointer-events-auto"
                         >
                             {actionButtons.map((btn, i) => (
                                 <motion.button
@@ -69,7 +69,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}
                                     onClick={btn.onClick}
-                                    className="flex items-center gap-3 cursor-pointer select-none"
+                                    className="flex items-center gap-3 cursor-pointer select-none pointer-events-auto"
                                 >
                                     <span className="bg-[#1A1A1A] text-white px-3.5 py-1.5 rounded-xl shadow-xl text-xs font-semibold whitespace-nowrap border border-white/10 tracking-wide">
                                         {btn.label}
@@ -84,18 +84,18 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                 </AnimatePresence>
 
                 {/* Primary FAB */}
-                <div className="relative">
-                    {!isOpen && <div className="absolute inset-0 rounded-full bg-[#ffb700]/20 animate-ping" />}
+                <div className="relative pointer-events-auto">
+                    {!isOpen && <div className="absolute inset-0 rounded-full bg-[#ffb700]/20 animate-ping pointer-events-none" />}
                     
                     <motion.button
                         onClick={toggleOpen}
                         animate={{ rotate: isOpen ? 45 : 0 }}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`relative w-16 h-16 rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,183,0,0.4)] border-4 transition-colors z-10 ${isOpen ? 'bg-white border-[#ffb700] text-[#ffb700]' : 'bg-[#ffb700] border-white text-white'}`}
+                        className={`relative w-16 h-16 rounded-full flex items-center justify-center shadow-[0_12px_24px_rgba(255,183,0,0.4)] border-4 transition-colors z-10 cursor-pointer ${isOpen ? 'bg-white border-[#ffb700] text-[#ffb700]' : 'bg-[#ffb700] border-white text-white'}`}
                         title="Quick Actions"
                     >
-                        {!isOpen && <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700" />}
+                        {!isOpen && <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700 pointer-events-none" />}
                         <span className="material-symbols-outlined text-3xl font-bold">add</span>
                     </motion.button>
                 </div>
