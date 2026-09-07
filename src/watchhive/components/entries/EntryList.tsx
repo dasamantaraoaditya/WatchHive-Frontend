@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import {
@@ -35,17 +36,11 @@ export const EntryCard: React.FC<{
     onClick?: (entry: Entry, details: TmdbDetails | null) => void;
     showWatchingBadge?: boolean;
 }> = ({ entry, onEdit, onDelete: _onDelete, onComplete: _onComplete, onClick, showWatchingBadge = false }) => {
+    const navigate = useNavigate();
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-    const [showMobileActions, setShowMobileActions] = useState(false);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const cacheKey = `${entry.type}-${entry.tmdbId}`;
 
@@ -111,16 +106,17 @@ export const EntryCard: React.FC<{
             <motion.div
                 layoutId={`card-wrapper-${entry.id}`}
                 className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl"
-                onClick={(e) => {
-                    if (isMobile) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setShowMobileActions(!showMobileActions);
+                onClick={() => {
+                    if (onClick) {
+                        onClick(entry, details);
                     } else {
-                        onClick && onClick(entry, details);
+                        const mediaType = entry.type === 'TV_SHOW' ? 'tv' : 'movie';
+                        navigate(`/watch-hive/details/${mediaType}/${entry.tmdbId}`, {
+                            state: { from: window.location.pathname + window.location.search }
+                        });
                     }
                 }}
-                whileHover={onClick && !isMobile ? { scale: 0.98, transition: { duration: 0.2 } } : {}}
+                whileHover={{ scale: 0.98, transition: { duration: 0.2 } }}
                 whileTap={{ scale: 0.95 }}
             >
                 <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
@@ -142,59 +138,82 @@ export const EntryCard: React.FC<{
                     {/* Overlay shadow for cinematic feel */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Mobile Central Eye Overlay */}
-                    {isMobile && showMobileActions && (
-                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/45 backdrop-blur-[2.5px] transition-all duration-300 animate-[fade-in_0.2s_ease-out]">
+                    {/* Three-dots Context Menu */}
+                    {(onEdit || _onDelete || (_onComplete && entry.isWatching)) && (
+                        <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
                             <button
                                 type="button"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onClick && onClick(entry, details);
+                                    setMenuOpen(prev => !prev);
                                 }}
-                                className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
-                                title="View details"
+                                className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-all active:scale-90"
+                                title="Options"
+                                aria-label="More options"
                             >
-                                <span className="material-symbols-outlined text-[24px] font-bold">visibility</span>
+                                <span className="material-symbols-outlined text-[18px]">more_vert</span>
                             </button>
+
+                            {menuOpen && (
+                                <>
+                                    <div 
+                                        className="fixed inset-0 z-30 cursor-default" 
+                                        onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            setMenuOpen(false); 
+                                        }} 
+                                    />
+                                    <div 
+                                        className="absolute top-10 right-0 z-40 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl py-1.5 min-w-[160px] flex flex-col animate-[fade-in_0.15s_ease-out] overflow-hidden"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        {_onComplete && entry.isWatching && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setMenuOpen(false);
+                                                    setIsCompleting(true);
+                                                }}
+                                                className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px] text-emerald-500">check_circle</span>
+                                                <span>Have Watched</span>
+                                            </button>
+                                        )}
+                                        {onEdit && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setMenuOpen(false);
+                                                    onEdit(entry);
+                                                }}
+                                                className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px] text-amber-500">edit</span>
+                                                <span>Edit Entry</span>
+                                            </button>
+                                        )}
+                                        {_onDelete && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setMenuOpen(false);
+                                                    _onDelete(entry.id);
+                                                }}
+                                                className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors text-left w-full"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                                                <span>Delete Entry</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
-
-                    {/* Actions overlay */}
-                    <div className={`absolute top-2 right-2 flex flex-col gap-2 z-20 transition-all duration-300
-                        ${isMobile 
-                            ? (showMobileActions ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-90 pointer-events-none') 
-                            : 'hidden sm:flex opacity-0 group-hover:opacity-100'}`}
-                    >
-                        {onEdit && (
-                            <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" title="Edit">
-                                <span className="material-symbols-outlined text-[18px]">edit</span>
-                            </button>
-                        )}
-                        {_onDelete && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    _onDelete(entry.id);
-                                }}
-                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                                title="Delete"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">delete</span>
-                            </button>
-                        )}
-                        {_onComplete && entry.isWatching && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsCompleting(true);
-                                }}
-                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                                title="Complete Watching"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                            </button>
-                        )}
-                    </div>
 
                     <div className="absolute top-2 left-2 flex items-center gap-1.5 z-20">
                         <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90 select-none`}>
@@ -208,9 +227,9 @@ export const EntryCard: React.FC<{
                                 {/* Animated ping ring behind the icon */}
                                 <span className="absolute inline-flex h-full w-full rounded-full bg-[#ffb700] opacity-75 animate-ping" />
                                 
-                                {/* Animated Eye Badge */}
+                                {/* Animated Watching Badge */}
                                 <span className="relative inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#ffb700] text-white shadow-md border border-white/30 backdrop-blur-sm transition-transform duration-300 group-hover/watching:scale-110">
-                                    <span className="material-symbols-outlined text-[13px] font-black animate-pulse">visibility</span>
+                                    <span className="material-symbols-outlined text-[13px] font-black animate-pulse">play_arrow</span>
                                 </span>
 
                                 {/* Tooltip on Hover */}
@@ -245,19 +264,6 @@ export const EntryCard: React.FC<{
                         <span className="truncate flex-1">{metadataString || '-'}</span>
                         {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
                     </div>
-                    {/* Have Watched button — always visible when entry is in currently watching mode */}
-                    {_onComplete && entry.isWatching && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsCompleting(true);
-                            }}
-                            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
-                        >
-                            <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                            Have Watched
-                        </button>
-                    )}
                 </motion.div>
             </motion.div>
 
@@ -307,6 +313,7 @@ export const EntryList: React.FC<EntryListProps> = ({
     searchQuery, 
     onSearchChange 
 }) => {
+    const navigate = useNavigate();
     const { alert, confirm } = useCustomAlert();
     const [entries, setEntries] = useState<Entry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -597,7 +604,12 @@ export const EntryList: React.FC<EntryListProps> = ({
                             showWatchingBadge={true}
                             onEdit={onEdit}
                             onDelete={readOnly ? undefined : handleDelete}
-                            onClick={(entry, details) => setSelectedEntry({ entry, details })}
+                            onClick={(entry) => {
+                                const mediaType = entry.type === 'TV_SHOW' ? 'tv' : 'movie';
+                                navigate(`/watch-hive/details/${mediaType}/${entry.tmdbId}`, {
+                                    state: { from: window.location.pathname + window.location.search }
+                                });
+                            }}
                         />
                     ))}
                 </div>

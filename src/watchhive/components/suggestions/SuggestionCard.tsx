@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
 import { entriesApi } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { WatchlistButton, SkeletonCard, Modal } from '../common';
+import { SkeletonCard, Modal } from '../common';
 import { EntryForm } from '../entries/EntryForm';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
+import { useWatchlist } from '../../contexts/WatchlistContext';
 
 interface SuggestionCardProps {
     group: GroupedSuggestion;
@@ -37,14 +38,8 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     const [isDismissing, setIsDismissing] = useState(false);
     const [showEntryForm, setShowEntryForm] = useState(false);
     const { confirm, alert } = useCustomAlert();
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-    const [showMobileActions, setShowMobileActions] = useState(false);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const { isInWatchlist, addToList, removeFromList } = useWatchlist();
+    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
         if (preloadedDetails) {
@@ -93,7 +88,17 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
         e.stopPropagation();
         if (isDismissing) return;
 
-        const title = details?.title || details?.name || 'this title';
+        let resolvedTitle = details?.name || details?.title;
+        if (!resolvedTitle) {
+            try {
+                const endpoint = group.mediaType === 'tv' ? 'tv' : 'movie';
+                const data: any = await apiClient.get(`/tmdb/${endpoint}/${group.tmdbId}`);
+                resolvedTitle = data?.name || data?.title;
+            } catch (e) {
+                console.warn('Failed to fetch details before adding to watching', e);
+            }
+        }
+        const title = resolvedTitle || (group.mediaType === 'tv' ? 'TV Show' : 'Movie');
         const confirmed = await confirm(`Would you like to move "${title}" to your Currently Watching log?`, {
             title: 'Log as Currently Watching',
             confirmText: 'Move to Currently Watching',
@@ -107,7 +112,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
             const suggestorId = uniqueSuggestors[0]?.id;
             await entriesApi.createEntry({
                 tmdbId: group.tmdbId,
-                title: details?.title || details?.name || title,
+                title,
                 type: apiType,
                 isWatching: true,
                 startedAt: new Date().toISOString(),
@@ -142,7 +147,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
         e.stopPropagation();
         if (isDismissing) return;
         
-        const title = details?.title || details?.name || 'this title';
+        const title = details?.name || details?.title || 'this suggestion';
         const confirmed = await confirm(`Delete suggestions for "${title}"?`, {
             title: 'Delete Suggestion',
             confirmText: 'Delete',
@@ -173,20 +178,14 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
         <>
             <div 
                 className="watchlist-card group relative flex flex-col h-full bg-white rounded-3xl border border-[#ffb700]/10 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
-                onClick={(e) => {
-                    if (isMobile) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setShowMobileActions(!showMobileActions);
-                    } else {
-                        navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { 
-                            state: { 
-                                suggestedByUserId: uniqueSuggestors[0]?.id,
-                                suggestedByUser: uniqueSuggestors[0],
-                                from: window.location.pathname + window.location.search 
-                            } 
-                        });
-                    }
+                onClick={() => {
+                    navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { 
+                        state: { 
+                            suggestedByUserId: uniqueSuggestors[0]?.id,
+                            suggestedByUser: uniqueSuggestors[0],
+                            from: window.location.pathname + window.location.search 
+                        } 
+                    });
                 }}
             >
                 {/* Poster Wrapper */}
@@ -202,73 +201,92 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     {/* Standardized Action Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Mobile Central Eye Overlay */}
-                    {isMobile && showMobileActions && (
-                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/45 backdrop-blur-[2.5px] transition-all duration-300 animate-[fade-in_0.2s_ease-out]">
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { 
-                                        state: { 
-                                            suggestedByUserId: uniqueSuggestors[0]?.id,
-                                            suggestedByUser: uniqueSuggestors[0],
-                                            from: window.location.pathname + window.location.search 
-                                        } 
-                                    });
-                                }}
-                                className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
-                                title="View details"
-                            >
-                                <span className="material-symbols-outlined text-[24px] font-bold">visibility</span>
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Actions overlay */}
-                    <div className={`absolute top-2 right-2 flex flex-col gap-2 z-20 transition-all duration-300
-                        ${isMobile 
-                            ? (showMobileActions ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-90 pointer-events-none') 
-                            : 'opacity-0 group-hover:opacity-100'}`}
-                    >
-                        <div className="watchlist-action-standard">
-                            <WatchlistButton 
-                                tmdbId={group.tmdbId} 
-                                mediaType={group.mediaType as any} 
-                                suggestedByUserId={uniqueSuggestors[0]?.id}
-                                variant="icon"
-                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            />
-                        </div>
-
-                        <button 
-                            onClick={handleAddToWatching}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            disabled={isDismissing}
-                            title="Log as Currently Watching"
+                    {/* Three-dots Context Menu */}
+                    <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setMenuOpen(prev => !prev);
+                            }}
+                            className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-all active:scale-90"
+                            title="Options"
+                            aria-label="More options"
                         >
-                            <span className="material-symbols-outlined text-[18px]">visibility</span>
+                            <span className="material-symbols-outlined text-[18px]">more_vert</span>
                         </button>
 
-                        <button 
-                            onClick={handleMarkAsWatched}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            disabled={isDismissing}
-                            title="Mark as Watched"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                        </button>
-                        
-                        <button 
-                            onClick={handleDelete}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            disabled={isDismissing}
-                            title="Delete Suggestion"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">
-                                {isDismissing ? 'sync' : 'delete'}
-                            </span>
-                        </button>
+                        {menuOpen && (
+                            <>
+                                <div 
+                                    className="fixed inset-0 z-30 cursor-default" 
+                                    onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        setMenuOpen(false); 
+                                    }} 
+                                />
+                                <div 
+                                    className="absolute top-10 right-0 z-40 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl py-1.5 min-w-[185px] flex flex-col animate-[fade-in_0.15s_ease-out] overflow-hidden"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            setMenuOpen(false);
+                                            handleAddToWatching(e);
+                                        }}
+                                        disabled={isDismissing}
+                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full disabled:opacity-50"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px] text-sky-500">play_arrow</span>
+                                        <span>Log as Watching</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            setMenuOpen(false);
+                                            handleMarkAsWatched(e);
+                                        }}
+                                        disabled={isDismissing}
+                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full disabled:opacity-50"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px] text-emerald-500">check_circle</span>
+                                        <span>Mark as Watched</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            setMenuOpen(false);
+                                            if (isInWatchlist(group.tmdbId)) {
+                                                await removeFromList(group.tmdbId);
+                                            } else {
+                                                await addToList(group.tmdbId, group.mediaType as any, uniqueSuggestors[0]?.id);
+                                            }
+                                        }}
+                                        disabled={isDismissing}
+                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full disabled:opacity-50"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px] text-amber-500">
+                                            {isInWatchlist(group.tmdbId) ? 'bookmark_added' : 'bookmark_add'}
+                                        </span>
+                                        <span>{isInWatchlist(group.tmdbId) ? 'Remove from Watchlist' : 'Add to Watchlist'}</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            setMenuOpen(false);
+                                            handleDelete(e);
+                                        }}
+                                        disabled={isDismissing}
+                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors text-left w-full disabled:opacity-50"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                                        <span>Delete Suggestion</span>
+                                    </button>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Badge Overlay */}

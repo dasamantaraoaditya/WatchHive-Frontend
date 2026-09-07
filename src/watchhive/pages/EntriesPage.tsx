@@ -297,6 +297,7 @@ export const EntriesPage: React.FC = () => {
                                             key={entry.id} 
                                             entry={entry}
                                             onComplete={handleComplete}
+                                            onEdit={handleEdit}
                                             onDelete={handleDeleteWatching}
                                             onClick={(e) => navigate(`/watch-hive/details/${e.type === 'TV_SHOW' ? 'tv' : 'movie'}/${e.tmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
                                         />
