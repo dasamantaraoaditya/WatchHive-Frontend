@@ -144,7 +144,7 @@ export const CinematicStacksPage: React.FC = () => {
     const handleRemove = async (tmdbId: number) => {
         if (!currentList) return;
         const targetItem = items.find(item => item.tmdbId === tmdbId);
-        const title = targetItem?.title || 'this title';
+        const title = targetItem?.title || 'this item';
 
         const confirmed = await confirm(`Are you sure you want to remove "${title}" from this stack?`, {
             title: 'Remove from Stack',

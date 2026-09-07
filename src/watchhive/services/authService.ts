@@ -53,7 +53,7 @@ export const authService = {
     },
 
     isAuthenticated(): boolean {
-        return !!apiClient.getAccessToken();
+        return !!apiClient.getAccessToken() || !!localStorage.getItem('refreshToken');
     },
 };
 

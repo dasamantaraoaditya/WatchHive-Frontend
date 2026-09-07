@@ -80,7 +80,7 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
         if (!selectedMovie || isSubmitting) return;
         setIsSubmitting(true);
 
-        const title = selectedMovie.title || selectedMovie.name || 'this title';
+        const title = selectedMovie.name || selectedMovie.title || (selectedMovie.media_type === 'tv' ? 'TV Show' : 'Movie');
         try {
             const apiType = selectedMovie.media_type === 'tv' ? 'TV_SHOW' : 'MOVIE';
             

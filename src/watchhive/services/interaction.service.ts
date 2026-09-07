@@ -31,8 +31,11 @@ export const interactionService = {
         return await apiClient.get<{ comments: Comment[], pagination: any }>(`/comments/${entryId}?page=${page}`);
     },
 
-    addComment: async (entryId: string, content: string) => {
-        return await apiClient.post<{ message: string, comment: Comment, commentCount: number }>(`/comments/${entryId}`, { content });
+    addComment: async (entryId: string, content: string, parentCommentId?: string) => {
+        return await apiClient.post<{ message: string, comment: Comment, commentCount: number }>(
+            `/comments/${entryId}`,
+            { content, ...(parentCommentId ? { parentCommentId } : {}) }
+        );
     },
 
     deleteComment: async (commentId: string) => {

@@ -41,8 +41,15 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         return 'movie';
     })() as 'movie' | 'tv';
     const { details } = useTmdbDetails(fetchTmdbId as number, entryData?.type || mediaTypeFallback);
-
-    const title = isSuggestion ? (item.data.title || item.data.name) : entryData.title;
+    const rawTitle = isSuggestion ? (item.data.title || item.data.name) : entryData.title;
+    const isGenericTitle = !rawTitle ||
+        rawTitle.toLowerCase() === 'this title' ||
+        rawTitle.toLowerCase() === 'untitled' ||
+        rawTitle.toLowerCase().startsWith('movie #') ||
+        rawTitle.toLowerCase().startsWith('media #');
+    const title = (!isGenericTitle && rawTitle)
+        ? rawTitle
+        : (details?.name || details?.title || details?.original_name || details?.original_title || rawTitle || 'Untitled');
 
     // Choose cinematic landscape backdrop if available; otherwise fallback to poster
     const backdropPathRaw = isSuggestion ? item.data.backdrop_path : details?.backdrop_path;
@@ -54,7 +61,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
     const username = isSuggestion ? 'WatchHive Suggestion' : (entryData?.user?.username || 'User');
     const displayName = isSuggestion ? (item.reason || 'Trending Now') : (entryData?.user?.displayName || username);
-    const userId = !isSuggestion ? entryData?.user?.id : null;
+    const userId = !isSuggestion ? (entryData?.user?.id || entryData?.userId) : null;
 
     // Support both profilePictureUrl and avatarUrl (defensive)
     const userAvatar = entryData?.user?.profilePictureUrl || entryData?.user?.avatarUrl;
@@ -352,9 +359,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     isOpen={showComments}
                     onClose={() => setShowComments(false)}
                     entryId={entryData.id}
-                    onCommentAdded={() => {
-                        setCommentCount(prev => prev + 1);
+                    entryTitle={title}
+                    entryAuthorId={userId || undefined}
+                    onCommentAdded={(newCount) => {
+                        setCommentCount(prev => newCount ?? prev + 1);
                         setIsCommented(true);
+                    }}
+                    onCommentDeleted={(newCount) => {
+                        setCommentCount(prev => Math.max(0, newCount ?? prev - 1));
                     }}
                 />
             )}
