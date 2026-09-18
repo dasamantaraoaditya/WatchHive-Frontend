@@ -83,7 +83,7 @@ const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
         if (n.type === 'FOLLOW' || n.type === 'FOLLOW_REQUEST' || n.type === 'FOLLOW_ACCEPT' || n.type === 'FOLLOW_REJECT') {
             return `/watch-hive/profile/${n.content.actorId}`;
         }
-        return `/watch-hive/entry/${n.content.entryId}`;
+        return '/watch-hive/feed';
     };
 
     return (

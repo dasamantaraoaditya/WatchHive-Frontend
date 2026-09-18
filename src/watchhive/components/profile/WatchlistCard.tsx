@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import apiClient from '../../services/api.js';
-import { MovieDetailsModal, Modal } from '../common';
+import { MovieDetailsModal, Modal, CardDropdownMenu } from '../common';
 import { entriesApi } from '../../services/entries.service';
 import { EntryForm } from '../entries/EntryForm';
 import './Profile.css';
@@ -33,7 +33,6 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const { removeFromList } = useWatchlist();
     const [isTransitioning, setIsTransitioning] = useState(false);
     const { confirm, alert } = useCustomAlert();
-    const [menuOpen, setMenuOpen] = useState(false);
 
     const handleAddToWatching = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -177,69 +176,29 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 {/* Three-dots Context Menu */}
                 {!readOnly && (
                     <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setMenuOpen(prev => !prev);
-                            }}
-                            className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-all active:scale-90"
-                            title="Options"
-                            aria-label="More options"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">more_vert</span>
-                        </button>
-
-                        {menuOpen && (
-                            <>
-                                <div 
-                                    className="fixed inset-0 z-30 cursor-default" 
-                                    onClick={(e) => { 
-                                        e.stopPropagation(); 
-                                        setMenuOpen(false); 
-                                    }} 
-                                />
-                                <div 
-                                    className="absolute top-10 right-0 z-40 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl py-1.5 min-w-[175px] flex flex-col animate-[fade-in_0.15s_ease-out] overflow-hidden"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            setMenuOpen(false);
-                                            handleAddToWatching(e);
-                                        }}
-                                        disabled={isTransitioning}
-                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full disabled:opacity-50"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px] text-sky-500">play_arrow</span>
-                                        <span>Log as Watching</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            setMenuOpen(false);
-                                            handleMarkAsWatched(e);
-                                        }}
-                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px] text-emerald-500">check_circle</span>
-                                        <span>Mark as Watched</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            setMenuOpen(false);
-                                            handleRemove(e);
-                                        }}
-                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors text-left w-full"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                                        <span>Remove from Watchlist</span>
-                                    </button>
-                                </div>
-                            </>
-                        )}
+                        <CardDropdownMenu
+                            items={[
+                                {
+                                    label: 'Log as Watching',
+                                    icon: 'play_arrow',
+                                    iconColor: 'text-sky-500',
+                                    disabled: isTransitioning,
+                                    onClick: handleAddToWatching,
+                                },
+                                {
+                                    label: 'Mark as Watched',
+                                    icon: 'check_circle',
+                                    iconColor: 'text-emerald-500',
+                                    onClick: handleMarkAsWatched,
+                                },
+                                {
+                                    label: 'Remove from Watchlist',
+                                    icon: 'delete',
+                                    danger: true,
+                                    onClick: handleRemove,
+                                },
+                            ]}
+                        />
                     </div>
                 )}
 

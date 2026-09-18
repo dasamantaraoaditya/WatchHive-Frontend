@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
 import { entriesApi } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { SkeletonCard, Modal } from '../common';
+import { SkeletonCard, Modal, CardDropdownMenu } from '../common';
 import { EntryForm } from '../entries/EntryForm';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
@@ -39,7 +39,6 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     const [showEntryForm, setShowEntryForm] = useState(false);
     const { confirm, alert } = useCustomAlert();
     const { isInWatchlist, addToList, removeFromList } = useWatchlist();
-    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
         if (preloadedDetails) {
@@ -203,90 +202,44 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
 
                     {/* Three-dots Context Menu */}
                     <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setMenuOpen(prev => !prev);
-                            }}
-                            className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-all active:scale-90"
-                            title="Options"
-                            aria-label="More options"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">more_vert</span>
-                        </button>
-
-                        {menuOpen && (
-                            <>
-                                <div 
-                                    className="fixed inset-0 z-30 cursor-default" 
-                                    onClick={(e) => { 
-                                        e.stopPropagation(); 
-                                        setMenuOpen(false); 
-                                    }} 
-                                />
-                                <div 
-                                    className="absolute top-10 right-0 z-40 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl py-1.5 min-w-[185px] flex flex-col animate-[fade-in_0.15s_ease-out] overflow-hidden"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            setMenuOpen(false);
-                                            handleAddToWatching(e);
-                                        }}
-                                        disabled={isDismissing}
-                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full disabled:opacity-50"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px] text-sky-500">play_arrow</span>
-                                        <span>Log as Watching</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            setMenuOpen(false);
-                                            handleMarkAsWatched(e);
-                                        }}
-                                        disabled={isDismissing}
-                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full disabled:opacity-50"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px] text-emerald-500">check_circle</span>
-                                        <span>Mark as Watched</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={async (e) => {
-                                            e.stopPropagation();
-                                            setMenuOpen(false);
-                                            if (isInWatchlist(group.tmdbId)) {
-                                                await removeFromList(group.tmdbId);
-                                            } else {
-                                                await addToList(group.tmdbId, group.mediaType as any, uniqueSuggestors[0]?.id);
-                                            }
-                                        }}
-                                        disabled={isDismissing}
-                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full disabled:opacity-50"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px] text-amber-500">
-                                            {isInWatchlist(group.tmdbId) ? 'bookmark_added' : 'bookmark_add'}
-                                        </span>
-                                        <span>{isInWatchlist(group.tmdbId) ? 'Remove from Watchlist' : 'Add to Watchlist'}</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            setMenuOpen(false);
-                                            handleDelete(e);
-                                        }}
-                                        disabled={isDismissing}
-                                        className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors text-left w-full disabled:opacity-50"
-                                    >
-                                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                                        <span>Delete Suggestion</span>
-                                    </button>
-                                </div>
-                            </>
-                        )}
+                        <CardDropdownMenu
+                            items={[
+                                {
+                                    label: 'Log as Watching',
+                                    icon: 'play_arrow',
+                                    iconColor: 'text-sky-500',
+                                    disabled: isDismissing,
+                                    onClick: handleAddToWatching,
+                                },
+                                {
+                                    label: 'Mark as Watched',
+                                    icon: 'check_circle',
+                                    iconColor: 'text-emerald-500',
+                                    disabled: isDismissing,
+                                    onClick: handleMarkAsWatched,
+                                },
+                                {
+                                    label: isInWatchlist(group.tmdbId) ? 'Remove from Watchlist' : 'Add to Watchlist',
+                                    icon: isInWatchlist(group.tmdbId) ? 'bookmark_added' : 'bookmark_add',
+                                    iconColor: 'text-amber-500',
+                                    disabled: isDismissing,
+                                    onClick: async () => {
+                                        if (isInWatchlist(group.tmdbId)) {
+                                            await removeFromList(group.tmdbId);
+                                        } else {
+                                            await addToList(group.tmdbId, group.mediaType as any, uniqueSuggestors[0]?.id);
+                                        }
+                                    },
+                                },
+                                {
+                                    label: 'Delete Suggestion',
+                                    icon: 'delete',
+                                    danger: true,
+                                    disabled: isDismissing,
+                                    onClick: handleDelete,
+                                },
+                            ]}
+                        />
                     </div>
 
                     {/* Badge Overlay */}

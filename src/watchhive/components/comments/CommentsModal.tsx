@@ -45,15 +45,33 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
+    const [replyingToUser, setReplyingToUser] = useState<string | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const commentsContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (isOpen && entryId) {
             setReplyingTo(null);
+            setReplyingToUser(null);
             setNewComment('');
             fetchComments();
         }
     }, [isOpen, entryId]);
+
+    // Handle Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && isOpen) {
+                if (replyingTo) {
+                    cancelReply();
+                } else {
+                    onClose();
+                }
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, replyingTo, onClose]);
 
     const fetchComments = async () => {
         setIsLoading(true);
@@ -67,8 +85,10 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
         }
     };
 
-    const startReply = (comment: Comment) => {
+    const startReply = (comment: Comment, targetUserName?: string) => {
         setReplyingTo(comment);
+        const name = targetUserName || comment.user?.displayName || comment.user?.username || 'user';
+        setReplyingToUser(name);
         setTimeout(() => {
             textareaRef.current?.focus();
         }, 50);
@@ -76,6 +96,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 
     const cancelReply = () => {
         setReplyingTo(null);
+        setReplyingToUser(null);
     };
 
     const handleSubmit = async (e?: React.FormEvent) => {
@@ -165,17 +186,20 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-4 sm:p-6"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-0 sm:p-4"
             onClick={onClose}
         >
             <div
-                className="w-full max-w-lg bg-[#FFF9F0] rounded-3xl shadow-2xl flex flex-col font-sans text-[#2D2926] max-h-[90vh] overflow-hidden border border-[#ffb700]/20"
+                className="w-full max-w-lg bg-[#FFF9F0] rounded-t-[28px] sm:rounded-3xl shadow-2xl flex flex-col font-sans text-[#2D2926] max-h-[88vh] sm:max-h-[85vh] h-[82vh] sm:h-auto overflow-hidden border-t sm:border border-[#ffb700]/25"
                 onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
             >
+                {/* Mobile Drag Handle Pill for native PWA / mobile sheet feel */}
+                <div className="w-10 h-1 rounded-full bg-[#2D2926]/20 mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
+
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-[#ffb700]/15 flex items-center justify-between bg-white/60 backdrop-blur-md">
+                <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-[#ffb700]/15 flex items-center justify-between bg-white/60 backdrop-blur-md">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#ffb700]/15 text-[#ffb700] flex items-center justify-center shrink-0">
                             <span className="material-symbols-outlined text-[20px]">chat_bubble</span>
@@ -203,7 +227,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                 </div>
 
                 {/* Body / Comments List */}
-                <div className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col gap-6">
+                <div ref={commentsContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-5 sm:gap-6">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center py-10">
                             <BeeLoader size="small" message="Loading discussion..." />
@@ -282,7 +306,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                                                 <div className="flex items-center gap-4 mt-1.5 px-1">
                                                     <button
                                                         type="button"
-                                                        onClick={() => startReply(comment)}
+                                                        onClick={() => startReply(comment, authorName)}
                                                         className="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#ffb700] hover:text-[#d49900] hover:underline transition-colors cursor-pointer"
                                                     >
                                                         <span className="material-symbols-outlined text-[13px]">
@@ -302,7 +326,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 
                                         {/* Threaded Replies */}
                                         {comment.replies && comment.replies.length > 0 && (
-                                            <div className="ml-8 sm:ml-10 pl-3.5 sm:pl-4 border-l-2 border-[#ffb700]/30 flex flex-col gap-2.5 mt-1.5">
+                                            <div className="ml-7 sm:ml-10 pl-3 sm:pl-4 border-l-2 border-[#ffb700]/30 flex flex-col gap-2.5 mt-1.5">
                                                 {comment.replies.map(reply => {
                                                     const canDeleteReply =
                                                         user?.id === reply.userId ||
@@ -314,7 +338,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                                                         'User';
 
                                                     return (
-                                                        <div key={reply.id} className="flex gap-3 group/reply">
+                                                        <div key={reply.id} className="flex gap-2.5 sm:gap-3 group/reply">
                                                             <div className="shrink-0 mt-0.5">
                                                                 <Link
                                                                     to={
@@ -369,6 +393,20 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                                                                 <div className="bg-white/80 px-3.5 py-2.5 rounded-2xl rounded-tl-none border border-[#ffb700]/10 shadow-xs text-[13.5px] text-[#2D2926]/85 leading-relaxed whitespace-pre-wrap break-words">
                                                                     {reply.content}
                                                                 </div>
+
+                                                                {/* Reply Action for Threaded Replies */}
+                                                                <div className="flex items-center gap-3 mt-1 px-1">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => startReply(comment, replyAuthorName)}
+                                                                        className="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#ffb700] hover:text-[#d49900] hover:underline transition-colors cursor-pointer"
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-[12px]">
+                                                                            reply
+                                                                        </span>
+                                                                        <span>Reply</span>
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     );
@@ -383,7 +421,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                 </div>
 
                 {/* Footer / Input Area */}
-                <div className="border-t border-[#ffb700]/15 bg-white shadow-[0_-4px_20px_rgba(255,183,0,0.03)] rounded-b-3xl">
+                <div className="border-t border-[#ffb700]/15 bg-white shadow-[0_-4px_20px_rgba(255,183,0,0.03)] rounded-b-none sm:rounded-b-3xl pb-[env(safe-area-inset-bottom,0px)]">
                     {/* Replying banner */}
                     {replyingTo && (
                         <div className="px-5 py-2.5 bg-[#ffb700]/10 border-b border-[#ffb700]/15 flex items-center justify-between text-xs font-semibold text-[#2D2926]">
@@ -391,13 +429,13 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                                 <span className="material-symbols-outlined text-[16px] text-[#ffb700]">reply</span>
                                 <span className="text-[#2D2926]/60 font-medium">Replying to</span>
                                 <span className="font-bold text-[#2D2926] truncate">
-                                    @{replyingTo.user?.displayName || replyingTo.user?.username || 'user'}
+                                    @{replyingToUser || replyingTo.user?.displayName || replyingTo.user?.username || 'user'}
                                 </span>
                             </div>
                             <button
                                 type="button"
                                 onClick={cancelReply}
-                                className="p-1 text-[#2D2926]/50 hover:text-[#2D2926] rounded-full hover:bg-black/5 transition-colors shrink-0"
+                                className="p-1 text-[#2D2926]/50 hover:text-[#2D2926] rounded-full hover:bg-black/5 transition-colors shrink-0 cursor-pointer"
                                 title="Cancel reply"
                                 aria-label="Cancel reply"
                             >
@@ -420,7 +458,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                                 }}
                                 placeholder={
                                     replyingTo
-                                        ? 'Write a reply...'
+                                        ? `Write a reply to @${replyingToUser || replyingTo.user?.displayName || replyingTo.user?.username || 'user'}...`
                                         : 'Share your thoughts on this watch...'
                                 }
                                 disabled={isSubmitting}

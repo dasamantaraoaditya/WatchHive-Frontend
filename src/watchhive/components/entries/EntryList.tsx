@@ -7,7 +7,8 @@ import {
     SkeletonGrid,
     ErrorState,
     FilterBar,
-    Modal
+    Modal,
+    CardDropdownMenu
 } from '../common';
 import { EntryForm } from './EntryForm';
 import '../profile/Profile.css';
@@ -40,7 +41,6 @@ export const EntryCard: React.FC<{
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
-    const [menuOpen, setMenuOpen] = useState(false);
 
     const cacheKey = `${entry.type}-${entry.tmdbId}`;
 
@@ -141,77 +141,40 @@ export const EntryCard: React.FC<{
                     {/* Three-dots Context Menu */}
                     {(onEdit || _onDelete || (_onComplete && entry.isWatching)) && (
                         <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setMenuOpen(prev => !prev);
-                                }}
-                                className="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md shadow-lg transition-all active:scale-90"
-                                title="Options"
-                                aria-label="More options"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">more_vert</span>
-                            </button>
-
-                            {menuOpen && (
-                                <>
-                                    <div 
-                                        className="fixed inset-0 z-30 cursor-default" 
-                                        onClick={(e) => { 
-                                            e.stopPropagation(); 
-                                            setMenuOpen(false); 
-                                        }} 
-                                    />
-                                    <div 
-                                        className="absolute top-10 right-0 z-40 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl py-1.5 min-w-[160px] flex flex-col animate-[fade-in_0.15s_ease-out] overflow-hidden"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        {_onComplete && entry.isWatching && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setMenuOpen(false);
-                                                    setIsCompleting(true);
-                                                }}
-                                                className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full"
-                                            >
-                                                <span className="material-symbols-outlined text-[18px] text-emerald-500">check_circle</span>
-                                                <span>Have Watched</span>
-                                            </button>
-                                        )}
-                                        {onEdit && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setMenuOpen(false);
-                                                    onEdit(entry);
-                                                }}
-                                                className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800 transition-colors text-left w-full"
-                                            >
-                                                <span className="material-symbols-outlined text-[18px] text-amber-500">edit</span>
-                                                <span>Edit Entry</span>
-                                            </button>
-                                        )}
-                                        {_onDelete && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setMenuOpen(false);
-                                                    _onDelete(entry.id);
-                                                }}
-                                                className="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors text-left w-full"
-                                            >
-                                                <span className="material-symbols-outlined text-[18px]">delete</span>
-                                                <span>Delete Entry</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                </>
-                            )}
+                            <CardDropdownMenu
+                                items={[
+                                    ...((_onComplete && entry.isWatching)
+                                        ? [
+                                              {
+                                                  label: 'Have Watched',
+                                                  icon: 'check_circle',
+                                                  iconColor: 'text-emerald-500',
+                                                  onClick: () => setIsCompleting(true),
+                                              },
+                                          ]
+                                        : []),
+                                    ...(onEdit
+                                        ? [
+                                              {
+                                                  label: 'Edit Entry',
+                                                  icon: 'edit',
+                                                  iconColor: 'text-amber-500',
+                                                  onClick: () => onEdit(entry),
+                                              },
+                                          ]
+                                        : []),
+                                    ...(_onDelete
+                                        ? [
+                                              {
+                                                  label: 'Delete Entry',
+                                                  icon: 'delete',
+                                                  danger: true,
+                                                  onClick: () => _onDelete(entry.id),
+                                              },
+                                          ]
+                                        : []),
+                                ]}
+                            />
                         </div>
                     )}
 

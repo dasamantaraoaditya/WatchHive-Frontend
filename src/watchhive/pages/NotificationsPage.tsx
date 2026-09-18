@@ -135,7 +135,7 @@ const NotificationsPage: React.FC = () => {
         if (n.type === 'SUGGESTION') {
             return { to: '/watch-hive/entries', state: { activeTab: 'suggestions' } };
         }
-        return { to: `/watch-hive/entry/${n.content.entryId}` };
+        return { to: '/watch-hive/feed' };
     };
 
     return (
