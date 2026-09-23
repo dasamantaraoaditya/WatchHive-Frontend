@@ -82,6 +82,19 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
         return acc;
     }, []);
 
+    // Extract non-empty suggestion messages with their respective author
+    const suggestionMessages = group.suggestions
+        .filter(s => s.message && s.message.trim().length > 0)
+        .map(s => {
+            const author = group.suggestors.find(u => u.id === s.fromUserId) || uniqueSuggestors[0];
+            return {
+                id: s.id,
+                message: s.message!.trim(),
+                author,
+                createdAt: s.createdAt,
+            };
+        });
+
     const handleAddToWatching = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -258,6 +271,32 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     <p className="text-[11px] text-[#2D2926]/60 line-clamp-2 leading-snug mt-1 italic">
                         {details?.overview || 'No description available'}
                     </p>
+
+                    {/* Recommendation Comment / Note from Friend */}
+                    {suggestionMessages.length > 0 && (
+                        <div className="mt-2 p-2.5 rounded-2xl bg-amber-50/90 border border-amber-200/70 text-[#2D2926] text-[11px] leading-relaxed shadow-xs">
+                            <div className="flex items-start gap-1.5">
+                                <span className="material-symbols-outlined text-amber-500 text-sm shrink-0 select-none mt-0.5">format_quote</span>
+                                <div className="flex-1 min-w-0">
+                                    <p className="italic text-[#2D2926]/90 line-clamp-2 font-medium">
+                                        "{suggestionMessages[0].message}"
+                                    </p>
+                                    <div className="flex items-center justify-between gap-1 mt-1">
+                                        {suggestionMessages[0].author && (
+                                            <span className="text-[10px] font-bold text-amber-800/80 truncate">
+                                                — @{suggestionMessages[0].author.username || suggestionMessages[0].author.displayName}
+                                            </span>
+                                        )}
+                                        {suggestionMessages.length > 1 && (
+                                            <span className="text-[9px] font-bold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-full shrink-0">
+                                                +{suggestionMessages.length - 1} more note{suggestionMessages.length > 2 ? 's' : ''}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     
                     <div className="mt-auto pt-3 border-t border-[#ffb700]/10">
                         <div className="flex flex-col gap-2">
