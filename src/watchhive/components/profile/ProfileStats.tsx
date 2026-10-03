@@ -40,7 +40,7 @@ export const ProfileStats: React.FC = () => {
             setData(res);
         } catch (err: any) {
             console.error('Failed to fetch stats:', err);
-            setError('Unable to connect to WatchHive servers right now. Please try again later.');
+            setError('Unable to connect to WatchersHive servers right now. Please try again later.');
         } finally {
             setLoading(false);
         }

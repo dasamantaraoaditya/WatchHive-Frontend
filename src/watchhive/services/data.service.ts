@@ -42,7 +42,7 @@ export async function exportData(options: ExportOptions): Promise<void> {
 
     const date = new Date().toISOString().split('T')[0];
     const label = includeParts.length === 2 ? 'export' : includeParts[0];
-    const filename = `watchhive_${label}_${date}.${format}`;
+    const filename = `watchershive_${label}_${date}.${format}`;
 
     const a = document.createElement('a');
     a.href = url;
@@ -67,7 +67,7 @@ export async function importData(file: File): Promise<ImportResult> {
                 try {
                     payload = JSON.parse(text);
                 } catch {
-                    reject(new Error('Invalid JSON file. Please upload a valid WatchHive export file.'));
+                    reject(new Error('Invalid JSON file. Please upload a valid WatchersHive export file.'));
                     return;
                 }
 

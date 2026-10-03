@@ -290,7 +290,7 @@ export const MovieDetailsPage: React.FC = () => {
         if (!details) return;
         const shareData = {
             title,
-            text: `Check out ${title} on WatchHive!`,
+            text: `Check out ${title} on WatchersHive!`,
             url: window.location.href,
         };
 

@@ -181,7 +181,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         <Link to={userId ? `/watch-hive/profile/${userId}` : '#'}>
                             <Avatar
                                 src={isSuggestion ? whLogo : avatarUrl}
-                                name={isSuggestion ? 'WatchHive' : username}
+                                name={isSuggestion ? 'WatchersHive' : username}
                                 size="md"
                                 showBorder={false}
                             />

@@ -509,7 +509,7 @@ export const CinematicStacksPage: React.FC = () => {
                 {error ? (
                     <ErrorState 
                         title="The Hive is Currently Down"
-                        message="Unable to connect to WatchHive servers right now. Please check your connection or try again later."
+                        message="Unable to connect to WatchersHive servers right now. Please check your connection or try again later."
                         onRetry={() => {
                             setError(null);
                             setIsLoading(true);

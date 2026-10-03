@@ -1,4 +1,4 @@
-// Service Worker for WatchHive PWA & Web Push Notifications
+// Service Worker for WatchersHive PWA & Web Push Notifications
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -15,9 +15,9 @@ self.addEventListener('push', (event) => {
     try {
         const data = event.data.json();
 
-        const title = data.title || '🐝 WatchHive';
+        const title = data.title || '🐝 WatchersHive';
         const options = {
-            body: data.body || 'You have a new notification on WatchHive.',
+            body: data.body || 'You have a new notification on WatchersHive.',
             icon: data.icon || '/icons/icon-192x192.png',
             badge: data.badge || '/icons/icon-96x96.png',
             data: {
@@ -44,7 +44,7 @@ self.addEventListener('notificationclick', (event) => {
 
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            // Check if there is already a window open with WatchHive
+            // Check if there is already a window open with WatchersHive
             for (const client of clientList) {
                 if (client.url.includes('/watch-hive') && 'focus' in client) {
                     client.navigate(targetUrl);

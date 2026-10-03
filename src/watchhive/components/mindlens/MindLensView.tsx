@@ -26,7 +26,7 @@ export const MindLensView: React.FC = () => {
             setData(response);
         } catch (err: any) {
             console.error(err);
-            setError('Unable to connect to WatchHive servers right now. Please check your connection or try again later.');
+            setError('Unable to connect to WatchersHive servers right now. Please check your connection or try again later.');
         } finally {
             setIsLoading(false);
         }

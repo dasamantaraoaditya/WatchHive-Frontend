@@ -113,7 +113,7 @@ export const EntriesPage: React.FC = () => {
             setWatchingPagination(response.pagination);
         } catch (err: any) {
             console.error('Failed to fetch watching entries', err);
-            setWatchingError('Unable to connect to WatchHive servers right now. Please try again later.');
+            setWatchingError('Unable to connect to WatchersHive servers right now. Please try again later.');
         } finally {
             setIsWatchingLoading(false);
         }

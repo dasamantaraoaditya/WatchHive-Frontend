@@ -246,9 +246,9 @@ export const LandingPage: React.FC = () => {
                 <div className="max-w-7xl md:mx-auto px-6 w-full flex items-center justify-between">
                     <Link to="/watch-hive" className="flex items-center gap-3 group">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center p-2 transition-all ${navSolid ? 'bg-white shadow-sm border border-[#ffb700]/10' : 'bg-white/80 backdrop-blur-md shadow-[0_4px_12px_rgba(255,183,0,0.15)] group-hover:bg-white'}`}>
-                            <img src={whLogo} alt="WatchHive" className="w-full h-full object-contain animate-pulse" />
+                            <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain animate-pulse" />
                         </div>
-                        <span className="text-xl font-black tracking-tight text-[#2D2926]">WatchHive</span>
+                        <span className="text-xl font-black tracking-tight text-[#2D2926]">WatchersHive</span>
                     </Link>
                     
                     <div className="hidden md:flex items-center gap-8 font-bold text-[14px] text-[#2D2926]/70">
@@ -307,7 +307,7 @@ export const LandingPage: React.FC = () => {
                                     onClick={handleInstall}
                                     className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-[#ffb700] text-white text-[16px] font-black tracking-wide px-8 py-4.5 rounded-2xl shadow-[0_8px_20px_rgba(245,158,11,0.25)] hover:shadow-[0_12px_28px_rgba(245,158,11,0.4)] hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
                                 >
-                                    Install WatchHive
+                                    Install WatchersHive
                                     <span className="material-symbols-outlined text-[20px]">download</span>
                                 </button>
                             ) : (
@@ -592,7 +592,7 @@ export const LandingPage: React.FC = () => {
                         Try It In Action
                     </h2>
                     <p className="text-[#2D2926]/50 font-semibold max-w-2xl mx-auto">
-                        We don't just talk about features—we build them. Click around to see how WatchHive operates.
+                        We don't just talk about features—we build them. Click around to see how WatchersHive operates.
                     </p>
                 </div>
 
@@ -610,7 +610,7 @@ export const LandingPage: React.FC = () => {
                             </div>
 
                             <p className="text-[13px] text-[#2D2926]/60 font-semibold mb-6">
-                                Toggle mood matrices to see how WatchHive dynamically classifies your watchlist's psychological density.
+                                Toggle mood matrices to see how WatchersHive dynamically classifies your watchlist's psychological density.
                             </p>
 
                             {/* Toggles */}
@@ -732,7 +732,7 @@ export const LandingPage: React.FC = () => {
                             </div>
                         </div>
 
-                        <span className="text-[10px] font-bold text-slate-400 mt-5 block text-center">Simulated from WatchHive Social Core Feed</span>
+                        <span className="text-[10px] font-bold text-slate-400 mt-5 block text-center">Simulated from WatchersHive Social Core Feed</span>
                     </div>
 
                     {/* sandbox Column 3: Cinematic Stacks */}
@@ -821,7 +821,7 @@ export const LandingPage: React.FC = () => {
                             <span className="text-[#ffb700]">Beautifully Cataloged.</span>
                         </h2>
                         <p className="text-lg text-[#2D2926]/60 font-semibold mb-10 max-w-md mx-auto lg:mx-0 leading-relaxed">
-                            WatchHive compiles your sprawling cinematic universe into a singular, breathtaking profile grid. Never forget what you watched or how you rated it, down to the exact atmosphere details.
+                            WatchersHive compiles your sprawling cinematic universe into a singular, breathtaking profile grid. Never forget what you watched or how you rated it, down to the exact atmosphere details.
                         </p>
                         <Link to="/watch-hive/signup" className="inline-flex items-center gap-2 text-[#ffb700] font-black text-lg hover:text-[#2D2926] transition-colors group">
                             <span>Start building yours today</span>
@@ -837,7 +837,7 @@ export const LandingPage: React.FC = () => {
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-8"></div>
                     <div className="relative z-10 flex flex-col items-center">
                         <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-4.5 shadow-lg border border-[#ffb700]/10 mb-8">
-                            <img src={whLogo} alt="WatchHive" className="w-full h-full object-contain" />
+                            <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain" />
                         </div>
                         <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-4 drop-shadow-sm">
                             The Curtain is Raised.
@@ -857,13 +857,13 @@ export const LandingPage: React.FC = () => {
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/20 p-1.5 flex items-center justify-center">
-                            <img src={whLogo} alt="WatchHive" className="w-full h-full object-contain" />
+                            <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain" />
                         </div>
-                        <span className="font-black text-[#2D2926] text-xl tracking-tight">WatchHive</span>
+                        <span className="font-black text-[#2D2926] text-xl tracking-tight">WatchersHive</span>
                     </div>
                     
                     <p className="text-[13px] font-bold text-[#2D2926]/40 text-center md:text-left">
-                        © 2026 WatchHive. Crafted for true cinephiles worldwide.
+                        © 2026 WatchersHive. Crafted for true cinephiles worldwide.
                     </p>
                     
                     <div className="flex items-center gap-6 text-[14px] font-bold text-[#2D2926]/60">

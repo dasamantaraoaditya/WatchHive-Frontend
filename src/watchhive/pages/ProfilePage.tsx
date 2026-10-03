@@ -91,12 +91,12 @@ export const ProfilePage: React.FC = () => {
 
     const handleInvite = async () => {
         const inviteUrl = `${window.location.origin}/signup?ref=${user.username}`;
-        const inviteText = `Join me on WatchHive! Check out my cinematic journey and let's build our movie hive together. 🐝🎥`;
+        const inviteText = `Join me on WatchersHive! Check out my cinematic journey and let's build our movie hive together. 🐝🎥`;
 
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: 'WatchHive Invite',
+                    title: 'WatchersHive Invite',
                     text: inviteText,
                     url: inviteUrl,
                 });
