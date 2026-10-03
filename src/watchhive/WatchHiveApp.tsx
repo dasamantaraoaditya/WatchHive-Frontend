@@ -46,10 +46,10 @@ const LegacyUrlRedirect: React.FC = () => {
     return <Navigate to={`/watch-hive${location.pathname}${location.search}`} replace />;
 };
 
-// Route redirector for /watchers-hive/* -> /watch-hive/*
+// Route redirector for /watchers-hive/* or /watcher-hive/* -> /watch-hive/*
 const WatchersHiveRedirect: React.FC = () => {
     const location = useLocation();
-    const subpath = location.pathname.replace(/^\/watchers-hive/, '');
+    const subpath = location.pathname.replace(/^\/watchers?-hive/, '');
     return <Navigate to={`/watch-hive${subpath}${location.search}`} replace />;
 };
 
@@ -224,9 +224,11 @@ const AppRoutes: React.FC = () => {
                 <Route path="/details/:mediaType/:tmdbId" element={<LegacyUrlRedirect />} />
                 <Route path="/profile/:id" element={<LegacyUrlRedirect />} />
 
-                {/* WatchersHive path aliases */}
+                {/* WatchersHive / WatcherHive path aliases */}
                 <Route path="/watchers-hive" element={<Navigate to="/watch-hive/feed" replace />} />
                 <Route path="/watchers-hive/*" element={<WatchersHiveRedirect />} />
+                <Route path="/watcher-hive" element={<Navigate to="/watch-hive/feed" replace />} />
+                <Route path="/watcher-hive/*" element={<WatchersHiveRedirect />} />
 
                 {/* Default Redirect */}
                 <Route path="*" element={<Navigate to="/watch-hive" replace />} />
