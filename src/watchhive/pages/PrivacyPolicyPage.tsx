@@ -137,9 +137,9 @@ export const PrivacyPolicyPage: React.FC = () => {
                                 <h2 className="text-xl font-black text-slate-900 mb-1">Contact Us</h2>
                                 <p className="text-[13px] font-medium text-slate-500">Have questions about your data? Reach out.</p>
                             </div>
-                            <a href="mailto:privacy@watchershive.com" className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 px-6 py-3 rounded-2xl font-black text-xs transition-colors">
+                            <a href="mailto:watchershive@gmail.com" className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 px-6 py-3 rounded-2xl font-black text-xs transition-colors">
                                 <span className="material-symbols-outlined text-sm">mail</span>
-                                privacy@watchershive.com
+                                watchershive@gmail.com
                             </a>
                         </div>
                     </section>
