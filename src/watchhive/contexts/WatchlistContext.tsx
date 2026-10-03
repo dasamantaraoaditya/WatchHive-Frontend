@@ -49,7 +49,7 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             setWatchlist(list);
         } catch (err: any) {
             console.error('Failed to fetch watchlist', err);
-            setError('Unable to connect to WatchHive servers right now. Please check your connection or try again later.');
+            setError('Unable to connect to WatchersHive servers right now. Please check your connection or try again later.');
             setWatchlist(null);
         } finally {
             clearTimeout(timeout);

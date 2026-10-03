@@ -20,9 +20,9 @@ export const Sidebar: React.FC = () => {
                 <div className="wh-sidebar__top">
                     <div className="wh-sidebar__brand">
                         <div className="wh-sidebar__logo">
-                            <img src={whLogo} alt="WatchHive Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <img src={whLogo} alt="WatchersHive Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </div>
-                        <h1 className="wh-sidebar__title">WatchHive</h1>
+                        <h1 className="wh-sidebar__title">WatchersHive</h1>
                     </div>
                     
                     <nav className="wh-sidebar__nav">

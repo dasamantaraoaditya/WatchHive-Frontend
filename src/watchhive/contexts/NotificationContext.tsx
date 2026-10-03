@@ -58,7 +58,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             setPage(pageNum);
         } catch (err: any) {
             console.error('Failed to fetch notifications:', err);
-            setError('Unable to connect to WatchHive servers right now. Please check your connection or try again later.');
+            setError('Unable to connect to WatchersHive servers right now. Please check your connection or try again later.');
         } finally {
             setLoading(false);
         }

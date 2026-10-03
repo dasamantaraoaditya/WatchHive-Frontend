@@ -59,7 +59,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         ? `${TMDB_BACKDROP_IMG}${backdropPathRaw}`
         : (posterPathRaw ? `${TMDB_POSTER_IMG}${posterPathRaw}` : null);
 
-    const username = isSuggestion ? 'WatchHive Suggestion' : (entryData?.user?.username || 'User');
+    const username = isSuggestion ? 'WatchersHive Suggestion' : (entryData?.user?.username || 'User');
     const displayName = isSuggestion ? (item.reason || 'Trending Now') : (entryData?.user?.displayName || username);
     const userId = !isSuggestion ? (entryData?.user?.id || entryData?.userId) : null;
 
@@ -107,10 +107,10 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     };
 
     const handleShare = async () => {
-        const shareTitle = 'WatchHive';
+        const shareTitle = 'WatchersHive';
         const shareText = isSuggestion
-            ? `Check out this recommendation for "${title}" on WatchHive! ✨`
-            : `Check out ${displayName}'s ${actionText} for "${title}" on WatchHive! ✨`;
+            ? `Check out this recommendation for "${title}" on WatchersHive! ✨`
+            : `Check out ${displayName}'s ${actionText} for "${title}" on WatchersHive! ✨`;
 
         // Use user's profile as the target link if it's an entry
         const shareUrl = userId

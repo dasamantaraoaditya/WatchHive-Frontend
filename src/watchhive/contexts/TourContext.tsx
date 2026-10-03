@@ -303,7 +303,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         <div className="flex gap-3">
                             <span className="material-symbols-outlined text-[#ffb700] text-3xl font-bold flex-shrink-0">auto_awesome</span>
                             <div className="flex flex-col gap-0.5 min-w-0">
-                                <h4 className="text-sm font-black text-[#2D2926]">Welcome to WatchHive! 🐝</h4>
+                                <h4 className="text-sm font-black text-[#2D2926]">Welcome to WatchersHive! 🐝</h4>
                                 <p className="text-[11px] font-bold text-[#2D2926]/60 leading-relaxed mt-1">
                                     Take a quick 7-step guided tour to learn how to navigate your feed, activity logs, finding friends, Quick Add, profile privacy, MindLens AI analytics, and movie details!
                                 </p>

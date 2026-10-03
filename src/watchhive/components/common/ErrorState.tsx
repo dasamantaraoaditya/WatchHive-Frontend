@@ -12,7 +12,7 @@ interface ErrorStateProps {
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
     title = "The Hive is Currently Unreachable",
-    message = "We're unable to connect to WatchHive servers right now. Please check your internet connection or try again in a few moments.",
+    message = "We're unable to connect to WatchersHive servers right now. Please check your internet connection or try again in a few moments.",
     onRetry,
     className = "",
     isDismissable,

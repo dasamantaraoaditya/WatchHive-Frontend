@@ -75,7 +75,7 @@ export const InstallPromptBanner: React.FC = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                     <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 600, color: 'var(--brand-color, #f5c518)' }}>
-                        Install WatchHive App
+                        Install WatchersHive App
                     </h3>
                     <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary, #ccc)' }}>
                         Install our app for a faster, app-like experience and offline access!

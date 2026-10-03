@@ -10,7 +10,7 @@ interface UIContextType {
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
 export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [pageTitle, setPageTitle] = useState('WatchHive');
+    const [pageTitle, setPageTitle] = useState('WatchersHive');
     const [pageIcon, setPageIcon] = useState<string | null>(null);
 
     return (

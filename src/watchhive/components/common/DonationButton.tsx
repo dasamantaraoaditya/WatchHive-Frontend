@@ -28,7 +28,7 @@ export const DonationButton: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="donation-button"
-                title="Support WatchHive"
+                title="Support WatchersHive"
                 aria-label="Buy me a coffee"
             >
                 <span className="donation-icon">☕</span>
