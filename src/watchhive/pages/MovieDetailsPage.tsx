@@ -7,7 +7,7 @@ import { useWatchlist } from '../contexts/WatchlistContext';
 import { EntryForm } from '../components/entries/EntryForm';
 import { SuggestUserSelector } from '../components/suggestions/SuggestUserSelector';
 import { useUI, useCustomAlert } from '../contexts';
-import { entriesApi } from '../services/entries.service';
+import { entriesApi, Entry } from '../services/entries.service';
 
 interface CastMember {
     id: number;
@@ -140,6 +140,7 @@ export const MovieDetailsPage: React.FC = () => {
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [userEntry, setUserEntry] = useState<Entry | null>(null);
 
     const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
     const [seasonDetails, setSeasonDetails] = useState<{ episodes: EpisodeItem[]; overview?: string; name?: string } | null>(null);
@@ -197,8 +198,16 @@ export const MovieDetailsPage: React.FC = () => {
             setError(null);
             try {
                 const endpoint = mediaType === 'movie' ? `/tmdb/movie/${tmdbId}` : `/tmdb/tv/${tmdbId}`;
-                const data: any = await apiClient.get(endpoint);
+                const [data, entriesRes]: [any, any] = await Promise.all([
+                    apiClient.get(endpoint),
+                    entriesApi.getEntries({ tmdbId, limit: 10 }).catch(() => ({ entries: [] }))
+                ]);
                 setDetails(data);
+
+                const foundEntry = entriesRes.entries?.find((e: Entry) => Number(e.tmdbId) === Number(tmdbId));
+                if (foundEntry) {
+                    setUserEntry(foundEntry);
+                }
             } catch (err) {
                 console.error('Failed to fetch details:', err);
                 setError('Failed to load cinematic details. The hive is a bit busy.');
@@ -469,6 +478,47 @@ export const MovieDetailsPage: React.FC = () => {
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* Logged Watch Entry & Suggested By Card */}
+                                {userEntry && (
+                                    <div className="flex flex-col gap-4 p-6 bg-amber-50/70 border border-amber-200/90 rounded-3xl shadow-sm">
+                                        <div className="flex flex-wrap items-center justify-between gap-3">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-600 text-lg">
+                                                    ⭐
+                                                </span>
+                                                <div>
+                                                    <h3 className="text-base font-black text-[#2D2926]">Your Watch Entry</h3>
+                                                    <p className="text-xs font-bold text-slate-400">
+                                                        {userEntry.isWatching ? 'Currently Watching' : `Logged on ${formatDate(userEntry.watchedAt)}`}
+                                                        {userEntry.rating ? ` • Rated ${userEntry.rating} / 10` : ''}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Suggested By badge */}
+                                            {userEntry.suggestedByUser && (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100/80 border border-amber-300/80 rounded-2xl text-xs font-black text-amber-900 shadow-2xs">
+                                                    <span>💡 Suggested by</span>
+                                                    {userEntry.suggestedByUser.profilePictureUrl ? (
+                                                        <img src={userEntry.suggestedByUser.profilePictureUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-4 h-4 rounded-full bg-[#ffb700] text-white text-[8px] font-black flex items-center justify-center">
+                                                            {userEntry.suggestedByUser.username[0]?.toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                    <span className="underline">@{userEntry.suggestedByUser.username}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {userEntry.review && (
+                                            <p className="text-sm font-medium text-[#2D2926]/90 italic border-l-2 border-amber-400 pl-3 py-0.5">
+                                                "{userEntry.review}"
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Accolades & Critic Reception Section */}
                                 {(details.awards || (details.critic_ratings && details.critic_ratings.length > 0)) && (
