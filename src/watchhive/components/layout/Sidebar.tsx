@@ -19,9 +19,9 @@ export const Sidebar: React.FC = () => {
             <Link to="/watch-hive/feed">
                 <div className="wh-sidebar__brand">
                     <div className="wh-sidebar__logo">
-                        <img src={whLogo} alt="WatchHive Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        <img src={whLogo} alt="WatchersHive Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
-                    <h1 className="wh-sidebar__title">WatchHive</h1>
+                    <h1 className="wh-sidebar__title">WatchersHive</h1>
                 </div>
             </Link>
             <div className="wh-sidebar__content">

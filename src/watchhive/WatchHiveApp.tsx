@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, TourProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
 import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, MovieDetailsModal, QuickCurrentlyWatchingModal } from './components/common';
@@ -38,6 +38,19 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
 
     return !isAuthenticated ? <>{children}</> : <Navigate to="/watch-hive/feed" replace />;
+};
+
+// Route redirector for clean/legacy root paths -> /watch-hive/*
+const LegacyUrlRedirect: React.FC = () => {
+    const location = useLocation();
+    return <Navigate to={`/watch-hive${location.pathname}${location.search}`} replace />;
+};
+
+// Route redirector for /watchers-hive/* or /watcher-hive/* -> /watch-hive/*
+const WatchersHiveRedirect: React.FC = () => {
+    const location = useLocation();
+    const subpath = location.pathname.replace(/^\/watchers?-hive/, '');
+    return <Navigate to={`/watch-hive${subpath}${location.search}`} replace />;
 };
 
 // App Routes Component
@@ -181,7 +194,9 @@ const AppRoutes: React.FC = () => {
                         </ProtectedRoute>
                     }
                 />
-                <Route path="/watch-hive/suggestions" element={<Navigate to="/watch-hive/entries" state={{ activeTab: 'suggestions' }} replace />} />
+                <Route path="/watch-hive/suggestions" element={<Navigate to="/watch-hive/entries?tab=suggestions" replace />} />
+                <Route path="/watch-hive/watchlist" element={<Navigate to="/watch-hive/entries?tab=watchlist" replace />} />
+                <Route path="/watch-hive/entry/:entryId" element={<Navigate to="/watch-hive/feed" replace />} />
 
                 {/* Landing Page — shown to unauthenticated visitors */}
                 <Route
@@ -199,6 +214,21 @@ const AppRoutes: React.FC = () => {
                     path="/watch-hive/privacy"
                     element={<PrivacyPolicyPage />}
                 />
+
+                {/* Clean Root / Deep Link Redirect Aliases */}
+                <Route path="/signup" element={<LegacyUrlRedirect />} />
+                <Route path="/login" element={<LegacyUrlRedirect />} />
+                <Route path="/privacy" element={<LegacyUrlRedirect />} />
+                <Route path="/feed" element={<LegacyUrlRedirect />} />
+                <Route path="/rankings" element={<LegacyUrlRedirect />} />
+                <Route path="/details/:mediaType/:tmdbId" element={<LegacyUrlRedirect />} />
+                <Route path="/profile/:id" element={<LegacyUrlRedirect />} />
+
+                {/* WatchersHive / WatcherHive path aliases */}
+                <Route path="/watchers-hive" element={<Navigate to="/watch-hive/feed" replace />} />
+                <Route path="/watchers-hive/*" element={<WatchersHiveRedirect />} />
+                <Route path="/watcher-hive" element={<Navigate to="/watch-hive/feed" replace />} />
+                <Route path="/watcher-hive/*" element={<WatchersHiveRedirect />} />
 
                 {/* Default Redirect */}
                 <Route path="*" element={<Navigate to="/watch-hive" replace />} />

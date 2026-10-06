@@ -9,7 +9,8 @@ import { WatchlistGrid } from '../components/profile';
 import { 
     SkeletonCard, 
     SkeletonGrid,
-    FilterBar
+    FilterBar,
+    ErrorState
 } from '../components/common';
 import { SuggestionsTab } from '../components/suggestions/SuggestionsTab';
 import { PageLayout } from '../components/layout';
@@ -53,6 +54,7 @@ export const EntriesPage: React.FC = () => {
     };
     const [watchingEntries, setWatchingEntries] = useState<Entry[]>([]);
     const [isWatchingLoading, setIsWatchingLoading] = useState(false);
+    const [watchingError, setWatchingError] = useState<string | null>(null);
     const [watchingPagination, setWatchingPagination] = useState({ total: 0, limit: 20, offset: 0, hasMore: false });
     const [watchingSort, setWatchingSort] = useState('recent-desc');
     const [searchQueries, setSearchQueries] = useState({
@@ -76,25 +78,42 @@ export const EntriesPage: React.FC = () => {
         if (location.state?.openForm) {
             setShowForm(true);
             setEditingEntry(undefined);
-            navigate(location.pathname, { replace: true, state: { ...location.state, openForm: false } });
+            navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: { ...location.state, openForm: false } });
         }
         const stateTab = location.state?.activeTab;
         if (stateTab && ['history', 'watching', 'watchlist', 'suggestions'].includes(stateTab)) {
             setActiveTab(stateTab as any);
-            navigate(location.pathname, { replace: true, state: {} });
+            setSearchParams({ tab: stateTab }, { replace: true });
         }
-    }, [location.state, navigate, location.pathname]);
+    }, [location.state, navigate, location.pathname, location.search, setSearchParams]);
+
+    // Save & restore scroll position for activeTab
+    useEffect(() => {
+        const key = `scroll_entries_${activeTab}`;
+        const savedScroll = sessionStorage.getItem(key);
+        if (savedScroll) {
+            setTimeout(() => window.scrollTo(0, parseInt(savedScroll, 10)), 50);
+        }
+
+        const handleScroll = () => {
+            sessionStorage.setItem(`scroll_entries_${activeTab}`, window.scrollY.toString());
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [activeTab]);
 
     const fetchWatching = useCallback(async (offset = 0) => {
         if (!user) return;
         setIsWatchingLoading(true);
+        setWatchingError(null);
         try {
             const response = await entriesApi.getEntries({ userId: user.id, isWatching: true, limit: 20, offset });
             const filtered = response.entries.filter((e: Entry) => e.isWatching);
             setWatchingEntries(prev => offset > 0 ? [...prev, ...filtered] : filtered);
             setWatchingPagination(response.pagination);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to fetch watching entries', err);
+            setWatchingError('Unable to connect to WatchersHive servers right now. Please try again later.');
         } finally {
             setIsWatchingLoading(false);
         }
@@ -122,6 +141,7 @@ export const EntriesPage: React.FC = () => {
     const handleSuccess = () => {
         setShowForm(false);
         setEditingEntry(undefined);
+        fetchWatching(0);
         setRefreshKey((prev) => prev + 1);
     };
 
@@ -236,7 +256,13 @@ export const EntriesPage: React.FC = () => {
                                 countLabel={searchQueries.watching ? "Matching Sessions" : "Active Sessions"}
                             />
                             
-                            {isWatchingLoading && watchingEntries.length === 0 ? (
+                            {watchingError ? (
+                                <ErrorState 
+                                    title="The Hive is Currently Down"
+                                    message="Unable to load your active watching sessions right now. Please check your connection or try again later."
+                                    onRetry={() => fetchWatching(0)}
+                                />
+                            ) : isWatchingLoading && watchingEntries.length === 0 ? (
                                 <SkeletonGrid count={3} />
                             ) : filteredWatchingEntries.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
@@ -252,7 +278,7 @@ export const EntriesPage: React.FC = () => {
                                     <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
                                         {searchQueries.watching 
                                             ? `We couldn't find any active sessions matching "${searchQueries.watching}"` 
-                                            : "The hive is quiet. Start watching a movie or TV show to track your active sessions!"}
+                                            : "The hive is quiet. Log a movie or TV show you are currently watching to track your active sessions!"}
                                     </p>
                                     {!searchQueries.watching && (
                                         <button
@@ -271,6 +297,7 @@ export const EntriesPage: React.FC = () => {
                                             key={entry.id} 
                                             entry={entry}
                                             onComplete={handleComplete}
+                                            onEdit={handleEdit}
                                             onDelete={handleDeleteWatching}
                                             onClick={(e) => navigate(`/watch-hive/details/${e.type === 'TV_SHOW' ? 'tv' : 'movie'}/${e.tmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
                                         />

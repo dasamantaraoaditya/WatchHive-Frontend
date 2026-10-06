@@ -41,8 +41,15 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         return 'movie';
     })() as 'movie' | 'tv';
     const { details } = useTmdbDetails(fetchTmdbId as number, entryData?.type || mediaTypeFallback);
-
-    const title = isSuggestion ? (item.data.title || item.data.name) : entryData.title;
+    const rawTitle = isSuggestion ? (item.data.title || item.data.name) : entryData.title;
+    const isGenericTitle = !rawTitle ||
+        rawTitle.toLowerCase() === 'this title' ||
+        rawTitle.toLowerCase() === 'untitled' ||
+        rawTitle.toLowerCase().startsWith('movie #') ||
+        rawTitle.toLowerCase().startsWith('media #');
+    const title = (!isGenericTitle && rawTitle)
+        ? rawTitle
+        : (details?.name || details?.title || details?.original_name || details?.original_title || rawTitle || 'Untitled');
 
     // Choose cinematic landscape backdrop if available; otherwise fallback to poster
     const backdropPathRaw = isSuggestion ? item.data.backdrop_path : details?.backdrop_path;
@@ -52,9 +59,9 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         ? `${TMDB_BACKDROP_IMG}${backdropPathRaw}`
         : (posterPathRaw ? `${TMDB_POSTER_IMG}${posterPathRaw}` : null);
 
-    const username = isSuggestion ? 'WatchHive Suggestion' : (entryData?.user?.username || 'User');
+    const username = isSuggestion ? 'WatchersHive Suggestion' : (entryData?.user?.username || 'User');
     const displayName = isSuggestion ? (item.reason || 'Trending Now') : (entryData?.user?.displayName || username);
-    const userId = !isSuggestion ? entryData?.user?.id : null;
+    const userId = !isSuggestion ? (entryData?.user?.id || entryData?.userId) : null;
 
     // Support both profilePictureUrl and avatarUrl (defensive)
     const userAvatar = entryData?.user?.profilePictureUrl || entryData?.user?.avatarUrl;
@@ -100,10 +107,10 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     };
 
     const handleShare = async () => {
-        const shareTitle = 'WatchHive';
+        const shareTitle = 'WatchersHive';
         const shareText = isSuggestion
-            ? `Check out this recommendation for "${title}" on WatchHive! ✨`
-            : `Check out ${displayName}'s ${actionText} for "${title}" on WatchHive! ✨`;
+            ? `Check out this recommendation for "${title}" on WatchersHive! ✨`
+            : `Check out ${displayName}'s ${actionText} for "${title}" on WatchersHive! ✨`;
 
         // Use user's profile as the target link if it's an entry
         const shareUrl = userId
@@ -174,7 +181,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         <Link to={userId ? `/watch-hive/profile/${userId}` : '#'}>
                             <Avatar
                                 src={isSuggestion ? whLogo : avatarUrl}
-                                name={isSuggestion ? 'WatchHive' : username}
+                                name={isSuggestion ? 'WatchersHive' : username}
                                 size="fluid"
                                 showBorder={false}
                             />
@@ -184,7 +191,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     <div className="feed-card-header-info flex-1 min-w-0 pr-2">
                         <div className="flex flex-col md:flex-row md:items-start md:justify-between w-full gap-2">
                             <div className="flex flex-col min-w-[0] pr-2">
-                                <p className="feed-card-header-text">
+                                <p className="feed-card-header-text leading-snug">
                                     {isSuggestion ? (
                                         <span className="font-bold text-[#2D2926]">{displayName}</span>
                                     ) : (
@@ -203,8 +210,28 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                         {title}
                                     </button>
                                 </p>
+
+                                {entryData?.suggestedByUser && (
+                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-[#2D2926]/70 font-medium">
+                                        <span className="text-[11px] font-medium text-[#2D2926]/60">Suggested by</span>
+                                        <Link 
+                                            to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} 
+                                            className="inline-flex items-center gap-1.5 font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <Avatar
+                                                src={entryData.suggestedByUser.profilePictureUrl}
+                                                name={entryData.suggestedByUser.displayName || entryData.suggestedByUser.username}
+                                                size="xxs"
+                                                showBorder={false}
+                                            />
+                                            <span>@{entryData.suggestedByUser.username}</span>
+                                        </Link>
+                                    </div>
+                                )}
+
                                 {metadataString && (
-                                    <p className="text-xs text-[#2D2926]/50 mt-0.5 font-semibold">
+                                    <p className="text-xs text-[#2D2926]/50 mt-1 font-semibold">
                                         {metadataString}
                                     </p>
                                 )}
@@ -332,9 +359,14 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     isOpen={showComments}
                     onClose={() => setShowComments(false)}
                     entryId={entryData.id}
-                    onCommentAdded={() => {
-                        setCommentCount(prev => prev + 1);
+                    entryTitle={title}
+                    entryAuthorId={userId || undefined}
+                    onCommentAdded={(newCount) => {
+                        setCommentCount(prev => newCount ?? prev + 1);
                         setIsCommented(true);
+                    }}
+                    onCommentDeleted={(newCount) => {
+                        setCommentCount(prev => Math.max(0, newCount ?? prev - 1));
                     }}
                 />
             )}

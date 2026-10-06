@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import apiClient from '../../services/api.js';
-import { MovieDetailsModal } from '../common';
+import { MovieDetailsModal, Modal, CardDropdownMenu } from '../common';
 import { entriesApi } from '../../services/entries.service';
+import { EntryForm } from '../entries/EntryForm';
 import './Profile.css';
 import { useCustomAlert } from '../../contexts';
 
@@ -11,27 +12,27 @@ interface WatchlistCardProps {
     tmdbId: number;
     mediaType?: string;
     readOnly?: boolean;
+    suggestedByUserId?: string | null;
+    suggestedByUser?: {
+        id: string;
+        username: string;
+        displayName?: string | null;
+        profilePictureUrl?: string | null;
+    } | null;
 }
 
 const TMDB_IMG = 'https://image.tmdb.org/t/p/w185';
 
-export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie', readOnly = false }) => {
+export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType = 'movie', readOnly = false, suggestedByUserId = null, suggestedByUser = null }) => {
     const navigate = useNavigate();
     const [details, setDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [modalView, setModalView] = useState<'details' | 'log'>('details');
+    const [modalView] = useState<'details' | 'log'>('details');
+    const [showEntryForm, setShowEntryForm] = useState(false);
     const { removeFromList } = useWatchlist();
     const [isTransitioning, setIsTransitioning] = useState(false);
     const { confirm, alert } = useCustomAlert();
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-    const [showMobileActions, setShowMobileActions] = useState(false);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const handleAddToWatching = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -39,10 +40,20 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
 
         if (isTransitioning) return;
 
-        const title = details?.title || details?.name || 'this title';
-        const confirmed = await confirm(`Would you like to start watching "${title}"? This will move it from your watchlist to your Currently Watching list.`, {
-            title: 'Start Watching',
-            confirmText: 'Start Watching',
+        let resolvedTitle = details?.name || details?.title || details?.original_name || details?.original_title;
+        if (!resolvedTitle) {
+            try {
+                const fetched = await apiClient.get<any>(`/tmdb/${mediaType === 'tv' ? 'tv' : 'movie'}/${tmdbId}`);
+                resolvedTitle = fetched?.name || fetched?.title || fetched?.original_name || fetched?.original_title || 'Untitled';
+                setDetails(fetched);
+            } catch {
+                resolvedTitle = 'Untitled';
+            }
+        }
+
+        const confirmed = await confirm(`Would you like to move "${resolvedTitle}" to your Currently Watching log?`, {
+            title: 'Log as Currently Watching',
+            confirmText: 'Move to Currently Watching',
             severity: 'primary'
         });
         if (!confirmed) return;
@@ -52,27 +63,28 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         try {
             const apiType = mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
             
-            // Create currently watching entry
+            // Create currently watching entry with preserved suggestedByUserId
             await entriesApi.createEntry({
                 tmdbId,
-                title: details.title || details.name,
+                title: resolvedTitle,
                 type: apiType,
                 isWatching: true,
-                startedAt: new Date().toISOString()
+                startedAt: new Date().toISOString(),
+                suggestedByUserId: suggestedByUser?.id || null
             });
 
             // Remove from watchlist
             await removeFromList(tmdbId);
 
             // Display beautiful success alert
-            await alert(`"${title}" has been successfully moved to your Currently Watching list!`, {
-                title: 'Watching Started',
+            await alert(`"${title}" has been added to your Currently Watching log!`, {
+                title: 'Marked as Watching',
                 severity: 'success',
                 confirmText: 'Awesome'
             });
         } catch (err) {
             console.error('Failed to move item to currently watching', err);
-            await alert(`Failed to start watching "${title}". Please try again.`, {
+            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
                 title: 'Error',
                 severity: 'error'
             });
@@ -100,12 +112,17 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
     const handleMarkAsWatched = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setModalView('log');
-        setShowModal(true);
+        setShowEntryForm(true);
     };
 
     const handleCardClick = () => {
-        navigate(`/watch-hive/details/${mediaType}/${tmdbId}`, { state: { from: window.location.pathname + window.location.search } });
+        navigate(`/watch-hive/details/${mediaType}/${tmdbId}`, { 
+            state: { 
+                suggestedByUserId: suggestedByUser?.id || suggestedByUserId,
+                suggestedByUser,
+                from: window.location.pathname + window.location.search 
+            } 
+        });
     };
 
     const handleRemove = async (e: React.MouseEvent) => {
@@ -138,15 +155,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
         <>
             <div 
                 className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl bg-white border border-[#ffb700]/10 shadow-sm hover:shadow-md transition-all"
-                onClick={(e) => {
-                    if (isMobile) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setShowMobileActions(!showMobileActions);
-                    } else {
-                        handleCardClick();
-                    }
-                }}
+                onClick={handleCardClick}
             >
                 <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
                 {details.poster_path ? (
@@ -164,62 +173,32 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 {/* Overlay shadow for cinematic feel */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                {/* Mobile Central Eye Overlay */}
-                {isMobile && showMobileActions && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/45 backdrop-blur-[2.5px] transition-all duration-300 animate-[fade-in_0.2s_ease-out]">
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleCardClick();
-                            }}
-                            className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
-                            title="View details"
-                        >
-                            <span className="material-symbols-outlined text-[24px] font-bold">visibility</span>
-                        </button>
-                    </div>
-                )}
-
-                {/* Standardized Actions Layout */}
+                {/* Three-dots Context Menu */}
                 {!readOnly && (
-                    <div className={`absolute top-2 right-2 flex flex-col gap-2 z-20 transition-all duration-300
-                        ${isMobile 
-                            ? (showMobileActions ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-90 pointer-events-none') 
-                            : 'opacity-0 group-hover:opacity-100'}`}
-                    >
-                        <button
-                            onClick={handleAddToWatching}
-                            disabled={isTransitioning}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors disabled:opacity-50"
-                            title="Start Watching (Move to Currently Watching)"
-                        >
-                            {isTransitioning ? (
-                                <span className="animate-spin text-[12px] text-[#ffb700]">⏳</span>
-                            ) : (
-                                <span className="material-symbols-outlined text-[18px]">
-                                    play_arrow
-                                </span>
-                            )}
-                        </button>
-
-                        <button
-                            onClick={handleMarkAsWatched}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            title="Mark as Watched (Hive It)"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">
-                                check_circle
-                            </span>
-                        </button>
-                        
-                        <button
-                            onClick={handleRemove}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            title="Remove from Watchlist"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
+                    <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
+                        <CardDropdownMenu
+                            items={[
+                                {
+                                    label: 'Log as Watching',
+                                    icon: 'play_arrow',
+                                    iconColor: 'text-sky-500',
+                                    disabled: isTransitioning,
+                                    onClick: handleAddToWatching,
+                                },
+                                {
+                                    label: 'Mark as Watched',
+                                    icon: 'check_circle',
+                                    iconColor: 'text-emerald-500',
+                                    onClick: handleMarkAsWatched,
+                                },
+                                {
+                                    label: 'Remove from Watchlist',
+                                    icon: 'delete',
+                                    danger: true,
+                                    onClick: handleRemove,
+                                },
+                            ]}
+                        />
                     </div>
                 )}
 
@@ -231,6 +210,12 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
             </div>
             <div className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white border-t border-slate-50">
                 <h4 className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={title}>{title}</h4>
+                {suggestedByUser && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200/70 rounded-md text-[#2D2926] text-[9px] font-bold w-fit mt-0.5">
+                        <span>💡 Suggested by</span>
+                        <span className="font-black text-amber-800">@{suggestedByUser.username}</span>
+                    </div>
+                )}
                 <div className="watchlist-card__meta text-[11px] font-bold mt-1 text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
                     <span>{year || 'Coming Soon'}</span>
                     {rating && (
@@ -252,6 +237,40 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 }
             }}
         />
+
+        {showEntryForm && (
+            <Modal
+                isOpen={showEntryForm}
+                onClose={() => setShowEntryForm(false)}
+                title="Log your watch"
+                maxWidth="max-w-4xl"
+            >
+                <EntryForm
+                    isModal={true}
+                    prefillData={{
+                        tmdbId,
+                        title: details.title || details.name,
+                        type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                        posterPath: details.poster_path,
+                        overview: details.overview,
+                        suggestedByUserId: suggestedByUser?.id || suggestedByUserId || null,
+                        suggestedByUser: suggestedByUser ? {
+                            id: suggestedByUser.id,
+                            username: suggestedByUser.username,
+                            displayName: suggestedByUser.displayName || null,
+                            profilePictureUrl: suggestedByUser.profilePictureUrl || null,
+                        } : null,
+                    }}
+                    onSuccess={async () => {
+                        setShowEntryForm(false);
+                        if (!readOnly) {
+                            await removeFromList(tmdbId);
+                        }
+                    }}
+                    onCancel={() => setShowEntryForm(false)}
+                />
+            </Modal>
+        )}
         </>
     );
 };

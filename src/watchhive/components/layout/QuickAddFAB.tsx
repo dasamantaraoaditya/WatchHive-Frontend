@@ -43,7 +43,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
     const secondaryActions = [
         {
             icon: 'visibility',
-            label: 'Watching Now',
+            label: 'Add Currently Watching',
             onClick: onCurrentlyWatching,
             hoverClass: 'hover:bg-emerald-50 hover:text-emerald-600',
         },
@@ -55,7 +55,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
         },
         {
             icon: 'send',
-            label: 'Suggest Title',
+            label: 'Suggest',
             onClick: onSuggest,
             hoverClass: 'hover:bg-purple-50 hover:text-purple-600',
         },
@@ -81,16 +81,16 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                 className={`max-w-full ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
             >
                 <div className="bg-white/95 backdrop-blur-xl border border-[#ffb700]/30 shadow-[0_8px_30px_rgba(0,0,0,0.12)] p-1 sm:p-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 transition-all">
-                    {/* Primary Action Button: Log Watch */}
+                    {/* Primary Action Button: Log an Entry / Log Watch */}
                     <motion.button
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.96 }}
                         onClick={onLogWatch}
                         className="relative group bg-[#ffb700] hover:bg-[#ffa700] text-white font-black text-[11px] sm:text-xs uppercase tracking-wider px-3 sm:px-4 py-2 sm:py-2.5 rounded-full flex items-center gap-1.5 sm:gap-2 shadow-md shadow-[#ffb700]/30 transition-all overflow-hidden whitespace-nowrap shrink-0"
-                        title="Log Watch"
+                        title="Log an Entry"
                     >
                         <span className="material-symbols-outlined text-base sm:text-lg font-bold">edit_note</span>
-                        <span>Log Watch</span>
+                        <span>Log an Entry</span>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
                     </motion.button>
 

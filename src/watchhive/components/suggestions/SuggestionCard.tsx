@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
+import { entriesApi } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { WatchlistButton, SkeletonCard, Avatar } from '../common';
+import { SkeletonCard, Modal, CardDropdownMenu, Avatar } from '../common';
+import { EntryForm } from '../entries/EntryForm';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
+import { useWatchlist } from '../../contexts/WatchlistContext';
 
 interface SuggestionCardProps {
     group: GroupedSuggestion;
     onStatusChange?: () => void;
+    onLogEntry?: (prefill: { tmdbId: number; title: string; type: 'MOVIE' | 'TV_SHOW'; posterPath?: string | null; suggestedByUserId?: string | null; suggestionIds?: string[] }) => void;
     preloadedDetails?: {
         title: string;
         overview: string;
@@ -32,15 +36,9 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isDismissing, setIsDismissing] = useState(false);
-    const { confirm } = useCustomAlert();
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-    const [showMobileActions, setShowMobileActions] = useState(false);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    const [showEntryForm, setShowEntryForm] = useState(false);
+    const { confirm, alert } = useCustomAlert();
+    const { isInWatchlist, addToList, removeFromList } = useWatchlist();
 
     useEffect(() => {
         if (preloadedDetails) {
@@ -78,13 +76,93 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
         fetchDetails();
     }, [group.tmdbId, group.mediaType, preloadedDetails]);
 
-    const handleDismiss = async () => {
+    // De-duplicate suggestors
+    const uniqueSuggestors = group.suggestors.reduce((acc: any[], current) => {
+        if (!acc.find(s => s.id === current.id)) acc.push(current);
+        return acc;
+    }, []);
+
+    // Extract non-empty suggestion messages with their respective author
+    const suggestionMessages = group.suggestions
+        .filter(s => s.message && s.message.trim().length > 0)
+        .map(s => {
+            const author = group.suggestors.find(u => u.id === s.fromUserId) || uniqueSuggestors[0];
+            return {
+                id: s.id,
+                message: s.message!.trim(),
+                author,
+                createdAt: s.createdAt,
+            };
+        });
+
+    const handleAddToWatching = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isDismissing) return;
+
+        let resolvedTitle = details?.name || details?.title;
+        if (!resolvedTitle) {
+            try {
+                const endpoint = group.mediaType === 'tv' ? 'tv' : 'movie';
+                const data: any = await apiClient.get(`/tmdb/${endpoint}/${group.tmdbId}`);
+                resolvedTitle = data?.name || data?.title;
+            } catch (e) {
+                console.warn('Failed to fetch details before adding to watching', e);
+            }
+        }
+        const title = resolvedTitle || (group.mediaType === 'tv' ? 'TV Show' : 'Movie');
+        const confirmed = await confirm(`Would you like to move "${title}" to your Currently Watching log?`, {
+            title: 'Log as Currently Watching',
+            confirmText: 'Move to Currently Watching',
+            severity: 'primary'
+        });
+        if (!confirmed) return;
+
+        setIsDismissing(true);
+        try {
+            const apiType = group.mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
+            const suggestorId = uniqueSuggestors[0]?.id;
+            await entriesApi.createEntry({
+                tmdbId: group.tmdbId,
+                title,
+                type: apiType,
+                isWatching: true,
+                startedAt: new Date().toISOString(),
+                suggestedByUserId: suggestorId
+            });
+            await Promise.all(group.suggestions.map(s => suggestionsApi.deleteSuggestion(s.id)));
+            await alert(`"${title}" has been added to your Currently Watching log!`, {
+                title: 'Marked as Watching',
+                severity: 'success',
+                confirmText: 'Awesome'
+            });
+            onStatusChange?.();
+        } catch (err) {
+            console.error('Failed to move item to currently watching', err);
+            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
+                title: 'Error',
+                severity: 'error'
+            });
+        } finally {
+            setIsDismissing(false);
+        }
+    };
+
+    const handleMarkAsWatched = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowEntryForm(true);
+    };
+
+    const handleDelete = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (isDismissing) return;
         
-        const title = details?.title || 'this title';
-        const confirmed = await confirm(`Dismiss suggestions for "${title}"?`, {
-            title: 'Dismiss Suggestion',
-            confirmText: 'Dismiss',
+        const title = details?.name || details?.title || 'this suggestion';
+        const confirmed = await confirm(`Delete suggestions for "${title}"?`, {
+            title: 'Delete Suggestion',
+            confirmText: 'Delete',
             severity: 'warning'
         });
         if (!confirmed) return;
@@ -95,7 +173,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
             await Promise.all(group.suggestions.map(s => suggestionsApi.deleteSuggestion(s.id)));
             onStatusChange?.();
         } catch (err) {
-            console.error('Failed to dismiss suggestions', err);
+            console.error('Failed to delete suggestions', err);
         } finally {
             setIsDismissing(false);
         }
@@ -107,25 +185,19 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
 
     const posterUrl = details?.poster_path ? `https://image.tmdb.org/t/p/w342${details.poster_path}` : null;
     const title = details?.title || details?.name || 'Untitled';
-    
-    // De-duplicate suggestors
-    const uniqueSuggestors = group.suggestors.reduce((acc: any[], current) => {
-        if (!acc.find(s => s.id === current.id)) acc.push(current);
-        return acc;
-    }, []);
 
     return (
         <>
             <div 
                 className="watchlist-card group relative flex flex-col h-full bg-white rounded-3xl border border-[#ffb700]/10 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
-                onClick={(e) => {
-                    if (isMobile) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setShowMobileActions(!showMobileActions);
-                    } else {
-                        navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { state: { from: window.location.pathname + window.location.search } });
-                    }
+                onClick={() => {
+                    navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { 
+                        state: { 
+                            suggestedByUserId: uniqueSuggestors[0]?.id,
+                            suggestedByUser: uniqueSuggestors[0],
+                            from: window.location.pathname + window.location.search 
+                        } 
+                    });
                 }}
             >
                 {/* Poster Wrapper */}
@@ -141,48 +213,46 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     {/* Standardized Action Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Mobile Central Eye Overlay */}
-                    {isMobile && showMobileActions && (
-                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/45 backdrop-blur-[2.5px] transition-all duration-300 animate-[fade-in_0.2s_ease-out]">
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { state: { from: window.location.pathname + window.location.search } });
-                                }}
-                                className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
-                                title="View details"
-                            >
-                                <span className="material-symbols-outlined text-[24px] font-bold">visibility</span>
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Actions overlay */}
-                    <div className={`absolute top-2 right-2 flex flex-col gap-2 z-20 transition-all duration-300
-                        ${isMobile 
-                            ? (showMobileActions ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-90 pointer-events-none') 
-                            : 'opacity-0 group-hover:opacity-100'}`}
-                    >
-                        <div className="watchlist-action-standard">
-                            <WatchlistButton 
-                                tmdbId={group.tmdbId} 
-                                mediaType={group.mediaType as any} 
-                                variant="icon"
-                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            />
-                        </div>
-                        
-                        <button 
-                            onClick={handleDismiss}
-                            className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                            disabled={isDismissing}
-                            title="Dismiss Suggestion"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">
-                                {isDismissing ? 'sync' : 'visibility_off'}
-                            </span>
-                        </button>
+                    {/* Three-dots Context Menu */}
+                    <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
+                        <CardDropdownMenu
+                            items={[
+                                {
+                                    label: 'Log as Watching',
+                                    icon: 'play_arrow',
+                                    iconColor: 'text-sky-500',
+                                    disabled: isDismissing,
+                                    onClick: handleAddToWatching,
+                                },
+                                {
+                                    label: 'Mark as Watched',
+                                    icon: 'check_circle',
+                                    iconColor: 'text-emerald-500',
+                                    disabled: isDismissing,
+                                    onClick: handleMarkAsWatched,
+                                },
+                                {
+                                    label: isInWatchlist(group.tmdbId) ? 'Remove from Watchlist' : 'Add to Watchlist',
+                                    icon: isInWatchlist(group.tmdbId) ? 'bookmark_added' : 'bookmark_add',
+                                    iconColor: 'text-amber-500',
+                                    disabled: isDismissing,
+                                    onClick: async () => {
+                                        if (isInWatchlist(group.tmdbId)) {
+                                            await removeFromList(group.tmdbId);
+                                        } else {
+                                            await addToList(group.tmdbId, group.mediaType as any, uniqueSuggestors[0]?.id);
+                                        }
+                                    },
+                                },
+                                {
+                                    label: 'Delete Suggestion',
+                                    icon: 'delete',
+                                    danger: true,
+                                    disabled: isDismissing,
+                                    onClick: handleDelete,
+                                },
+                            ]}
+                        />
                     </div>
 
                     {/* Badge Overlay */}
@@ -201,6 +271,32 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     <p className="text-[11px] text-[#2D2926]/60 line-clamp-2 leading-snug mt-1 italic">
                         {details?.overview || 'No description available'}
                     </p>
+
+                    {/* Recommendation Comment / Note from Friend */}
+                    {suggestionMessages.length > 0 && (
+                        <div className="mt-2 p-2.5 rounded-2xl bg-amber-50/90 border border-amber-200/70 text-[#2D2926] text-[11px] leading-relaxed shadow-xs">
+                            <div className="flex items-start gap-1.5">
+                                <span className="material-symbols-outlined text-amber-500 text-sm shrink-0 select-none mt-0.5">format_quote</span>
+                                <div className="flex-1 min-w-0">
+                                    <p className="italic text-[#2D2926]/90 line-clamp-2 font-medium">
+                                        "{suggestionMessages[0].message}"
+                                    </p>
+                                    <div className="flex items-center justify-between gap-1 mt-1">
+                                        {suggestionMessages[0].author && (
+                                            <span className="text-[10px] font-bold text-amber-800/80 truncate">
+                                                — @{suggestionMessages[0].author.username || suggestionMessages[0].author.displayName}
+                                            </span>
+                                        )}
+                                        {suggestionMessages.length > 1 && (
+                                            <span className="text-[9px] font-bold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-full shrink-0">
+                                                +{suggestionMessages.length - 1} more note{suggestionMessages.length > 2 ? 's' : ''}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     
                     <div className="mt-auto pt-3 border-t border-[#ffb700]/10">
                         <div className="flex flex-col gap-2">
@@ -224,6 +320,38 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     </div>
                 </div>
             </div>
+
+            {showEntryForm && (
+                <Modal
+                    isOpen={showEntryForm}
+                    onClose={() => setShowEntryForm(false)}
+                    title="Log your watch"
+                    maxWidth="max-w-4xl"
+                >
+                    <EntryForm
+                        isModal={true}
+                        prefillData={{
+                            tmdbId: group.tmdbId,
+                            title: details?.title || details?.name || preloadedDetails?.title || 'Untitled',
+                            type: group.mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                            posterPath: details?.poster_path || preloadedDetails?.poster_path || null,
+                            overview: details?.overview || preloadedDetails?.overview || null,
+                            suggestedByUserId: uniqueSuggestors[0]?.id || null,
+                            suggestedByUser: uniqueSuggestors[0] || null,
+                        }}
+                        onSuccess={async () => {
+                            setShowEntryForm(false);
+                            try {
+                                await Promise.all(group.suggestions.map(s => suggestionsApi.deleteSuggestion(s.id)));
+                            } catch (err) {
+                                console.error('Failed to delete suggestions on log:', err);
+                            }
+                            onStatusChange?.();
+                        }}
+                        onCancel={() => setShowEntryForm(false)}
+                    />
+                </Modal>
+            )}
         </>
     );
 };

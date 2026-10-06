@@ -7,6 +7,23 @@ export class ApiClient {
     private accessToken: string | null = null;
     private refreshToken: string | null = null;
 
+    private isRefreshing = false;
+    private failedQueue: Array<{
+        resolve: (token: string) => void;
+        reject: (error: unknown) => void;
+    }> = [];
+
+    private processQueue(error: unknown, token: string | null = null) {
+        this.failedQueue.forEach((prom) => {
+            if (error) {
+                prom.reject(error);
+            } else if (token) {
+                prom.resolve(token);
+            }
+        });
+        this.failedQueue = [];
+    }
+
     constructor() {
         this.client = axios.create({
             baseURL: API_BASE_URL,
@@ -35,18 +52,47 @@ export class ApiClient {
             async (error: AxiosError) => {
                 const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-                // If error is 401 and we haven't retried yet
-                if (error.response?.status === 401 && !originalRequest._retry && this.refreshToken) {
+                // If error is 401 and request wasn't already retried and not the refresh endpoint itself
+                if (
+                    error.response?.status === 401 &&
+                    !originalRequest._retry &&
+                    !originalRequest.url?.includes('/auth/refresh')
+                ) {
+                    if (this.isRefreshing) {
+                        return new Promise((resolve, reject) => {
+                            this.failedQueue.push({
+                                resolve: (token: string) => {
+                                    if (originalRequest.headers) {
+                                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                                    }
+                                    resolve(this.client(originalRequest));
+                                },
+                                reject: (err: unknown) => {
+                                    reject(err);
+                                },
+                            });
+                        });
+                    }
+
+                    const currentRefreshToken = this.refreshToken || localStorage.getItem('refreshToken');
+                    if (!currentRefreshToken) {
+                        this.clearTokens();
+                        return Promise.reject(error);
+                    }
+
                     originalRequest._retry = true;
+                    this.isRefreshing = true;
 
                     try {
-                        // Try to refresh the token
+                        // Refresh the token
                         const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-                            refreshToken: this.refreshToken,
+                            refreshToken: currentRefreshToken,
                         });
 
                         const { accessToken, refreshToken } = response.data;
                         this.setTokens(accessToken, refreshToken);
+
+                        this.processQueue(null, accessToken);
 
                         // Retry the original request with new token
                         if (originalRequest.headers) {
@@ -54,10 +100,13 @@ export class ApiClient {
                         }
                         return this.client(originalRequest);
                     } catch (refreshError) {
+                        this.processQueue(refreshError, null);
                         // Refresh failed, clear tokens and redirect to login
                         this.clearTokens();
                         window.location.href = '/watch-hive/login';
                         return Promise.reject(refreshError);
+                    } finally {
+                        this.isRefreshing = false;
                     }
                 }
 
@@ -87,6 +136,10 @@ export class ApiClient {
 
     getAccessToken() {
         return this.accessToken;
+    }
+
+    getRefreshToken() {
+        return this.refreshToken;
     }
 
     // HTTP methods

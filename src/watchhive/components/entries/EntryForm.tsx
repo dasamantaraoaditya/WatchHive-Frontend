@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { entriesApi, CreateEntryData, Entry } from '../../services/entries.service';
+import { entriesApi, CreateEntryData, Entry, SuggestedUser } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import { HiveDatePicker } from '../common/HiveDatePicker';
+import { useAuth } from '../../contexts/AuthContext';
+import { userService } from '../../services/userService';
+import { suggestionsApi } from '../../services/suggestions.service';
 
 export function calculateFuzzyScore(query: string, targetTitle: string): number {
     if (!query || !targetTitle) return 0;
@@ -58,7 +61,15 @@ function levenshteinDistance(a: string, b: string): number {
 
 interface EntryFormProps {
     entry?: Entry;
-    prefillData?: { tmdbId: number; title: string; type: 'MOVIE' | 'TV_SHOW'; posterPath?: string | null; overview?: string | null };
+    prefillData?: { 
+        tmdbId: number; 
+        title: string; 
+        type: 'MOVIE' | 'TV_SHOW'; 
+        posterPath?: string | null; 
+        overview?: string | null;
+        suggestedByUserId?: string | null;
+        suggestedByUser?: SuggestedUser | null;
+    };
     onSuccess?: (entry: Entry) => void;
     onCancel?: () => void;
     isModal?: boolean;
@@ -333,6 +344,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    const { user } = useAuth();
+
     // ── Form state ──
     const [formData, setFormData] = useState<CreateEntryData>({
         tmdbId: entry?.tmdbId || prefillData?.tmdbId || 0,
@@ -347,6 +360,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         isRewatch: entry?.isRewatch || false,
         isWatching: entry?.isWatching || defaultIsWatching,
         watchLocation: entry?.watchLocation || '',
+        suggestedByUserId: entry?.suggestedByUserId || prefillData?.suggestedByUserId || undefined,
     });
 
     // ── UI state ──
@@ -360,14 +374,77 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const [suggestedUser, setSuggestedUser] = useState<SuggestedUser | null>(
+        entry?.suggestedByUser || prefillData?.suggestedByUser || null
+    );
+
+    // Auto-fetch suggested user profile if only ID is available, or check matching suggestions
+    useEffect(() => {
+        const targetUserId = formData.suggestedByUserId || entry?.suggestedByUserId || prefillData?.suggestedByUserId;
+        if (targetUserId && !suggestedUser) {
+            userService.getUser(targetUserId).then((profile: any) => {
+                if (profile) {
+                    setSuggestedUser({
+                        id: profile.id,
+                        username: profile.username,
+                        displayName: profile.displayName || null,
+                        profilePictureUrl: profile.profilePictureUrl || null
+                    });
+                }
+            }).catch((err: any) => console.error('Failed to load prefilled suggested user:', err));
+        } else if (!targetUserId && !suggestedUser && formData.tmdbId > 0) {
+            suggestionsApi.getMySuggestions().then(groups => {
+                const matchGroup = (groups || []).find(g => Number(g.tmdbId) === Number(formData.tmdbId));
+                if (matchGroup && matchGroup.suggestors && matchGroup.suggestors.length > 0) {
+                    const s = matchGroup.suggestors[0];
+                    setSuggestedUser({
+                        id: s.id,
+                        username: s.username,
+                        displayName: s.displayName || null,
+                        profilePictureUrl: s.profilePictureUrl || null
+                    });
+                    setFormData(prev => ({ ...prev, suggestedByUserId: s.id }));
+                }
+            }).catch((err: any) => console.error('Failed to check matching suggestions for tmdbId:', err));
+        }
+    }, [formData.suggestedByUserId, formData.tmdbId, entry?.suggestedByUserId, prefillData?.suggestedByUserId]);
+
+    const [showSuggestorPicker, setShowSuggestorPicker] = useState(false);
+    const [suggestorSearchQuery, setSuggestorSearchQuery] = useState('');
+    const [suggestorResults, setSuggestorResults] = useState<SuggestedUser[]>([]);
+    const [isSearchingSuggestors, setIsSearchingSuggestors] = useState(false);
+
     const searchRef = useRef<HTMLDivElement>(null);
+    const suggestorRef = useRef<HTMLDivElement>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const fetchConnections = useCallback(async (q: string) => {
+        setIsSearchingSuggestors(true);
+        try {
+            if (q.trim().length > 0) {
+                const res = await userService.searchUsers(q);
+                setSuggestorResults((res.users || []) as SuggestedUser[]);
+            } else {
+                const followers = await userService.getFollowers(user?.id || '').catch(() => []);
+                const following = await userService.getFollowing(user?.id || '').catch(() => []);
+                const combined = Array.from(new Map([...(followers || []), ...(following || [])].map(u => [u.id, u])).values());
+                setSuggestorResults(combined as SuggestedUser[]);
+            }
+        } catch {
+            setSuggestorResults([]);
+        } finally {
+            setIsSearchingSuggestors(false);
+        }
+    }, [user?.id]);
 
     // ── Close search results when clicking outside ──
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
                 setShowResults(false);
+            }
+            if (suggestorRef.current && !suggestorRef.current.contains(e.target as Node)) {
+                setShowSuggestorPicker(false);
             }
         };
         document.addEventListener('mousedown', handler);
@@ -443,11 +520,17 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
         try {
             let savedEntry: Entry;
+            const payload = { ...formData };
+            // If user has provided a rating or review, or is logging a completed watch, ensure isWatching is set to false
+            if (payload.rating !== undefined || (payload.review && payload.review.trim().length > 0)) {
+                payload.isWatching = false;
+            }
+
             if (isEditing && entry) {
-                const { tmdbId, ...updateData } = formData;
+                const { tmdbId, ...updateData } = payload;
                 savedEntry = await entriesApi.updateEntry(entry.id, updateData);
             } else {
-                savedEntry = await entriesApi.createEntry(formData as CreateEntryData);
+                savedEntry = await entriesApi.createEntry(payload as CreateEntryData);
             }
             onSuccess?.(savedEntry);
         } catch (err: any) {
@@ -795,6 +878,99 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 </button>
                                             </span>
                                         ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Suggested By Friend Selector */}
+                            <div className="flex flex-col gap-2.5">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50 flex items-center justify-between">
+                                    <span>Suggested By</span>
+                                    <span className="text-[#ffb700] text-[9px] font-bold">Tag a friend who recommended this</span>
+                                </label>
+                                
+                                {suggestedUser ? (
+                                    <div className="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200/80 rounded-2xl">
+                                        <div className="flex items-center gap-2.5">
+                                            {suggestedUser.profilePictureUrl ? (
+                                                <img src={suggestedUser.profilePictureUrl} alt="" className="w-7 h-7 rounded-full object-cover border border-amber-300" />
+                                            ) : (
+                                                <div className="w-7 h-7 rounded-full bg-[#ffb700] text-white font-black text-xs flex items-center justify-center">
+                                                    {suggestedUser.displayName?.[0] || suggestedUser.username[0]}
+                                                </div>
+                                            )}
+                                            <div className="flex flex-col">
+                                                <span className="text-xs font-black text-[#2D2926]">{suggestedUser.displayName || suggestedUser.username}</span>
+                                                <span className="text-[10px] text-amber-700 font-bold">@{suggestedUser.username}</span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSuggestedUser(null);
+                                                setFormData(prev => ({ ...prev, suggestedByUserId: null }));
+                                            }}
+                                            className="text-xs text-amber-700 font-bold hover:text-red-500 px-2 py-1 rounded-lg hover:bg-amber-100/60 transition-colors"
+                                        >
+                                            Clear
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="relative" ref={suggestorRef}>
+                                        <div className="relative flex items-center">
+                                            <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">lightbulb</span>
+                                            <input
+                                                type="text"
+                                                value={suggestorSearchQuery}
+                                                onFocus={() => {
+                                                    setShowSuggestorPicker(true);
+                                                    if (suggestorResults.length === 0) fetchConnections('');
+                                                }}
+                                                onChange={(e) => {
+                                                    setSuggestorSearchQuery(e.target.value);
+                                                    setShowSuggestorPicker(true);
+                                                    fetchConnections(e.target.value);
+                                                }}
+                                                className="w-full pl-9 pr-4 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
+                                                placeholder="Search follower/friend username to tag suggestor..."
+                                            />
+                                        </div>
+
+                                        {showSuggestorPicker && (
+                                            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
+                                                {isSearchingSuggestors ? (
+                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading connections...</div>
+                                                ) : suggestorResults.length === 0 ? (
+                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">No connected friends found</div>
+                                                ) : (
+                                                    suggestorResults.map(u => (
+                                                        <button
+                                                            key={u.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setSuggestedUser(u);
+                                                                setFormData(prev => ({ ...prev, suggestedByUserId: u.id }));
+                                                                setShowSuggestorPicker(false);
+                                                                setSuggestorSearchQuery('');
+                                                            }}
+                                                            className="w-full flex items-center gap-2.5 p-2 hover:bg-[#ffb700]/10 rounded-xl transition-colors text-left"
+                                                        >
+                                                            {u.profilePictureUrl ? (
+                                                                <img src={u.profilePictureUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-6 h-6 rounded-full bg-[#ffb700] text-white font-black text-[10px] flex items-center justify-center">
+                                                                    {u.displayName?.[0] || u.username[0]}
+                                                                </div>
+                                                            )}
+                                                            <div className="flex flex-col min-w-0 flex-1">
+                                                                <span className="text-xs font-bold text-[#2D2926] truncate">{u.displayName || u.username}</span>
+                                                                <span className="text-[9px] text-[#2D2926]/40 font-bold truncate">@{u.username}</span>
+                                                            </div>
+                                                        </button>
+                                                    ))
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

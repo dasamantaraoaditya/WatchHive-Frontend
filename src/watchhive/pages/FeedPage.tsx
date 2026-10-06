@@ -165,7 +165,7 @@ export const FeedPage: React.FC = () => {
                             items.map((item) => (
                                 <FeedCard key={`${item.type}-${item.id}`} item={item} />
                             ))
-                        ) : !loading && !initialLoading ? (
+                        ) : !loading && !initialLoading && !error ? (
                             <EmptyState
                                 title="Your feed is empty"
                                 message="Follow users or rate movies to see activity here!"

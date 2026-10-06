@@ -6,7 +6,8 @@ interface WatchlistContextType {
     watchlist: List | null;
     isLoading: boolean;
     hasLoaded: boolean;
-    addToList: (tmdbId: number, mediaType?: 'movie' | 'tv') => Promise<void>;
+    error: string | null;
+    addToList: (tmdbId: number, mediaType?: 'movie' | 'tv', suggestedByUserId?: string | null) => Promise<void>;
     removeFromList: (tmdbId: number) => Promise<void>;
     isInWatchlist: (tmdbId: number) => boolean;
     fetchWatchlist: () => Promise<void>;
@@ -27,14 +28,17 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [watchlist, setWatchlist] = useState<List | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchWatchlist = useCallback(async () => {
         if (!isAuthenticated) {
             setWatchlist(null);
             setHasLoaded(false);
+            setError(null);
             return;
         }
         setIsLoading(true);
+        setError(null);
         // Safety timeout — always clear loading state after 8 seconds
         const timeout = setTimeout(() => {
             setIsLoading(false);
@@ -43,8 +47,9 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         try {
             const list = await listsApi.getWatchlist();
             setWatchlist(list);
-        } catch (error) {
-            console.error('Failed to fetch watchlist', error);
+        } catch (err: any) {
+            console.error('Failed to fetch watchlist', err);
+            setError('Unable to connect to WatchersHive servers right now. Please check your connection or try again later.');
             setWatchlist(null);
         } finally {
             clearTimeout(timeout);
@@ -62,7 +67,7 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
     }, [isAuthenticated, fetchWatchlist]);
 
-    const addToList = async (tmdbId: number, mediaType: 'movie' | 'tv' = 'movie') => {
+    const addToList = async (tmdbId: number, mediaType: 'movie' | 'tv' = 'movie', suggestedByUserId?: string | null) => {
         if (!isAuthenticated) return;
 
         // If watchlist is null (not fetched yet or error), try fetch first? 
@@ -95,12 +100,13 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 mediaType,
                 listId: targetList.id,
                 orderIndex: 0,
+                suggestedByUserId: suggestedByUserId || null,
                 addedAt: new Date().toISOString()
             }]
         });
 
         try {
-            const newItem = await listsApi.addToWatchlist(targetList.id, tmdbId, mediaType);
+            const newItem = await listsApi.addToWatchlist(targetList.id, tmdbId, mediaType, suggestedByUserId);
             setWatchlist(prev => prev ? {
                 ...prev,
                 items: (prev.items || []).map(i => i.id === tempId ? newItem : i)
@@ -137,7 +143,7 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     return (
-        <WatchlistContext.Provider value={{ watchlist, isLoading, hasLoaded, addToList, removeFromList, isInWatchlist, fetchWatchlist }}>
+        <WatchlistContext.Provider value={{ watchlist, isLoading, hasLoaded, error, addToList, removeFromList, isInWatchlist, fetchWatchlist }}>
             {children}
         </WatchlistContext.Provider>
     );

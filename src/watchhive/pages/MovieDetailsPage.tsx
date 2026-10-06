@@ -7,7 +7,7 @@ import { useWatchlist } from '../contexts/WatchlistContext';
 import { EntryForm } from '../components/entries/EntryForm';
 import { SuggestUserSelector } from '../components/suggestions/SuggestUserSelector';
 import { useUI, useCustomAlert } from '../contexts';
-import { entriesApi } from '../services/entries.service';
+import { entriesApi, Entry } from '../services/entries.service';
 
 interface CastMember {
     id: number;
@@ -140,6 +140,7 @@ export const MovieDetailsPage: React.FC = () => {
     const [details, setDetails] = useState<MovieDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [userEntry, setUserEntry] = useState<Entry | null>(null);
 
     const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
     const [seasonDetails, setSeasonDetails] = useState<{ episodes: EpisodeItem[]; overview?: string; name?: string } | null>(null);
@@ -197,8 +198,16 @@ export const MovieDetailsPage: React.FC = () => {
             setError(null);
             try {
                 const endpoint = mediaType === 'movie' ? `/tmdb/movie/${tmdbId}` : `/tmdb/tv/${tmdbId}`;
-                const data: any = await apiClient.get(endpoint);
+                const [data, entriesRes]: [any, any] = await Promise.all([
+                    apiClient.get(endpoint),
+                    entriesApi.getEntries({ tmdbId, limit: 10 }).catch(() => ({ entries: [] }))
+                ]);
                 setDetails(data);
+
+                const foundEntry = entriesRes.entries?.find((e: Entry) => Number(e.tmdbId) === Number(tmdbId));
+                if (foundEntry) {
+                    setUserEntry(foundEntry);
+                }
             } catch (err) {
                 console.error('Failed to fetch details:', err);
                 setError('Failed to load cinematic details. The hive is a bit busy.');
@@ -238,30 +247,32 @@ export const MovieDetailsPage: React.FC = () => {
         if (!tmdbId || isTransitioning) return;
 
         const confirmed = await confirm(
-            `Would you like to start watching "${title}"? This will move it to your Currently Watching list.`,
-            { title: 'Start Watching', confirmText: 'Start Watching', severity: 'primary' }
+            `Would you like to move "${title}" to your Currently Watching log?`,
+            { title: 'Log as Currently Watching', confirmText: 'Move to Currently Watching', severity: 'primary' }
         );
         if (!confirmed) return;
 
         setIsTransitioning(true);
         try {
             const apiType = mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
+            const suggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id;
             await entriesApi.createEntry({
                 tmdbId,
                 title,
                 type: apiType,
                 isWatching: true,
                 startedAt: new Date().toISOString(),
+                suggestedByUserId: suggestedByUserId || null,
             });
             await removeFromList(tmdbId);
-            await alert(`"${title}" has been moved to your Currently Watching list!`, {
-                title: 'Watching Started',
+            await alert(`"${title}" has been added to your Currently Watching log!`, {
+                title: 'Marked as Watching',
                 severity: 'success',
                 confirmText: 'Awesome',
             });
         } catch (err) {
-            console.error('Failed to start watching:', err);
-            await alert(`Failed to start watching "${title}". Please try again.`, {
+            console.error('Failed to add to currently watching log:', err);
+            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
                 title: 'Error',
                 severity: 'error',
             });
@@ -273,10 +284,11 @@ export const MovieDetailsPage: React.FC = () => {
     const handleWatchlistToggle = async () => {
         if (!tmdbId) return;
         try {
+            const suggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id;
             if (inWatchlist) {
                 await removeFromList(tmdbId);
             } else {
-                await addToList(tmdbId, mediaType);
+                await addToList(tmdbId, mediaType, suggestedByUserId);
             }
         } catch (err) {
             console.error('Watchlist action failed', err);
@@ -287,7 +299,7 @@ export const MovieDetailsPage: React.FC = () => {
         if (!details) return;
         const shareData = {
             title,
-            text: `Check out ${title} on WatchHive!`,
+            text: `Check out ${title} on WatchersHive!`,
             url: window.location.href,
         };
 
@@ -307,10 +319,10 @@ export const MovieDetailsPage: React.FC = () => {
         const fromPath = (location.state as any)?.from;
         if (fromPath) {
             navigate(fromPath);
-        } else if (window.history.length > 1) {
+        } else if (window.history.length > 2) {
             navigate(-1);
         } else {
-            navigate('/watch-hive/feed');
+            navigate('/watch-hive/entries?tab=watching');
         }
     };
 
@@ -443,9 +455,9 @@ export const MovieDetailsPage: React.FC = () => {
                                                 className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/15 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs"
                                             >
                                                 <span className="material-symbols-outlined text-[18px] text-[#ffb700]">
-                                                    play_circle
-                                                </span>
-                                                Start Watching
+                                                     visibility
+                                                 </span>
+                                                 Log Currently Watching
                                             </button>
                                         )}
 
@@ -466,6 +478,47 @@ export const MovieDetailsPage: React.FC = () => {
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* Logged Watch Entry & Suggested By Card */}
+                                {userEntry && (
+                                    <div className="flex flex-col gap-4 p-6 bg-amber-50/70 border border-amber-200/90 rounded-3xl shadow-sm">
+                                        <div className="flex flex-wrap items-center justify-between gap-3">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-600 text-lg">
+                                                    ⭐
+                                                </span>
+                                                <div>
+                                                    <h3 className="text-base font-black text-[#2D2926]">Your Watch Entry</h3>
+                                                    <p className="text-xs font-bold text-slate-400">
+                                                        {userEntry.isWatching ? 'Currently Watching' : `Logged on ${formatDate(userEntry.watchedAt)}`}
+                                                        {userEntry.rating ? ` • Rated ${userEntry.rating} / 10` : ''}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Suggested By badge */}
+                                            {userEntry.suggestedByUser && (
+                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100/80 border border-amber-300/80 rounded-2xl text-xs font-black text-amber-900 shadow-2xs">
+                                                    <span>💡 Suggested by</span>
+                                                    {userEntry.suggestedByUser.profilePictureUrl ? (
+                                                        <img src={userEntry.suggestedByUser.profilePictureUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-4 h-4 rounded-full bg-[#ffb700] text-white text-[8px] font-black flex items-center justify-center">
+                                                            {userEntry.suggestedByUser.username[0]?.toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                    <span className="underline">@{userEntry.suggestedByUser.username}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {userEntry.review && (
+                                            <p className="text-sm font-medium text-[#2D2926]/90 italic border-l-2 border-amber-400 pl-3 py-0.5">
+                                                "{userEntry.review}"
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
 
                                 {/* Accolades & Critic Reception Section */}
                                 {(details.awards || (details.critic_ratings && details.critic_ratings.length > 0)) && (
@@ -795,6 +848,8 @@ export const MovieDetailsPage: React.FC = () => {
                                     type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
                                     posterPath: details.poster_path,
                                     overview: details.overview,
+                                    suggestedByUserId: location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || null,
+                                    suggestedByUser: location.state?.suggestedByUser || null,
                                 }}
                                 isModal={false}
                                 onSuccess={() => setView('details')}

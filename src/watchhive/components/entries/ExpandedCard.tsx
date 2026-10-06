@@ -152,7 +152,7 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                 </div>
 
                 {/* Metadata Grid */}
-                <div className={`grid grid-cols-2 ${entry.watchLocation ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-4`}>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Your Rating</span>
                         <span className="text-[#2D2926] text-2xl font-black">{entry.rating ? `⭐ ${entry.rating}` : '-'}</span>
@@ -169,6 +169,23 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Status</span>
                         <span className="text-[#2D2926] text-sm font-bold mt-1 tracking-wide">{entry.isWatching ? 'Watching' : 'Completed'}</span>
                     </div>
+                    {entry.suggestedByUser && (
+                        <div className="flex flex-col gap-1 p-5 rounded-3xl bg-amber-50/80 border border-amber-200/90 shadow-sm hover:shadow-md transition-shadow">
+                            <span className="text-amber-800 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
+                                <span>💡</span> Suggested By
+                            </span>
+                            <div className="flex items-center gap-2 mt-1 min-w-0">
+                                {entry.suggestedByUser.profilePictureUrl ? (
+                                    <img src={entry.suggestedByUser.profilePictureUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
+                                ) : (
+                                    <div className="w-5 h-5 rounded-full bg-[#ffb700] text-white font-black text-[9px] flex items-center justify-center shrink-0">
+                                        {entry.suggestedByUser.displayName?.[0] || entry.suggestedByUser.username[0]}
+                                    </div>
+                                )}
+                                <span className="text-[#2D2926] text-xs font-black truncate">@{entry.suggestedByUser.username}</span>
+                            </div>
+                        </div>
+                    )}
                     {entry.watchLocation && (
                         <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
                             <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Watch Location</span>

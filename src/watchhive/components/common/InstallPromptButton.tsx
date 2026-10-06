@@ -40,7 +40,7 @@ export const InstallPromptButton = () => {
     <button
       onClick={showInstallPrompt}
       className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary hover:bg-yellow-600 text-black font-semibold transition-colors duration-200"
-      title="Install WatchHive on your device"
+      title="Install WatchersHive on your device"
     >
       <svg
         className="w-5 h-5"

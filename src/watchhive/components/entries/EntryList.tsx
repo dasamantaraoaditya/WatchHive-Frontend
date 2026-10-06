@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { entriesApi, Entry, GetEntriesParams } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import {
@@ -6,8 +7,10 @@ import {
     SkeletonGrid,
     ErrorState,
     FilterBar,
-    MovieDetailsModal
+    Modal,
+    CardDropdownMenu
 } from '../common';
+import { EntryForm } from './EntryForm';
 import '../profile/Profile.css';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -32,18 +35,12 @@ export const EntryCard: React.FC<{
     onDelete?: (id: string) => void;
     onComplete?: (entry: Entry) => void;
     onClick?: (entry: Entry, details: TmdbDetails | null) => void;
-}> = ({ entry, onEdit, onDelete: _onDelete, onComplete: _onComplete, onClick }) => {
+    showWatchingBadge?: boolean;
+}> = ({ entry, onEdit, onDelete: _onDelete, onComplete: _onComplete, onClick, showWatchingBadge = false }) => {
+    const navigate = useNavigate();
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [imgError, setImgError] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-    const [showMobileActions, setShowMobileActions] = useState(false);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     const cacheKey = `${entry.type}-${entry.tmdbId}`;
 
@@ -109,16 +106,17 @@ export const EntryCard: React.FC<{
             <motion.div
                 layoutId={`card-wrapper-${entry.id}`}
                 className="watchlist-card group relative cursor-pointer overflow-hidden transform-gpu rounded-3xl"
-                onClick={(e) => {
-                    if (isMobile) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setShowMobileActions(!showMobileActions);
+                onClick={() => {
+                    if (onClick) {
+                        onClick(entry, details);
                     } else {
-                        onClick && onClick(entry, details);
+                        const mediaType = entry.type === 'TV_SHOW' ? 'tv' : 'movie';
+                        navigate(`/watch-hive/details/${mediaType}/${entry.tmdbId}`, {
+                            state: { from: window.location.pathname + window.location.search }
+                        });
                     }
                 }}
-                whileHover={onClick && !isMobile ? { scale: 0.98, transition: { duration: 0.2 } } : {}}
+                whileHover={{ scale: 0.98, transition: { duration: 0.2 } }}
                 whileTap={{ scale: 0.95 }}
             >
                 <div className="watchlist-card__poster-wrapper bg-stone-900 rounded-t-xl overflow-hidden relative">
@@ -140,64 +138,70 @@ export const EntryCard: React.FC<{
                     {/* Overlay shadow for cinematic feel */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Mobile Central Eye Overlay */}
-                    {isMobile && showMobileActions && (
-                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/45 backdrop-blur-[2.5px] transition-all duration-300 animate-[fade-in_0.2s_ease-out]">
-                            <button
-                                type="button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onClick && onClick(entry, details);
-                                }}
-                                className="w-12 h-12 rounded-full bg-[#ffb700] hover:bg-[#ffc83b] text-white flex items-center justify-center shadow-xl active:scale-90 transition-transform scale-105 pointer-events-auto"
-                                title="View details"
-                            >
-                                <span className="material-symbols-outlined text-[24px] font-bold">visibility</span>
-                            </button>
+                    {/* Three-dots Context Menu */}
+                    {(onEdit || _onDelete || (_onComplete && entry.isWatching)) && (
+                        <div className="absolute top-2 right-2 z-30" onClick={(e) => e.stopPropagation()}>
+                            <CardDropdownMenu
+                                items={[
+                                    ...((_onComplete && entry.isWatching)
+                                        ? [
+                                              {
+                                                  label: 'Have Watched',
+                                                  icon: 'check_circle',
+                                                  iconColor: 'text-emerald-500',
+                                                  onClick: () => setIsCompleting(true),
+                                              },
+                                          ]
+                                        : []),
+                                    ...(onEdit
+                                        ? [
+                                              {
+                                                  label: 'Edit Entry',
+                                                  icon: 'edit',
+                                                  iconColor: 'text-amber-500',
+                                                  onClick: () => onEdit(entry),
+                                              },
+                                          ]
+                                        : []),
+                                    ...(_onDelete
+                                        ? [
+                                              {
+                                                  label: 'Delete Entry',
+                                                  icon: 'delete',
+                                                  danger: true,
+                                                  onClick: () => _onDelete(entry.id),
+                                              },
+                                          ]
+                                        : []),
+                                ]}
+                            />
                         </div>
                     )}
 
-                    {/* Actions overlay */}
-                    <div className={`absolute top-2 right-2 flex flex-col gap-2 z-20 transition-all duration-300
-                        ${isMobile 
-                            ? (showMobileActions ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' : 'opacity-0 -translate-y-2 scale-90 pointer-events-none') 
-                            : 'hidden sm:flex opacity-0 group-hover:opacity-100'}`}
-                    >
-                        {onEdit && (
-                            <button onClick={(e) => { e.stopPropagation(); onEdit(entry); }} className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-[#ffb700] flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors" title="Edit">
-                                <span className="material-symbols-outlined text-[18px]">edit</span>
-                            </button>
-                        )}
-                        {_onDelete && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    _onDelete(entry.id);
-                                }}
-                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-red-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                                title="Delete"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">delete</span>
-                            </button>
-                        )}
-                        {_onComplete && entry.isWatching && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setIsCompleting(true);
-                                }}
-                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/60 hover:text-green-500 flex items-center justify-center shadow-lg backdrop-blur-sm transition-colors"
-                                title="Complete Watching"
-                            >
-                                <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                        <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90`}>
+                    <div className="absolute top-2 left-2 flex items-center gap-1.5 z-20">
+                        <span className={`${ti.color} text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90 select-none`}>
                             {ti.emoji}
                         </span>
+                        {entry.isWatching && showWatchingBadge && (
+                            <div 
+                                className="relative group/watching flex items-center justify-center cursor-pointer"
+                                title="Watching"
+                            >
+                                {/* Animated ping ring behind the icon */}
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-[#ffb700] opacity-75 animate-ping" />
+                                
+                                {/* Animated Watching Badge */}
+                                <span className="relative inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#ffb700] text-white shadow-md border border-white/30 backdrop-blur-sm transition-transform duration-300 group-hover/watching:scale-110">
+                                    <span className="material-symbols-outlined text-[13px] font-black animate-pulse">play_arrow</span>
+                                </span>
+
+                                {/* Tooltip on Hover */}
+                                <div className="absolute left-full ml-1.5 top-1/2 -translate-y-1/2 hidden group-hover/watching:flex items-center px-2 py-1 bg-[#2D2926] text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-xl z-30 pointer-events-none whitespace-nowrap">
+                                    <span className="w-1.5 h-1.5 bg-[#ffb700] rounded-full mr-1.5 animate-pulse" />
+                                    Watching
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -223,38 +227,38 @@ export const EntryCard: React.FC<{
                         <span className="truncate flex-1">{metadataString || '-'}</span>
                         {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
                     </div>
-                    {/* Have Watched button — always visible when entry is in currently watching mode */}
-                    {_onComplete && entry.isWatching && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsCompleting(true);
-                            }}
-                            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
-                        >
-                            <span className="material-symbols-outlined text-[15px]">check_circle</span>
-                            Have Watched
-                        </button>
-                    )}
                 </motion.div>
             </motion.div>
 
-            <MovieDetailsModal
-                isOpen={isCompleting}
-                onClose={() => setIsCompleting(false)}
-                tmdbId={entry.tmdbId}
-                mediaType={entry.type === 'TV_SHOW' ? 'tv' : 'movie'}
-                initialView="log"
-                existingEntry={{
-                    ...entry,
-                    isWatching: false,
-                    watchedAt: new Date().toISOString()
-                }}
-                onLogSuccess={() => {
-                    if (_onComplete) _onComplete(entry);
-                    setIsCompleting(false);
-                }}
-            />
+            {isCompleting && (
+                <Modal
+                    isOpen={isCompleting}
+                    onClose={() => setIsCompleting(false)}
+                    title="Log your watch"
+                    maxWidth="max-w-4xl"
+                >
+                    <EntryForm
+                        isModal={true}
+                        entry={{
+                            ...entry,
+                            isWatching: false
+                        }}
+                        prefillData={{
+                            tmdbId: entry.tmdbId,
+                            title: entry.title,
+                            type: (entry.type === 'EPISODE' ? 'TV_SHOW' : entry.type) as 'MOVIE' | 'TV_SHOW',
+                            posterPath: (entry as any).posterPath || null,
+                            suggestedByUserId: entry.suggestedByUserId || entry.suggestedByUser?.id || null,
+                            suggestedByUser: entry.suggestedByUser || null,
+                        }}
+                        onSuccess={() => {
+                            setIsCompleting(false);
+                            if (_onComplete) _onComplete(entry);
+                        }}
+                        onCancel={() => setIsCompleting(false)}
+                    />
+                </Modal>
+            )}
         </>
     );
 };
@@ -272,6 +276,7 @@ export const EntryList: React.FC<EntryListProps> = ({
     searchQuery, 
     onSearchChange 
 }) => {
+    const navigate = useNavigate();
     const { alert, confirm } = useCustomAlert();
     const [entries, setEntries] = useState<Entry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -521,7 +526,13 @@ export const EntryList: React.FC<EntryListProps> = ({
                 isLoading={isLoading}
             />
 
-            {entries.length === 0 ? (
+            {error ? (
+                <ErrorState 
+                    title="The Hive is Currently Down"
+                    message="Unable to load your watch history right now. Please check your internet connection or try again later."
+                    onRetry={() => loadEntries()}
+                />
+            ) : entries.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm animate-[fade-in_0.3s_ease-out]">
                     <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
                         <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
@@ -553,9 +564,15 @@ export const EntryList: React.FC<EntryListProps> = ({
                         <EntryCard
                             key={entry.id}
                             entry={entry}
+                            showWatchingBadge={true}
                             onEdit={onEdit}
                             onDelete={readOnly ? undefined : handleDelete}
-                            onClick={(entry, details) => setSelectedEntry({ entry, details })}
+                            onClick={(entry) => {
+                                const mediaType = entry.type === 'TV_SHOW' ? 'tv' : 'movie';
+                                navigate(`/watch-hive/details/${mediaType}/${entry.tmdbId}`, {
+                                    state: { from: window.location.pathname + window.location.search }
+                                });
+                            }}
                         />
                     ))}
                 </div>

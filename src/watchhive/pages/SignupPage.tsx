@@ -101,12 +101,12 @@ export const SignupPage: React.FC = () => {
                 <div className="mb-8 flex flex-col items-center text-center">
                     <Link to="/watch-hive" className="block mb-6 group">
                         <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-[#ffb700]/10 flex items-center justify-center p-3 group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
-                            <img src={whLogo} alt="WatchHive" className="w-full h-full object-contain" />
+                            <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain" />
                         </div>
                     </Link>
                     <h1 className="text-3xl sm:text-4xl font-black text-[#2D2926] tracking-tight mb-2">Create Account</h1>
                     <p className="text-[15px] font-medium text-[#2D2926]/50 max-w-[300px]">
-                        Join WatchHive to track and share your movie journey
+                        Join WatchersHive to track and share your movie journey
                     </p>
                 </div>
 

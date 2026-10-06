@@ -75,10 +75,19 @@ export const CinematicStacksPage: React.FC = () => {
 
     const loadRankedList = async (listId: string) => {
         setIsLoading(true);
+        setItems([]);
         try {
             const response = await listsApi.getRankedList(listId);
             setCurrentList(response.list);
-            setItems(response.items);
+
+            const seen = new Set<number>();
+            const uniqueItems = (response.items || []).filter(item => {
+                if (seen.has(item.tmdbId)) return false;
+                seen.add(item.tmdbId);
+                return true;
+            });
+
+            setItems(uniqueItems);
         } catch (err) {
             setError('Failed to load ranked items');
         } finally {
@@ -135,7 +144,7 @@ export const CinematicStacksPage: React.FC = () => {
     const handleRemove = async (tmdbId: number) => {
         if (!currentList) return;
         const targetItem = items.find(item => item.tmdbId === tmdbId);
-        const title = targetItem?.title || 'this title';
+        const title = targetItem?.title || 'this item';
 
         const confirmed = await confirm(`Are you sure you want to remove "${title}" from this stack?`, {
             title: 'Remove from Stack',
@@ -348,9 +357,8 @@ export const CinematicStacksPage: React.FC = () => {
                     )}
                 </AnimatePresence>
 
-
                 {/* Stacks Selector */}
-                {lists.length > 0 && (
+                {lists.length > 0 && !error && (
                     <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
                         {lists.map(list => (
                             <motion.div
@@ -385,7 +393,7 @@ export const CinematicStacksPage: React.FC = () => {
                     </div>
                 )}
 
-                {currentList && (
+                {currentList && !error && (
                     <div className="flex flex-col gap-8">
                         {/* Stack Action Header */}
                         <div className="flex items-center justify-between bg-slate-50/50 backdrop-blur-md border border-slate-200/60 rounded-3xl p-5 sm:p-6 shadow-sm">
@@ -498,7 +506,17 @@ export const CinematicStacksPage: React.FC = () => {
                 )}
 
 
-                {!currentList && !isLoading && (
+                {error ? (
+                    <ErrorState 
+                        title="The Hive is Currently Down"
+                        message="Unable to connect to WatchersHive servers right now. Please check your connection or try again later."
+                        onRetry={() => {
+                            setError(null);
+                            setIsLoading(true);
+                            loadLists();
+                        }}
+                    />
+                ) : (!currentList && !isLoading && (
                      <div className="flex-grow flex items-center justify-center py-20">
                         <div className="text-center max-w-sm">
                             <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-8 shadow-inner">
@@ -516,9 +534,7 @@ export const CinematicStacksPage: React.FC = () => {
                             </button>
                         </div>
                      </div>
-                )}
-
-                {error && <ErrorState message={error} onRetry={() => loadLists()} />}
+                ))}
 
                 <Modal
                     isOpen={isCreateModalOpen}

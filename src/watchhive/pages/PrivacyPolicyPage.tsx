@@ -24,7 +24,7 @@ export const PrivacyPolicyPage: React.FC = () => {
                             Introduction
                         </h2>
                         <p className="font-medium">
-                            Welcome to WatchHive. We respect your privacy and are committed to protecting your personal data.
+                            Welcome to WatchersHive. We respect your privacy and are committed to protecting your personal data.
                             This privacy policy will inform you about how we look after your personal data when you visit our website,
                             use our offline-capable standalone Progressive Web Application (PWA), and engage with other members of the hive.
                         </p>
@@ -60,7 +60,7 @@ export const PrivacyPolicyPage: React.FC = () => {
                             Core Feature Analytics & MindLens
                         </h2>
                         <p className="font-medium mb-3">
-                            WatchHive processes your cinematic logs to formulate the **MindLens Psychological Profile**:
+                            WatchersHive processes your cinematic logs to formulate the **MindLens Psychological Profile**:
                         </p>
                         <div className="p-5 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/20 text-slate-700">
                             <div className="flex gap-3 mb-2.5">
@@ -114,9 +114,9 @@ export const PrivacyPolicyPage: React.FC = () => {
                             Google OAuth Integration
                         </h2>
                         <p className="font-semibold text-[13px] leading-relaxed text-slate-600">
-                            WatchHive allows you to sign in using your Google account. When you use Google OAuth, we receive
+                            WatchersHive allows you to sign in using your Google account. When you use Google OAuth, we receive
                             your email address, name, and profile picture from Google. We use this information only to create
-                            and manage your WatchHive account. We do not share this information with third parties for marketing purposes.
+                            and manage your WatchersHive account. We do not share this information with third parties for marketing purposes.
                         </p>
                     </section>
 
@@ -137,9 +137,9 @@ export const PrivacyPolicyPage: React.FC = () => {
                                 <h2 className="text-xl font-black text-slate-900 mb-1">Contact Us</h2>
                                 <p className="text-[13px] font-medium text-slate-500">Have questions about your data? Reach out.</p>
                             </div>
-                            <a href="mailto:privacy@watchhive.app" className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 px-6 py-3 rounded-2xl font-black text-xs transition-colors">
+                            <a href="mailto:watchershive@gmail.com" className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 px-6 py-3 rounded-2xl font-black text-xs transition-colors">
                                 <span className="material-symbols-outlined text-sm">mail</span>
-                                privacy@watchhive.app
+                                watchershive@gmail.com
                             </a>
                         </div>
                     </section>

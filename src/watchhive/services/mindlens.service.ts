@@ -35,6 +35,36 @@ export interface DailyTimeSeriesPoint {
     items?: { id: string; title: string; type: string; rating?: string; watchedAt?: string }[];
 }
 
+export interface RecommenderStat {
+    userId: string;
+    username: string;
+    displayName: string | null;
+    profilePictureUrl: string | null;
+    totalSuggested: number;
+    watchedCount: number;
+    currentlyWatchingCount: number;
+    conversionRate: number;
+    avgRating: number | null;
+    highHitCount: number;
+    influenceScore: number;
+    badge: string;
+}
+
+export interface SuggestionAnalytics {
+    summary: {
+        totalSuggestionsReceived: number;
+        totalSuggestionsWatched: number;
+        overallConversionRate: number;
+        topInfluencerName: string | null;
+        topInfluencerUsername: string | null;
+        bestTasteMatchUsername: string | null;
+    };
+    recommenders: RecommenderStat[];
+    outgoingImpact: {
+        totalSent: number;
+    };
+}
+
 export interface MindLensData {
     hasEnoughData: boolean;
     message?: string;
@@ -53,6 +83,7 @@ export interface MindLensData {
     behavioralTrails?: BehavioralTrail[];
     badges?: UserBadge[];
     dailyTimeSeries?: DailyTimeSeriesPoint[];
+    suggestionAnalytics?: SuggestionAnalytics;
     themes?: { name: string; score: number }[];
     timeDistribution?: {
         morning: number;

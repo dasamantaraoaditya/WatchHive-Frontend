@@ -1,6 +1,6 @@
 {
-  "name": "WatchHive",
-  "short_name": "watchhive",
+  "name": "WatchersHive",
+  "short_name": "WatchersHive",
   "description": "Track every movie, anime, K-drama, and TV series you watch. Rate, review, and discover with a community of fellow watchers.",
   "start_url": "/watch-hive/feed",
   "scope": "/",

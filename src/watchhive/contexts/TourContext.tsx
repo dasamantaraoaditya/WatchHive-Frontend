@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 export interface TourStep {
@@ -11,53 +12,57 @@ export interface TourStep {
 
 const TOUR_STEPS: TourStep[] = [
     {
-        target: '#nav-brand, .wh-sidebar__brand',
-        title: 'Welcome to WatchHive 🐝',
-        content: 'Your personal cinematic universe — log every movie & show you watch, track what\'s next, discover what your friends are buzzing about, and build curated ranked lists. All in one hive.',
-        placement: 'bottom'
-    },
-    {
-        target: '[title="Quick Actions"]',
-        title: 'Quick Add — Your Hive Switch ⚡',
-        content: 'Tap the golden ⊕ button anytime to instantly log a new watch entry, mark something as Currently Watching, add to your Watchlist, or suggest a title to a friend — all without leaving your current page.',
-        placement: 'left'
+        target: '.wh-sidebar__link[href*="feed"], .wh-bottom-nav__link[href*="feed"], #nav-link-feed',
+        title: 'Step 1: Home & Social Feed 🏠',
+        content: 'Home is your central hub! Here you can explore your main activity feed, discover trending recommendations, and read real reviews from people in your swarm.',
+        placement: 'right'
     },
     {
         target: '.wh-sidebar__link[href*="entries"], .wh-bottom-nav__link[href*="entries"], #nav-link-entries',
-        title: 'Entries — Your Watch Log 🎬',
-        content: 'Every quick-add lands here. Browse your full history across three tabs: Watched (completed titles with ratings), Currently Watching (in-progress shows), and Watchlist (your backlog). Filter, search, and edit any entry.',
+        title: 'Step 2: Activity Tabs 🎬',
+        content: 'Your activity is organized in four clear tabs: Currently Watching (active sessions), Watch History (completed entries & ratings), Suggestions (titles recommended by friends), and Watchlist (saved backlog).',
         placement: 'right'
-    },
-    {
-        target: '.wh-sidebar__link[href*="mindlens"], .wh-bottom-nav__link[href*="mindlens"], #nav-link-mindlens',
-        title: 'MindLens — Deep Intelligence 🧠',
-        content: 'Your personal analytics engine. See genre heatmaps, binge patterns, average ratings by category, watch streaks, and AI-powered recommendations — all computed from your unique viewing history.',
-        placement: 'right'
-    },
-    {
-        target: '.wh-sidebar__link[href*="feed"], .wh-bottom-nav__link[href*="feed"], #nav-link-feed',
-        title: 'Feed — Your Social Hive 🏠',
-        content: 'See what people you follow are watching in real time. React to entries, discover hidden gems your friends rated highly, and get personalised suggestions based on your swarm\'s collective taste.',
-        placement: 'right'
-    },
-    {
-        target: '.wh-sidebar__link[href*="rankings"], .wh-bottom-nav__link[href*="rankings"]',
-        title: 'Rankings — Build Your Stack 🏆',
-        content: 'Create and rank your all-time favourites into curated Stack Lists — "Top 10 Thrillers", "Best Comfort Watches" and more. Drag to reorder, add cover art, and share your taste with followers.',
-        placement: 'right'
-    },
-    {
-        target: '#nav-profile-trigger, .wh-sidebar__user',
-        title: 'Profile & Privacy ⚙️',
-        content: 'Click your avatar to visit your profile. Manage your display name, bio, and profile picture. Use Privacy Settings to control who can follow you — toggle Follow Requests on to approve followers manually.',
-        placement: 'bottom'
     },
     {
         target: '.wh-sidebar__link[href*="search"], .wh-bottom-nav__link[href*="search"], #nav-link-search',
-        title: 'Search — Discover & Connect 🔍',
-        content: 'Search any movie or TV show to instantly log it via Quick Add. Switch to the Users tab to find friends by username, view their public profiles, and send follow requests to join their hive.',
+        title: 'Step 3: Search & Follow People 👥',
+        content: 'Want to build your swarm? Open Search and switch to the Users tab to find people by username or display name, view their activity, and send follow requests!',
+        placement: 'right'
+    },
+    {
+        target: '[title="Quick Actions"]',
+        title: 'Step 4: Quick Add — Hive Switch ⚡',
+        content: 'Tap the golden ⊕ button anytime to quickly: Log a completed watch entry, Log a currently watching title, Suggest a movie to a friend, or Bookmark to your Watchlist.',
+        placement: 'left'
+    },
+    {
+        target: '#nav-profile-trigger, .wh-sidebar__user',
+        title: 'Step 5: Profile & Privacy Controls ⚙️',
+        content: 'Click your avatar to open your Profile! Customize your bio and avatar, and control account visibility — choose Public, Followers Only, or Private with manual follow request approvals.',
+        placement: 'bottom'
+    },
+    {
+        target: '.wh-sidebar__link[href*="mindlens"], .wh-bottom-nav__link[href*="mindlens"], #nav-link-mindlens',
+        title: 'Step 6: MindLens & Personal Rankings 🧠🏆',
+        content: 'Explore MindLens for AI-powered viewing taste analysis and genre insights. Head to Rankings to curate and share top-tier lists ("Top 10 Thrillers", "Fav Comfort Shows").',
+        placement: 'right'
+    },
+    {
+        target: '.wh-sidebar__link[href*="search"], .wh-bottom-nav__link[href*="search"], #nav-link-search',
+        title: 'Step 7: Search Movies & TV Details 🔍',
+        content: 'Search any movie or TV show to inspect rich detail pages — view cast & crew, streaming platform availability (Where to Watch), ratings, seasons, and episode guides!',
         placement: 'right'
     }
+];
+
+const STEP_ROUTES: (string | null)[] = [
+    '/watch-hive/feed',
+    '/watch-hive/entries?tab=watching',
+    '/watch-hive/search?tab=users',
+    null,
+    '/watch-hive/profile',
+    '/watch-hive/mindlens',
+    '/watch-hive/search?tab=media',
 ];
 
 interface TourContextType {
@@ -97,6 +102,7 @@ const queryVisibleElement = (selector: string): HTMLElement | null => {
 
 export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
     const [isActive, setIsActive] = useState(false);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
     const [showWelcome, setShowWelcome] = useState(false);
@@ -120,6 +126,15 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [isAuthenticated]);
 
+    // Auto-navigate to relevant route when step changes
+    useEffect(() => {
+        if (!isActive) return;
+        const targetRoute = STEP_ROUTES[currentStepIndex];
+        if (targetRoute) {
+            navigate(targetRoute);
+        }
+    }, [isActive, currentStepIndex, navigate]);
+
     // Handle spotlight target rect updates dynamically and instantaneously
     useEffect(() => {
         if (!isActive) {
@@ -132,7 +147,6 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!step) return;
             const element = queryVisibleElement(step.target);
             if (element) {
-                // Scroll instantly to avoid measurements during smooth-scrolling animations
                 element.scrollIntoView({ behavior: 'auto', block: 'center' });
                 setTargetRect(element.getBoundingClientRect());
             } else {
@@ -140,8 +154,8 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         };
 
-        // Initial measurement
-        updateRect();
+        // Delay measurement slightly after route navigation for DOM stability
+        const timer = setTimeout(updateRect, 150);
 
         const handleLayoutUpdate = () => {
             const step = TOUR_STEPS[currentStepIndex];
@@ -152,11 +166,11 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         };
 
-        // Listeners for layout adjustments
         window.addEventListener('resize', handleLayoutUpdate);
         window.addEventListener('scroll', handleLayoutUpdate);
         
         return () => {
+            clearTimeout(timer);
             window.removeEventListener('resize', handleLayoutUpdate);
             window.removeEventListener('scroll', handleLayoutUpdate);
         };
@@ -196,19 +210,37 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const activeStep = TOUR_STEPS[currentStepIndex];
     const isMovieDetailsPage = typeof window !== 'undefined' && window.location.pathname.includes('/details/');
 
-    // Compute boundary-safe tooltip position — no CSS transforms, clamps within viewport
+    // Compute boundary-safe tooltip position — mobile-optimized top/bottom positioning
     const getTooltipStyle = (): React.CSSProperties => {
-        // Mobile: centered bottom drawer that fits all mobile screen sizes cleanly
-        if (window.innerWidth < 768) {
-            return {
-                position: 'fixed',
-                left: '12px',
-                right: '12px',
-                bottom: '16px',
-                width: 'calc(100vw - 24px)',
-                maxWidth: 'none',
-                zIndex: 3000
-            };
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // Mobile optimization: position tooltip away from target so target is 100% visible
+        if (vw < 768) {
+            const targetY = targetRect ? (targetRect.top + targetRect.height / 2) : (vh / 2);
+            // If target is in lower half of screen (e.g. bottom nav or FAB), place tooltip at TOP
+            if (targetY > vh / 2) {
+                return {
+                    position: 'fixed',
+                    left: '12px',
+                    right: '12px',
+                    top: '72px',
+                    width: 'calc(100vw - 24px)',
+                    maxWidth: 'none',
+                    zIndex: 3000
+                };
+            } else {
+                // Target is in upper half of screen (e.g. header avatar), place tooltip at BOTTOM
+                return {
+                    position: 'fixed',
+                    left: '12px',
+                    right: '12px',
+                    bottom: '84px',
+                    width: 'calc(100vw - 24px)',
+                    maxWidth: 'none',
+                    zIndex: 3000
+                };
+            }
         }
 
         if (!targetRect) {
@@ -222,11 +254,9 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const gap = 14;
-        const PAD = 16; // min distance from any viewport edge
+        const PAD = 16;
         const TW = tooltipRef.current?.offsetWidth ?? 340;
         const TH = tooltipRef.current?.offsetHeight ?? 220;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
 
         let left: number;
         let top: number;
@@ -251,7 +281,6 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 break;
         }
 
-        // Clamp so the tooltip never overflows any edge
         left = Math.max(PAD, Math.min(left, vw - TW - PAD));
         top  = Math.max(PAD, Math.min(top,  vh - TH - PAD));
 
@@ -274,9 +303,9 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         <div className="flex gap-3">
                             <span className="material-symbols-outlined text-[#ffb700] text-3xl font-bold flex-shrink-0">auto_awesome</span>
                             <div className="flex flex-col gap-0.5 min-w-0">
-                                <h4 className="text-sm font-black text-[#2D2926]">Welcome to WatchHive! 🐝</h4>
+                                <h4 className="text-sm font-black text-[#2D2926]">Welcome to WatchersHive! 🐝</h4>
                                 <p className="text-[11px] font-bold text-[#2D2926]/60 leading-relaxed mt-1">
-                                    Take a quick 8-step tour to discover everything — from logging watches to analytics, rankings, and connecting with your swarm.
+                                    Take a quick 7-step guided tour to learn how to navigate your feed, activity logs, finding friends, Quick Add, profile privacy, MindLens AI analytics, and movie details!
                                 </p>
                             </div>
                         </div>
@@ -302,18 +331,18 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
             <AnimatePresence>
                 {isActive && (
                     <>
-                        {/* Masked Spotlight SVG — only cut holes if NOT in Movie Details view and target is valid */}
+                        {/* Masked Spotlight SVG with Golden Glow Ring */}
                         {!isMovieDetailsPage && targetRect && targetRect.width > 10 && targetRect.height > 10 ? (
                             <svg className="fixed inset-0 pointer-events-none z-[2400] w-full h-full">
                                 <defs>
                                     <mask id="tour-spotlight-mask">
                                         <rect width="100%" height="100%" fill="white" />
                                         <rect
-                                            x={targetRect.left - 6}
-                                            y={targetRect.top - 6}
-                                            width={targetRect.width + 12}
-                                            height={targetRect.height + 12}
-                                            rx={Math.abs(targetRect.width - targetRect.height) < 4 ? "9999" : "16"}
+                                            x={targetRect.left - 8}
+                                            y={targetRect.top - 8}
+                                            width={targetRect.width + 16}
+                                            height={targetRect.height + 16}
+                                            rx={Math.abs(targetRect.width - targetRect.height) < 8 ? "9999" : "18"}
                                             fill="black"
                                         />
                                     </mask>
@@ -321,20 +350,33 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 <rect
                                     width="100%"
                                     height="100%"
-                                    fill="rgba(45, 41, 38, 0.4)"
+                                    fill="rgba(30, 27, 25, 0.65)"
                                     mask="url(#tour-spotlight-mask)"
                                     className="pointer-events-auto cursor-default"
+                                />
+                                {/* Pulsing Golden Ring Framing Highlighted Target */}
+                                <rect
+                                    x={targetRect.left - 8}
+                                    y={targetRect.top - 8}
+                                    width={targetRect.width + 16}
+                                    height={targetRect.height + 16}
+                                    rx={Math.abs(targetRect.width - targetRect.height) < 8 ? "9999" : "18"}
+                                    fill="none"
+                                    stroke="#ffb700"
+                                    strokeWidth="3"
+                                    className="animate-pulse pointer-events-none"
+                                    style={{ filter: 'drop-shadow(0 0 10px rgba(255, 183, 0, 0.9))' }}
                                 />
                             </svg>
                         ) : (
                             /* Translucent subtle overlay when in movie view or no target */
                             <div 
-                                className="fixed inset-0 bg-black/25 backdrop-blur-[1px] z-[2400] pointer-events-auto cursor-default transition-all"
+                                className="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-[2400] pointer-events-auto cursor-default transition-all"
                                 onClick={(e) => e.stopPropagation()}
                             />
                         )}
 
-                        {/* Interactive Tooltip Card */}
+                        {/* Interactive Mobile-Friendly Tooltip Card */}
                         <motion.div
                             ref={tooltipRef}
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -342,33 +384,41 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 280 }}
                             style={getTooltipStyle()}
-                            className="w-[calc(100vw-24px)] md:w-[340px] max-w-[360px] bg-white/95 backdrop-blur-xl border border-[#ffb700]/30 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.25)] p-5 flex flex-col gap-4 font-sans select-none border-t-4 border-t-[#ffb700] z-[3000]"
+                            className="w-[calc(100vw-24px)] md:w-[340px] max-w-[360px] bg-white/95 backdrop-blur-xl border border-[#ffb700]/30 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-4 md:p-5 flex flex-col gap-3 font-sans select-none border-t-4 border-t-[#ffb700] z-[3000]"
                         >
-                            {/* Step Count & Skip */}
-                            <div className="flex items-center justify-between">
-                                <span className="px-2.5 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md text-[9px] font-black uppercase tracking-wider">
-                                    Step {currentStepIndex + 1} of {TOUR_STEPS.length}
-                                </span>
-                                <button
-                                    onClick={skipTour}
-                                    className="text-[9px] font-black text-neutral-400 hover:text-[#ffb700] uppercase tracking-wider transition-colors cursor-pointer"
-                                >
-                                    Skip Tour
-                                </button>
+                            {/* Step Indicator & Progress Bar */}
+                            <div className="flex flex-col gap-1.5">
+                                <div className="flex items-center justify-between">
+                                    <span className="px-2.5 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md text-[9px] font-black uppercase tracking-wider">
+                                        Step {currentStepIndex + 1} of {TOUR_STEPS.length}
+                                    </span>
+                                    <button
+                                        onClick={skipTour}
+                                        className="text-[9px] font-black text-neutral-400 hover:text-[#ffb700] uppercase tracking-wider transition-colors cursor-pointer"
+                                    >
+                                        Skip Tour
+                                    </button>
+                                </div>
+                                <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                                    <div 
+                                        className="bg-[#ffb700] h-full transition-all duration-300 rounded-full"
+                                        style={{ width: `${((currentStepIndex + 1) / TOUR_STEPS.length) * 100}%` }}
+                                    />
+                                </div>
                             </div>
 
                             {/* Title & Description */}
                             <div className="flex flex-col gap-1">
-                                <h4 className="text-[14px] font-black text-[#2D2926] tracking-tight flex items-center gap-1.5">
+                                <h4 className="text-[13px] md:text-[14px] font-black text-[#2D2926] tracking-tight flex items-center gap-1.5">
                                     {activeStep.title}
                                 </h4>
-                                <p className="text-[11px] leading-relaxed text-[#2D2926]/75 font-bold mt-1">
+                                <p className="text-[11px] leading-relaxed text-[#2D2926]/75 font-bold">
                                     {activeStep.content}
                                 </p>
                             </div>
 
                             {/* Tooltip Navigation */}
-                            <div className="flex items-center justify-between pt-2.5 border-t border-[#ffb700]/10 mt-1">
+                            <div className="flex items-center justify-between pt-2 border-t border-[#ffb700]/10 mt-0.5">
                                 <button
                                     onClick={prevStep}
                                     disabled={currentStepIndex === 0}
@@ -378,7 +428,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 </button>
                                 <button
                                     onClick={nextStep}
-                                    className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer"
+                                    className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer active:scale-95"
                                 >
                                     <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</span>
                                     <span className="material-symbols-outlined text-[10px] font-bold">arrow_forward</span>
