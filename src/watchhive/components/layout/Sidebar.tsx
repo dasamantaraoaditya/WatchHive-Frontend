@@ -16,15 +16,16 @@ export const Sidebar: React.FC = () => {
 
     return (
         <aside className="wh-sidebar">
+            <Link to="/watch-hive/feed">
+                <div className="wh-sidebar__brand">
+                    <div className="wh-sidebar__logo">
+                        <img src={whLogo} alt="WatchHive Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                    <h1 className="wh-sidebar__title">WatchHive</h1>
+                </div>
+            </Link>
             <div className="wh-sidebar__content">
                 <div className="wh-sidebar__top">
-                    <div className="wh-sidebar__brand">
-                        <div className="wh-sidebar__logo">
-                            <img src={whLogo} alt="WatchHive Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        </div>
-                        <h1 className="wh-sidebar__title">WatchHive</h1>
-                    </div>
-                    
                     <nav className="wh-sidebar__nav">
                         <Link to="/watch-hive/feed" className={`wh-sidebar__link ${isActive('/watch-hive/feed') ? 'wh-sidebar__link--active' : ''}`}>
                             <span className="material-symbols-outlined fill-1">home</span>
