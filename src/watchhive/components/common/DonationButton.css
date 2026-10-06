@@ -1,7 +1,7 @@
 /* Donation Wrapper Styles */
 .donation-wrapper {
     position: fixed;
-    bottom: 8.5rem; /* Lifted above the Quick Add FAB */
+    bottom: 2rem;
     right: 2rem;
     z-index: 1000;
     display: inline-flex;
@@ -81,9 +81,9 @@
 
 @media (max-width: 640px) {
     .donation-wrapper {
-        bottom: 11rem;
+        bottom: 9rem;
         /* Above QuickAddFAB */
-        right: 2.5rem; /* Centered relative to FAB (4rem wide vs 3rem wide) */
+        right: 1.5rem; /* Centered relative to FAB (4rem wide vs 3rem wide) */
     }
 
     .donation-button {
