@@ -50,7 +50,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
                         className="w-full pl-6.5 sm:pl-12 pr-6.5 sm:pr-12 py-1 sm:py-2.5 bg-slate-50 border border-[#ffb700]/10 rounded-md sm:rounded-2xl text-[10px] sm:text-[14px] font-medium text-[#2D2926] placeholder-[#2D2926]/30 focus:outline-none focus:ring-2 focus:ring-[#ffb700]/10 focus:border-[#ffb700]/30 transition-all shadow-sm group-hover:bg-white"
-                        style={{ paddingLeft: '1.65rem' }}
+                        style={{ paddingLeft: '1.65rem', textIndent: '15px' }}
                     />
                     {search && !isLoading && (
                         <button
@@ -72,10 +72,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         </span>
                     </div>
                 )}
-                
+
                 <div className="flex items-center gap-0.5 sm:gap-2 bg-[#ffb700]/5 hover:bg-[#ffb700]/10 px-1.5 py-1 sm:px-4 sm:py-2.5 rounded-md sm:rounded-2xl border border-[#ffb700]/20 shadow-sm transition-all group cursor-pointer relative">
                     <span className="material-symbols-outlined text-[11px] sm:text-[16px] text-[#b07d00] font-bold shrink-0">sort</span>
-                    <select 
+                    <select
                         className="bg-transparent border-none text-[7.5px] sm:text-[10px] font-black text-[#b07d00] focus:ring-0 cursor-pointer p-0 pr-3 sm:pr-6 uppercase tracking-widest outline-none appearance-none -webkit-appearance-none -moz-appearance-none"
                         value={sortBy}
                         onChange={(e) => onSortChange(e.target.value)}
@@ -91,7 +91,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                             // Map lengthy labels to super clean, intuitive, and short terms for mobile layout
                             let shortLabel = option.label;
                             const lower = option.label.toLowerCase();
-                            
+
                             if (window.innerWidth < 640 || (window.matchMedia && window.matchMedia('(max-width: 640px)').matches)) {
                                 if (lower.includes('recently watched') || lower.includes('recent watch')) {
                                     shortLabel = 'Recent';
@@ -119,7 +119,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                                 if (lower.includes('recently added')) shortLabel = 'Recently Added';
                                 if (lower.includes('recently suggested')) shortLabel = 'Recently Suggested';
                             }
-                            
+
                             return (
                                 <option key={option.value} value={option.value} className="bg-white text-slate-700 font-bold uppercase tracking-wider text-[11px] py-2">
                                     {shortLabel}

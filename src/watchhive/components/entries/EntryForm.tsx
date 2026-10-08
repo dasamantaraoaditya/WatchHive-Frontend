@@ -93,7 +93,7 @@ const FractionalStar: React.FC<{ fill: number; size: number; active: boolean }> 
     const id = React.useId();
     // branding gold color vs soft background gray
     const strokeColor = active ? '#ffb700' : 'rgba(45, 41, 38, 0.15)';
-    
+
     return (
         <svg width={size} height={size} viewBox="0 0 24 24" className="drop-shadow-sm transition-all duration-300 transform hover:scale-115">
             <defs>
@@ -102,8 +102,8 @@ const FractionalStar: React.FC<{ fill: number; size: number; active: boolean }> 
                     <stop offset={`${fill * 100}%`} stopColor="transparent" />
                 </linearGradient>
             </defs>
-            <path 
-                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" 
+            <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
                 fill={`url(#${id})`}
                 stroke={strokeColor}
                 strokeWidth={active ? "1" : "1.5"}
@@ -115,13 +115,13 @@ const FractionalStar: React.FC<{ fill: number; size: number; active: boolean }> 
 
 /* ── Star Rating Component with Snapping Snaps ── */
 const StarRating: React.FC<{
-    value: number | undefined; 
+    value: number | undefined;
     onChange: (v: number | undefined) => void;
     disabled?: boolean;
 }> = ({ value, onChange, disabled }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [hoverValue, setHoverValue] = useState<number | null>(null);
-    
+
     const displayValue = hoverValue ?? (value ?? 0);
 
     const calculateRating = (e: React.MouseEvent | React.TouchEvent) => {
@@ -130,7 +130,7 @@ const StarRating: React.FC<{
         const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
         const x = clientX - rect.left;
         const width = rect.width;
-        
+
         // Map 0-width to 0-10 rating, clamped
         const rawRating = (x / width) * 10;
         // Snap to nearest 0.5 step for incredibly user-friendly rating snaps!
@@ -162,7 +162,7 @@ const StarRating: React.FC<{
     return (
         <div className="flex flex-wrap items-center gap-4" role="radiogroup" aria-label="Rating">
             {/* The Interactive Star Row */}
-            <div 
+            <div
                 ref={containerRef}
                 className="flex items-center gap-1.5 cursor-pointer py-1.5"
                 onMouseMove={handleMouseMove}
@@ -173,18 +173,18 @@ const StarRating: React.FC<{
                     // Each star represents 2 points (0-2, 2-4, 4-6, 6-8, 8-10)
                     const starStart = i * 2;
                     const starFill = Math.max(0, Math.min(1, (displayValue - starStart) / 2));
-                    
+
                     return (
-                        <FractionalStar 
-                            key={i} 
-                            fill={starFill} 
-                            size={36} 
-                            active={displayValue > starStart} 
+                        <FractionalStar
+                            key={i}
+                            fill={starFill}
+                            size={36}
+                            active={displayValue > starStart}
                         />
                     );
                 })}
             </div>
-            
+
             {/* The High-Precision Numeric Control */}
             <div className="flex items-center gap-1 bg-gradient-to-br from-[#FFF9F0] to-white border border-[#ffb700]/25 px-3 py-1.5 rounded-xl shadow-sm">
                 <input
@@ -351,8 +351,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         tmdbId: entry?.tmdbId || prefillData?.tmdbId || 0,
         title: entry?.title || prefillData?.title || '',
         type: entry?.type || prefillData?.type || 'MOVIE',
-        watchedAt: entry?.watchedAt 
-            ? toLocalISOString(entry.watchedAt) 
+        watchedAt: entry?.watchedAt
+            ? toLocalISOString(entry.watchedAt)
             : toLocalISOString(new Date()),
         rating: entry?.rating || undefined,
         review: entry?.review || '',
@@ -575,10 +575,10 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                        
+
                         {/* ── Left Column: Media Information & Rating (5/12 cols) ── */}
                         <div className="lg:col-span-5 flex flex-col gap-5">
-                            
+
                             {/* Search or Selected Media Header */}
                             {!isEditing ? (
                                 <div className="flex flex-col gap-2">
@@ -700,7 +700,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                             <div className={`flex flex-col gap-2.5 p-4 sm:p-4.5 ${isModal ? 'bg-[#FFF9F0]/40 rounded-3xl' : 'bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm'}`}>
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Rate this Cinematic Experience</label>
                                 <StarRating value={formData.rating} onChange={(v) => setFormData((prev) => ({ ...prev, rating: v }))} />
-                                
+
                                 {/* Interactive Mood Badge */}
                                 {(() => {
                                     const mood = getRatingMood(formData.rating);
@@ -732,8 +732,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         </div>
                                         <div className="flex items-center gap-2.5 flex-shrink-0">
                                             <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
-                                                ${formData.isRewatch 
-                                                    ? 'bg-[#ffb700]/10 text-[#ffb700]' 
+                                                ${formData.isRewatch
+                                                    ? 'bg-[#ffb700]/10 text-[#ffb700]'
                                                     : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
                                                 {formData.isRewatch ? 'YES' : 'NO'}
                                             </span>
@@ -742,7 +742,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     type="checkbox"
                                                     checked={formData.isRewatch}
                                                     onChange={(e) => setFormData((prev) => ({ ...prev, isRewatch: e.target.checked }))}
-                                                    className="sr-only peer" 
+                                                    className="sr-only peer"
                                                 />
                                                 <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#ffb700] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
                                             </div>
@@ -757,8 +757,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         </div>
                                         <div className="flex items-center gap-2.5 flex-shrink-0">
                                             <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
-                                                ${formData.isWatching 
-                                                    ? 'bg-[#22c55e]/10 text-[#22c55e]' 
+                                                ${formData.isWatching
+                                                    ? 'bg-[#22c55e]/10 text-[#22c55e]'
                                                     : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
                                                 {formData.isWatching ? 'YES' : 'NO'}
                                             </span>
@@ -767,7 +767,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     type="checkbox"
                                                     checked={formData.isWatching}
                                                     onChange={(e) => setFormData((prev) => ({ ...prev, isWatching: e.target.checked }))}
-                                                    className="sr-only peer" 
+                                                    className="sr-only peer"
                                                 />
                                                 <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#22c55e] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
                                             </div>
@@ -778,8 +778,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                         </div>
 
                         {/* ── Right Column: Rich Review, Colorful Locations, Tags (7/12 cols) ── */}
-                        <div className="lg:col-span-7 flex flex-col gap-5 bg-[#FFF9F0]/25 p-4.5 sm:p-5.5 md:p-6.5 rounded-[32px] border border-[#ffb700]/10 backdrop-blur-sm">
-                            
+                        <div className="lg:col-span-7 flex flex-col gap-5 bg-[#FFF9F0]/25 p-5 sm:p-5.5 md:p-6.5 rounded-[24px] border border-[#ffb700]/10 backdrop-blur-sm">
+
                             {/* Rich Notebook Review */}
                             <div className="flex flex-col gap-2">
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Write a Review or Log Thoughts</label>
@@ -808,9 +808,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 key={l.value}
                                                 type="button"
                                                 className={`flex-1 min-w-[76px] sm:min-w-[85px] max-w-[120px] flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2 transition-all group/loc relative overflow-hidden cursor-pointer
-                                                ${isSelected 
-                                                    ? 'bg-white border-[#ffb700] shadow-[0_4px_15px_-4px_rgba(255,183,0,0.22)] scale-[1.03]' 
-                                                    : 'bg-white/50 border-[#ffb700]/10 text-[#2D2926]/60 hover:border-[#ffb700]/30 hover:bg-white hover:scale-[1.02]'}`}
+                                                ${isSelected
+                                                        ? 'bg-white border-[#ffb700] shadow-[0_4px_15px_-4px_rgba(255,183,0,0.22)] scale-[1.03]'
+                                                        : 'bg-white/50 border-[#ffb700]/10 text-[#2D2926]/60 hover:border-[#ffb700]/30 hover:bg-white hover:scale-[1.02]'}`}
                                                 onClick={() => setFormData((prev) => ({ ...prev, watchLocation: prev.watchLocation === l.value ? '' : l.value }))}
                                             >
                                                 <div className="transition-transform group-hover/loc:scale-110 duration-300">
@@ -868,9 +868,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         {formData.tags.map((tag) => (
                                             <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/5 border border-[#ffb700]/20 text-[#ffb700] px-2.5 py-1.5 rounded-lg text-xs font-black hover:bg-[#ffb700]/10 transition-colors">
                                                 #{tag}
-                                                <button 
-                                                    type="button" 
-                                                    onClick={() => handleRemoveTag(tag)} 
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveTag(tag)}
                                                     className="w-4 h-4 flex items-center justify-center rounded-full bg-[#ffb700]/10 hover:bg-red-500 hover:text-white text-[#ffb700] transition-colors ml-1 focus:outline-none text-[8px] font-black"
                                                     aria-label={`Remove tag ${tag}`}
                                                 >

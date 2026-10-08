@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GroupedSuggestion, suggestionsApi } from '../../services/suggestions.service';
 import { entriesApi } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
-import { SkeletonCard, Modal, CardDropdownMenu } from '../common';
+import { SkeletonCard, Modal, CardDropdownMenu, Avatar } from '../common';
 import { EntryForm } from '../entries/EntryForm';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
@@ -303,12 +303,11 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                             <span className="text-[9px] font-black uppercase tracking-widest text-[#2D2926]/40">From your Hive</span>
                             <div className="flex -space-x-2 overflow-hidden">
                                 {uniqueSuggestors.slice(0, 4).map(s => (
-                                    <img 
-                                        key={s.id} 
-                                        src={s.profilePictureUrl || `https://ui-avatars.com/api/?name=${s.displayName || s.username}&background=ffb700&color=fff`} 
-                                        title={s.displayName || s.username}
-                                        className="inline-block h-7 w-7 rounded-full ring-2 ring-white object-cover bg-white" 
-                                        alt=""
+                                    <Avatar
+                                        key={s.id}
+                                        src={s.profilePictureUrl || `https://ui-avatars.com/api/?name=${s.displayName || s.username}&background=ffb700&color=fff`}
+                                        name={s.displayName || s.username}
+                                        size="xs"
                                     />
                                 ))}
                                 {uniqueSuggestors.length > 4 && (

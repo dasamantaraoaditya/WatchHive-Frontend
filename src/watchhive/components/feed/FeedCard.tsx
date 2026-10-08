@@ -143,15 +143,15 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const actionText = (() => {
         if (isSuggestion) return 'recommends';
         if (!entryData) return 'just watched';
-        
+
         if (entryData.isWatching) {
             return 'started watching';
         }
-        
+
         if (entryData.startedAt) {
             return 'completed watching';
         }
-        
+
         return entryData.review ? 'reviewed' : 'just watched';
     })();
 
@@ -182,7 +182,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             <Avatar
                                 src={isSuggestion ? whLogo : avatarUrl}
                                 name={isSuggestion ? 'WatchersHive' : username}
-                                size="md"
+                                size="fluid"
                                 showBorder={false}
                             />
                         </Link>
@@ -202,7 +202,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     {' '}
                                     <span className="text-[#2D2926]/70 font-medium">{actionText}</span>
                                     {' '}
-                                    <button 
+                                    <button
                                         type="button"
                                         onClick={() => targetTmdbId && navigate(`/watch-hive/details/${normMediaType}/${targetTmdbId}`, { state: { from: window.location.pathname + window.location.search } })}
                                         className="font-extrabold text-[#2D2926] hover:text-[#ffb700] hover:underline transition-colors bg-transparent border-none p-0 inline align-baseline text-left cursor-pointer font-display"
@@ -264,7 +264,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     </div>
                                 )}
                             </div>
-                            
+
                             {/* Tags (if any exist) */}
                             {!isSuggestion && entryData?.tags && entryData.tags.length > 0 && (
                                 <div className="feed-card-tags">
