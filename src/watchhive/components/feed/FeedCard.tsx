@@ -73,13 +73,20 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
 
-    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM"
-    const displayTimestamp = item.timestamp || entryData?.updatedAt || entryData?.createdAt;
+    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM" or "Jan 1, 2025" for date-only
+    const displayTimestamp = entryData?.watchedAt || item.timestamp || entryData?.updatedAt || entryData?.createdAt;
     const timestamp = !isSuggestion && displayTimestamp
-        ? new Date(displayTimestamp).toLocaleString(undefined, {
-            month: 'short', day: 'numeric', year: 'numeric',
-            hour: 'numeric', minute: '2-digit'
-        }).replace(',', ' at')
+        ? (() => {
+            const d = new Date(displayTimestamp);
+            if (isNaN(d.getTime())) return 'Just Now';
+            const isMidnight = d.getHours() === 0 && d.getMinutes() === 0;
+            return isMidnight
+                ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                : d.toLocaleString(undefined, {
+                    month: 'short', day: 'numeric', year: 'numeric',
+                    hour: 'numeric', minute: '2-digit'
+                }).replace(',', ' at');
+        })()
         : 'Just Now';
 
     const handleLike = async () => {
@@ -142,7 +149,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
     const actionText = (() => {
         if (isSuggestion) return 'recommends';
-        if (!entryData) return 'just watched';
+        if (!entryData) return 'watched';
 
         if (entryData.isWatching) {
             return 'started watching';
@@ -152,7 +159,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
             return 'completed watching';
         }
 
-        return entryData.review ? 'reviewed' : 'just watched';
+        return entryData.review ? 'reviewed' : 'watched';
     })();
 
     const releaseYear = (details?.release_date || details?.first_air_date || '').substring(0, 4);

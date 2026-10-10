@@ -3,6 +3,7 @@ import { suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import userService from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUI } from '../../contexts';
 import { BeeLoader } from '../common';
 import { User } from '../../types';
 
@@ -32,8 +33,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     onClose,
     onSuccess
 }) => {
-    if (!isOpen) return null;
-
+    const { registerModal } = useUI();
     const { user: currentUser } = useAuth();
 
     // Movie Search State
@@ -55,6 +55,13 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     const [error, setError] = useState<string | null>(null);
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        return registerModal();
+    }, [isOpen, registerModal]);
+
+    if (!isOpen) return null;
 
     // Helper to format avatar URL
     const getAvatarUrl = (url: string | null | undefined, seed: string) => {
@@ -186,7 +193,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     });
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display">
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display">
             <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#ffb700]/20 max-h-[90vh]">
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[#ffb700]/10 flex items-center justify-between bg-white shrink-0">
