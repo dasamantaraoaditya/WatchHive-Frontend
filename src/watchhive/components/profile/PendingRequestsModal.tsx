@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import followsService from '../../services/follows.service';
 import { Avatar, BeeLoader } from '../common';
-import { useCustomAlert } from '../../contexts';
+import { useCustomAlert, useUI } from '../../contexts';
 
 interface PendingRequestsModalProps {
     isOpen: boolean;
@@ -28,20 +28,22 @@ interface PendingRequest {
 }
 
 export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOpen, onClose, onRequestsUpdated }) => {
+    const { registerModal } = useUI();
     const [requests, setRequests] = useState<PendingRequest[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasHadRequests, setHasHadRequests] = useState(false);
     const { alert } = useCustomAlert();
 
     useEffect(() => {
+        if (!isOpen) return;
+        return registerModal();
+    }, [isOpen, registerModal]);
+
+    useEffect(() => {
         if (isOpen) {
             setHasHadRequests(false);
             fetchRequests();
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
         }
-        return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
     // Auto-close modal 1.5s after user finishes resolving all pending requests

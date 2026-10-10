@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
+import { useUI } from '../../contexts';
 
 interface ModalProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ export const Modal: React.FC<ModalProps> = ({
     children, 
     maxWidth = 'max-w-2xl' 
 }) => {
+    const { registerModal } = useUI();
     const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
 
     useEffect(() => {
@@ -25,15 +27,11 @@ export const Modal: React.FC<ModalProps> = ({
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Scroll lock
+    // Register modal lifecycle with UIContext (coordinates scroll lock, body.modal-open, and hiding FAB/floating bars)
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => { document.body.style.overflow = 'unset'; };
-    }, [isOpen]);
+        if (!isOpen) return;
+        return registerModal();
+    }, [isOpen, registerModal]);
 
     return createPortal(
         <AnimatePresence>

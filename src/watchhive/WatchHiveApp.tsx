@@ -296,19 +296,19 @@ export const WatchHiveApp: React.FC = () => {
     return (
         <BrowserRouter>
             <ScrollToTop />
-            <AuthProvider>
-                <NotificationProvider>
-                    <WatchlistProvider>
-                        <CustomAlertProvider>
-                            <UIProvider>
+            <UIProvider>
+                <AuthProvider>
+                    <NotificationProvider>
+                        <WatchlistProvider>
+                            <CustomAlertProvider>
                                 <TourProvider>
                                     <AppRoutes />
                                 </TourProvider>
-                            </UIProvider>
-                        </CustomAlertProvider>
-                    </WatchlistProvider>
-                </NotificationProvider>
-            </AuthProvider>
+                            </CustomAlertProvider>
+                        </WatchlistProvider>
+                    </NotificationProvider>
+                </AuthProvider>
+            </UIProvider>
         </BrowserRouter>
     );
 };

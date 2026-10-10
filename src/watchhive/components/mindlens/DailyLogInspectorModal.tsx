@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useUI } from '../../contexts';
 
 export interface InspectionItem {
     id: string;
@@ -26,6 +27,13 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
     count,
     items,
 }) => {
+    const { registerModal } = useUI();
+
+    useEffect(() => {
+        if (!isOpen || !dateStr) return;
+        return registerModal();
+    }, [isOpen, dateStr, registerModal]);
+
     if (!isOpen || !dateStr) return null;
 
     const formattedDate = new Date(dateStr).toLocaleDateString(undefined, {
@@ -37,7 +45,7 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#2D2926]/50 backdrop-blur-md p-4 animate-[fade-in_0.2s_ease-out]"
+            className="fixed inset-0 z-[2000] flex items-center justify-center bg-[#2D2926]/50 backdrop-blur-md p-4 animate-[fade-in_0.2s_ease-out]"
             onClick={onClose}
         >
             <div
