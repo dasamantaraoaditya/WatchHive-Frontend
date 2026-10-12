@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
 import { formatUserFriendlyError } from '../utils/errorHandler';
 import { resolveAvatarUrl } from '../components/common/Avatar';
+import { AvatarLightboxModal } from '../components/common';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -55,6 +56,7 @@ export const UserProfilePage: React.FC = () => {
     const [userRankings, setUserRankings] = useState<List[] | null>(null);
     const [isRankingsLoading, setIsRankingsLoading] = useState(false);
     const [avatarError, setAvatarError] = useState(false);
+    const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
     useEffect(() => {
         setAvatarError(false);
@@ -246,9 +248,13 @@ export const UserProfilePage: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex flex-col md:flex-row items-center gap-8">
-                        <div className="relative">
-                            <div className="absolute -inset-2 bg-[#ffb700]/20 rounded-full blur-xl opacity-30"></div>
-                            <div className="relative p-1 bg-gradient-to-br from-[#ffb700] to-transparent rounded-full">
+                        <div 
+                            className="relative group cursor-pointer"
+                            onClick={() => setIsAvatarModalOpen(true)}
+                            title="Click to view full picture"
+                        >
+                            <div className="absolute -inset-2 bg-[#ffb700]/20 rounded-full blur-xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                            <div className="relative p-1 bg-gradient-to-br from-[#ffb700] via-[#ffaa00] to-transparent rounded-full shadow-lg transition-transform group-hover:scale-105 duration-300">
                                 <div className="bg-white rounded-full p-1 relative overflow-hidden">
                                     {resolveAvatarUrl(profileUser.profilePictureUrl) && !avatarError ? (
                                         <img 
@@ -262,6 +268,10 @@ export const UserProfilePage: React.FC = () => {
                                             <span className="material-symbols-outlined text-5xl">person</span>
                                         </div>
                                     )}
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 rounded-full flex flex-col items-center justify-center transition-opacity">
+                                        <span className="material-symbols-outlined text-white text-2xl drop-shadow">zoom_in</span>
+                                        <span className="text-[10px] font-black text-white uppercase tracking-wider mt-0.5">View</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -586,6 +596,15 @@ export const UserProfilePage: React.FC = () => {
                         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
                         userId={profileUser.id}
                         type={modalConfig.type}
+                    />
+                )}
+                {profileUser && (
+                    <AvatarLightboxModal
+                        isOpen={isAvatarModalOpen}
+                        onClose={() => setIsAvatarModalOpen(false)}
+                        src={resolveAvatarUrl(profileUser.profilePictureUrl)}
+                        name={profileUser.displayName || profileUser.username}
+                        username={profileUser.username}
                     />
                 )}
                 {profileUser && isSuggestModalOpen && (

@@ -7,6 +7,7 @@ import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
 import { ExportFormat, ImportResult } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
+import { AvatarLightboxModal } from '../components/common';
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser } = useAuth();
@@ -47,9 +48,14 @@ export const ProfilePage: React.FC = () => {
         if (user) setBioText(user.bio || '');
     }, [user?.bio]);
 
+    const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+
     if (!user) return <ProfileSkeleton />;
 
-    const handleAvatarClick = () => fileInputRef.current?.click();
+    const handleUploadClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        fileInputRef.current?.click();
+    };
 
     const handleSaveBio = async () => {
         if (bioText.length > 500) {
@@ -210,7 +216,11 @@ export const ProfilePage: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-center gap-8 mt-2 md:mt-0">
                     
                     {/* Avatar */}
-                    <div className="relative group cursor-pointer shrink-0" onClick={handleAvatarClick}>
+                    <div 
+                        className="relative group cursor-pointer shrink-0" 
+                        onClick={() => setIsAvatarModalOpen(true)}
+                        title="Click to view full picture"
+                    >
                         <div className="absolute -inset-2 bg-[#ffb700]/20 rounded-full blur-xl opacity-50 pointer-events-none transition-all duration-500 group-hover:bg-[#ffb700]/40"></div>
                         <div className="relative p-1 bg-gradient-to-br from-[#ffb700] via-[#ffaa00] to-transparent rounded-full shadow-lg transition-transform group-hover:scale-105 duration-300">
                             <div className="bg-white rounded-full p-1 w-32 h-32 md:w-40 md:h-40 overflow-hidden relative">
@@ -226,12 +236,24 @@ export const ProfilePage: React.FC = () => {
                                         <span className="material-symbols-outlined text-[3rem]">face</span>
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-full flex flex-col items-center justify-center transition-opacity">
-                                    <span className="material-symbols-outlined text-white text-2xl">photo_camera</span>
+                                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 rounded-full flex flex-col items-center justify-center transition-opacity">
+                                    <span className="material-symbols-outlined text-white text-2xl drop-shadow">zoom_in</span>
+                                    <span className="text-[10px] font-black text-white uppercase tracking-wider mt-0.5">View</span>
                                 </div>
                             </div>
                         </div>
                         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                        
+                        {/* Camera upload button */}
+                        <button
+                            type="button"
+                            onClick={handleUploadClick}
+                            className="absolute bottom-0 right-0 sm:right-1 w-9 h-9 bg-[#ffb700] text-black rounded-full shadow-md flex items-center justify-center hover:brightness-105 active:scale-95 transition-all z-10 border-2 border-white"
+                            title="Change Profile Picture"
+                        >
+                            <span className="material-symbols-outlined text-sm font-bold">photo_camera</span>
+                        </button>
+
                         {user.profilePictureUrl && (
                             <button onClick={(e) => { e.stopPropagation(); handleRemoveAvatar(); }} className="absolute -top-1 right-0 sm:-right-2 w-8 h-8 bg-white text-rose-500 rounded-full shadow-md flex items-center justify-center hover:bg-rose-50 hover:scale-110 transition-transform z-10" title="Delete Photo">
                                 <span className="material-symbols-outlined text-sm">close</span>
@@ -560,6 +582,14 @@ export const ProfilePage: React.FC = () => {
                 onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
                 userId={user.id}
                 type={modalConfig.type}
+            />
+
+            <AvatarLightboxModal
+                isOpen={isAvatarModalOpen}
+                onClose={() => setIsAvatarModalOpen(false)}
+                src={resolveAvatarUrl(user.profilePictureUrl)}
+                name={user.displayName || user.username}
+                username={user.username}
             />
 
             <style>{`

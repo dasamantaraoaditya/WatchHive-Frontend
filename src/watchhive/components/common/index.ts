@@ -20,3 +20,4 @@ export { default as ScrollToTop } from './ScrollToTop';
 export * from './SearchMediaModal';
 export * from './QuickCurrentlyWatchingModal';
 export * from './CardDropdownMenu';
+export * from './AvatarLightboxModal';
