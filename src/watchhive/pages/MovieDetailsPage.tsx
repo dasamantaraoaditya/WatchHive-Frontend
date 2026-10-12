@@ -8,6 +8,7 @@ import { EntryForm } from '../components/entries/EntryForm';
 import { SuggestUserSelector } from '../components/suggestions/SuggestUserSelector';
 import { useUI, useCustomAlert } from '../contexts';
 import { entriesApi, Entry } from '../services/entries.service';
+import { formatUserFriendlyError } from '../utils/errorHandler';
 
 interface CastMember {
     id: number;
@@ -210,7 +211,10 @@ export const MovieDetailsPage: React.FC = () => {
                 }
             } catch (err) {
                 console.error('Failed to fetch details:', err);
-                setError('Failed to load cinematic details. The hive is a bit busy.');
+                setError(formatUserFriendlyError(err, {
+                    resourceType: 'movie',
+                    defaultMessage: 'Failed to load cinematic details. The hive is a bit busy.'
+                }));
             } finally {
                 setLoading(false);
             }

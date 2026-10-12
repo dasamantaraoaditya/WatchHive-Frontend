@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { formatUserFriendlyError } from '../utils/errorHandler';
+
 export interface AlertOptions {
     title?: string;
     confirmText?: string;
@@ -31,12 +33,17 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
     });
 
     const alert = (message: string, options?: AlertOptions) => {
+        const isErrorSeverity = options?.severity === 'error' || options?.severity === 'danger';
+        const displayMessage = isErrorSeverity
+            ? formatUserFriendlyError(message, { defaultMessage: message })
+            : message;
+
         return new Promise<boolean>((resolve) => {
             setState({
                 isOpen: true,
-                message,
+                message: displayMessage,
                 type: 'alert',
-                title: options?.title || 'Alert',
+                title: options?.title || (isErrorSeverity ? 'Notice' : 'Alert'),
                 confirmText: options?.confirmText || 'Got it',
                 severity: options?.severity || 'primary',
                 resolve,

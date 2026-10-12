@@ -195,7 +195,6 @@ const NotificationsPage: React.FC = () => {
                     <PushOptInBanner />
                     {error ? (
                         <ErrorState
-                            title="The Hive is Currently Down"
                             message={error}
                             onRetry={() => fetchNotifications(1)}
                         />

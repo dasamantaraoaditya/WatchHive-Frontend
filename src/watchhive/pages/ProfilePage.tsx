@@ -427,7 +427,7 @@ export const ProfilePage: React.FC = () => {
             {/* Data Management Block */}
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
                 {/* Hidden file input */}
-                <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={e => handleImportFile(e.target.files?.[0])} />
+                <input ref={importFileRef} type="file" accept=".json,.csv" className="hidden" onChange={e => handleImportFile(e.target.files?.[0])} />
 
                 <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700]">
@@ -521,6 +521,13 @@ export const ProfilePage: React.FC = () => {
                                 {dataLoading ? <Skeleton variant="circle" width={16} height={16} /> : <span className="material-symbols-outlined text-lg">upload</span>}
                                 Import Data
                             </button>
+                        </div>
+
+                        <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-[11px] text-amber-900 leading-relaxed">
+                            <span className="material-symbols-outlined text-base text-amber-600 shrink-0 mt-0.5">info</span>
+                            <p>
+                                <strong>Feed Protection:</strong> Imported watch history and entries are saved to your personal library & stats only and will not flood your followers' community feeds.
+                            </p>
                         </div>
 
                         {importResult && (

@@ -11,7 +11,7 @@ interface ErrorStateProps {
 }
 
 export const ErrorState: React.FC<ErrorStateProps> = ({
-    title = "The Hive is Currently Unreachable",
+    title,
     message = "We're unable to connect to WatchersHive servers right now. Please check your internet connection or try again in a few moments.",
     onRetry,
     className = "",
@@ -19,6 +19,12 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
     onDismiss,
     illustration
 }) => {
+    const isNotFound = message.toLowerCase().includes('not found') || 
+                       message.toLowerCase().includes('no longer available') ||
+                       message.toLowerCase().includes('deleted');
+
+    const resolvedTitle = title || (isNotFound ? 'Content Unavailable' : 'The Hive is Currently Unreachable');
+
     return (
         <div 
             className={`flex flex-col items-center justify-center py-16 px-6 text-center bg-gradient-to-b from-amber-500/5 via-white to-white rounded-[32px] border border-amber-500/20 shadow-sm my-6 max-w-xl mx-auto ${className}`}
@@ -28,13 +34,13 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
                 <div className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center mb-6 border border-amber-200/60 shadow-inner relative">
                     <span className="absolute -inset-2 bg-amber-500/10 rounded-full blur-xl animate-pulse"></span>
                     <span className="material-symbols-outlined text-4xl text-amber-500 relative z-10">
-                        wifi_off
+                        {isNotFound ? 'search_off' : 'wifi_off'}
                     </span>
                 </div>
             )}
             
             <h3 className="text-2xl font-black text-[#2D2926] tracking-tight mb-2">
-                {title}
+                {resolvedTitle}
             </h3>
             
             <p className="text-sm font-bold text-slate-500 max-w-md leading-relaxed mb-8">

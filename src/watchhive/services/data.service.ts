@@ -63,11 +63,17 @@ export async function importData(file: File): Promise<ImportResult> {
             try {
                 const text = e.target?.result as string;
 
+                if (file.name.toLowerCase().endsWith('.csv') || file.type.includes('csv')) {
+                    const result = await apiClient.post<ImportResult>('/data/import', { csv: text });
+                    resolve(result);
+                    return;
+                }
+
                 let payload: Record<string, unknown>;
                 try {
                     payload = JSON.parse(text);
                 } catch {
-                    reject(new Error('Invalid JSON file. Please upload a valid WatchersHive export file.'));
+                    reject(new Error('Invalid file format. Please upload a valid JSON or CSV export file.'));
                     return;
                 }
 

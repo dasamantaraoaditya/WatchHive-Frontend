@@ -12,6 +12,7 @@ import { listsApi, ListItem, List } from '../services/lists.service';
 import { WatchlistGrid } from '../components/profile/WatchlistGrid';
 import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
+import { formatUserFriendlyError } from '../utils/errorHandler';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -69,7 +70,10 @@ export const UserProfilePage: React.FC = () => {
                 setPageIcon('person');
             } catch (err) {
                 console.error(err);
-                setError('User not found');
+                setError(formatUserFriendlyError(err, {
+                    resourceType: 'profile',
+                    defaultMessage: 'This user profile could not be found.'
+                }));
             } finally {
                 if (showLoading) setLoading(false);
             }
