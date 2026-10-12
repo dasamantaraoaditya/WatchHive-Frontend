@@ -645,7 +645,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                             setShowResults(false);
                                                             navigate(`/watch-hive/search?mode=movies&deep=true&q=${encodeURIComponent(searchQuery)}`);
                                                         }}
-                                                        className="w-full sm:w-auto px-3.5 py-2 bg-[#ffb700] hover:bg-[#ffc83b] active:scale-95 text-white rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all text-center cursor-pointer flex-shrink-0"
+                                                        className="w-full sm:w-auto px-3.5 py-2 bg-[#ffb700] hover:bg-[#ffc83b] active:scale-95 text-[#2D2926] rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all text-center cursor-pointer flex-shrink-0"
                                                     >
                                                         Deep Search 🔎
                                                     </button>
@@ -858,7 +858,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                     <button
                                         type="button"
                                         onClick={handleAddTag}
-                                        className="absolute right-2 px-3 py-1 bg-[#ffb700]/10 hover:bg-[#ffb700] text-[#ffb700] hover:text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all"
+                                        className="absolute right-2 px-3 py-1 bg-[#ffb700] hover:bg-[#ffb700]/90 text-[#2D2926] rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
                                     >
                                         Add +
                                     </button>
@@ -867,12 +867,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 {formData.tags && formData.tags.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 mt-1">
                                         {formData.tags.map((tag) => (
-                                            <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/5 border border-[#ffb700]/20 text-[#ffb700] px-2.5 py-1.5 rounded-lg text-xs font-black hover:bg-[#ffb700]/10 transition-colors">
+                                            <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/15 border border-[#ffb700]/30 text-[#2D2926] px-2.5 py-1.5 rounded-lg text-xs font-black transition-colors">
                                                 #{tag}
                                                 <button
                                                     type="button"
                                                     onClick={() => handleRemoveTag(tag)}
-                                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-[#ffb700]/10 hover:bg-red-500 hover:text-white text-[#ffb700] transition-colors ml-1 focus:outline-none text-[8px] font-black"
+                                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-[#2D2926]/10 hover:bg-red-500 hover:text-white text-[#2D2926] transition-colors ml-1 focus:outline-none text-[8px] font-black cursor-pointer"
                                                     aria-label={`Remove tag ${tag}`}
                                                 >
                                                     ✕
@@ -989,12 +989,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                         )}
                         <button
                             type="submit"
-                            className="flex items-center justify-center gap-1.5 px-7 py-3 bg-[#ffb700] text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none cursor-pointer active:scale-97"
+                            className="flex items-center justify-center gap-1.5 px-7 py-3 bg-[#ffb700] text-[#2D2926] font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none cursor-pointer active:scale-97"
                             disabled={isLoading || (!isEditing && !hasSelection)}
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-white"></div>
+                                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-[#2D2926]"></div>
                                     Saving...
                                 </>
                             ) : (
