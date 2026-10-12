@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { mindLensApi, MindLensData } from '../../services/mindlens.service';
 import { MindLensHighlightsSkeleton } from '../common/Skeleton';
-import { ErrorState } from '../common';
+import { ErrorState, Avatar } from '../common';
 import { Link } from 'react-router-dom';
 import { ProfileStats } from '../profile';
 import { DailyLogInspectorModal } from './DailyLogInspectorModal';
@@ -546,13 +546,11 @@ export const MindLensView: React.FC = () => {
                                                         #{rank + 1}
                                                     </span>
                                                     <Link to={`/watch-hive/profile/${rec.userId}`} className="flex items-center gap-2 group/user min-w-0">
-                                                        {rec.profilePictureUrl ? (
-                                                            <img src={rec.profilePictureUrl} alt="" className="w-8 h-8 rounded-full object-cover border border-[#ffb700]/30" />
-                                                        ) : (
-                                                            <div className="w-8 h-8 rounded-full bg-[#ffb700] text-white font-black text-xs flex items-center justify-center">
-                                                                {(rec.displayName?.[0] || rec.username[0]).toUpperCase()}
-                                                            </div>
-                                                        )}
+                                                        <Avatar 
+                                                            src={rec.profilePictureUrl} 
+                                                            name={rec.displayName || rec.username} 
+                                                            size="xs" 
+                                                        />
                                                         <div className="flex flex-col min-w-0">
                                                             <span className="text-xs font-black text-[#2D2926] group-hover/user:text-[#ffb700] transition-colors truncate">
                                                                 {rec.displayName || rec.username}

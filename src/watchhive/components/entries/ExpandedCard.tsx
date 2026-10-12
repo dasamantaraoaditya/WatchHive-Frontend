@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Entry } from '../../services/entries.service';
 import { TmdbDetails, formatDate } from './types';
+import { Avatar } from '../common/Avatar';
 
 export interface ExpandedCardProps {
     entry: Entry;
@@ -175,13 +176,11 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                                 <span>💡</span> Suggested By
                             </span>
                             <div className="flex items-center gap-2 mt-1 min-w-0">
-                                {entry.suggestedByUser.profilePictureUrl ? (
-                                    <img src={entry.suggestedByUser.profilePictureUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
-                                ) : (
-                                    <div className="w-5 h-5 rounded-full bg-[#ffb700] text-white font-black text-[9px] flex items-center justify-center shrink-0">
-                                        {entry.suggestedByUser.displayName?.[0] || entry.suggestedByUser.username[0]}
-                                    </div>
-                                )}
+                                <Avatar 
+                                    src={entry.suggestedByUser.profilePictureUrl} 
+                                    name={entry.suggestedByUser.displayName || entry.suggestedByUser.username} 
+                                    size="xxs" 
+                                />
                                 <span className="text-[#2D2926] text-xs font-black truncate">@{entry.suggestedByUser.username}</span>
                             </div>
                         </div>

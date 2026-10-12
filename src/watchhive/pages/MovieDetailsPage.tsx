@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BeeLoader, ErrorState } from '../components/common';
+import { BeeLoader, ErrorState, Avatar } from '../components/common';
 import apiClient from '../services/api';
 import { useWatchlist } from '../contexts/WatchlistContext';
 import { EntryForm } from '../components/entries/EntryForm';
@@ -504,13 +504,11 @@ export const MovieDetailsPage: React.FC = () => {
                                             {userEntry.suggestedByUser && (
                                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100/80 border border-amber-300/80 rounded-2xl text-xs font-black text-amber-900 shadow-2xs">
                                                     <span>💡 Suggested by</span>
-                                                    {userEntry.suggestedByUser.profilePictureUrl ? (
-                                                        <img src={userEntry.suggestedByUser.profilePictureUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-4 h-4 rounded-full bg-[#ffb700] text-white text-[8px] font-black flex items-center justify-center">
-                                                            {userEntry.suggestedByUser.username[0]?.toUpperCase()}
-                                                        </div>
-                                                    )}
+                                                    <Avatar 
+                                                        src={userEntry.suggestedByUser.profilePictureUrl} 
+                                                        name={userEntry.suggestedByUser.displayName || userEntry.suggestedByUser.username} 
+                                                        size="xxs" 
+                                                    />
                                                     <span className="underline">@{userEntry.suggestedByUser.username}</span>
                                                 </div>
                                             )}

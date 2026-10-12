@@ -13,6 +13,7 @@ import { WatchlistGrid } from '../components/profile/WatchlistGrid';
 import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
 import { formatUserFriendlyError } from '../utils/errorHandler';
+import { resolveAvatarUrl } from '../components/common/Avatar';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -53,8 +54,10 @@ export const UserProfilePage: React.FC = () => {
 
     const [userRankings, setUserRankings] = useState<List[] | null>(null);
     const [isRankingsLoading, setIsRankingsLoading] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
 
     useEffect(() => {
+        setAvatarError(false);
         if (!id) return;
         if (currentUser && id === currentUser.id) {
             navigate('/watch-hive/profile');
@@ -247,8 +250,13 @@ export const UserProfilePage: React.FC = () => {
                             <div className="absolute -inset-2 bg-[#ffb700]/20 rounded-full blur-xl opacity-30"></div>
                             <div className="relative p-1 bg-gradient-to-br from-[#ffb700] to-transparent rounded-full">
                                 <div className="bg-white rounded-full p-1 relative overflow-hidden">
-                                    {profileUser.profilePictureUrl ? (
-                                        <img className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover" src={profileUser.profilePictureUrl} alt="User profile" />
+                                    {resolveAvatarUrl(profileUser.profilePictureUrl) && !avatarError ? (
+                                        <img 
+                                            className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover" 
+                                            src={resolveAvatarUrl(profileUser.profilePictureUrl)!} 
+                                            alt={profileUser.displayName || profileUser.username}
+                                            onError={() => setAvatarError(true)} 
+                                        />
                                     ) : (
                                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
                                             <span className="material-symbols-outlined text-5xl">person</span>

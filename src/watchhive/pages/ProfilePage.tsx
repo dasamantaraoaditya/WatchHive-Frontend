@@ -6,6 +6,7 @@ import { User, UpdateUserData } from '../types';
 import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
 import { ExportFormat, ImportResult } from '../services/data.service';
+import { resolveAvatarUrl } from '../components/common/Avatar';
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser } = useAuth();
@@ -18,6 +19,7 @@ export const ProfilePage: React.FC = () => {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
     const [stats, setStats] = useState<{ followersCount: number; followingCount: number } | null>(null);
@@ -78,6 +80,7 @@ export const ProfilePage: React.FC = () => {
 
         try {
             const updatedUser = await userService.uploadAvatar(file);
+            setAvatarError(false);
             updateUser({ ...user, profilePictureUrl: updatedUser.profilePictureUrl });
             setSuccessMsg('Profile picture updated!');
             setTimeout(() => setSuccessMsg(null), 3000);
@@ -211,8 +214,13 @@ export const ProfilePage: React.FC = () => {
                         <div className="absolute -inset-2 bg-[#ffb700]/20 rounded-full blur-xl opacity-50 pointer-events-none transition-all duration-500 group-hover:bg-[#ffb700]/40"></div>
                         <div className="relative p-1 bg-gradient-to-br from-[#ffb700] via-[#ffaa00] to-transparent rounded-full shadow-lg transition-transform group-hover:scale-105 duration-300">
                             <div className="bg-white rounded-full p-1 w-32 h-32 md:w-40 md:h-40 overflow-hidden relative">
-                                {user.profilePictureUrl ? (
-                                    <img className={`w-full h-full object-cover rounded-full ${uploading ? 'opacity-50' : ''}`} src={user.profilePictureUrl} alt={user.username} />
+                                {resolveAvatarUrl(user.profilePictureUrl) && !avatarError ? (
+                                    <img 
+                                        className={`w-full h-full object-cover rounded-full ${uploading ? 'opacity-50' : ''}`} 
+                                        src={resolveAvatarUrl(user.profilePictureUrl)!} 
+                                        alt={user.username}
+                                        onError={() => setAvatarError(true)} 
+                                    />
                                 ) : (
                                     <div className="w-full h-full rounded-full bg-[#ffb700]/5 flex items-center justify-center text-[#ffb700]">
                                         <span className="material-symbols-outlined text-[3rem]">face</span>

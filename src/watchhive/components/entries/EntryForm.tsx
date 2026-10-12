@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { entriesApi, CreateEntryData, Entry, SuggestedUser } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import { HiveDatePicker } from '../common/HiveDatePicker';
+import { Avatar } from '../common/Avatar';
 import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services/userService';
 import { suggestionsApi } from '../../services/suggestions.service';
@@ -892,13 +893,11 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 {suggestedUser ? (
                                     <div className="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200/80 rounded-2xl">
                                         <div className="flex items-center gap-2.5">
-                                            {suggestedUser.profilePictureUrl ? (
-                                                <img src={suggestedUser.profilePictureUrl} alt="" className="w-7 h-7 rounded-full object-cover border border-amber-300" />
-                                            ) : (
-                                                <div className="w-7 h-7 rounded-full bg-[#ffb700] text-white font-black text-xs flex items-center justify-center">
-                                                    {suggestedUser.displayName?.[0] || suggestedUser.username[0]}
-                                                </div>
-                                            )}
+                                            <Avatar 
+                                                src={suggestedUser.profilePictureUrl} 
+                                                name={suggestedUser.displayName || suggestedUser.username} 
+                                                size="xs" 
+                                            />
                                             <div className="flex flex-col">
                                                 <span className="text-xs font-black text-[#2D2926]">{suggestedUser.displayName || suggestedUser.username}</span>
                                                 <span className="text-[10px] text-amber-700 font-bold">@{suggestedUser.username}</span>
@@ -955,13 +954,11 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                             }}
                                                             className="w-full flex items-center gap-2.5 p-2 hover:bg-[#ffb700]/10 rounded-xl transition-colors text-left"
                                                         >
-                                                            {u.profilePictureUrl ? (
-                                                                <img src={u.profilePictureUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-6 h-6 rounded-full bg-[#ffb700] text-white font-black text-[10px] flex items-center justify-center">
-                                                                    {u.displayName?.[0] || u.username[0]}
-                                                                </div>
-                                                            )}
+                                                            <Avatar 
+                                                                src={u.profilePictureUrl} 
+                                                                name={u.displayName || u.username} 
+                                                                size="xxs" 
+                                                            />
                                                             <div className="flex flex-col min-w-0 flex-1">
                                                                 <span className="text-xs font-bold text-[#2D2926] truncate">{u.displayName || u.username}</span>
                                                                 <span className="text-[9px] text-[#2D2926]/40 font-bold truncate">@{u.username}</span>
