@@ -21,7 +21,7 @@ const getDirectLink = (providerName: string, fallbackLink: string, title: string
     const query = encodeURIComponent(title);
     if (name.includes('netflix')) return `https://www.netflix.com/search?q=${query}`;
     if (name.includes('amazon') || name.includes('prime')) return `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${query}`;
-    if (name.includes('hotstar')) return `https://www.hotstar.com/in/explore?searchQuery=${query}`;
+    if (name.includes('hotstar') || name.includes('disney')) return `https://www.hotstar.com/in/explore?searchQuery=${query}`;
     if (name.includes('zee5')) return `https://www.zee5.com/search?q=${query}`;
     if (name.includes('sonyliv')) return `https://www.sonyliv.com/search?query=${query}`;
     if (name.includes('jiocinema')) return `https://www.jiocinema.com/search?q=${query}`;
