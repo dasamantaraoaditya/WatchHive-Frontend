@@ -153,6 +153,10 @@ export const HeaderActions: React.FC = () => {
                                     </span>
                                 )}
                             </button>
+                            <Link to="/watch-hive/support" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors">
+                                <span className="material-symbols-outlined text-[20px] text-[#ffb700]">support_agent</span>
+                                Help & Support
+                            </Link>
 
                             <div className="h-px bg-black/5 my-1 mx-2" />
 

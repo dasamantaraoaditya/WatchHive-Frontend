@@ -246,9 +246,13 @@ export const LoginPage: React.FC = () => {
                             Sign up
                         </Link>
                     </p>
-                    <p className="text-[13px] font-medium text-[#2D2926]/30">
+                    <p className="text-[13px] font-medium text-[#2D2926]/40 flex items-center justify-center gap-2">
                         <Link to="/watch-hive/privacy" className="hover:text-[#2D2926]/60 transition-colors">
                             Privacy Policy
+                        </Link>
+                        <span>·</span>
+                        <Link to="/watch-hive/support" className="hover:text-[#ffb700] transition-colors font-bold text-[#b07d00]">
+                            Help & Support
                         </Link>
                     </p>
                 </div>

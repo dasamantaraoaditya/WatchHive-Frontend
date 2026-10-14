@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth, useUI } from '../contexts';
 import { userService, dataService } from '../services';
 import { FollowListModal, SetPasswordSection } from '../components/profile';
@@ -574,6 +575,28 @@ export const ProfilePage: React.FC = () => {
                             </div>
                         )}
                     </div>
+                </div>
+            </div>
+
+            {/* Help & Support Card */}
+            <div className="bg-white border border-black/5 rounded-[32px] p-6 sm:p-8 shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-[#ffb700]/15 flex items-center justify-center text-[#ffb700] border border-[#ffb700]/25">
+                            <span className="material-symbols-outlined text-2xl font-bold">support_agent</span>
+                        </div>
+                        <div>
+                            <h3 className="text-base font-black text-[#2D2926]">Help & Support</h3>
+                            <p className="text-xs text-slate-400 font-bold">Report an issue, request features, or reach us at watchershive@gmail.com</p>
+                        </div>
+                    </div>
+                    <Link
+                        to="/watch-hive/support"
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/30 hover:border-[#ffb700] text-xs font-black uppercase tracking-wider text-slate-800 transition-all hover:shadow-sm"
+                    >
+                        <span>Open Support Hub</span>
+                        <span className="material-symbols-outlined text-sm font-bold text-[#ffb700]">arrow_forward</span>
+                    </Link>
                 </div>
             </div>
 

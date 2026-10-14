@@ -14,4 +14,5 @@ export { ForgotPasswordPage } from './ForgotPasswordPage';
 export { ResetPasswordPage } from './ResetPasswordPage';
 export { MovieDetailsPage } from './MovieDetailsPage';
 export { WatchHistoryComparePage } from './WatchHistoryComparePage';
+export { SupportPage } from './SupportPage';
 
