@@ -6,7 +6,7 @@ import { showInstallPrompt, isInstallPromptReady } from '../../serviceWorkerRegi
 /* ── TMDb poster URLs for showcasing popular movies ── */
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
 
-/* Curated list of iconic/popular movie posters */
+/* Curated list of iconic movie posters */
 const SHOWCASE_POSTERS = [
     { title: "Dune: Part Two", path: "/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg", year: "2024" },
     { title: "Past Lives", path: "/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg", year: "2023" },
@@ -29,7 +29,7 @@ const SHOWCASE_POSTERS = [
 const POSTER_ROW_1 = SHOWCASE_POSTERS.slice(0, 8);
 const POSTER_ROW_2 = SHOWCASE_POSTERS.slice(8, 16);
 
-function useReveal(threshold = 0.12) {
+function useReveal(threshold = 0.1) {
     const ref = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
 
@@ -55,21 +55,21 @@ export const LandingPage: React.FC = () => {
     const [isInstalled, setIsInstalled] = useState(false);
     const [showInstallHint, setShowInstallHint] = useState(false);
 
-    // ── Interactive Demo 1: Suggester Impact & Hive Cheers ──
+    // ── Interactive Widget 1: Real SuggestionCard Replica & Suggester Impact ──
     const [selectedFriend, setSelectedFriend] = useState<'maya' | 'karan' | 'elena'>('maya');
-    const [acceptedSuggestions, setAcceptedSuggestions] = useState<Record<string, boolean>>({});
+    const [suggestionStatus, setSuggestionStatus] = useState<Record<string, 'idle' | 'watching' | 'watched' | 'watchlist'>>({});
     const [friendCheers, setFriendCheers] = useState<Record<string, number>>({
-        maya: 24,
-        karan: 19,
-        elena: 31
+        maya: 28,
+        karan: 22,
+        elena: 35
     });
-    const [justCheered, setJustCheered] = useState<string | null>(null);
+    const [cheerNotice, setCheerNotice] = useState<string | null>(null);
 
     const friendProfiles = {
         maya: {
             name: "Maya Chen",
-            handle: "@cinephile_maya",
-            avatar: "🌸",
+            username: "cinephile_maya",
+            avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
             role: "Soul Healer & Indie Cinephile",
             resonanceScore: 98,
             suggestionsSent: 16,
@@ -77,15 +77,17 @@ export const LandingPage: React.FC = () => {
             topStacked: 6,
             movieTitle: "Past Lives",
             year: "2023",
+            rating: "8.0",
+            genres: ["Drama", "Romance"],
             poster: "/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg",
-            personalNote: "You mentioned having a nostalgic, contemplative week. Put your phone away, make a warm tea, and let this film wash over you. It stayed with me for weeks.",
-            tag: "High Resonance Compass",
-            badgeColor: "bg-emerald-500/10 text-emerald-700 border-emerald-500/20"
+            overview: "Nora and Hae Sung, two deeply connected childhood friends, are wrested apart after Nora's family emigrates from South Korea.",
+            personalNote: "You mentioned having a contemplative week. Put your phone away and just let this film wash over you. The cinematography healed my soul.",
+            tag: "98% Resonance Compass"
         },
         karan: {
             name: "Karan Mehta",
-            handle: "@scifi_karan",
-            avatar: "🪐",
+            username: "scifi_karan",
+            avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80",
             role: "Cosmic Visionary & Nolan Buff",
             resonanceScore: 94,
             suggestionsSent: 20,
@@ -93,57 +95,70 @@ export const LandingPage: React.FC = () => {
             topStacked: 9,
             movieTitle: "Interstellar",
             year: "2014",
+            rating: "8.7",
+            genres: ["Sci-Fi", "Drama", "Adventure"],
             poster: "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-            personalNote: "If you need a reminder of what human curiosity and love can do across the cosmos, turn up your sound system for Zimmer's organ score. Pure awe.",
-            tag: "Cosmic Architect",
-            badgeColor: "bg-indigo-500/10 text-indigo-700 border-indigo-500/20"
+            overview: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival as Earth faces famine.",
+            personalNote: "Turn up your speakers for Zimmer's organ score. If you need a reminder of what human curiosity and love can do across space, this is it.",
+            tag: "94% Cosmic Architect"
         },
         elena: {
             name: "Elena Rostova",
-            handle: "@cinema_elena",
-            avatar: "🌿",
+            username: "cinema_elena",
+            avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80",
             role: "Sanctuary Curator & Ghibli Lover",
-            resonanceScore: 99,
+            resonanceScore: 100,
             suggestionsSent: 12,
             suggestionsWatched: 12,
             topStacked: 7,
             movieTitle: "Spirited Away",
             year: "2001",
+            rating: "8.5",
+            genres: ["Animation", "Fantasy"],
             poster: "/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg",
-            personalNote: "Whenever the world feels overly heavy, this hand-drawn miracle grounds my spirit. An instant dose of warmth to cheer you up this weekend!",
-            tag: "Comfort Sanctuary",
-            badgeColor: "bg-amber-500/10 text-amber-700 border-amber-500/20"
+            overview: "A young girl wandering into a world ruled by gods and witches must find a way to free her parents who have been transformed into pigs.",
+            personalNote: "Whenever the modern world gets too noisy, this hand-drawn miracle grounds my spirit. An instant dose of warmth to cheer you up!",
+            tag: "100% Comfort Sanctuary"
         }
     };
 
-    // ── Interactive Demo 2: Cinematic Stacks as Movie Experience Report Card ──
+    // ── Interactive Widget 2: Real RankedItem Stacks Replica (Movie Experience Report Card) ──
     const [activeStackTheme, setActiveStackTheme] = useState<'worldview' | 'comfort'>('worldview');
     const [worldviewStack, setWorldviewStack] = useState([
         {
-            id: '1',
+            id: 's1',
             title: 'Interstellar',
             year: '2014',
+            rating: '9.8',
+            mediaType: 'movie',
+            genre: 'Sci-Fi / Drama',
             path: '/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg',
-            userReflection: 'Watched with my dad before moving across continents. Made me realize love is the only dimensional constant.',
+            reflection: 'Watched with my dad before moving across continents. Made me realize love is the only dimensional constant.',
             impactTier: 'Monumental Life Anchor',
             emotionalTone: 'Cosmic Wonder & Familial Love'
         },
         {
-            id: '2',
+            id: 's2',
             title: 'Past Lives',
             year: '2023',
+            rating: '9.5',
+            mediaType: 'movie',
+            genre: 'Drama / Romance',
             path: '/k3waqVXSnvCZWfJYNtdamTgTtTA.jpg',
-            userReflection: 'Helped me make peace with parallel versions of my life and the people I left behind in earlier chapters.',
+            reflection: 'Helped me make peace with parallel versions of my life and the people left behind in earlier chapters.',
             impactTier: 'Soul Mirror',
             emotionalTone: 'Gentle Melancholy & Acceptance'
         },
         {
-            id: '3',
+            id: 's3',
             title: 'Dune: Part Two',
             year: '2024',
+            rating: '9.3',
+            mediaType: 'movie',
+            genre: 'Sci-Fi / Adventure',
             path: '/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
-            userReflection: 'The pinnacle of theatrical transport. Showed me how myth and sound design can vibrate your entire body in IMAX.',
-            impactTier: 'Cinematic Grandeur',
+            reflection: 'The pinnacle of audiovisual cinema. Showed me how myth and sound design can vibrate your entire soul in IMAX.',
+            impactTier: 'Theatrical Masterpiece',
             emotionalTone: 'Awe, Myth & Visual Majesty'
         }
     ]);
@@ -153,8 +168,11 @@ export const LandingPage: React.FC = () => {
             id: 'c1',
             title: 'Spirited Away',
             year: '2001',
+            rating: '9.9',
+            mediaType: 'movie',
+            genre: 'Animation / Fantasy',
             path: '/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg',
-            userReflection: 'My safe haven since childhood. Whenever burnout strikes, this world rebuilds my wonder for living.',
+            reflection: 'My safe haven since childhood. Whenever burnout strikes, this world rebuilds my wonder for living.',
             impactTier: 'Eternal Sanctuary',
             emotionalTone: 'Handcrafted Warmth & Innocence'
         },
@@ -162,23 +180,28 @@ export const LandingPage: React.FC = () => {
             id: 'c2',
             title: 'The Truman Show',
             year: '1998',
+            rating: '9.4',
+            mediaType: 'movie',
+            genre: 'Drama / Comedy',
             path: '/vuza0WqY239cuGhKVYhaioGjjmj.jpg',
-            userReflection: 'Inspired me to live courageously and choose genuine truth over comfortable illusions.',
+            reflection: 'Inspired me to live courageously and choose genuine truth over comfortable illusions.',
             impactTier: 'Awakening Call',
-            emotionalTone: 'Existential Hope & Freedom'
+            emotionalTone: 'Existential Hope & Courage'
         },
         {
             id: 'c3',
             title: 'La La Land',
             year: '2016',
+            rating: '9.2',
+            mediaType: 'movie',
+            genre: 'Musical / Romance',
             path: '/uDO8zWDhfWwoFdKS4fzkVJb0Rf0.jpg',
-            userReflection: 'A bittersweet celebration of dreams, sacrifices, and the fleeting beauty of who we meet along the way.',
+            reflection: 'A bittersweet celebration of dreams, sacrifices, and the fleeting beauty of who we meet along the way.',
             impactTier: 'Bittersweet Melody',
             emotionalTone: 'Passion, Nostalgia & Dreams'
         }
     ]);
 
-    // Active stack list selector
     const currentStack = activeStackTheme === 'worldview' ? worldviewStack : comfortStack;
     const setCurrentStack = activeStackTheme === 'worldview' ? setWorldviewStack : setComfortStack;
 
@@ -191,44 +214,55 @@ export const LandingPage: React.FC = () => {
         setCurrentStack(copy);
     };
 
-    // ── Interactive Demo 3: Live Community Cheering Feed Simulator ──
-    const [feedItems, setFeedItems] = useState([
-        {
-            id: 1,
-            from: "Marcus",
-            to: "Sarah",
-            action: "suggested to cheer up",
-            movie: "Spirited Away",
-            note: "Heard work has been exhausting. Take 2 hours for yourself tonight, this film cures everything 🐝✨",
-            cheers: 18,
-            cheered: false
+    // ── Interactive Widget 3: Real MindLens Dashboard Replica ──
+    const [mindLensMood, setMindLensMood] = useState<'existential' | 'comfort' | 'dopamine'>('existential');
+    const mindLensData = {
+        existential: {
+            icon: "🌌",
+            mood: "Cosmic Existential Reflection",
+            confidence: 96,
+            status: "High Existential & Atmospheric Resonance",
+            description: "Your recent logs lean into sweeping philosophical horizons, non-linear timelines, and poignant questions about humanity's place in time.",
+            persona: "The Cosmic Dreamer",
+            dominantVibe: "Awe & Transcendent Wonder",
+            recentTitles: ["Interstellar", "Arrival", "Blade Runner 2049"],
+            dopamine: 78,
+            atmosphere: 98,
+            depth: 96
         },
-        {
-            id: 2,
-            from: "Hannah",
-            to: "Community",
-            action: "updated Report Card Stack",
-            movie: "Films That Shaped My 20s",
-            note: "Moved Interstellar to #1. No other film captures grief and optimism quite like it.",
-            cheers: 27,
-            cheered: false
+        comfort: {
+            icon: "🌿",
+            mood: "Sanctuary & Wholesome Healing",
+            confidence: 94,
+            status: "High Emotional Nourishment & Catharsis",
+            description: "Your viewing pattern shows an active search for hand-drawn beauty, comforting domestic intimacy, and gentle escapism that heals mental fatigue.",
+            persona: "The Nostalgic Sanctuary Keeper",
+            dominantVibe: "Warmth & Pure Tenderness",
+            recentTitles: ["Spirited Away", "Past Lives", "My Neighbor Totoro"],
+            dopamine: 85,
+            atmosphere: 92,
+            depth: 88
+        },
+        dopamine: {
+            icon: "⚡",
+            mood: "Adrenaline & Mythological Thrill",
+            confidence: 91,
+            status: "High Kinetic Drive & Epic Scale",
+            description: "You are craving dense world-building, massive IMAX percussion, and pulse-raising narrative conflicts with high cinematic velocity.",
+            persona: "The Mythic Seeker",
+            dominantVibe: "Intensity & Grand Spectacle",
+            recentTitles: ["Dune: Part Two", "Oppenheimer", "The Batman"],
+            dopamine: 96,
+            atmosphere: 94,
+            depth: 82
         }
-    ]);
-
-    const handleFeedCheer = (id: number) => {
-        setFeedItems(prev => prev.map(item => {
-            if (item.id === id) {
-                return {
-                    ...item,
-                    cheers: item.cheered ? item.cheers - 1 : item.cheers + 1,
-                    cheered: !item.cheered
-                };
-            }
-            return item;
-        }));
     };
 
-    // ── PWA & Scroll Listeners ──
+    // ── Interactive Widget 4: Real FeedCard Replica ──
+    const [feedLiked, setFeedLiked] = useState(false);
+    const [feedLikes, setFeedLikes] = useState(48);
+
+    // ── PWA & Scroll Hooks ──
     useEffect(() => {
         const handleBeforeInstall = () => setIsInstallReady(true);
         const handleAppInstalled = () => { setIsInstalled(true); setIsInstallReady(false); };
@@ -236,9 +270,7 @@ export const LandingPage: React.FC = () => {
         window.addEventListener('appinstalled', handleAppInstalled);
 
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
-        if (isStandalone) {
-            setIsInstalled(true);
-        }
+        if (isStandalone) setIsInstalled(true);
 
         setIsInstallReady(isInstallPromptReady());
 
@@ -257,42 +289,41 @@ export const LandingPage: React.FC = () => {
     };
 
     useEffect(() => {
-        const handler = () => {
-            setNavSolid(window.scrollY > 50);
-        };
+        const handler = () => setNavSolid(window.scrollY > 40);
         window.addEventListener('scroll', handler, { passive: true });
         return () => window.removeEventListener('scroll', handler);
     }, []);
 
-    // Scroll reveal hooks
-    const heroReveal = useReveal(0.05);
-    const communityReveal = useReveal(0.08);
-    const suggestionReveal = useReveal(0.08);
-    const stackReveal = useReveal(0.08);
+    // Reveal references
+    const heroReveal = useReveal(0.04);
+    const androidReveal = useReveal(0.08);
+    const suggestionSectionReveal = useReveal(0.08);
+    const stacksSectionReveal = useReveal(0.08);
+    const mindLensSectionReveal = useReveal(0.08);
+    const feedSectionReveal = useReveal(0.08);
     const openSourceReveal = useReveal(0.08);
-    const posterReveal = useReveal(0.05);
     const ctaReveal = useReveal(0.1);
 
-    const activeFriendData = friendProfiles[selectedFriend];
-    const topRankedFilm = currentStack[0];
+    const activeFriend = friendProfiles[selectedFriend];
+    const topStackMovie = currentStack[0];
+    const activeMoodData = mindLensData[mindLensMood];
 
     return (
-        <div className="min-h-screen bg-[#FFF9F0] text-[#2D2926] font-sans overflow-x-hidden selection:bg-[#ffb700] selection:text-white">
+        <div className="min-h-screen bg-[#FFF9F0] text-stone-900 font-sans overflow-x-hidden selection:bg-[#ffb700] selection:text-stone-900">
             
-            {/* Custom Animations & Styling */}
+            {/* Custom Animations & Material Symbols */}
             <style>{`
-                @keyframes float-slow { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-10px) rotate(2deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+                @keyframes float-gentle { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
                 @keyframes marquee-l { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
                 @keyframes marquee-r { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
-                @keyframes cheer-pop { 0% { transform: scale(1); } 50% { transform: scale(1.3) rotate(8deg); } 100% { transform: scale(1); } }
+                @keyframes pulse-soft { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.85; transform: scale(0.98); } }
                 
-                .anim-float { animation: float-slow 7s ease-in-out infinite; }
-                .anim-float-delayed { animation: float-slow 8.5s ease-in-out infinite 1.2s; }
-                .marquee-left { animation: marquee-l 45s linear infinite; }
-                .marquee-right { animation: marquee-r 45s linear infinite; }
-                .cheer-pop { animation: cheer-pop 0.35s ease-out; }
-                
-                .lp-reveal { opacity: 0; transform: translateY(32px); transition: all 0.85s cubic-bezier(0.16, 1, 0.3, 1); }
+                .anim-float { animation: float-gentle 6s ease-in-out infinite; }
+                .marquee-left { animation: marquee-l 50s linear infinite; }
+                .marquee-right { animation: marquee-r 50s linear infinite; }
+                .pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+
+                .lp-reveal { opacity: 0; transform: translateY(28px); transition: all 0.75s cubic-bezier(0.16, 1, 0.3, 1); }
                 .lp-reveal.is-visible { opacity: 1; transform: translateY(0); }
 
                 .material-symbols-outlined {
@@ -303,286 +334,147 @@ export const LandingPage: React.FC = () => {
             `}</style>
 
             {/* ── Top Navigation Bar ───────────────────────────────── */}
-            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navSolid ? 'bg-[#FFF9F0]/95 backdrop-blur-md shadow-sm border-b border-[#ffb700]/15 py-3.5' : 'bg-transparent py-5'}`}>
-                <div className="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
+            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navSolid ? 'bg-[#FFF9F0]/95 backdrop-blur-md shadow-sm border-b border-amber-200/80 py-3.5' : 'bg-transparent py-5'}`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 w-full flex items-center justify-between">
                     <Link to="/watch-hive" className="flex items-center gap-3 group">
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center p-2 transition-all ${navSolid ? 'bg-white shadow-sm border border-[#ffb700]/20' : 'bg-white/90 backdrop-blur-md shadow-[0_4px_12px_rgba(255,183,0,0.18)] group-hover:scale-105'}`}>
+                        <div className="w-10 h-10 rounded-2xl bg-white border border-amber-300/80 p-2 shadow-sm flex items-center justify-center transition-transform group-hover:scale-105">
                             <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain" />
                         </div>
                         <div className="flex flex-col text-left">
-                            <span className="text-xl font-black tracking-tight text-[#2D2926]">WatchersHive</span>
-                            <span className="text-[10px] font-bold text-[#b07d00] tracking-wider uppercase -mt-1 hidden sm:block">Community & Suggestions</span>
+                            <span className="text-xl font-black tracking-tight text-stone-900">WatchersHive</span>
+                            <span className="text-[10px] font-extrabold text-amber-800 tracking-wider uppercase -mt-1 hidden sm:block">A Community of Watchers</span>
                         </div>
                     </Link>
                     
-                    <div className="hidden lg:flex items-center gap-8 font-extrabold text-[13.5px] text-[#2D2926]/70">
-                        <a href="#community" className="hover:text-[#ffb700] transition-colors">The Watchers Hive</a>
-                        <a href="#suggestions" className="hover:text-[#ffb700] transition-colors">Suggestion Impact</a>
-                        <a href="#stacks" className="hover:text-[#ffb700] transition-colors">Report Card Stacks</a>
-                        <a href="#open-source" className="hover:text-[#ffb700] transition-colors flex items-center gap-1.5">
-                            <span>Open Source</span>
-                            <span className="text-[10px] bg-[#ffb700]/15 text-[#92660a] px-2 py-0.5 rounded-full font-black">GitHub</span>
+                    <div className="hidden lg:flex items-center gap-8 font-extrabold text-sm text-stone-700">
+                        <a href="#android-launch" className="hover:text-amber-600 transition-colors flex items-center gap-1.5 text-amber-800 bg-amber-100/70 px-3 py-1 rounded-full border border-amber-300/60">
+                            <span className="material-symbols-outlined text-[16px] text-amber-600">android</span>
+                            <span>Android App Coming</span>
                         </a>
+                        <a href="#suggestions" className="hover:text-amber-600 transition-colors">Direct Suggestions</a>
+                        <a href="#stacks" className="hover:text-amber-600 transition-colors">Report Card Stacks</a>
+                        <a href="#mindlens" className="hover:text-amber-600 transition-colors">MindLens</a>
+                        <a href="#open-source" className="hover:text-amber-600 transition-colors">Open Source</a>
                     </div>
                     
-                    <div className="flex items-center gap-3.5">
+                    <div className="flex items-center gap-3">
                         <a 
                             href="https://github.com/dasamantaraoaditya/WatchHive-Frontend" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-[#2D2926]/75 bg-white border border-[#ffb700]/25 hover:border-[#ffb700] transition-all shadow-sm"
-                            title="Star WatchersHive on GitHub"
+                            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-black text-stone-800 bg-white border border-amber-300/80 hover:border-amber-500 transition-all shadow-xs"
                         >
-                            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                             </svg>
-                            <span>Open Source</span>
+                            <span>GitHub</span>
                         </a>
 
-                        <Link to="/watch-hive/login" className="text-[13.5px] font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors px-3 py-2">
+                        <Link to="/watch-hive/login" className="text-xs sm:text-sm font-extrabold text-stone-800 hover:text-amber-600 transition-colors px-2 py-1.5">
                             Sign In
                         </Link>
-                        <Link to="/watch-hive/signup" className="bg-[#ffb700] text-black text-[13.5px] font-black tracking-wide px-5 py-2.5 rounded-full shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.45)] hover:-translate-y-0.5 transition-all">
-                            Join Hive
+                        <Link to="/watch-hive/signup" className="bg-[#ffb700] hover:bg-amber-400 text-stone-900 text-xs sm:text-sm font-black tracking-wide px-5 py-2.5 rounded-full shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                            Join Free
                         </Link>
                     </div>
                 </div>
             </nav>
 
             {/* ── Hero Section ───────────────────────────────────── */}
-            <section className={`relative pt-32 pb-20 md:pt-44 md:pb-28 px-6 overflow-hidden flex flex-col items-center text-center w-full min-h-[92vh] lp-reveal ${heroReveal.visible ? 'is-visible' : ''}`} ref={heroReveal.ref}>
+            <section className={`relative pt-32 pb-20 md:pt-44 md:pb-28 px-4 sm:px-6 md:px-8 overflow-hidden flex flex-col items-center text-center w-full lp-reveal ${heroReveal.visible ? 'is-visible' : ''}`} ref={heroReveal.ref}>
                 {/* Honey Aura Radial Gradient */}
-                <div className="absolute top-12 left-1/2 -translate-x-1/2 w-full max-w-[1100px] h-[650px] bg-gradient-to-b from-[#ffb700]/20 via-[#ffb700]/5 to-transparent blur-[130px] rounded-full -z-10 pointer-events-none"></div>
+                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-[1000px] h-[550px] bg-gradient-to-b from-[#ffb700]/25 via-amber-200/20 to-transparent blur-[120px] rounded-full -z-10 pointer-events-none"></div>
 
                 {/* Subtitle Badge */}
-                <div className="inline-flex items-center gap-2.5 bg-white border border-[#ffb700]/30 px-4 py-2 rounded-full shadow-[0_2px_12px_rgba(255,183,0,0.1)] mb-6 z-10">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#ffb700] animate-ping"></span>
-                    <span className="text-[11.5px] font-black text-[#855700] uppercase tracking-wider">A Community of Watchers • Open Source Collective</span>
+                <div className="inline-flex items-center gap-2.5 bg-white border border-amber-300/80 px-4 py-2 rounded-full shadow-xs mb-6 z-10">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+                    <span className="text-xs font-black text-amber-900 uppercase tracking-wider">A Social Hive For True Cinephiles • 100% Open Source</span>
                 </div>
 
                 {/* Main Headline */}
-                <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-[#2D2926] max-w-5xl mx-auto leading-[1.08] mb-6 z-10">
-                    Where Cinephiles Connect,<br />
-                    <span className="bg-gradient-to-r from-[#e59700] via-[#ffb700] to-amber-600 bg-clip-text text-transparent">Suggest & Cheer Up.</span>
+                <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-stone-950 max-w-5xl mx-auto leading-[1.08] mb-6 z-10">
+                    Cinema Is Better Shared.<br />
+                    <span className="bg-gradient-to-r from-amber-600 via-[#e59700] to-amber-500 bg-clip-text text-transparent">Suggest, Cheer & Connect.</span>
                 </h1>
 
                 {/* Narrative Subhead */}
-                <p className="text-base sm:text-lg md:text-xl font-medium text-[#2D2926]/70 max-w-3xl mx-auto mb-10 z-10 leading-relaxed">
-                    Movie watching is never meant to be a cold, solitary algorithm. WatchersHive is a living community where friends handpick cinema for each other, discover whose suggestions actually leave a lasting mark, and preserve their personal <strong className="text-[#2D2926] font-black">Movie Experience Report Cards</strong>.
+                <p className="text-base sm:text-lg md:text-xl font-medium text-stone-700 max-w-3xl mx-auto mb-10 z-10 leading-relaxed">
+                    Stop letting cold commercial algorithms dictate what you watch. WatchersHive is built as a warm collective where friends trade heartfelt recommendations with personal notes, see whose taste actually impacts their lives, and curate their personal <strong className="text-stone-900 font-black">Movie Experience Report Cards</strong>.
                 </p>
 
                 {/* Hero CTAs */}
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-md justify-center z-20 mb-14">
-                    <Link to="/watch-hive/signup" className="w-full sm:w-auto bg-[#ffb700] text-black text-[15.5px] font-black tracking-wide px-8 py-4 rounded-2xl shadow-[0_8px_24px_rgba(255,183,0,0.35)] hover:shadow-[0_12px_32px_rgba(255,183,0,0.5)] hover:-translate-y-1 transition-all flex items-center justify-center gap-2 group">
-                        <span>Join the Watchers Hive</span>
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full max-w-lg justify-center z-20 mb-12">
+                    <Link to="/watch-hive/signup" className="w-full sm:w-auto bg-[#ffb700] hover:bg-amber-400 text-stone-950 text-base font-black tracking-wide px-8 py-4 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 group">
+                        <span>Enter the Watchers Hive</span>
                         <span className="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
                     </Link>
 
-                    {isInstalled ? (
-                        <div className="w-full sm:w-auto bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 text-[15px] font-extrabold px-6 py-4 rounded-2xl flex items-center justify-center gap-2">
-                            <span className="material-symbols-outlined text-[20px] text-emerald-600">check_circle</span>
-                            <span>App Installed</span>
-                        </div>
-                    ) : isInstallReady ? (
-                        <button 
-                            onClick={handleInstall}
-                            className="w-full sm:w-auto bg-white border border-[#ffb700]/30 text-[#855700] text-[15px] font-black px-6 py-4 rounded-2xl hover:bg-[#FFF9F0] hover:border-[#ffb700] transition-all flex items-center justify-center gap-2 shadow-sm"
-                        >
-                            <span className="material-symbols-outlined text-[20px]">download</span>
-                            <span>Install App</span>
-                        </button>
-                    ) : (
-                        <button 
-                            onClick={handleInstall}
-                            className="w-full sm:w-auto bg-white border border-[#ffb700]/30 text-[#855700] text-[15px] font-black px-6 py-4 rounded-2xl hover:bg-[#FFF9F0] hover:border-[#ffb700] transition-all flex items-center justify-center gap-2 shadow-sm"
-                        >
-                            <span className="material-symbols-outlined text-[20px]">devices</span>
-                            <span>Mobile & PWA Ready</span>
-                        </button>
-                    )}
+                    <a 
+                        href="#android-launch"
+                        className="w-full sm:w-auto bg-white border border-amber-300 hover:border-amber-500 text-amber-900 text-base font-extrabold px-6 py-4 rounded-2xl hover:bg-amber-50 transition-all flex items-center justify-center gap-2 shadow-xs"
+                    >
+                        <span className="material-symbols-outlined text-[20px] text-emerald-600">android</span>
+                        <span>Android App Launch</span>
+                    </a>
                 </div>
 
-                {showInstallHint && !isInstallReady && !isInstalled && (
-                    <div className="p-5 bg-white border border-[#ffb700]/30 rounded-3xl shadow-xl max-w-md w-full mb-8 z-30 flex flex-col gap-3 text-left">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h4 className="text-[11px] font-black text-[#855700] uppercase tracking-widest">Install App on Your Device</h4>
-                                <p className="text-xs text-[#2D2926]/60 font-semibold mt-0.5">Instant offline access directly from your home screen or desktop.</p>
-                            </div>
-                            <button onClick={() => setShowInstallHint(false)} className="text-slate-400 hover:text-[#ffb700] text-sm font-bold">✕</button>
-                        </div>
-                        <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 text-xs">
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-wider text-[#b07d00] w-24 shrink-0">iOS Safari</span>
-                                <span className="text-[#2D2926]/75 font-medium">Tap <strong>Share</strong> → <strong>Add to Home Screen</strong></span>
-                            </div>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-wider text-[#b07d00] w-24 shrink-0">Android / Chrome</span>
-                                <span className="text-[#2D2926]/75 font-medium">Tap <strong>Menu (⋮)</strong> → <strong>Install app</strong></span>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                {/* Android App Launch Announcement Banner (Joyful & Professional) */}
+                <div id="android-launch" className={`w-full max-w-5xl bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 text-white rounded-3xl p-6 sm:p-8 border border-amber-400/30 shadow-xl mb-16 text-left relative overflow-hidden lp-reveal ${androidReveal.visible ? 'is-visible' : ''}`} ref={androidReveal.ref}>
+                    <div className="absolute -right-20 -top-20 w-64 h-64 bg-[#ffb700]/15 rounded-full blur-3xl pointer-events-none"></div>
 
-                {/* ── Interactive Hero Sandbox: Suggestion Experience & Impact Card ── */}
-                <div className="w-full max-w-5xl bg-white rounded-[36px] p-6 sm:p-8 border border-[#ffb700]/25 shadow-[0_20px_50px_rgba(255,183,0,0.12)] text-left relative z-20 overflow-hidden">
-                    {/* Top Tab Bar: Demonstrating the 3 Friends */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
-                        <div>
-                            <span className="text-[10px] font-black text-[#855700] uppercase tracking-widest bg-[#ffb700]/15 px-3 py-1 rounded-full inline-block mb-1.5">Interactive Demo</span>
-                            <h3 className="text-xl sm:text-2xl font-black text-[#2D2926] tracking-tight">
-                                A Genuine Movie Suggestion From Your Hive
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+                        <div className="space-y-2">
+                            <div className="flex flex-wrap items-center gap-2.5">
+                                <span className="bg-emerald-500 text-stone-950 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                                    <span>Play Store Internal Testing</span>
+                                </span>
+                                <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-bold px-2.5 py-1 rounded-md">
+                                    Flutter v1.0.33+34 Ready
+                                </span>
+                            </div>
+                            <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                                WatchersHive for Android — Launching Soon!
                             </h3>
-                            <p className="text-xs sm:text-sm text-[#2D2926]/60 font-semibold mt-0.5">
-                                Select a friend in your circle to see how heartfelt suggestions and resonance impact work:
+                            <p className="text-sm text-stone-300 font-medium max-w-2xl leading-relaxed">
+                                Experience buttery 60/120 FPS native performance, offline theater mode with local SQLite queuing (rate & log even with zero cellular bars in the cinema), and seamless background synchronization.
                             </p>
                         </div>
 
-                        {/* Friend Switcher */}
-                        <div className="flex bg-[#FFF9F0] p-1.5 rounded-2xl border border-[#ffb700]/20 w-full sm:w-auto">
-                            {(['maya', 'karan', 'elena'] as const).map(friendKey => (
-                                <button
-                                    key={friendKey}
-                                    onClick={() => setSelectedFriend(friendKey)}
-                                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 capitalize ${selectedFriend === friendKey ? 'bg-white text-[#2D2926] shadow-sm border border-slate-100' : 'text-[#2D2926]/50 hover:text-[#2D2926]'}`}
-                                >
-                                    <span>{friendProfiles[friendKey].avatar}</span>
-                                    <span>{friendProfiles[friendKey].name.split(' ')[0]}</span>
-                                </button>
-                            ))}
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full lg:w-auto">
+                            <button
+                                onClick={handleInstall}
+                                className="bg-[#ffb700] hover:bg-amber-300 text-stone-950 font-black text-xs px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">download</span>
+                                <span>{isInstalled ? 'PWA Ready on Device' : 'Install PWA Today'}</span>
+                            </button>
+                            <Link
+                                to="/watch-hive/support"
+                                className="bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs px-5 py-3 rounded-xl border border-white/20 transition-all text-center"
+                            >
+                                Request Tester Access
+                            </Link>
                         </div>
                     </div>
 
-                    {/* Interactive Body */}
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6 items-center">
-                        
-                        {/* Poster & Film Preview (4 cols) */}
-                        <div className="lg:col-span-4 flex flex-col items-center sm:items-start">
-                            <div className="relative w-44 sm:w-48 aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-[#FFF9F0] group">
-                                <img 
-                                    src={`${TMDB_IMG}/w342${activeFriendData.poster}`} 
-                                    alt={activeFriendData.movieTitle} 
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-                                />
-                                <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg text-white font-black text-[11px] flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[13px] text-[#ffb700]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                                    <span>{activeFriendData.year}</span>
-                                </div>
-                            </div>
-                            <h4 className="font-black text-lg text-[#2D2926] mt-3">{activeFriendData.movieTitle}</h4>
-                            <span className="text-xs text-[#2D2926]/50 font-bold">Suggested to cheer you up</span>
+                    {showInstallHint && !isInstallReady && !isInstalled && (
+                        <div className="mt-4 pt-4 border-t border-white/10 bg-white/5 rounded-2xl p-4 text-xs text-stone-200">
+                            <span className="font-bold text-amber-300 block mb-1">How to Install on Mobile & Desktop:</span>
+                            <p className="text-stone-300">iOS Safari: Tap <strong>Share</strong> → <strong>Add to Home Screen</strong>. Android / Chrome: Tap <strong>Menu (⋮)</strong> → <strong>Install app</strong>.</p>
                         </div>
-
-                        {/* Suggestion Card & Note Content (8 cols) */}
-                        <div className="lg:col-span-8 flex flex-col justify-between h-full gap-5">
-                            {/* Friend Header */}
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/30 flex items-center justify-center text-2xl shadow-inner">
-                                        {activeFriendData.avatar}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <h5 className="font-extrabold text-[15px] text-[#2D2926]">{activeFriendData.name}</h5>
-                                            <span className="text-xs text-[#2D2926]/40 font-semibold">{activeFriendData.handle}</span>
-                                        </div>
-                                        <p className="text-xs text-[#b07d00] font-bold">{activeFriendData.role}</p>
-                                    </div>
-                                </div>
-
-                                <div className={`px-3 py-1 rounded-full text-[11px] font-black border ${activeFriendData.badgeColor}`}>
-                                    {activeFriendData.tag}
-                                </div>
-                            </div>
-
-                            {/* Personal Note Box */}
-                            <div className="bg-[#FFF9F0] border border-[#ffb700]/20 rounded-2xl p-5 relative">
-                                <span className="material-symbols-outlined text-[#ffb700] text-[20px] absolute -top-2.5 left-4 bg-white px-1 rounded-md border border-[#ffb700]/20">chat_bubble</span>
-                                <p className="text-sm font-semibold text-[#2D2926]/85 italic leading-relaxed pt-1">
-                                    "{activeFriendData.personalNote}"
-                                </p>
-                            </div>
-
-                            {/* Suggester Impact Insight Metrics */}
-                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 grid grid-cols-3 gap-3 text-center">
-                                <div>
-                                    <span className="text-[10px] font-bold text-[#2D2926]/40 uppercase tracking-wider block">Resonance Rate</span>
-                                    <span className="text-lg font-black text-emerald-600">{activeFriendData.resonanceScore}%</span>
-                                </div>
-                                <div>
-                                    <span className="text-[10px] font-bold text-[#2D2926]/40 uppercase tracking-wider block">Watched & Loved</span>
-                                    <span className="text-lg font-black text-[#2D2926]">{activeFriendData.suggestionsWatched} / {activeFriendData.suggestionsSent}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[10px] font-bold text-[#2D2926]/40 uppercase tracking-wider block">Moved to Stacks</span>
-                                    <span className="text-lg font-black text-[#b07d00]">#{activeFriendData.topStacked} Films</span>
-                                </div>
-                            </div>
-
-                            {/* Interactive Micro-Action Buttons */}
-                            <div className="flex flex-wrap items-center gap-3 pt-2">
-                                <button 
-                                    onClick={() => {
-                                        setAcceptedSuggestions(prev => ({
-                                            ...prev,
-                                            [selectedFriend]: !prev[selectedFriend]
-                                        }));
-                                    }}
-                                    className={`px-5 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${acceptedSuggestions[selectedFriend] ? 'bg-emerald-600 text-white shadow-md' : 'bg-[#ffb700] text-black hover:bg-amber-400'}`}
-                                >
-                                    <span className="material-symbols-outlined text-[16px]">
-                                        {acceptedSuggestions[selectedFriend] ? 'done' : 'bookmark_add'}
-                                    </span>
-                                    <span>{acceptedSuggestions[selectedFriend] ? 'Accepted to Watchlist! ✨' : 'Accept Suggestion'}</span>
-                                </button>
-
-                                <button 
-                                    onClick={() => {
-                                        setFriendCheers(prev => ({
-                                            ...prev,
-                                            [selectedFriend]: prev[selectedFriend] + 1
-                                        }));
-                                        setJustCheered(selectedFriend);
-                                        setTimeout(() => setJustCheered(null), 1000);
-                                    }}
-                                    className="px-4 py-2.5 rounded-xl text-xs font-black bg-white border border-[#ffb700]/30 text-[#855700] hover:bg-[#FFF9F0] transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
-                                >
-                                    <span className={`material-symbols-outlined text-[16px] text-[#ffb700] ${justCheered === selectedFriend ? 'cheer-pop' : ''}`} style={{ fontVariationSettings: "'FILL' 1" }}>
-                                        favorite
-                                    </span>
-                                    <span>Send Cheer ({friendCheers[selectedFriend]})</span>
-                                </button>
-
-                                {justCheered === selectedFriend && (
-                                    <span className="text-xs font-black text-amber-700 animate-pulse">
-                                        🐝 Cheered {activeFriendData.name.split(' ')[0]}!
-                                    </span>
-                                )}
-                            </div>
-
-                        </div>
-
-                    </div>
+                    )}
                 </div>
 
-                {/* Floating posters backdrop decor */}
-                <div className="absolute top-[35%] left-0 right-0 h-[65%] w-full pointer-events-none -z-10 opacity-20 sm:opacity-40 overflow-hidden">
-                    <img src={`${TMDB_IMG}/w342${SHOWCASE_POSTERS[1].path}`} className="absolute top-[8%] left-[3%] w-28 md:w-40 rounded-2xl shadow-xl -rotate-6 anim-float border-2 border-white" alt=""/>
-                    <img src={`${TMDB_IMG}/w342${SHOWCASE_POSTERS[3].path}`} className="absolute top-[28%] right-[4%] w-28 md:w-36 rounded-2xl shadow-xl rotate-6 anim-float-delayed border-2 border-white" alt=""/>
-                    <img src={`${TMDB_IMG}/w342${SHOWCASE_POSTERS[5].path}`} className="absolute bottom-[18%] left-[7%] w-24 md:w-32 rounded-2xl shadow-xl -rotate-3 anim-float border-2 border-white" alt=""/>
-                </div>
-            </section>
-
-            {/* ── Marquee Poster Reel ─────────────────────────────── */}
-            <section className={`py-8 bg-white border-y border-[#ffb700]/15 overflow-hidden lp-reveal ${posterReveal.visible ? 'is-visible' : ''}`} ref={posterReveal.ref}>
-                <div className="flex flex-col gap-4">
+                {/* ── Marquee Poster Reel ─────────────────────────────── */}
+                <div className="w-full overflow-hidden py-4 border-y border-amber-200/80 bg-white/70 backdrop-blur-xs mb-16 space-y-3">
                     <div className="flex w-[200%] marquee-left">
                         {[...POSTER_ROW_1, ...POSTER_ROW_1].map((p, i) => (
-                            <div key={i} className="w-[130px] sm:w-[160px] md:w-[180px] shrink-0 px-2">
-                                <div className="aspect-[2/3] w-full bg-[#FFF9F0] rounded-xl overflow-hidden shadow-sm border border-[#ffb700]/15 relative group">
+                            <div key={i} className="w-[120px] sm:w-[150px] md:w-[170px] shrink-0 px-2">
+                                <div className="aspect-[2/3] w-full bg-stone-900 rounded-xl overflow-hidden shadow-xs border border-amber-300/40 relative group">
                                     <img src={`${TMDB_IMG}/w342${p.path}`} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                                        <span className="text-white text-xs font-black leading-tight">{p.title}</span>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5">
+                                        <span className="text-white text-[11px] font-black leading-tight">{p.title}</span>
                                     </div>
                                 </div>
                             </div>
@@ -590,263 +482,386 @@ export const LandingPage: React.FC = () => {
                     </div>
                     <div className="flex w-[200%] marquee-right">
                         {[...POSTER_ROW_2, ...POSTER_ROW_2].map((p, i) => (
-                            <div key={i} className="w-[130px] sm:w-[160px] md:w-[180px] shrink-0 px-2">
-                                <div className="aspect-[2/3] w-full bg-[#FFF9F0] rounded-xl overflow-hidden shadow-sm border border-[#ffb700]/15 relative group">
+                            <div key={i} className="w-[120px] sm:w-[150px] md:w-[170px] shrink-0 px-2">
+                                <div className="aspect-[2/3] w-full bg-stone-900 rounded-xl overflow-hidden shadow-xs border border-amber-300/40 relative group">
                                     <img src={`${TMDB_IMG}/w342${p.path}`} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                                        <span className="text-white text-xs font-black leading-tight">{p.title}</span>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5">
+                                        <span className="text-white text-[11px] font-black leading-tight">{p.title}</span>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
                 </div>
+
             </section>
 
-            {/* ── Section 1: The Community of Watchers & The Suggestion Experience ── */}
-            <section id="community" className={`py-24 px-6 max-w-7xl mx-auto lp-reveal ${communityReveal.visible ? 'is-visible' : ''}`} ref={communityReveal.ref}>
+            {/* ── Section 1: Direct Suggestions & Suggester Impact (Accurate SuggestionCard Replica) ── */}
+            <section id="suggestions" className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto lp-reveal ${suggestionSectionReveal.visible ? 'is-visible' : ''}`} ref={suggestionSectionReveal.ref}>
                 <div className="text-center mb-16 max-w-3xl mx-auto">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-[#855700] bg-[#ffb700]/15 px-4 py-1.5 rounded-full inline-block mb-3">
-                        Human Connection Over Algorithms
+                    <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
+                        Feature 1: Direct Human Suggestions
                     </span>
-                    <h2 className="text-3xl sm:text-5xl font-black text-[#2D2926] tracking-tight mb-4">
-                        A Real Community of Watchers.
+                    <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
+                        Movie Suggestions That Cheer You Up.
                     </h2>
-                    <p className="text-base sm:text-lg text-[#2D2926]/70 font-semibold leading-relaxed">
-                        Algorithms optimize for watch time and advertisement clicks. Friends optimize for your soul. In WatchersHive, you share cinema to inspire, comfort, and cheer each other up.
+                    <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
+                        In WatchersHive, you don't scroll aimless recommendation algorithms. Friends handpick titles with thoughtful personal notes. And you can see which friends in your circle provide the suggestions that truly impact you.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-                    {/* Card 1 */}
-                    <div className="bg-white p-8 rounded-3xl border border-[#ffb700]/15 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                {/* Interactive Showcase: Exact Web App SuggestionCard Widget */}
+                <div className="bg-white rounded-[36px] p-6 sm:p-10 border border-amber-200/90 shadow-[0_12px_40px_rgba(255,183,0,0.08)] text-left">
+                    
+                    {/* Top Switcher for Friends */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-stone-200 gap-4">
                         <div>
-                            <div className="w-12 h-12 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/25 flex items-center justify-center mb-6 text-[#ffb700]">
-                                <span className="material-symbols-outlined text-[26px]">favorite</span>
-                            </div>
-                            <h3 className="text-xl font-bold text-[#2D2926] mb-3">Cheer Up Suggestions</h3>
-                            <p className="text-sm text-[#2D2926]/70 font-semibold leading-relaxed">
-                                Had an exhausting day? Your hive friends can handpick a heartwarming classic or a thrilling distraction, attached with a warm note written just for you.
+                            <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full inline-block mb-1">
+                                Live Web App Widget Demo
+                            </span>
+                            <h3 className="text-xl sm:text-2xl font-black text-stone-950">
+                                Received Suggestion Card (As Rendered in Hive)
+                            </h3>
+                            <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
+                                Select a friend to view their recommendation note and suggester impact:
                             </p>
                         </div>
-                        <div className="mt-6 pt-4 border-t border-slate-100 text-xs font-extrabold text-[#b07d00] flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-[16px]">celebration</span>
-                            <span>Direct personal notes attached to every title</span>
-                        </div>
-                    </div>
 
-                    {/* Card 2 */}
-                    <div className="bg-white p-8 rounded-3xl border border-[#ffb700]/15 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                        <div>
-                            <div className="w-12 h-12 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/25 flex items-center justify-center mb-6 text-[#ffb700]">
-                                <span className="material-symbols-outlined text-[26px]">insights</span>
-                            </div>
-                            <h3 className="text-xl font-bold text-[#2D2926] mb-3">Suggester Impact Insights</h3>
-                            <p className="text-sm text-[#2D2926]/70 font-semibold leading-relaxed">
-                                Discover who in your circle has the golden taste. WatchersHive tracks whose recommendations you actually end up watching, loving, and preserving in your top stacks.
-                            </p>
-                        </div>
-                        <div className="mt-6 pt-4 border-t border-slate-100 text-xs font-extrabold text-[#b07d00] flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-[16px]">verified</span>
-                            <span>Know whose taste never misses</span>
-                        </div>
-                    </div>
-
-                    {/* Card 3 */}
-                    <div className="bg-white p-8 rounded-3xl border border-[#ffb700]/15 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                        <div>
-                            <div className="w-12 h-12 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/25 flex items-center justify-center mb-6 text-[#ffb700]">
-                                <span className="material-symbols-outlined text-[26px]">group</span>
-                            </div>
-                            <h3 className="text-xl font-bold text-[#2D2926] mb-3">Zero Commercial Noise</h3>
-                            <p className="text-sm text-[#2D2926]/70 font-semibold leading-relaxed">
-                                No sponsored movie studios forcing ads onto your feed. No bot reviews inflating scores. Just genuine watchers discussing what moved them.
-                            </p>
-                        </div>
-                        <div className="mt-6 pt-4 border-t border-slate-100 text-xs font-extrabold text-[#b07d00] flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-[16px]">lock_open</span>
-                            <span>Clean, honest, community-first space</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ── Community Swarm Cheer Simulator ── */}
-                <div id="suggestions" className={`mt-14 bg-white rounded-3xl p-6 sm:p-8 border border-[#ffb700]/20 shadow-sm max-w-4xl mx-auto text-left lp-reveal ${suggestionReveal.visible ? 'is-visible' : ''}`} ref={suggestionReveal.ref}>
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[#ffb700]">hive</span>
-                            <h4 className="font-extrabold text-base text-[#2D2926]">Live Community Cheers</h4>
-                        </div>
-                        <span className="text-[10px] font-black text-[#855700] bg-[#ffb700]/15 px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            Micro-Interaction Feed
-                        </span>
-                    </div>
-
-                    <div className="space-y-3.5">
-                        {feedItems.map(item => (
-                            <div key={item.id} className="bg-[#FFF9F0]/80 border border-[#ffb700]/15 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-xs font-black text-[#2D2926]">@{item.from}</span>
-                                        <span className="text-[11px] font-bold text-[#b07d00] bg-[#ffb700]/15 px-2 py-0.5 rounded-md">{item.action}</span>
-                                        <span className="text-xs font-black text-[#2D2926] underline decoration-[#ffb700]">{item.movie}</span>
-                                    </div>
-                                    <p className="text-xs text-[#2D2926]/70 font-semibold italic">"{item.note}"</p>
-                                </div>
+                        <div className="flex bg-[#FFF9F0] p-1.5 rounded-2xl border border-amber-300/80 w-full sm:w-auto">
+                            {(['maya', 'karan', 'elena'] as const).map(friendKey => (
                                 <button
-                                    onClick={() => handleFeedCheer(item.id)}
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1 shrink-0 ${item.cheered ? 'bg-[#ffb700] text-black shadow-sm' : 'bg-white border border-[#ffb700]/25 text-[#855700] hover:bg-[#FFF9F0]'}`}
+                                    key={friendKey}
+                                    onClick={() => setSelectedFriend(friendKey)}
+                                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 capitalize ${selectedFriend === friendKey ? 'bg-white text-stone-900 shadow-sm border border-stone-200' : 'text-stone-600 hover:text-stone-900'}`}
                                 >
-                                    <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: item.cheered ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
-                                    <span>{item.cheers} Cheers</span>
+                                    <img src={friendProfiles[friendKey].avatarUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
+                                    <span>{friendProfiles[friendKey].name.split(' ')[0]}</span>
                                 </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Accurate SuggestionCard Grid Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-start">
+                        
+                        {/* The Actual SuggestionCard (5 cols) */}
+                        <div className="lg:col-span-5 flex justify-center">
+                            <div className="w-full max-w-sm bg-white rounded-3xl border border-amber-300/80 overflow-hidden shadow-md flex flex-col">
+                                {/* Poster Wrapper */}
+                                <div className="aspect-[2/3] relative overflow-hidden bg-stone-900">
+                                    <img 
+                                        src={`${TMDB_IMG}/w342${activeFriend.poster}`} 
+                                        alt={activeFriend.movieTitle} 
+                                        className="w-full h-full object-cover" 
+                                    />
+                                    {/* Real Yellow Badge */}
+                                    <div className="absolute top-3 left-3 z-10">
+                                        <span className="bg-[#ffb700] text-stone-950 text-[10px] font-black px-2.5 py-1 rounded-md shadow-sm uppercase tracking-wider">
+                                            Suggested
+                                        </span>
+                                    </div>
+                                    <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-md text-white text-[11px] font-black px-2.5 py-1 rounded-md flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-amber-400 text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                        <span>{activeFriend.rating}</span>
+                                    </div>
+                                </div>
+
+                                {/* Content Details */}
+                                <div className="p-5 flex flex-col flex-1 gap-2 text-left">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-base font-black text-stone-900 truncate">
+                                            {activeFriend.movieTitle}
+                                        </h4>
+                                        <span className="text-xs font-bold text-stone-500">({activeFriend.year})</span>
+                                    </div>
+                                    
+                                    <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">
+                                        {activeFriend.overview}
+                                    </p>
+
+                                    {/* Recommendation Comment Box (Exact Web App Style) */}
+                                    <div className="mt-2 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-stone-900 text-xs leading-relaxed shadow-xs">
+                                        <div className="flex items-start gap-2">
+                                            <span className="material-symbols-outlined text-amber-600 text-base shrink-0 mt-0.5">format_quote</span>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="italic text-stone-800 line-clamp-3 font-medium">
+                                                    "{activeFriend.personalNote}"
+                                                </p>
+                                                <div className="flex items-center justify-between gap-1 mt-2">
+                                                    <span className="text-[11px] font-black text-amber-900">
+                                                        — @{activeFriend.username}
+                                                    </span>
+                                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                                        To Cheer You Up
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom Footer: From your Hive */}
+                                    <div className="mt-4 pt-3 border-t border-stone-200 flex items-center justify-between">
+                                        <div>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-stone-500 block">
+                                                From Your Hive
+                                            </span>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <img src={activeFriend.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover ring-2 ring-amber-300" />
+                                                <span className="text-xs font-black text-stone-800">@{activeFriend.username}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-1.5">
+                                            <button
+                                                onClick={() => {
+                                                    const nextStatus = suggestionStatus[selectedFriend] === 'watchlist' ? 'idle' : 'watchlist';
+                                                    setSuggestionStatus(prev => ({ ...prev, [selectedFriend]: nextStatus }));
+                                                }}
+                                                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1 ${suggestionStatus[selectedFriend] === 'watchlist' ? 'bg-emerald-600 text-white' : 'bg-stone-100 text-stone-800 hover:bg-stone-200'}`}
+                                            >
+                                                <span className="material-symbols-outlined text-[15px]">
+                                                    {suggestionStatus[selectedFriend] === 'watchlist' ? 'done' : 'bookmark_add'}
+                                                </span>
+                                                <span>{suggestionStatus[selectedFriend] === 'watchlist' ? 'In Watchlist' : 'Watchlist'}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
-                        ))}
+                        </div>
+
+                        {/* Suggester Impact Report Card & Cheer Actions (7 cols) */}
+                        <div className="lg:col-span-7 flex flex-col justify-between h-full space-y-6">
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <img src={activeFriend.avatarUrl} alt="" className="w-12 h-12 rounded-2xl object-cover ring-2 ring-amber-400" />
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="font-black text-lg text-stone-900">{activeFriend.name}</h4>
+                                            <span className="text-xs font-bold text-stone-500">@{activeFriend.username}</span>
+                                        </div>
+                                        <p className="text-xs font-extrabold text-amber-800">{activeFriend.role}</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-amber-50/70 border border-amber-200 rounded-3xl p-6 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs font-black text-amber-950 uppercase tracking-wider">
+                                            Suggester Impact Insights
+                                        </span>
+                                        <span className="text-xs font-black bg-white px-3 py-1 rounded-full border border-amber-300 text-amber-800">
+                                            {activeFriend.tag}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-sm text-stone-700 font-medium leading-relaxed">
+                                        WatchersHive automatically calculates how often {activeFriend.name.split(' ')[0]}'s suggestions resonate with your cinematic journey. No guessing—you know who gives the recommendations that never miss.
+                                    </p>
+
+                                    {/* 3 Metrics */}
+                                    <div className="grid grid-cols-3 gap-3 pt-2 text-center">
+                                        <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-xs">
+                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">Resonance Rate</span>
+                                            <span className="text-2xl font-black text-emerald-600">{activeFriend.resonanceScore}%</span>
+                                        </div>
+                                        <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-xs">
+                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">Loved & Watched</span>
+                                            <span className="text-2xl font-black text-stone-900">{activeFriend.suggestionsWatched} / {activeFriend.suggestionsSent}</span>
+                                        </div>
+                                        <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-xs">
+                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">Top Stacked</span>
+                                            <span className="text-2xl font-black text-amber-700">#{activeFriend.topStacked} Films</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Cheer Up Button & Interactive Response */}
+                            <div className="p-5 bg-white rounded-2xl border border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div>
+                                    <span className="text-xs font-black text-stone-900 block">Cheer back your suggester</span>
+                                    <span className="text-xs text-stone-600 font-medium">Send a buzz of appreciation for this thoughtful pick.</span>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setFriendCheers(prev => ({ ...prev, [selectedFriend]: prev[selectedFriend] + 1 }));
+                                            setCheerNotice(`🐝 Cheered ${activeFriend.name.split(' ')[0]} with a Hive Buzz!`);
+                                            setTimeout(() => setCheerNotice(null), 2000);
+                                        }}
+                                        className="bg-[#ffb700] hover:bg-amber-400 text-stone-950 font-black text-xs px-5 py-3 rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                                        <span>Send Cheer ({friendCheers[selectedFriend]})</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {cheerNotice && (
+                                <div className="p-3 bg-amber-100 border border-amber-300 rounded-xl text-xs font-black text-amber-900 text-center animate-pulse">
+                                    {cheerNotice}
+                                </div>
+                            )}
+
+                        </div>
+
                     </div>
                 </div>
             </section>
 
-            {/* ── Section 2: Cinematic Stacks: The Movie Experience Report Card ── */}
-            <section id="stacks" className={`py-24 px-6 bg-white border-y border-[#ffb700]/15 relative overflow-hidden lp-reveal ${stackReveal.visible ? 'is-visible' : ''}`} ref={stackReveal.ref}>
+            {/* ── Section 2: Cinematic Stacks (Movie Experience Report Cards) ── */}
+            <section id="stacks" className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 bg-white border-y border-amber-200/80 lp-reveal ${stacksSectionReveal.visible ? 'is-visible' : ''}`} ref={stacksSectionReveal.ref}>
                 <div className="max-w-7xl mx-auto">
                     
                     <div className="text-center mb-16 max-w-3xl mx-auto">
-                        <span className="text-[11px] font-black uppercase tracking-widest text-[#855700] bg-[#FFF9F0] px-4 py-1.5 rounded-full inline-block border border-[#ffb700]/30 mb-3">
-                            Beyond Sterile Numbers
+                        <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
+                            Feature 2: Cinematic Stacks
                         </span>
-                        <h2 className="text-3xl sm:text-5xl font-black text-[#2D2926] tracking-tight mb-4">
-                            Cinematic Stacks as Your Experience Report Card.
+                        <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
+                            Your Personal Movie Experience Report Card.
                         </h2>
-                        <p className="text-base sm:text-lg text-[#2D2926]/70 font-semibold leading-relaxed">
-                            We don't obsess over generic star ratings or whether a movie is an 8.1 or an 8.2. Instead, your <strong className="text-[#2D2926]">Cinematic Stack</strong> is your emotional report card. The order you choose to preserve defines who you are, what you treasure, and the monumental impact those films made on your life.
+                        <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
+                            We don't obsess over sterile decimal ratings. A Cinematic Stack is your emotional footprint: the order of movies you preserve tells the world who you are, what you treasure, and the monumental impact cinema had on your journey.
                         </p>
                     </div>
 
-                    {/* Interactive Stack Re-orderer Sandbox */}
-                    <div className="bg-[#FFF9F0] border border-[#ffb700]/25 rounded-[36px] p-6 sm:p-10 shadow-lg text-left">
-                        {/* Theme Switcher */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-[#ffb700]/20 gap-4">
+                    {/* Stacks Interactive Sandbox */}
+                    <div className="bg-[#FFF9F0] rounded-[36px] p-6 sm:p-10 border border-amber-300/80 shadow-lg text-left">
+                        
+                        {/* Stack Header & Switcher */}
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-amber-300/60 gap-4">
                             <div>
-                                <span className="text-[10px] font-black text-[#855700] uppercase tracking-wider bg-white px-3 py-1 rounded-full border border-[#ffb700]/25 inline-block mb-1">
-                                    Try Reordering Movies Below (▲ / ▼)
+                                <span className="text-[10px] font-black text-amber-900 uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-amber-300 inline-block mb-1">
+                                    Reorder Live (Click ▲ / ▼)
                                 </span>
-                                <h3 className="text-xl sm:text-2xl font-black text-[#2D2926]">
-                                    Report Card Stack: {activeStackTheme === 'worldview' ? '"Films That Changed My Worldview"' : '"Sanctuary for a Tired Soul"'}
+                                <h3 className="text-xl sm:text-2xl font-black text-stone-950">
+                                    Stack: {activeStackTheme === 'worldview' ? '"Films That Changed My Worldview"' : '"Sanctuary for a Tired Soul"'}
                                 </h3>
                             </div>
 
-                            <div className="flex bg-white p-1 rounded-2xl border border-[#ffb700]/25">
+                            <div className="flex bg-white p-1 rounded-2xl border border-amber-300">
                                 <button
                                     onClick={() => setActiveStackTheme('worldview')}
-                                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${activeStackTheme === 'worldview' ? 'bg-[#ffb700] text-black shadow-sm' : 'text-[#2D2926]/50 hover:text-[#2D2926]'}`}
+                                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${activeStackTheme === 'worldview' ? 'bg-[#ffb700] text-stone-950 shadow-xs' : 'text-stone-600 hover:text-stone-900'}`}
                                 >
                                     Worldview Stack
                                 </button>
                                 <button
                                     onClick={() => setActiveStackTheme('comfort')}
-                                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${activeStackTheme === 'comfort' ? 'bg-[#ffb700] text-black shadow-sm' : 'text-[#2D2926]/50 hover:text-[#2D2926]'}`}
+                                    className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${activeStackTheme === 'comfort' ? 'bg-[#ffb700] text-stone-950 shadow-xs' : 'text-stone-600 hover:text-stone-900'}`}
                                 >
                                     Sanctuary Stack
                                 </button>
                             </div>
                         </div>
 
-                        {/* Interactive Body: Stacks on left, Dynamic Report Card Meaning on right */}
+                        {/* Stack Items & Live Report Card Explanation */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8">
                             
-                            {/* Stack Items (7 cols) */}
-                            <div className="lg:col-span-7 space-y-4">
+                            {/* Ranked Items (7 cols) */}
+                            <div className="lg:col-span-7 space-y-3.5">
                                 {currentStack.map((movie, index) => (
                                     <div 
                                         key={movie.id}
-                                        className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all shadow-sm ${index === 0 ? 'border-[#ffb700] ring-2 ring-[#ffb700]/20' : 'border-slate-100'}`}
+                                        className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all shadow-xs ${index === 0 ? 'border-amber-400 ring-2 ring-amber-300/40' : 'border-stone-200'}`}
                                     >
-                                        <div className="flex items-start sm:items-center justify-between gap-4">
-                                            <div className="flex items-center gap-3.5">
-                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${index === 0 ? 'bg-[#ffb700] text-black shadow-md' : 'bg-slate-100 text-[#2D2926]/60'}`}>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                {/* Stylized Rank Badge (#1, #2, #3) */}
+                                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm shrink-0 border ${index === 0 ? 'bg-[#ffb700] text-stone-950 border-amber-400 shadow-xs' : 'bg-stone-100 text-stone-700 border-stone-200'}`}>
                                                     #{index + 1}
                                                 </div>
-                                                <div className="w-12 aspect-[2/3] rounded-lg overflow-hidden shrink-0 shadow-sm border border-slate-200">
-                                                    <img src={`${TMDB_IMG}/w92${movie.path}`} alt={movie.title} className="w-full h-full object-cover" />
+
+                                                {/* 64x96 Poster wrap */}
+                                                <div className="w-12 h-18 rounded-lg overflow-hidden shrink-0 shadow-xs bg-stone-900 border border-stone-200">
+                                                    <img src={`${TMDB_IMG}/w92${movie.path}`} alt="" className="w-full h-full object-cover" />
                                                 </div>
-                                                <div>
+
+                                                <div className="min-w-0">
                                                     <div className="flex items-center gap-2">
-                                                        <h4 className="font-extrabold text-sm sm:text-base text-[#2D2926]">{movie.title}</h4>
-                                                        <span className="text-xs text-[#2D2926]/40 font-bold">({movie.year})</span>
+                                                        <h4 className="font-black text-sm sm:text-base text-stone-950 truncate">{movie.title}</h4>
+                                                        <span className="text-xs font-bold text-stone-500 shrink-0">({movie.year})</span>
                                                     </div>
-                                                    <span className="text-[11px] font-black text-[#855700] bg-[#ffb700]/15 px-2 py-0.5 rounded-md inline-block mt-0.5">
-                                                        {movie.impactTier}
-                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-[10px] font-black text-amber-900 bg-amber-100 px-2 py-0.5 rounded">
+                                                            ★ {movie.rating}
+                                                        </span>
+                                                        <span className="text-[10px] font-bold text-stone-500 uppercase">{movie.genre}</span>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            {/* Move buttons */}
+                                            {/* Reorder Buttons */}
                                             <div className="flex flex-col gap-1 shrink-0">
                                                 <button
                                                     onClick={() => moveStackItem(index, 'up')}
                                                     disabled={index === 0}
-                                                    aria-label="Move movie up"
-                                                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black transition-all ${index === 0 ? 'text-slate-200 border border-slate-100 cursor-not-allowed' : 'bg-[#FFF9F0] text-[#855700] border border-[#ffb700]/30 hover:bg-[#ffb700] hover:text-black'}`}
+                                                    aria-label="Move item up"
+                                                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black border transition-all ${index === 0 ? 'text-stone-300 border-stone-200 bg-stone-50 cursor-not-allowed' : 'bg-white text-stone-900 border-amber-300 hover:bg-[#ffb700]'}`}
                                                 >
                                                     ▲
                                                 </button>
                                                 <button
                                                     onClick={() => moveStackItem(index, 'down')}
                                                     disabled={index === currentStack.length - 1}
-                                                    aria-label="Move movie down"
-                                                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black transition-all ${index === currentStack.length - 1 ? 'text-slate-200 border border-slate-100 cursor-not-allowed' : 'bg-[#FFF9F0] text-[#855700] border border-[#ffb700]/30 hover:bg-[#ffb700] hover:text-black'}`}
+                                                    aria-label="Move item down"
+                                                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black border transition-all ${index === currentStack.length - 1 ? 'text-stone-300 border-stone-200 bg-stone-50 cursor-not-allowed' : 'bg-white text-stone-900 border-amber-300 hover:bg-[#ffb700]'}`}
                                                 >
                                                     ▼
                                                 </button>
                                             </div>
                                         </div>
 
-                                        <p className="text-xs text-[#2D2926]/75 font-semibold mt-3 pl-1 sm:pl-11 italic border-l-2 border-[#ffb700]/30 py-0.5">
-                                            "{movie.userReflection}"
+                                        <p className="text-xs text-stone-700 font-medium mt-3 pl-3 sm:pl-11 border-l-2 border-amber-400 italic">
+                                            "{movie.reflection}"
                                         </p>
                                     </div>
                                 ))}
                             </div>
 
-                            {/* Dynamic "Report Card Insight" (5 cols) */}
-                            <div className="lg:col-span-5 bg-white rounded-3xl p-6 border border-[#ffb700]/25 shadow-sm flex flex-col justify-between">
+                            {/* Report Card Meaning Analysis (5 cols) */}
+                            <div className="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-7 border border-amber-300/80 shadow-sm flex flex-col justify-between">
                                 <div>
                                     <div className="flex items-center gap-2 mb-3">
-                                        <span className="material-symbols-outlined text-[#ffb700]">school</span>
-                                        <h4 className="font-black text-sm text-[#855700] uppercase tracking-wider">Your Report Card Statement</h4>
+                                        <span className="material-symbols-outlined text-amber-600">badge</span>
+                                        <h4 className="font-black text-xs text-amber-900 uppercase tracking-widest">
+                                            Your Experience Report Card
+                                        </h4>
                                     </div>
 
-                                    <div className="p-4 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/20 mb-5">
-                                        <span className="text-[10px] font-black text-[#2D2926]/40 uppercase tracking-widest block mb-1">
-                                            Your #1 Film Definition
+                                    <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 mb-5">
+                                        <span className="text-[10px] font-black text-stone-500 uppercase tracking-widest block mb-1">
+                                            Crown Film In Your Stack
                                         </span>
-                                        <h5 className="font-black text-lg text-[#2D2926] mb-1">
-                                            {topRankedFilm.title} sits at your summit.
+                                        <h5 className="font-black text-lg text-stone-950 mb-1">
+                                            {topStackMovie.title} is at #1
                                         </h5>
-                                        <p className="text-xs text-[#2D2926]/70 font-semibold leading-relaxed">
-                                            Keeping <strong>{topRankedFilm.title}</strong> at the top signals that you prioritize <strong className="text-[#855700]">{topRankedFilm.emotionalTone}</strong>. Anyone who visits your profile immediately understands what touched you most deeply.
+                                        <p className="text-xs text-stone-700 font-medium leading-relaxed">
+                                            Prioritizing <strong>{topStackMovie.title}</strong> signals that your soul values <strong className="text-amber-900">{topStackMovie.emotionalTone}</strong>. Anyone who inspects your profile instantly knows what leaves an indelible mark on you.
                                         </p>
                                     </div>
 
                                     <div className="space-y-3">
-                                        <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-100">
-                                            <span className="font-bold text-[#2D2926]/50">Emotional Imprint Tier</span>
-                                            <span className="font-black text-emerald-700">{topRankedFilm.impactTier}</span>
+                                        <div className="flex justify-between items-center text-xs pb-2.5 border-b border-stone-200">
+                                            <span className="font-bold text-stone-600">Emotional Impact Tier</span>
+                                            <span className="font-black text-emerald-700">{topStackMovie.impactTier}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-xs pb-2 border-b border-slate-100">
-                                            <span className="font-bold text-[#2D2926]/50">Community Resonance</span>
-                                            <span className="font-black text-[#2D2926]">Shared by 1.2k Cinephiles</span>
+                                        <div className="flex justify-between items-center text-xs pb-2.5 border-b border-stone-200">
+                                            <span className="font-bold text-stone-600">Hive Alignment</span>
+                                            <span className="font-black text-stone-900">Matches 1.4k Cinephiles</span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs">
-                                            <span className="font-bold text-[#2D2926]/50">Stack Purpose</span>
-                                            <span className="font-black text-[#855700]">Personal Life Monument</span>
+                                            <span className="font-bold text-stone-600">Stack Purpose</span>
+                                            <span className="font-black text-amber-900">Personal Memory Monument</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-6 pt-5 border-t border-slate-100">
-                                    <p className="text-[11px] text-[#2D2926]/50 font-semibold leading-relaxed">
-                                        💡 In WatchersHive, your stacks act as your personal cinematic DNA. You don't have to defend why a movie is your favorite—the stack tells your story.
+                                <div className="mt-6 pt-5 border-t border-stone-200">
+                                    <p className="text-xs text-stone-600 font-medium leading-relaxed">
+                                        💡 Your stacks are not a competitive leaderboard. They are your personal report card of movies you treasure, and proof of how cinema touched your life.
                                     </p>
                                 </div>
                             </div>
@@ -857,261 +872,326 @@ export const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* ── Section 3: 100% Open Source Collaborative Ground ── */}
-            <section id="open-source" className={`py-24 px-6 max-w-7xl mx-auto lp-reveal ${openSourceReveal.visible ? 'is-visible' : ''}`} ref={openSourceReveal.ref}>
+            {/* ── Section 3: MindLens Psychological Analytics (Accurate MindLensView Replica) ── */}
+            <section id="mindlens" className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto lp-reveal ${mindLensSectionReveal.visible ? 'is-visible' : ''}`} ref={mindLensSectionReveal.ref}>
                 <div className="text-center mb-16 max-w-3xl mx-auto">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-[#855700] bg-[#ffb700]/15 px-4 py-1.5 rounded-full inline-block mb-3">
-                        Public Good • Free Forever
+                    <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
+                        Feature 3: Psychological Mirror
                     </span>
-                    <h2 className="text-3xl sm:text-5xl font-black text-[#2D2926] tracking-tight mb-4">
-                        A Truly Open Source Ground.
+                    <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
+                        MindLens™ Analytics & Soul Persona.
                     </h2>
-                    <p className="text-base sm:text-lg text-[#2D2926]/70 font-semibold leading-relaxed">
-                        WatchersHive is built completely in the open. A collaborative ground where developers, designers, and cinephiles unite to build the purest movie recommendation, suggestion, and tracking experience on Earth.
+                    <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
+                        WatchersHive goes beyond genre labels like "Action" or "Drama". MindLens maps the emotional density of what you watch into psychological traits, predicted mood states, and your cinephile Soul Persona.
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                    
-                    {/* Left: Open Source Philosophy (7 cols) */}
-                    <div className="lg:col-span-7 bg-white rounded-3xl p-8 sm:p-10 border border-[#ffb700]/20 shadow-sm flex flex-col justify-between text-left">
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/30 flex items-center justify-center text-black">
-                                    <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                                    </svg>
+                {/* MindLens Interactive Sandbox */}
+                <div className="bg-white rounded-[36px] p-6 sm:p-10 border border-amber-200/90 shadow-lg text-left">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-stone-200 gap-4">
+                        <div>
+                            <span className="text-[10px] font-black text-amber-900 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full inline-block mb-1">
+                                MindLens Engine Demo
+                            </span>
+                            <h3 className="text-xl sm:text-2xl font-black text-stone-950">
+                                Psychological State & Predicted Mood
+                            </h3>
+                        </div>
+
+                        {/* Mood Matrix Toggle */}
+                        <div className="flex bg-[#FFF9F0] p-1.5 rounded-2xl border border-amber-300 w-full sm:w-auto">
+                            {(['existential', 'comfort', 'dopamine'] as const).map(moodKey => (
+                                <button
+                                    key={moodKey}
+                                    onClick={() => setMindLensMood(moodKey)}
+                                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black capitalize transition-all ${mindLensMood === moodKey ? 'bg-white text-stone-950 shadow-xs border border-stone-200' : 'text-stone-600 hover:text-stone-900'}`}
+                                >
+                                    {moodKey === 'existential' ? 'Cosmic Void' : moodKey === 'comfort' ? 'Comfort Sanctuary' : 'Kinetic Epic'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Accurate MindLens Highlights Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-8 items-stretch">
+                        
+                        {/* Predicted Mood Card (8 cols) */}
+                        <div className="lg:col-span-8 bg-[#FFF9F0] rounded-3xl p-6 sm:p-8 border border-amber-300/80 flex flex-col justify-between">
+                            <div>
+                                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                                    <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-amber-300">
+                                        <span className="text-lg">{activeMoodData.icon}</span>
+                                        <span className="text-xs font-black uppercase tracking-wider text-amber-900">Predicted Mood State</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-xs font-black text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                        <span>{activeMoodData.confidence}% Confidence</span>
+                                    </div>
+                                </div>
+
+                                <h4 className="text-2xl sm:text-3xl font-black text-stone-950 mb-1">
+                                    {activeMoodData.mood}
+                                </h4>
+                                <span className="text-xs font-black text-amber-900 uppercase tracking-widest block mb-4">
+                                    Status: {activeMoodData.status}
+                                </span>
+
+                                <p className="text-sm text-stone-700 font-medium leading-relaxed mb-6">
+                                    {activeMoodData.description}
+                                </p>
+                            </div>
+
+                            {/* Trigger Titles */}
+                            <div className="pt-4 border-t border-amber-300/60">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-stone-500 block mb-2">
+                                    Recent Mood Triggers
+                                </span>
+                                <div className="flex flex-wrap gap-2">
+                                    {activeMoodData.recentTitles.map((title, i) => (
+                                        <span key={i} className="px-3 py-1 bg-white border border-amber-200 text-xs font-bold text-stone-800 rounded-xl">
+                                            🎬 {title}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Soul Persona Card (4 cols) */}
+                        <div className="lg:col-span-4 bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 flex flex-col justify-between text-center items-center">
+                            <div className="w-full flex flex-col items-center">
+                                <div className="w-20 h-20 rounded-full p-1 mb-4 shadow-sm bg-gradient-to-tr from-amber-400 to-[#ffb700]">
+                                    <div className="w-full h-full rounded-full bg-[#FFF9F0] flex items-center justify-center text-3xl border-2 border-white">
+                                        {activeMoodData.icon}
+                                    </div>
+                                </div>
+
+                                <span className="text-[10px] font-black uppercase tracking-widest text-amber-800 mb-1">
+                                    Soul Persona
+                                </span>
+                                <h4 className="text-xl font-black text-stone-950 mb-2">
+                                    {activeMoodData.persona}
+                                </h4>
+                                <p className="text-xs text-stone-600 font-medium leading-relaxed mb-4">
+                                    Dominant Vibe: <strong>{activeMoodData.dominantVibe}</strong>
+                                </p>
+                            </div>
+
+                            {/* Trait Meters */}
+                            <div className="w-full space-y-2.5 pt-4 border-t border-stone-200 text-left">
+                                <div>
+                                    <div className="flex justify-between text-[11px] font-bold text-stone-700 mb-1">
+                                        <span>Atmosphere Resonance</span>
+                                        <span>{activeMoodData.atmosphere}%</span>
+                                    </div>
+                                    <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: `${activeMoodData.atmosphere}%` }}></div>
+                                    </div>
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-[#2D2926]">Collaborate & Build With Us</h3>
-                                    <span className="text-xs text-[#b07d00] font-black">GitHub / dasamantaraoaditya</span>
-                                </div>
-                            </div>
-
-                            <p className="text-sm sm:text-base text-[#2D2926]/75 font-semibold leading-relaxed">
-                                Most platforms trap your reviews and watch histories behind closed APIs, proprietary walls, and corporate monetization. WatchersHive believes cinema data belongs to the community.
-                            </p>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                                <div className="p-4 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/15">
-                                    <span className="text-sm font-black text-[#2D2926] block mb-1">🛠️ Full Transparency</span>
-                                    <p className="text-xs text-[#2D2926]/60 font-semibold">
-                                        Frontend, backend, and mobile apps are open for anyone to inspect, fork, and enhance.
-                                    </p>
-                                </div>
-                                <div className="p-4 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/15">
-                                    <span className="text-sm font-black text-[#2D2926] block mb-1">🎬 TMDb Powered</span>
-                                    <p className="text-xs text-[#2D2926]/60 font-semibold">
-                                        Direct integration with high-fidelity movie metadata, cast, director notes, and trailers.
-                                    </p>
+                                    <div className="flex justify-between text-[11px] font-bold text-stone-700 mb-1">
+                                        <span>Existential Depth</span>
+                                        <span>{activeMoodData.depth}%</span>
+                                    </div>
+                                    <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${activeMoodData.depth}%` }}></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap items-center gap-4">
-                            <a
-                                href="https://github.com/dasamantaraoaditya/WatchHive-Frontend"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="bg-[#2D2926] text-white px-6 py-3.5 rounded-xl text-xs font-black hover:bg-black transition-all flex items-center gap-2 shadow-sm"
-                            >
-                                <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
-                                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                                </svg>
-                                <span>Star on GitHub</span>
-                            </a>
-                            <Link to="/watch-hive/signup" className="bg-[#ffb700] text-black px-6 py-3.5 rounded-xl text-xs font-black hover:bg-amber-400 transition-all shadow-sm">
-                                Join the Collective
-                            </Link>
-                        </div>
                     </div>
-
-                    {/* Right: Repository Ecosystem (5 cols) */}
-                    <div className="lg:col-span-5 bg-gradient-to-br from-[#2D2926] to-[#1a1715] text-white rounded-3xl p-8 sm:p-10 shadow-xl flex flex-col justify-between text-left">
-                        <div>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-[#ffb700] bg-white/10 px-3 py-1 rounded-full inline-block mb-4">
-                                The Codebase
-                            </span>
-                            <h4 className="text-2xl font-black mb-2">Built Across 3 Repositories</h4>
-                            <p className="text-xs text-white/60 font-semibold mb-6">
-                                Everything is designed to be lightweight, modular, and blazing fast.
-                            </p>
-
-                            <div className="space-y-4">
-                                <a 
-                                    href="https://github.com/dasamantaraoaditya/WatchHive-Frontend" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="block p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#ffb700]/50 hover:bg-white/10 transition-all group"
-                                >
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-sm font-black text-white group-hover:text-[#ffb700] transition-colors">WatchHive-Frontend</span>
-                                        <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">React • Vite • Tailwind</span>
-                                    </div>
-                                    <p className="text-xs text-white/50 font-medium">Responsive web app, PWA service worker, interactive stacks.</p>
-                                </a>
-
-                                <a 
-                                    href="https://github.com/dasamantaraoaditya/WatchHive-Mobile" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="block p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#ffb700]/50 hover:bg-white/10 transition-all group"
-                                >
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-sm font-black text-white group-hover:text-[#ffb700] transition-colors">WatchHive-Mobile</span>
-                                        <span className="text-[10px] font-bold text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded">Flutter • Android & iOS</span>
-                                    </div>
-                                    <p className="text-xs text-white/50 font-medium">Native mobile app, Play Store internal release code, offline SQLite sync.</p>
-                                </a>
-
-                                <a 
-                                    href="https://github.com/dasamantaraoaditya/WatchHive-Backend" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="block p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[#ffb700]/50 hover:bg-white/10 transition-all group"
-                                >
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-sm font-black text-white group-hover:text-[#ffb700] transition-colors">WatchHive-Backend</span>
-                                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">Node • Express • PostgreSQL</span>
-                                    </div>
-                                    <p className="text-xs text-white/50 font-medium">High-speed API, TMDb caching layer, suggestion notifications.</p>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div className="pt-6 mt-6 border-t border-white/10 flex items-center justify-between text-xs text-white/60 font-bold">
-                            <span>Licensed under MIT</span>
-                            <span className="text-[#ffb700]">PRs & Issues Welcome</span>
-                        </div>
-                    </div>
-
                 </div>
             </section>
 
-            {/* ── Section 4: Offline Capable & Multi-Device ─────────── */}
-            <section className="py-20 px-6 max-w-7xl mx-auto my-8 bg-white rounded-[40px] border border-[#ffb700]/15 shadow-sm text-left">
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-                    <div className="flex-1 space-y-4">
-                        <span className="text-[11px] font-black uppercase tracking-widest text-[#855700] bg-[#FFF9F0] px-4 py-1.5 rounded-full inline-block border border-[#ffb700]/25">
-                            Built For Real Life
+            {/* ── Section 4: The Swarm Social Feed (Accurate FeedCard Replica) ── */}
+            <section className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 bg-white border-t border-amber-200/80 lp-reveal ${feedSectionReveal.visible ? 'is-visible' : ''}`} ref={feedSectionReveal.ref}>
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16 max-w-3xl mx-auto">
+                        <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
+                            Feature 4: The Swarm Feed
                         </span>
-                        <h2 className="text-3xl sm:text-4xl font-black text-[#2D2926] tracking-tight">
-                            Log Inside Theaters. Zero Signal Required.
+                        <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
+                            Micro-Reviews & Community Buzz.
                         </h2>
-                        <p className="text-sm sm:text-base text-[#2D2926]/70 font-semibold leading-relaxed">
-                            Ever walked out of a movie theater with zero cellular reception, wanting to log your thoughts before the magic fades? WatchersHive includes offline caching and SQLite sync: your entries are safely queued and sync automatically once you re-connect.
+                        <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
+                            A live social feed without ads or promotional spam. See what your friends are binging, give reviews a "Buzz", and join vibrant discussions about cinema you love.
                         </p>
-                        <div className="flex flex-wrap gap-4 pt-2 text-xs font-bold text-[#2D2926]/60">
-                            <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[#ffb700] text-[18px]">signal_wifi_off</span> Offline SQLite Queuing</span>
-                            <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[#ffb700] text-[18px]">sync</span> Background Auto-Sync</span>
-                            <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[#ffb700] text-[18px]">phone_android</span> Android Play Store Testing Ready</span>
-                        </div>
                     </div>
 
-                    <div className="flex-1 w-full max-w-md bg-[#FFF9F0] p-6 rounded-3xl border border-[#ffb700]/25 text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-white p-3 mx-auto shadow-sm border border-[#ffb700]/20 mb-4">
-                            <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain" />
+                    {/* FeedCard Replica Box */}
+                    <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-amber-300/80 shadow-md text-left">
+                        {/* Feed Card Header */}
+                        <div className="flex items-center gap-3.5 mb-4">
+                            <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-[#ffb700] ring-offset-2 shrink-0">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80" alt="" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-sm font-black text-stone-900">Sarah Jenkins</span>
+                                    <span className="text-xs text-stone-500 font-semibold">@sarah_cine</span>
+                                    <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">reviewed</span>
+                                </div>
+                                <span className="text-xs text-stone-500 font-medium">Dune: Part Two • 2 hours ago</span>
+                            </div>
                         </div>
-                        <h4 className="font-extrabold text-base text-[#2D2926] mb-1">Get WatchersHive on Any Device</h4>
-                        <p className="text-xs text-[#2D2926]/60 font-semibold mb-5">Install as a standalone app on your desktop, iPhone, or Android.</p>
-                        
-                        <div className="space-y-2">
-                            <button
-                                onClick={handleInstall}
-                                className="w-full bg-[#ffb700] text-black font-black text-xs py-3 rounded-xl hover:bg-amber-400 transition-all shadow-sm"
-                            >
-                                {isInstalled ? 'App Ready & Installed' : 'Install PWA Application'}
-                            </button>
-                            <Link
-                                to="/watch-hive/support"
-                                className="block w-full bg-white border border-[#ffb700]/25 text-[#855700] font-black text-xs py-3 rounded-xl hover:bg-[#FFF9F0] transition-all"
-                            >
-                                Learn About Mobile Internal Testing
-                            </Link>
+
+                        {/* Review Body */}
+                        <div className="bg-[#FFF9F0] border border-amber-200/80 rounded-2xl p-4.5 mb-4 space-y-2">
+                            <div className="flex items-center gap-1 text-amber-500">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <span key={i} className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                                ))}
+                                <span className="text-xs font-black text-stone-800 ml-1.5">5.0 / 5.0</span>
+                            </div>
+                            <p className="text-sm text-stone-800 font-medium leading-relaxed italic">
+                                "Visually staggering and sonically earth-shaking. Denis Villeneuve took Herbert's dense mythology and made it breathe with primal energy in IMAX. Easily one of the defining science fiction experiences of this century."
+                            </p>
+                        </div>
+
+                        {/* Micro-Interaction Actions */}
+                        <div className="flex items-center justify-between pt-3 border-t border-stone-200 text-xs font-bold text-stone-600">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => {
+                                        setFeedLiked(!feedLiked);
+                                        setFeedLikes(prev => feedLiked ? prev - 1 : prev + 1);
+                                    }}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all ${feedLiked ? 'bg-amber-100 text-amber-900 font-black' : 'hover:text-amber-600'}`}
+                                >
+                                    <span className="material-symbols-outlined text-[16px] text-amber-500" style={{ fontVariationSettings: feedLiked ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                                    <span>{feedLikes} Buzzes</span>
+                                </button>
+                                <span className="flex items-center gap-1.5 hover:text-amber-600 cursor-pointer">
+                                    <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
+                                    <span>14 Comments</span>
+                                </span>
+                            </div>
+                            <span className="text-emerald-700 font-extrabold flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[16px]">verified</span>
+                                <span>Verified Watch</span>
+                            </span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* ── Section 5: Community Voices ─────────────────────── */}
-            <section className="py-20 px-6 max-w-7xl mx-auto text-center">
-                <span className="text-[11px] font-black uppercase tracking-widest text-[#855700] bg-[#ffb700]/15 px-4 py-1.5 rounded-full inline-block mb-3">
-                    Voices from the Swarm
-                </span>
-                <h2 className="text-3xl sm:text-4xl font-black text-[#2D2926] tracking-tight mb-12">
-                    What Cinephiles Are Saying.
-                </h2>
+            {/* ── Section 5: Open Source Collaborative Ground ───────── */}
+            <section id="open-source" className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto lp-reveal ${openSourceReveal.visible ? 'is-visible' : ''}`} ref={openSourceReveal.ref}>
+                <div className="text-center mb-16 max-w-3xl mx-auto">
+                    <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
+                        Built For The Public Good
+                    </span>
+                    <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
+                        100% Open Source Ground.
+                    </h2>
+                    <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
+                        No closed corporate silos. WatchersHive is built openly on GitHub so developers, designers, and movie buffs can collaborate on building the ultimate movie tracking, suggestion, and review platform.
+                    </p>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-                    <div className="bg-white p-6 rounded-3xl border border-[#ffb700]/15 shadow-sm">
-                        <div className="flex items-center gap-1 text-[#ffb700] mb-3">
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <a 
+                        href="https://github.com/dasamantaraoaditya/WatchHive-Frontend"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-white p-7 rounded-3xl border border-amber-300/80 shadow-xs hover:border-amber-500 hover:shadow-md transition-all group flex flex-col justify-between"
+                    >
+                        <div>
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800">
+                                    <span className="material-symbols-outlined text-[22px]">laptop</span>
+                                </div>
+                                <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded">React • Vite</span>
+                            </div>
+                            <h4 className="text-lg font-black text-stone-950 mb-1 group-hover:text-amber-600 transition-colors">
+                                WatchHive-Frontend
+                            </h4>
+                            <p className="text-xs text-stone-600 font-medium leading-relaxed">
+                                Complete web app, PWA service worker with offline caching, interactive Stacks ranker, and MindLens UI.
+                            </p>
                         </div>
-                        <p className="text-xs sm:text-sm text-[#2D2926]/80 font-semibold italic mb-4 leading-relaxed">
-                            "I stopped caring about IMDb numbers. When a friend suggested 'Past Lives' with a 2-line note on WatchersHive, it was the best cinematic experience of my year."
-                        </p>
-                        <span className="text-xs font-black text-[#2D2926] block">Sarah Jenkins</span>
-                        <span className="text-[10px] text-[#2D2926]/40 font-bold">Hive Member</span>
-                    </div>
+                        <div className="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between text-xs font-black text-amber-900">
+                            <span>Inspect on GitHub</span>
+                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </div>
+                    </a>
 
-                    <div className="bg-white p-6 rounded-3xl border border-[#ffb700]/15 shadow-sm">
-                        <div className="flex items-center gap-1 text-[#ffb700] mb-3">
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <a 
+                        href="https://github.com/dasamantaraoaditya/WatchHive-Mobile"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-white p-7 rounded-3xl border border-amber-300/80 shadow-xs hover:border-amber-500 hover:shadow-md transition-all group flex flex-col justify-between"
+                    >
+                        <div>
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-emerald-700">
+                                    <span className="material-symbols-outlined text-[22px]">phone_iphone</span>
+                                </div>
+                                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Flutter • Android & iOS</span>
+                            </div>
+                            <h4 className="text-lg font-black text-stone-950 mb-1 group-hover:text-amber-600 transition-colors">
+                                WatchHive-Mobile
+                            </h4>
+                            <p className="text-xs text-stone-600 font-medium leading-relaxed">
+                                Cross-platform mobile app in internal testing for Google Play Store, featuring offline SQLite queuing and 120Hz animations.
+                            </p>
                         </div>
-                        <p className="text-xs sm:text-sm text-[#2D2926]/80 font-semibold italic mb-4 leading-relaxed">
-                            "Looking at someone's Stacks is like seeing their emotional DNA. You instantly know if you'll click as friends based on what they treasure at #1."
-                        </p>
-                        <span className="text-xs font-black text-[#2D2926] block">Devon Miller</span>
-                        <span className="text-[10px] text-[#2D2926]/40 font-bold">Film Columnist</span>
-                    </div>
+                        <div className="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between text-xs font-black text-amber-900">
+                            <span>Inspect on GitHub</span>
+                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </div>
+                    </a>
 
-                    <div className="bg-white p-6 rounded-3xl border border-[#ffb700]/15 shadow-sm">
-                        <div className="flex items-center gap-1 text-[#ffb700] mb-3">
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <a 
+                        href="https://github.com/dasamantaraoaditya/WatchHive-Backend"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-white p-7 rounded-3xl border border-amber-300/80 shadow-xs hover:border-amber-500 hover:shadow-md transition-all group flex flex-col justify-between"
+                    >
+                        <div>
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-blue-700">
+                                    <span className="material-symbols-outlined text-[22px]">database</span>
+                                </div>
+                                <span className="text-[10px] font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded">Node • Express • SQL</span>
+                            </div>
+                            <h4 className="text-lg font-black text-stone-950 mb-1 group-hover:text-amber-600 transition-colors">
+                                WatchHive-Backend
+                            </h4>
+                            <p className="text-xs text-stone-600 font-medium leading-relaxed">
+                                High-throughput API server with TMDb caching layer, suggestion notifications, and JWT authentication.
+                            </p>
                         </div>
-                        <p className="text-xs sm:text-sm text-[#2D2926]/80 font-semibold italic mb-4 leading-relaxed">
-                            "An open-source movie community with genuine suggestions and zero sponsored spam? This is exactly what the cinephile web has been waiting for."
-                        </p>
-                        <span className="text-xs font-black text-[#2D2926] block">Rohan V.</span>
-                        <span className="text-[10px] text-[#2D2926]/40 font-bold">Open Source Contributor</span>
-                    </div>
+                        <div className="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between text-xs font-black text-amber-900">
+                            <span>Inspect on GitHub</span>
+                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </div>
+                    </a>
                 </div>
             </section>
 
             {/* ── Final Call to Action ───────────────────────────── */}
-            <section className={`py-24 px-6 text-center lp-reveal ${ctaReveal.visible ? 'is-visible' : ''}`} ref={ctaReveal.ref}>
-                <div className="bg-gradient-to-r from-amber-500 via-[#ffb700] to-amber-600 rounded-[44px] py-20 px-6 max-w-5xl mx-auto shadow-[0_20px_50px_rgba(255,183,0,0.3)] relative overflow-hidden text-black">
+            <section className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 text-center lp-reveal ${ctaReveal.visible ? 'is-visible' : ''}`} ref={ctaReveal.ref}>
+                <div className="bg-gradient-to-r from-amber-500 via-[#ffb700] to-amber-600 rounded-[44px] py-16 sm:py-20 px-6 max-w-5xl mx-auto shadow-xl relative overflow-hidden text-stone-950">
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-4 shadow-xl border border-white/50 mb-6">
+                        <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center p-4 shadow-md border border-white/80 mb-6">
                             <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain" />
                         </div>
-                        <h2 className="text-4xl sm:text-6xl font-black tracking-tight mb-4 text-[#2D2926]">
-                            Step into the Hive.
+                        <h2 className="text-4xl sm:text-6xl font-black tracking-tight mb-4 text-stone-950">
+                            Step into the Hive Today.
                         </h2>
-                        <p className="text-base sm:text-xl font-bold text-[#2D2926]/80 mb-10 max-w-xl mx-auto leading-relaxed">
-                            Track what you love, cheer up the people you care about with unforgettable cinema, and build your personal Movie Experience Report Card today.
+                        <p className="text-base sm:text-xl font-bold text-stone-900/90 mb-10 max-w-xl mx-auto leading-relaxed">
+                            Join a joyful community of watchers. Suggest cinema that heals your friends, track your journey offline, and build your Movie Experience Report Card.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center gap-4">
-                            <Link to="/watch-hive/signup" className="w-full sm:w-auto bg-[#2D2926] text-white text-base font-black px-10 py-5 rounded-2xl shadow-xl hover:-translate-y-1 hover:bg-black transition-all">
+                            <Link to="/watch-hive/signup" className="w-full sm:w-auto bg-stone-950 text-white text-base font-black px-10 py-5 rounded-2xl shadow-lg hover:bg-black hover:-translate-y-0.5 transition-all">
                                 Create Free Account
                             </Link>
                             <a 
                                 href="https://github.com/dasamantaraoaditya/WatchHive-Frontend" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="w-full sm:w-auto bg-white/90 text-[#2D2926] text-base font-black px-8 py-5 rounded-2xl shadow-sm hover:bg-white hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                                className="w-full sm:w-auto bg-white text-stone-950 text-base font-black px-8 py-5 rounded-2xl shadow-xs hover:bg-stone-50 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                             >
                                 <span>Star on GitHub</span>
                             </a>
@@ -1121,32 +1201,32 @@ export const LandingPage: React.FC = () => {
             </section>
 
             {/* ── Footer ─────────────────────────────────────────── */}
-            <footer className="bg-white border-t border-[#ffb700]/15 py-14 px-6 text-left">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <footer className="bg-white border-t border-amber-200/80 py-12 px-4 sm:px-6 md:px-8 text-left">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#FFF9F0] border border-[#ffb700]/25 p-1.5 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-xl bg-[#FFF9F0] border border-amber-300 p-1 flex items-center justify-center">
                             <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain" />
                         </div>
                         <div>
-                            <span className="font-black text-[#2D2926] text-xl tracking-tight block">WatchersHive</span>
-                            <span className="text-[10px] font-bold text-[#b07d00] uppercase tracking-wider">A Community of Watchers</span>
+                            <span className="font-black text-stone-950 text-lg tracking-tight block">WatchersHive</span>
+                            <span className="text-[10px] font-black text-amber-800 uppercase tracking-wider">A Community of Watchers</span>
                         </div>
                     </div>
                     
-                    <p className="text-xs font-semibold text-[#2D2926]/50 text-center md:text-left">
-                        © 2026 WatchersHive. Crafted with love for cinema, open-source collaboration, and genuine human suggestions.
+                    <p className="text-xs font-medium text-stone-500 text-center md:text-left">
+                        © 2026 WatchersHive. Crafted for true cinephiles worldwide. Open source & ad-free.
                     </p>
                     
-                    <div className="flex flex-wrap items-center gap-6 text-xs font-extrabold text-[#2D2926]/70">
-                        <Link to="/watch-hive/login" className="hover:text-[#ffb700] transition-colors">Sign In</Link>
-                        <Link to="/watch-hive/signup" className="hover:text-[#ffb700] transition-colors">Sign Up</Link>
-                        <Link to="/watch-hive/support" className="hover:text-[#ffb700] transition-colors">Support</Link>
-                        <Link to="/watch-hive/privacy" className="hover:text-[#ffb700] transition-colors">Privacy Policy</Link>
+                    <div className="flex flex-wrap items-center gap-6 text-xs font-black text-stone-700">
+                        <Link to="/watch-hive/login" className="hover:text-amber-600 transition-colors">Sign In</Link>
+                        <Link to="/watch-hive/signup" className="hover:text-amber-600 transition-colors">Sign Up</Link>
+                        <Link to="/watch-hive/support" className="hover:text-amber-600 transition-colors">Support</Link>
+                        <Link to="/watch-hive/privacy" className="hover:text-amber-600 transition-colors">Privacy Policy</Link>
                         <a 
                             href="https://github.com/dasamantaraoaditya/WatchHive-Frontend" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="hover:text-[#ffb700] transition-colors flex items-center gap-1"
+                            className="hover:text-amber-600 transition-colors flex items-center gap-1"
                         >
                             <span>GitHub</span>
                             <span className="material-symbols-outlined text-[13px]">open_in_new</span>
