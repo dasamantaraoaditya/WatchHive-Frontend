@@ -133,7 +133,7 @@ export const MovieDetailsPage: React.FC = () => {
     const location = useLocation();
     const { setPageTitle, setPageIcon } = useUI();
     const { alert, confirm } = useCustomAlert();
-    const { promptAddToWatchlist, removeFromList, isInWatchlist } = useWatchlist();
+    const { watchlist, promptAddToWatchlist, removeFromList, isInWatchlist } = useWatchlist();
 
     const mediaType = (paramMediaType === 'tv' ? 'tv' : 'movie') as 'movie' | 'tv';
     const tmdbId = paramTmdbId ? parseInt(paramTmdbId, 10) : null;
@@ -240,6 +240,9 @@ export const MovieDetailsPage: React.FC = () => {
     const runtime = details?.runtime ? `${details.runtime}m` : details?.episode_run_time?.[0] ? `${details.episode_run_time[0]}m` : null;
     const primaryGenre = details?.genres?.[0]?.name;
     const inWatchlist = tmdbId ? isInWatchlist(tmdbId) : false;
+    const watchlistItem = tmdbId ? watchlist?.items?.find((item) => Number(item.tmdbId) === Number(tmdbId)) : undefined;
+    const resolvedSuggestedByUser = location.state?.suggestedByUser || watchlistItem?.suggestedByUser || null;
+    const resolvedSuggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || watchlistItem?.suggestedByUserId || watchlistItem?.suggestedByUser?.id || null;
 
     const posterUrl = details?.poster_path
         ? `https://image.tmdb.org/t/p/original${details.poster_path}`
@@ -261,7 +264,7 @@ export const MovieDetailsPage: React.FC = () => {
         setIsTransitioning(true);
         try {
             const apiType = mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
-            const suggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id;
+            const suggestedByUserId = resolvedSuggestedByUserId;
             const createdEntry = await entriesApi.createEntry({
                 tmdbId,
                 title,
@@ -291,8 +294,8 @@ export const MovieDetailsPage: React.FC = () => {
     const handleWatchlistToggle = async () => {
         if (!tmdbId) return;
         try {
-            const suggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id;
-            const suggestedByUser = location.state?.suggestedByUser;
+            const suggestedByUserId = resolvedSuggestedByUserId;
+            const suggestedByUser = resolvedSuggestedByUser;
             if (inWatchlist) {
                 await removeFromList(tmdbId);
             } else {
@@ -927,8 +930,8 @@ export const MovieDetailsPage: React.FC = () => {
                                     type: mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
                                     posterPath: details.poster_path,
                                     overview: details.overview,
-                                    suggestedByUserId: location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || null,
-                                    suggestedByUser: location.state?.suggestedByUser || null,
+                                    suggestedByUserId: resolvedSuggestedByUserId,
+                                    suggestedByUser: resolvedSuggestedByUser,
                                 }}
                                 defaultIsWatching={isCompletingWatch ? false : undefined}
                                 isModal={false}

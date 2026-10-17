@@ -70,7 +70,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 type: apiType,
                 isWatching: true,
                 startedAt: new Date().toISOString(),
-                suggestedByUserId: suggestedByUser?.id || null
+                suggestedByUserId: suggestedByUser?.id || suggestedByUserId || null
             });
 
             // Remove from watchlist
