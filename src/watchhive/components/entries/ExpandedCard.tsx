@@ -181,7 +181,9 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                                     name={entry.suggestedByUser.displayName || entry.suggestedByUser.username} 
                                     size="xxs" 
                                 />
-                                <span className="text-[#2D2926] text-xs font-black truncate">@{entry.suggestedByUser.username}</span>
+                                <span className="text-[#2D2926] text-xs font-black truncate" title={`@${entry.suggestedByUser.username}`}>
+                                    @{entry.suggestedByUser.username.length > 10 ? `${entry.suggestedByUser.username.slice(0, 10)}...` : entry.suggestedByUser.username}
+                                </span>
                             </div>
                         </div>
                     )}

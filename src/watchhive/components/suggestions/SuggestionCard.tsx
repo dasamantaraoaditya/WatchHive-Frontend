@@ -294,11 +294,16 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                                         "{suggestionMessages[0].message}"
                                     </p>
                                     <div className="flex items-center justify-between gap-1 mt-1">
-                                        {suggestionMessages[0].author && (
-                                            <span className="text-[10px] font-bold text-amber-800/80 truncate">
-                                                {isSent ? 'To: ' : '— '}@{suggestionMessages[0].author.username || suggestionMessages[0].author.displayName}
-                                            </span>
-                                        )}
+                                        {suggestionMessages[0].author && (() => {
+                                            const authorUser = suggestionMessages[0].author;
+                                            const rawName = authorUser.username || authorUser.displayName || '';
+                                            const formattedName = rawName.length > 10 ? `${rawName.slice(0, 10)}...` : rawName;
+                                            return (
+                                                <span className="text-[10px] font-bold text-amber-800/80 truncate" title={`${isSent ? 'To: ' : '— '}@${rawName}`}>
+                                                    {isSent ? 'To: ' : '— '}@{formattedName}
+                                                </span>
+                                            );
+                                        })()}
                                         {suggestionMessages.length > 1 && (
                                             <span className="text-[9px] font-bold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-full shrink-0">
                                                 +{suggestionMessages.length - 1} more note{suggestionMessages.length > 2 ? 's' : ''}

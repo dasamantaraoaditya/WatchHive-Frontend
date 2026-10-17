@@ -213,11 +213,12 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
                                 {entryData?.suggestedByUser && (
                                     <div className="mt-1 flex items-center gap-1.5 text-xs text-[#2D2926]/70 font-medium">
-                                        <span className="text-[11px] font-medium text-[#2D2926]/60">Suggested by</span>
+                                        <span className="text-[11px] font-medium text-[#2D2926]/60 shrink-0">Suggested by</span>
                                         <Link 
                                             to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} 
-                                            className="inline-flex items-center gap-1.5 font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors"
+                                            className="inline-flex items-center gap-1.5 font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors truncate max-w-[200px]"
                                             onClick={(e) => e.stopPropagation()}
+                                            title={`@${entryData.suggestedByUser.username}`}
                                         >
                                             <Avatar
                                                 src={entryData.suggestedByUser.profilePictureUrl}
@@ -225,7 +226,9 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                                 size="xxs"
                                                 showBorder={false}
                                             />
-                                            <span>@{entryData.suggestedByUser.username}</span>
+                                            <span className="truncate">
+                                                @{entryData.suggestedByUser.username.length > 10 ? `${entryData.suggestedByUser.username.slice(0, 10)}...` : entryData.suggestedByUser.username}
+                                            </span>
                                         </Link>
                                     </div>
                                 )}

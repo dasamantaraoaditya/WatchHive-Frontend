@@ -211,14 +211,16 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
             <div className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white border-t border-slate-50">
                 <h4 className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={title}>{title}</h4>
                 {suggestedByUser && (
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50/90 border border-amber-200/80 rounded-lg text-[#2D2926] text-[10px] font-bold w-fit mt-0.5 shadow-2xs">
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50/90 border border-amber-200/80 rounded-lg text-[#2D2926] text-[10px] font-bold w-fit max-w-full mt-0.5 shadow-2xs">
                         <Avatar
                             src={suggestedByUser.profilePictureUrl || undefined}
                             name={suggestedByUser.displayName || suggestedByUser.username}
                             size="xxs"
                         />
-                        <span className="text-[#2D2926]/70">Suggested by</span>
-                        <span className="font-black text-amber-800">@{suggestedByUser.username}</span>
+                        <span className="text-[#2D2926]/70 shrink-0">Suggested by</span>
+                        <span className="font-black text-amber-800 truncate" title={`@${suggestedByUser.username}`}>
+                            @{suggestedByUser.username.length > 10 ? `${suggestedByUser.username.slice(0, 10)}...` : suggestedByUser.username}
+                        </span>
                     </div>
                 )}
                 <div className="watchlist-card__meta text-[11px] font-bold mt-1 text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">

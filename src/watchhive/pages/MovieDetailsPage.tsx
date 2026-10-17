@@ -574,7 +574,9 @@ export const MovieDetailsPage: React.FC = () => {
                                                             name={userEntry.suggestedByUser.displayName || userEntry.suggestedByUser.username} 
                                                             size="xxs" 
                                                         />
-                                                        <span className="underline">@{userEntry.suggestedByUser.username}</span>
+                                                        <span className="underline truncate max-w-[150px]" title={`@${userEntry.suggestedByUser.username}`}>
+                                                            @{userEntry.suggestedByUser.username.length > 10 ? `${userEntry.suggestedByUser.username.slice(0, 10)}...` : userEntry.suggestedByUser.username}
+                                                        </span>
                                                     </div>
                                                 )}
                                             </div>
