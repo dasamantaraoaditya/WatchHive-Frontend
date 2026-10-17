@@ -507,10 +507,10 @@ export const MindLensView: React.FC = () => {
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="material-symbols-outlined text-[#ffb700] text-2xl">insights</span>
-                                        <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Suggestion Influence & Network Impact</h3>
+                                        <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Top 5 Influencers & Network Impact</h3>
                                     </div>
                                     <p className="text-xs font-medium text-[#2D2926]/60">
-                                        Discover who recommended your favorite movies and how your friends shape your watch history
+                                        Discover your top 5 friend influencers who recommended your favorite titles and shape your watch history
                                     </p>
                                 </div>
 
@@ -534,7 +534,7 @@ export const MindLensView: React.FC = () => {
                             {/* Recommenders Leaderboard Cards */}
                             {data.suggestionAnalytics.recommenders && data.suggestionAnalytics.recommenders.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {data.suggestionAnalytics.recommenders.map((rec, rank) => (
+                                    {data.suggestionAnalytics.recommenders.slice(0, 5).map((rec, rank) => (
                                         <div 
                                             key={rec.userId} 
                                             className="bg-white border border-[#ffb700]/20 rounded-2xl p-4 flex flex-col justify-between shadow-xs hover:shadow-md hover:border-[#ffb700]/40 transition-all relative overflow-hidden"
