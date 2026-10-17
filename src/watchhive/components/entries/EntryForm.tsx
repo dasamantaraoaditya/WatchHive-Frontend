@@ -382,7 +382,7 @@ const toLocalISOString = (dateInput: Date | string | number) => {
     return localTime.toISOString().slice(0, 16);
 };
 
-export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false, defaultIsWatching = false }) => {
+export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false, defaultIsWatching }) => {
     const navigate = useNavigate();
     const isEditing = !!entry;
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -407,7 +407,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         review: entry?.review || '',
         tags: entry?.tags || [],
         isRewatch: entry?.isRewatch || false,
-        isWatching: entry?.isWatching || defaultIsWatching,
+        isWatching: defaultIsWatching !== undefined ? defaultIsWatching : (entry?.isWatching || false),
         watchLocation: entry?.watchLocation || '',
         suggestedByUserId: entry?.suggestedByUserId || prefillData?.suggestedByUserId || undefined,
     });
@@ -603,14 +603,24 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                     <div className="flex flex-col gap-2 mb-6 border-b border-[#ffb700]/10 pb-4">
                         <h2 className="text-2xl font-black text-[#2D2926] flex items-center gap-2.5">
                             {isEditing ? (
-                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">edit</span>
+                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">
+                                    {entry?.isWatching && !formData.isWatching ? 'task_alt' : 'edit'}
+                                </span>
                             ) : (
-                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">movie</span>
+                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">
+                                    {formData.isWatching ? 'visibility' : 'movie'}
+                                </span>
                             )}
-                            {isEditing ? 'Edit Your Entry' : 'Log a Watch'}
+                            {isEditing
+                                ? (entry?.isWatching && !formData.isWatching ? 'Complete Your Watch' : 'Edit Your Entry')
+                                : (formData.isWatching ? 'Track What You\'re Watching' : 'Log a Watch')}
                         </h2>
                         <p className="text-xs text-[#2D2926]/50 font-bold uppercase tracking-wider">
-                            {isEditing ? 'Refine your rating, review, and details below.' : 'Search for a movie or TV show, rate it, and add it to your history.'}
+                            {isEditing
+                                ? (entry?.isWatching && !formData.isWatching
+                                    ? 'Give your rating and final thoughts to complete this watch.'
+                                    : 'Refine your rating, review, and details below.')
+                                : 'Search for a movie or TV show, rate it, and add it to your history.'}
                         </p>
                     </div>
                 )}
@@ -1048,9 +1058,13 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                             ) : (
                                 <>
                                     <span className="material-symbols-outlined text-sm font-bold">
-                                        {isEditing ? 'edit_note' : 'add'}
+                                        {isEditing
+                                            ? (entry?.isWatching && !formData.isWatching ? 'task_alt' : 'edit_note')
+                                            : (formData.isWatching ? 'visibility' : 'add')}
                                     </span>
-                                    {isEditing ? 'Update Entry' : 'Log Entry'}
+                                    {isEditing
+                                        ? (entry?.isWatching && !formData.isWatching ? 'Complete Watch' : 'Update Entry')
+                                        : (formData.isWatching ? 'Track Watching' : 'Log Entry')}
                                 </>
                             )}
                         </button>

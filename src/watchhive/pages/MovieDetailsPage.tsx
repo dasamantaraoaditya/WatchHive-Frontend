@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BeeLoader, ErrorState, Avatar } from '../components/common';
@@ -176,6 +176,7 @@ export const MovieDetailsPage: React.FC = () => {
         initialAction === 'log' ? 'log' : initialAction === 'suggest' ? 'suggest' : 'details'
     );
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [isCompletingWatch, setIsCompletingWatch] = useState(false);
     const [isNavVisible, setIsNavVisible] = useState(true);
     const lastScrollY = useRef(0);
 
@@ -192,35 +193,36 @@ export const MovieDetailsPage: React.FC = () => {
         };
     }, []);
 
-    useEffect(() => {
+    const fetchDetails = useCallback(async () => {
         if (!tmdbId) return;
-        const fetchDetails = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const endpoint = mediaType === 'movie' ? `/tmdb/movie/${tmdbId}` : `/tmdb/tv/${tmdbId}`;
-                const [data, entriesRes]: [any, any] = await Promise.all([
-                    apiClient.get(endpoint),
-                    entriesApi.getEntries({ tmdbId, limit: 10 }).catch(() => ({ entries: [] }))
-                ]);
-                setDetails(data);
+        setLoading(true);
+        setError(null);
+        try {
+            const endpoint = mediaType === 'movie' ? `/tmdb/movie/${tmdbId}` : `/tmdb/tv/${tmdbId}`;
+            const [data, entriesRes]: [any, any] = await Promise.all([
+                apiClient.get(endpoint),
+                entriesApi.getEntries({ tmdbId, limit: 10 }).catch(() => ({ entries: [] }))
+            ]);
+            setDetails(data);
 
-                const foundEntry = entriesRes.entries?.find((e: Entry) => Number(e.tmdbId) === Number(tmdbId));
-                if (foundEntry) {
-                    setUserEntry(foundEntry);
-                }
-            } catch (err) {
-                console.error('Failed to fetch details:', err);
-                setError(formatUserFriendlyError(err, {
-                    resourceType: 'movie',
-                    defaultMessage: 'Failed to load cinematic details. The hive is a bit busy.'
-                }));
-            } finally {
-                setLoading(false);
+            const foundEntry = entriesRes.entries?.find((e: Entry) => Number(e.tmdbId) === Number(tmdbId));
+            if (foundEntry) {
+                setUserEntry(foundEntry);
             }
-        };
-        fetchDetails();
+        } catch (err) {
+            console.error('Failed to fetch details:', err);
+            setError(formatUserFriendlyError(err, {
+                resourceType: 'movie',
+                defaultMessage: 'Failed to load cinematic details. The hive is a bit busy.'
+            }));
+        } finally {
+            setLoading(false);
+        }
     }, [tmdbId, mediaType]);
+
+    useEffect(() => {
+        fetchDetails();
+    }, [fetchDetails]);
 
     // Handle scroll for sticky navbar hiding/showing
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -260,7 +262,7 @@ export const MovieDetailsPage: React.FC = () => {
         try {
             const apiType = mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE';
             const suggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id;
-            await entriesApi.createEntry({
+            const createdEntry = await entriesApi.createEntry({
                 tmdbId,
                 title,
                 type: apiType,
@@ -268,6 +270,7 @@ export const MovieDetailsPage: React.FC = () => {
                 startedAt: new Date().toISOString(),
                 suggestedByUserId: suggestedByUserId || null,
             });
+            setUserEntry(createdEntry);
             await removeFromList(tmdbId);
             await alert(`"${title}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
@@ -473,13 +476,40 @@ export const MovieDetailsPage: React.FC = () => {
                                             </button>
                                         )}
 
-                                        <button
-                                            onClick={() => setView('log')}
-                                            className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#ffb700] text-white hover:brightness-105 flex items-center gap-2 transition-all shadow-md shadow-[#ffb700]/20"
-                                        >
-                                            <span className="material-symbols-outlined text-[18px]">edit_note</span>
-                                            Log Watch
-                                        </button>
+                                        {userEntry?.isWatching ? (
+                                            <button
+                                                onClick={() => {
+                                                    setIsCompletingWatch(true);
+                                                    setView('log');
+                                                }}
+                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#ffb700] text-[#2D2926] hover:brightness-105 flex items-center gap-2 transition-all shadow-md shadow-[#ffb700]/20 cursor-pointer"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">task_alt</span>
+                                                Complete Watch
+                                            </button>
+                                        ) : userEntry ? (
+                                            <button
+                                                onClick={() => {
+                                                    setIsCompletingWatch(false);
+                                                    setView('log');
+                                                }}
+                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/30 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px] text-[#ffb700]">check_circle</span>
+                                                {userEntry.rating ? `Logged (⭐ ${userEntry.rating})` : 'Logged ✓'}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => {
+                                                    setIsCompletingWatch(false);
+                                                    setView('log');
+                                                }}
+                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#ffb700] text-white hover:brightness-105 flex items-center gap-2 transition-all shadow-md shadow-[#ffb700]/20 cursor-pointer"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">edit_note</span>
+                                                Log Watch
+                                            </button>
+                                        )}
 
                                         <button
                                             onClick={() => setView('suggest')}
@@ -497,29 +527,57 @@ export const MovieDetailsPage: React.FC = () => {
                                         <div className="flex flex-wrap items-center justify-between gap-3">
                                             <div className="flex items-center gap-2">
                                                 <span className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center text-amber-600 text-lg">
-                                                    ⭐
+                                                    {userEntry.isWatching ? '👁️' : '⭐'}
                                                 </span>
                                                 <div>
-                                                    <h3 className="text-base font-black text-[#2D2926]">Your Watch Entry</h3>
+                                                    <h3 className="text-base font-black text-[#2D2926]">
+                                                        {userEntry.isWatching ? 'Currently Watching' : 'Your Watch Entry'}
+                                                    </h3>
                                                     <p className="text-xs font-bold text-slate-400">
-                                                        {userEntry.isWatching ? 'Currently Watching' : `Logged on ${formatDate(userEntry.watchedAt)}`}
+                                                        {userEntry.isWatching ? 'In your active watching queue' : `Logged on ${formatDate(userEntry.watchedAt)}`}
                                                         {userEntry.rating ? ` • Rated ${userEntry.rating} / 10` : ''}
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            {/* Suggested By badge */}
-                                            {userEntry.suggestedByUser && (
-                                                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100/80 border border-amber-300/80 rounded-2xl text-xs font-black text-amber-900 shadow-2xs">
-                                                    <span>💡 Suggested by</span>
-                                                    <Avatar 
-                                                        src={userEntry.suggestedByUser.profilePictureUrl} 
-                                                        name={userEntry.suggestedByUser.displayName || userEntry.suggestedByUser.username} 
-                                                        size="xxs" 
-                                                    />
-                                                    <span className="underline">@{userEntry.suggestedByUser.username}</span>
-                                                </div>
-                                            )}
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                {userEntry.isWatching && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setIsCompletingWatch(true);
+                                                            setView('log');
+                                                        }}
+                                                        className="px-3.5 py-1.5 rounded-xl text-xs font-black bg-[#ffb700] text-[#2D2926] hover:brightness-105 flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[16px]">task_alt</span>
+                                                        Complete Watch
+                                                    </button>
+                                                )}
+
+                                                <button
+                                                    onClick={() => {
+                                                        setIsCompletingWatch(false);
+                                                        setView('log');
+                                                    }}
+                                                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/90 border border-amber-200 text-[#2D2926] hover:bg-amber-100/60 flex items-center gap-1.5 transition-all cursor-pointer"
+                                                >
+                                                    <span className="material-symbols-outlined text-[14px]">edit</span>
+                                                    Edit
+                                                </button>
+
+                                                {/* Suggested By badge */}
+                                                {userEntry.suggestedByUser && (
+                                                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-100/80 border border-amber-300/80 rounded-2xl text-xs font-black text-amber-900 shadow-2xs">
+                                                        <span>💡 Suggested by</span>
+                                                        <Avatar 
+                                                            src={userEntry.suggestedByUser.profilePictureUrl} 
+                                                            name={userEntry.suggestedByUser.displayName || userEntry.suggestedByUser.username} 
+                                                            size="xxs" 
+                                                        />
+                                                        <span className="underline">@{userEntry.suggestedByUser.username}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
 
                                         {userEntry.review && (
@@ -844,14 +902,23 @@ export const MovieDetailsPage: React.FC = () => {
                                     <span className="material-symbols-outlined text-[26px] ml-1">arrow_back_ios</span>
                                 </button>
                                 <div>
-                                    <h3 className="text-2xl font-black text-[#2D2926]">Log Your Watch</h3>
+                                    <h3 className="text-2xl font-black text-[#2D2926]">
+                                        {isCompletingWatch
+                                            ? 'Complete Your Watch'
+                                            : userEntry
+                                            ? 'Edit Your Watch'
+                                            : 'Log Your Watch'}
+                                    </h3>
                                     <p className="text-xs font-bold text-[#2D2926]/40 uppercase tracking-widest">
-                                        Adding entry for {title}
+                                        {isCompletingWatch
+                                            ? `Complete watch entry for ${title}`
+                                            : `Adding entry for ${title}`}
                                     </p>
                                 </div>
                             </div>
 
                             <EntryForm
+                                entry={userEntry || undefined}
                                 prefillData={{
                                     tmdbId: tmdbId!,
                                     title,
@@ -861,9 +928,21 @@ export const MovieDetailsPage: React.FC = () => {
                                     suggestedByUserId: location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || null,
                                     suggestedByUser: location.state?.suggestedByUser || null,
                                 }}
+                                defaultIsWatching={isCompletingWatch ? false : undefined}
                                 isModal={false}
-                                onSuccess={() => setView('details')}
-                                onCancel={() => setView('details')}
+                                onSuccess={(updated) => {
+                                    if (updated) {
+                                        setUserEntry(updated);
+                                    } else {
+                                        fetchDetails();
+                                    }
+                                    setIsCompletingWatch(false);
+                                    setView('details');
+                                }}
+                                onCancel={() => {
+                                    setIsCompletingWatch(false);
+                                    setView('details');
+                                }}
                             />
                         </div>
                     ) : (
