@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from './Modal';
+import { BeeLoader } from './BeeLoader';
 import apiClient from '../../services/api';
 
 interface TmdbResult {
@@ -94,7 +95,9 @@ export const SearchMediaModal: React.FC<SearchMediaModalProps> = ({
                         autoFocus
                     />
                     {isSearching && (
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#ffb700]"></div>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                            <BeeLoader size="mini" message="" />
+                        </div>
                     )}
                 </div>
 

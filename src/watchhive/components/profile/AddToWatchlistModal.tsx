@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Modal, Avatar } from '../common';
+import { Modal, Avatar, BeeLoader, ModalBeeOverlay } from '../common';
 import { userService } from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
 import { User } from '../../types';
@@ -146,7 +146,8 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
             title="Add to Watchlist"
             maxWidth="max-w-md"
         >
-            <div className="flex flex-col gap-5 pt-2">
+            <div className="flex flex-col gap-5 pt-2 relative">
+                {isSubmitting && <ModalBeeOverlay message="Adding to your Watchlist..." />}
                 {/* Media Preview Header */}
                 <div className="flex items-center gap-3.5 p-3.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5">
                     {posterPath ? (
@@ -244,8 +245,9 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                             {showUserDropdown && (
                                 <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
                                     {isLoadingUsers ? (
-                                        <div className="p-3 text-center text-xs text-slate-400 font-bold">
-                                            Searching followers...
+                                        <div className="p-3 text-center text-xs text-slate-400 font-bold flex items-center justify-center gap-2">
+                                            <BeeLoader size="mini" message="" />
+                                            <span>Searching followers...</span>
                                         </div>
                                     ) : searchResults.length === 0 ? (
                                         <div className="p-3 text-center text-xs text-slate-400 font-bold">
@@ -300,10 +302,19 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                         disabled={isSubmitting}
                         className="px-5 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                     >
-                        <span className="material-symbols-outlined text-base">
-                            {isSubmitting ? 'hourglass_empty' : 'bookmark_add'}
-                        </span>
-                        <span>{isSubmitting ? 'Adding...' : selectedUser ? 'Add with Suggestion' : 'Add to Watchlist'}</span>
+                        {isSubmitting ? (
+                            <>
+                                <BeeLoader size="mini" message="" />
+                                <span>Adding...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="material-symbols-outlined text-base">
+                                    bookmark_add
+                                </span>
+                                <span>{selectedUser ? 'Add with Suggestion' : 'Add to Watchlist'}</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </div>

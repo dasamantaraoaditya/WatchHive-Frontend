@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BeeLoader } from '../common';
 import { useAuth } from '../../contexts';
 
 /**
@@ -191,7 +192,7 @@ export const SetPasswordSection: React.FC = () => {
                             >
                                 {isLoading ? (
                                     <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                                        <BeeLoader size="mini" message="" />
                                         <span>Saving...</span>
                                     </>
                                 ) : (

@@ -473,7 +473,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                             className="shrink-0 h-11 px-5 bg-[#ffb700] hover:brightness-105 disabled:opacity-40 disabled:hover:brightness-100 text-white font-bold rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? (
-                                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                                <BeeLoader size="mini" message="" />
                             ) : (
                                 <>
                                     <span>{replyingTo ? 'Reply' : 'Post'}</span>

@@ -750,7 +750,7 @@ export const MovieDetailsPage: React.FC = () => {
                                         {/* Selected Season Episodes */}
                                         {isSeasonLoading ? (
                                             <div className="py-12 flex justify-center">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ffb700]"></div>
+                                                <BeeLoader size="medium" message="Loading episodes..." />
                                             </div>
                                         ) : seasonDetails?.episodes && seasonDetails.episodes.length > 0 ? (
                                             <div className="flex flex-col gap-3 mt-2">

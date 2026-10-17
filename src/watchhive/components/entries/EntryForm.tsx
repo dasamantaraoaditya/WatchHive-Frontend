@@ -4,6 +4,7 @@ import { entriesApi, CreateEntryData, Entry, SuggestedUser } from '../../service
 import apiClient from '../../services/api.js';
 import { HiveDatePicker } from '../common/HiveDatePicker';
 import { Avatar } from '../common/Avatar';
+import { BeeLoader, ModalBeeOverlay } from '../common';
 import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services/userService';
 import { suggestionsApi } from '../../services/suggestions.service';
@@ -606,7 +607,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const hasSelection = formData.tmdbId > 0 && formData.title.length > 0;
 
     return (
-        <div className={`w-full ${!isModal ? 'max-w-4xl mx-auto py-2 md:py-6' : ''}`}>
+        <div className={`w-full ${!isModal ? 'max-w-4xl mx-auto py-2 md:py-6' : ''} relative`}>
+            {isLoading && (
+                <ModalBeeOverlay
+                    message={
+                        isEditing
+                            ? (entry?.isWatching && !formData.isWatching ? 'Completing your watch...' : 'Updating your entry...')
+                            : (formData.isWatching ? "Saving what you're watching..." : 'Logging to your Hive...')
+                    }
+                />
+            )}
             <div className={`${!isModal ? 'bg-white border border-[#ffb700]/15 shadow-sm rounded-[32px] p-5 md:p-8' : 'p-0'}`}>
                 {!isModal && (
                     <div className="flex flex-col gap-2 mb-6 border-b border-[#ffb700]/10 pb-4">
@@ -664,7 +674,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 autoComplete="off"
                                             />
                                             {isSearching && (
-                                                <div className="absolute right-3.5 animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#ffb700]"></div>
+                                                <div className="absolute right-3.5">
+                                                    <BeeLoader size="mini" message="" />
+                                                </div>
                                             )}
                                         </div>
 
@@ -1061,7 +1073,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-[#2D2926]"></div>
+                                    <BeeLoader size="mini" message="" />
                                     Saving...
                                 </>
                             ) : (

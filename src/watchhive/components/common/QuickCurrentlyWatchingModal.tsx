@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Modal } from './Modal';
+import { BeeLoader, ModalBeeOverlay } from './BeeLoader';
 import apiClient from '../../services/api';
 import { entriesApi } from '../../services/entries.service';
 import { useCustomAlert } from '../../contexts';
@@ -120,116 +121,121 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Log Currently Watching">
-            {!selectedMovie ? (
-                <div className="flex flex-col gap-4">
-                    <p className="text-[#2D2926]/60 text-xs font-bold uppercase tracking-wider mb-1">
-                        Select a movie or TV show to add to your currently watching log:
-                    </p>
-                    <div className="relative">
-                        <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#ffb700] text-[24px]">search</span>
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            className="w-full pl-12 pr-4 py-4 bg-[#FFF9F0]/50 border-2 border-[#ffb700]/30 outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 rounded-2xl text-lg font-bold text-[#2D2926] transition-all"
-                            placeholder="Search movies or TV shows..."
-                            autoComplete="off"
-                            autoFocus
-                        />
-                        {isSearching && (
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-[#ffb700]"></div>
-                        )}
-                    </div>
-
-                    <div className="max-h-80 overflow-y-auto flex flex-col gap-2">
-                        {searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
-                            <div className="text-center text-[#2D2926]/50 py-4 font-bold">No results found.</div>
-                        )}
-                        {searchResults.map((r) => (
-                            <button
-                                key={r.id}
-                                type="button"
-                                className="w-full flex items-center gap-4 p-2 hover:bg-[#ffb700]/10 rounded-xl transition-colors cursor-pointer text-left focus:outline-none"
-                                onClick={() => handleSelectResult(r)}
-                            >
-                                {r.poster_path ? (
-                                    <img src={`https://image.tmdb.org/t/p/w92${r.poster_path}`} alt="" className="w-12 h-16 object-cover rounded-md shadow-sm border border-[#2D2926]/5" />
-                                ) : (
-                                    <div className="w-12 h-16 bg-[#FFF9F0] border border-[#ffb700]/20 rounded-md flex items-center justify-center text-[#ffb700]/50">
-                                        <span className="material-symbols-outlined">image_not_supported</span>
-                                    </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="font-bold text-[#2D2926] truncate">{r.title || r.name}</h4>
-                                    <div className="flex items-center gap-2 text-xs text-[#2D2926]/50 mt-1 font-bold tracking-widest uppercase">
-                                        <span className={r.media_type === 'tv' ? 'text-blue-500' : 'text-[#ffb700]'}>{r.media_type === 'tv' ? 'TV' : 'Movie'}</span>
-                                        {yearOf(r) && <span>• {yearOf(r)}</span>}
-                                        {r.vote_average != null && r.vote_average > 0 && <span className="flex items-center gap-1"> • ⭐ {(r.vote_average).toFixed(1)}</span>}
-                                    </div>
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            ) : (
-                <div className="flex flex-col gap-5 p-1 animate-[fade-in_0.2s_ease-out]">
-                    <div className="flex gap-4 p-4 bg-[#FFF9F0] border border-[#ffb700]/20 rounded-2xl relative shadow-sm items-start">
-                        {selectedMovie.poster_path ? (
-                            <img 
-                                src={`https://image.tmdb.org/t/p/w185${selectedMovie.poster_path}`} 
-                                alt={selectedMovie.title || selectedMovie.name} 
-                                className="w-20 aspect-[2/3] object-cover rounded-xl shadow-md border border-white" 
+            <div className="relative">
+                {isSubmitting && <ModalBeeOverlay message="Adding to currently watching..." />}
+                {!selectedMovie ? (
+                    <div className="flex flex-col gap-4">
+                        <p className="text-[#2D2926]/60 text-xs font-bold uppercase tracking-wider mb-1">
+                            Select a movie or TV show to add to your currently watching log:
+                        </p>
+                        <div className="relative">
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#ffb700] text-[24px]">search</span>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                className="w-full pl-12 pr-4 py-4 bg-[#FFF9F0]/50 border-2 border-[#ffb700]/30 outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 rounded-2xl text-lg font-bold text-[#2D2926] transition-all"
+                                placeholder="Search movies or TV shows..."
+                                autoComplete="off"
+                                autoFocus
                             />
-                        ) : (
-                            <div className="w-20 aspect-[2/3] bg-[#FFF9F0] border border-[#ffb700]/20 rounded-xl flex items-center justify-center text-[#ffb700]/50">
-                                <span className="material-symbols-outlined text-3xl">image_not_supported</span>
-                            </div>
-                        )}
-                        <div className="flex-1 pt-1 min-w-0">
-                            <h3 className="font-black text-[#2D2926] text-base truncate">{selectedMovie.title || selectedMovie.name}</h3>
-                            <div className="flex items-center gap-2 text-[10px] text-[#2D2926]/50 mt-1.5 font-black tracking-widest uppercase">
-                                <span className={selectedMovie.media_type === 'tv' ? 'text-blue-500' : 'text-[#ffb700]'}>
-                                    {selectedMovie.media_type === 'tv' ? 'TV SHOW' : 'MOVIE'}
-                                </span>
-                                {yearOf(selectedMovie) && <span>• {yearOf(selectedMovie)}</span>}
-                            </div>
-                            <p className="text-[11px] leading-relaxed text-[#2D2926]/60 mt-2 font-bold line-clamp-2">
-                                {selectedMovie.overview || "No description available for this cinematic entry."}
-                            </p>
+                            {isSearching && (
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                    <BeeLoader size="mini" message="" />
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="max-h-80 overflow-y-auto flex flex-col gap-2">
+                            {searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
+                                <div className="text-center text-[#2D2926]/50 py-4 font-bold">No results found.</div>
+                            )}
+                            {searchResults.map((r) => (
+                                <button
+                                    key={r.id}
+                                    type="button"
+                                    className="w-full flex items-center gap-4 p-2 hover:bg-[#ffb700]/10 rounded-xl transition-colors cursor-pointer text-left focus:outline-none"
+                                    onClick={() => handleSelectResult(r)}
+                                >
+                                    {r.poster_path ? (
+                                        <img src={`https://image.tmdb.org/t/p/w92${r.poster_path}`} alt="" className="w-12 h-16 object-cover rounded-md shadow-sm border border-[#2D2926]/5" />
+                                    ) : (
+                                        <div className="w-12 h-16 bg-[#FFF9F0] border border-[#ffb700]/20 rounded-md flex items-center justify-center text-[#ffb700]/50">
+                                            <span className="material-symbols-outlined">image_not_supported</span>
+                                        </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-bold text-[#2D2926] truncate">{r.title || r.name}</h4>
+                                        <div className="flex items-center gap-2 text-xs text-[#2D2926]/50 mt-1 font-bold tracking-widest uppercase">
+                                            <span className={r.media_type === 'tv' ? 'text-blue-500' : 'text-[#ffb700]'}>{r.media_type === 'tv' ? 'TV' : 'Movie'}</span>
+                                            {yearOf(r) && <span>• {yearOf(r)}</span>}
+                                            {r.vote_average != null && r.vote_average > 0 && <span className="flex items-center gap-1"> • ⭐ {(r.vote_average).toFixed(1)}</span>}
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
                         </div>
                     </div>
-
-                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#ffb700]/10">
-                        <button
-                            type="button"
-                            onClick={() => setSelectedMovie(null)}
-                            disabled={isSubmitting}
-                            className="flex items-center justify-center gap-1.5 px-5 py-3 bg-slate-100 hover:bg-slate-200 text-[#2D2926] font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 focus:outline-none cursor-pointer"
-                        >
-                            <span className="material-symbols-outlined text-sm">arrow_back</span>
-                            Change
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleConfirmStartWatching}
-                            disabled={isSubmitting}
-                            className="flex items-center justify-center gap-1.5 px-6 py-3 bg-[#ffb700] text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 cursor-pointer active:scale-97"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-white"></div>
-                                    Adding...
-                                </>
+                ) : (
+                    <div className="flex flex-col gap-5 p-1 animate-[fade-in_0.2s_ease-out]">
+                        <div className="flex gap-4 p-4 bg-[#FFF9F0] border border-[#ffb700]/20 rounded-2xl relative shadow-sm items-start">
+                            {selectedMovie.poster_path ? (
+                                <img 
+                                    src={`https://image.tmdb.org/t/p/w185${selectedMovie.poster_path}`} 
+                                    alt={selectedMovie.title || selectedMovie.name} 
+                                    className="w-20 aspect-[2/3] object-cover rounded-xl shadow-md border border-white" 
+                                />
                             ) : (
-                                <>
-                                    <span className="material-symbols-outlined text-sm font-bold">visibility</span>
-                                    Log Currently Watching
-                                </>
+                                <div className="w-20 aspect-[2/3] bg-[#FFF9F0] border border-[#ffb700]/20 rounded-xl flex items-center justify-center text-[#ffb700]/50">
+                                    <span className="material-symbols-outlined text-3xl">image_not_supported</span>
+                                </div>
                             )}
-                        </button>
+                            <div className="flex-1 pt-1 min-w-0">
+                                <h3 className="font-black text-[#2D2926] text-base truncate">{selectedMovie.title || selectedMovie.name}</h3>
+                                <div className="flex items-center gap-2 text-[10px] text-[#2D2926]/50 mt-1.5 font-black tracking-widest uppercase">
+                                    <span className={selectedMovie.media_type === 'tv' ? 'text-blue-500' : 'text-[#ffb700]'}>
+                                        {selectedMovie.media_type === 'tv' ? 'TV SHOW' : 'MOVIE'}
+                                    </span>
+                                    {yearOf(selectedMovie) && <span>• {yearOf(selectedMovie)}</span>}
+                                </div>
+                                <p className="text-[11px] leading-relaxed text-[#2D2926]/60 mt-2 font-bold line-clamp-2">
+                                    {selectedMovie.overview || "No description available for this cinematic entry."}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#ffb700]/10">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedMovie(null)}
+                                disabled={isSubmitting}
+                                className="flex items-center justify-center gap-1.5 px-5 py-3 bg-slate-100 hover:bg-slate-200 text-[#2D2926] font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all disabled:opacity-50 focus:outline-none cursor-pointer"
+                            >
+                                <span className="material-symbols-outlined text-sm">arrow_back</span>
+                                Change
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleConfirmStartWatching}
+                                disabled={isSubmitting}
+                                className="flex items-center justify-center gap-1.5 px-6 py-3 bg-[#ffb700] text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 cursor-pointer active:scale-97"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <BeeLoader size="mini" message="" />
+                                        Adding...
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="material-symbols-outlined text-sm font-bold">visibility</span>
+                                        Log Currently Watching
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </Modal>
     );
 };

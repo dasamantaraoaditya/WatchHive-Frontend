@@ -3,7 +3,7 @@ import { suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import userService from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
-import { BeeLoader } from '../common';
+import { BeeLoader, ModalBeeOverlay } from '../common';
 import { User } from '../../types';
 
 interface SuggestMovieModalProps {
@@ -184,7 +184,8 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display">
-            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#ffb700]/20 max-h-[90vh]">
+            <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#ffb700]/20 max-h-[90vh] relative">
+                {isSending && <ModalBeeOverlay message="Delivering your recommendation to friends..." />}
                 {/* Header */}
                 <div className="p-4 sm:p-5 border-b border-[#ffb700]/10 flex items-center justify-between bg-white shrink-0">
                     <div>
@@ -431,7 +432,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                     >
                         {isSending ? (
                             <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                <BeeLoader size="mini" message="" />
                                 <span>Sending Suggestion...</span>
                             </>
                         ) : (

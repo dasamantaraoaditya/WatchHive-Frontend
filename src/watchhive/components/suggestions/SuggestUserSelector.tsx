@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../types/user.types';
 import userService from '../../services/userService';
-import { Avatar, BeeLoader } from '../common';
+import { Avatar, BeeLoader, ModalBeeOverlay } from '../common';
 import { suggestionsApi } from '../../services/suggestions.service';
 
 interface SuggestUserSelectorProps {
@@ -104,7 +104,8 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
     };
 
     return (
-        <div className="flex flex-col h-[520px] font-display">
+        <div className="flex flex-col h-[520px] font-display relative">
+            {isSending && <ModalBeeOverlay message="Delivering suggestions..." />}
             {/* Header */}
             <div className="flex items-center justify-between gap-4 mb-5">
                 <div className="flex items-center gap-3">
@@ -230,7 +231,7 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                 >
                     {isSending ? (
                         <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            <BeeLoader size="mini" message="" />
                             <span>Transmitting Suggestions...</span>
                         </>
                     ) : (

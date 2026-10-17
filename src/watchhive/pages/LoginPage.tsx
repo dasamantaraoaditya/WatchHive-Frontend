@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts';
 import { GoogleSignInButton } from '../components/auth';
+import { BeeLoader } from '../components/common';
 import whLogo from '../assets/images/watchhive-logo.png';
 
 export const LoginPage: React.FC = () => {
@@ -228,7 +229,7 @@ export const LoginPage: React.FC = () => {
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                                    <BeeLoader size="mini" message="" />
                                     <span>Signing in...</span>
                                 </>
                             ) : (

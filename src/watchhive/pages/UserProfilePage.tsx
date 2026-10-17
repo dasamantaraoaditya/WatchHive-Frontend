@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
 import { formatUserFriendlyError } from '../utils/errorHandler';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal } from '../components/common';
+import { AvatarLightboxModal, BeeLoader } from '../components/common';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -481,7 +481,7 @@ export const UserProfilePage: React.FC = () => {
 
                                     {isRankingsLoading ? (
                                         <div className="py-12 flex justify-center">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ffb700]"></div>
+                                            <BeeLoader size="medium" message="Loading rankings..." />
                                         </div>
                                     ) : !userRankings || userRankings.length === 0 ? (
                                         <div className="bg-white border border-black/5 rounded-3xl p-12 text-center text-slate-400 font-bold">

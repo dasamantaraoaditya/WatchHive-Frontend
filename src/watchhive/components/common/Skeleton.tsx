@@ -40,6 +40,10 @@ export const FeedCardSkeleton: React.FC = () => {
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
                         <div className="flex-1 space-y-2">
                             <Skeleton variant="text" width="70%" height={16} />
+                            <div className="flex items-center gap-1.5 pt-0.5">
+                                <Skeleton variant="circle" width={16} height={16} />
+                                <Skeleton variant="text" width={110} height={11} />
+                            </div>
                             <Skeleton variant="text" width="40%" height={12} />
                         </div>
                         <div className="hidden md:flex flex-col items-end gap-1 border-l border-black/5 pl-3">
@@ -50,8 +54,15 @@ export const FeedCardSkeleton: React.FC = () => {
                 </div>
             </div>
 
-            <div className="skeleton-feed-poster">
+            <div className="skeleton-feed-poster relative">
                 <Skeleton variant="rect" width="100%" height="100%" />
+                <div className="absolute top-4 right-4 flex items-center gap-2">
+                    <Skeleton variant="rect" width={52} height={26} className="rounded-full" />
+                </div>
+                <div className="absolute bottom-4 left-4 flex items-center gap-1.5">
+                    <Skeleton variant="rect" width={48} height={20} className="rounded-lg" />
+                    <Skeleton variant="rect" width={56} height={20} className="rounded-lg" />
+                </div>
             </div>
 
             <div className="skeleton-feed-insight">

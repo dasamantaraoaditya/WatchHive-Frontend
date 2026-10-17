@@ -8,7 +8,7 @@ import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
 import { ExportFormat, ImportResult } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal } from '../components/common';
+import { AvatarLightboxModal, ModalBeeOverlay } from '../components/common';
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser } = useAuth();
@@ -356,14 +356,7 @@ export const ProfilePage: React.FC = () => {
                         </h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
-                            {privacyUpdating && (
-                                <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center animate-fade-in">
-                                    <div className="flex flex-col items-center gap-3">
-                                        <div className="w-8 h-8 border-4 border-[#ffb700] border-t-transparent rounded-full animate-spin"></div>
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ffb700]">Applying changes...</p>
-                                    </div>
-                                </div>
-                            )}
+                            {privacyUpdating && <ModalBeeOverlay message="Applying changes..." />}
                             {[
                                 { 
                                     id: 'PUBLIC', 
