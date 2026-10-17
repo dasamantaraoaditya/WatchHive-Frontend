@@ -109,6 +109,17 @@ const NotificationsPage: React.FC = () => {
                 return <>{actor} rejected your follow request</>;
             case 'SUGGESTION':
                 return <>{actor} suggested you watch <span className="text-[#ffb700] font-black">{content.title}</span></>;
+            case 'FRIEND_STARTED_WATCHING':
+                return <>{actor} started watching <span className="text-[#ffb700] font-black">{content.entryTitle}</span></>;
+            case 'FRIEND_LOGGED_WATCH':
+                if (content.rating && content.review) {
+                    return <>{actor} watched & reviewed <span className="text-[#ffb700] font-black">{content.entryTitle}</span> ({content.rating}★)</>;
+                } else if (content.rating) {
+                    return <>{actor} watched <span className="text-[#ffb700] font-black">{content.entryTitle}</span> ({content.rating}★)</>;
+                } else if (content.review) {
+                    return <>{actor} reviewed <span className="text-[#ffb700] font-black">{content.entryTitle}</span></>;
+                }
+                return <>{actor} finished watching <span className="text-[#ffb700] font-black">{content.entryTitle}</span></>;
             default:
                 return 'New activity in your network';
         }
@@ -124,6 +135,8 @@ const NotificationsPage: React.FC = () => {
             case 'FOLLOW_ACCEPT': return <span className="material-symbols-outlined text-emerald-600 text-xl">how_to_reg</span>;
             case 'FOLLOW_REJECT': return <span className="material-symbols-outlined text-rose-500 text-xl">person_remove</span>;
             case 'SUGGESTION': return <span className="material-symbols-outlined text-amber-500 text-xl">auto_awesome</span>;
+            case 'FRIEND_STARTED_WATCHING': return <span className="material-symbols-outlined text-cyan-500 text-xl">visibility</span>;
+            case 'FRIEND_LOGGED_WATCH': return <span className="material-symbols-outlined text-[#ffb700] text-xl">movie</span>;
             default: return <span className="material-symbols-outlined text-[#ffb700] text-xl">notifications</span>;
         }
     };

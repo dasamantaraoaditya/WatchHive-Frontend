@@ -3,15 +3,20 @@ import api from './api';
 export interface Notification {
     id: string;
     userId: string;
-    type: 'FOLLOW' | 'FOLLOW_REQUEST' | 'FOLLOW_ACCEPT' | 'FOLLOW_REJECT' | 'LIKE' | 'COMMENT' | 'REPLY' | 'MENTION' | 'SUGGESTION';
+    type: 'FOLLOW' | 'FOLLOW_REQUEST' | 'FOLLOW_ACCEPT' | 'FOLLOW_REJECT' | 'LIKE' | 'COMMENT' | 'REPLY' | 'MENTION' | 'SUGGESTION' | 'FRIEND_STARTED_WATCHING' | 'FRIEND_LOGGED_WATCH';
     content: {
         actorId: string;
         actorName: string;
+        actorAvatar?: string | null;
         entryId?: string;
         entryTitle?: string;
         commentId?: string;
         contentSnippet?: string;
         requestId?: string;
+        rating?: number | null;
+        review?: string | null;
+        isWatching?: boolean;
+        tmdbId?: number | null;
     };
     isRead: boolean;
     createdAt: string;

@@ -452,6 +452,37 @@ export const ProfilePage: React.FC = () => {
                 </div>
             </div>
 
+            {/* Notification Preferences Block */}
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700]">
+                        <span className="material-symbols-outlined">notifications</span>
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-black text-slate-800">Notification Preferences</h2>
+                        <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Manage push alerts & activity updates</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 rounded-3xl bg-white border border-slate-100 group transition-all hover:bg-slate-50/50">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-[#ffb700] group-hover:bg-[#ffb700]/5 transition-all">
+                                <span className="material-symbols-outlined text-xl">movie</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-slate-700">Friends' Watching Activity Alerts</span>
+                                <span className="text-[10px] text-slate-400 font-medium">Receive push notifications when people you follow start watching or log a title</span>
+                            </div>
+                        </div>
+                        <Toggle
+                            checked={user.notifyFollowingActivity !== false}
+                            onChange={(val) => handleTogglePrivacy('notifyFollowingActivity', val)}
+                        />
+                    </div>
+                </div>
+            </div>
+
             {/* Account Security Block — only shown for Google-only accounts */}
             <SetPasswordSection />
 
