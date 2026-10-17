@@ -466,18 +466,25 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const searchRef = useRef<HTMLDivElement>(null);
     const suggestorRef = useRef<HTMLDivElement>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const cachedFollowersRef = useRef<SuggestedUser[] | null>(null);
 
     const fetchConnections = useCallback(async (q: string) => {
         setIsSearchingSuggestors(true);
         try {
-            if (q.trim().length > 0) {
-                const res = await userService.searchUsers(q);
-                setSuggestorResults((res.users || []) as SuggestedUser[]);
-            } else {
+            if (!cachedFollowersRef.current) {
                 const followers = await userService.getFollowers(user?.id || '').catch(() => []);
-                const following = await userService.getFollowing(user?.id || '').catch(() => []);
-                const combined = Array.from(new Map([...(followers || []), ...(following || [])].map(u => [u.id, u])).values());
-                setSuggestorResults(combined as SuggestedUser[]);
+                cachedFollowersRef.current = (followers || []) as SuggestedUser[];
+            }
+            const allFollowers = cachedFollowersRef.current;
+            if (q.trim().length > 0) {
+                const query = q.trim().toLowerCase();
+                const filtered = allFollowers.filter(u => 
+                    (u.displayName && u.displayName.toLowerCase().includes(query)) ||
+                    u.username.toLowerCase().includes(query)
+                );
+                setSuggestorResults(filtered);
+            } else {
+                setSuggestorResults(allFollowers);
             }
         } catch {
             setSuggestorResults([]);
@@ -989,16 +996,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     fetchConnections(e.target.value);
                                                 }}
                                                 className="w-full pl-9 pr-4 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
-                                                placeholder="Search follower/friend username to tag suggestor..."
+                                                placeholder="Search follower username to tag suggestor..."
                                             />
                                         </div>
 
                                         {showSuggestorPicker && (
                                             <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
                                                 {isSearchingSuggestors ? (
-                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading connections...</div>
+                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading followers...</div>
                                                 ) : suggestorResults.length === 0 ? (
-                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">No connected friends found</div>
+                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">No followers found</div>
                                                 ) : (
                                                     suggestorResults.map(u => (
                                                         <button

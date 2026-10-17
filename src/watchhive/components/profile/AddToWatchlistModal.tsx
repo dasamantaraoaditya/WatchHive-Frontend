@@ -63,20 +63,28 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
         }
     }, [isOpen, initialSuggestedByUserId, initialSuggestedByUser]);
 
+    const cachedFollowersRef = useRef<User[] | null>(null);
+
     const fetchUsers = useCallback(async (q: string) => {
         setIsLoadingUsers(true);
         try {
-            if (q.trim().length > 0) {
-                const res = await userService.searchUsers(q);
-                setSearchResults(res.users || []);
-            } else {
+            if (!cachedFollowersRef.current) {
                 const followers = await userService.getFollowers(currentUser?.id || '').catch(() => []);
-                const following = await userService.getFollowing(currentUser?.id || '').catch(() => []);
-                const combined = Array.from(new Map([...(followers || []), ...(following || [])].map(u => [u.id, u])).values());
-                setSearchResults(combined);
+                cachedFollowersRef.current = followers || [];
+            }
+            const allFollowers = cachedFollowersRef.current;
+            if (q.trim().length > 0) {
+                const query = q.trim().toLowerCase();
+                const filtered = allFollowers.filter(u => 
+                    (u.displayName && u.displayName.toLowerCase().includes(query)) ||
+                    u.username.toLowerCase().includes(query)
+                );
+                setSearchResults(filtered);
+            } else {
+                setSearchResults(allFollowers);
             }
         } catch (err) {
-            console.error('Failed to search users for suggestion:', err);
+            console.error('Failed to search followers for suggestion:', err);
         } finally {
             setIsLoadingUsers(false);
         }
@@ -213,7 +221,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                                     value={searchQuery}
                                     onChange={handleSearchChange}
                                     onFocus={handleInputFocus}
-                                    placeholder="Search friend who suggested this..."
+                                    placeholder="Search follower who suggested this..."
                                     className="w-full pl-9 pr-8 py-2.5 bg-black/5 dark:bg-white/5 border border-transparent focus:border-[#ffb700] rounded-xl text-xs font-medium text-[#2D2926] dark:text-white outline-none transition-all placeholder:text-slate-400"
                                 />
                                 {searchQuery && (
@@ -235,11 +243,11 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                                 <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
                                     {isLoadingUsers ? (
                                         <div className="p-3 text-center text-xs text-slate-400 font-bold">
-                                            Searching friends...
+                                            Searching followers...
                                         </div>
                                     ) : searchResults.length === 0 ? (
                                         <div className="p-3 text-center text-xs text-slate-400 font-bold">
-                                            {searchQuery ? `No friends found for "${searchQuery}"` : "No friends found"}
+                                            {searchQuery ? `No followers found for "${searchQuery}"` : "No followers found"}
                                         </div>
                                     ) : (
                                         searchResults.map((u) => (

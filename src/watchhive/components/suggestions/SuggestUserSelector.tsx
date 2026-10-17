@@ -32,14 +32,11 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
             setLoading(true);
             try {
                 const me = await userService.getMe();
-                const [following, followers] = await Promise.all([
-                    userService.getFollowing(me.id).catch(() => []),
-                    userService.getFollowers(me.id).catch(() => [])
-                ]);
+                const followers = await userService.getFollowers(me.id).catch(() => []);
 
-                // Combine & deduplicate friends
+                // Deduplicate followers
                 const friendMap = new Map<string, User>();
-                [...following, ...followers].forEach(u => {
+                (followers || []).forEach(u => {
                     if (u.id !== me.id) {
                         friendMap.set(u.id, u);
                     }
@@ -47,8 +44,8 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
 
                 setFriends(Array.from(friendMap.values()));
             } catch (err) {
-                console.error('Failed to fetch friends for suggestions:', err);
-                setError('Failed to load your friends list.');
+                console.error('Failed to fetch followers for suggestions:', err);
+                setError('Failed to load your followers list.');
             } finally {
                 setLoading(false);
             }
@@ -146,27 +143,27 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search friends..."
+                        placeholder="Search followers..."
                         className="w-full pl-11 pr-4 py-3 bg-[#FFF9F0]/60 border-2 border-[#ffb700]/15 rounded-2xl outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all font-bold text-xs sm:text-sm text-[#2D2926]"
                     />
                 </div>
 
-                {/* Friends Selection List */}
+                {/* Followers Selection List */}
                 <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
                     {loading ? (
                         <div className="py-12 flex justify-center">
-                            <BeeLoader size="small" message="Loading friends..." />
+                            <BeeLoader size="small" message="Loading followers..." />
                         </div>
                     ) : friends.length === 0 ? (
                         <div className="py-12 text-center bg-[#FFF9F0]/50 rounded-2xl border border-[#ffb700]/10 p-6">
-                            <p className="text-[#2D2926]/60 font-bold italic text-sm">You aren't connected with anyone yet!</p>
+                            <p className="text-[#2D2926]/60 font-bold italic text-sm">No followers yet</p>
                             <p className="text-[10px] uppercase font-black text-[#ffb700] mt-2 tracking-widest">
-                                Follow friends to suggest titles
+                                When cinephiles follow you, you can suggest movies to them
                             </p>
                         </div>
                     ) : filteredUsers.length === 0 ? (
                         <div className="py-12 text-center text-[#2D2926]/40 font-bold text-xs">
-                            No friends found matching "{searchQuery}"
+                            No followers found matching "{searchQuery}"
                         </div>
                     ) : (
                         filteredUsers.map(user => {

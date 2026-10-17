@@ -69,20 +69,17 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
         return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
-    // Load connected friends on mount
+    // Load followers on mount
     useEffect(() => {
         if (!currentUser) return;
         const loadFriends = async () => {
             setIsLoadingFriends(true);
             try {
-                const [following, followers] = await Promise.all([
-                    userService.getFollowing(currentUser.id).catch(() => []),
-                    userService.getFollowers(currentUser.id).catch(() => [])
-                ]);
+                const followers = await userService.getFollowers(currentUser.id).catch(() => []);
 
-                // Combine & deduplicate friends
+                // Deduplicate followers
                 const friendMap = new Map<string, User>();
-                [...following, ...followers].forEach(u => {
+                (followers || []).forEach(u => {
                     if (u.id !== currentUser.id) {
                         friendMap.set(u.id, u);
                     }
@@ -90,10 +87,8 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
 
                 const allFriends = Array.from(friendMap.values());
                 setFriends(allFriends);
-
-                // If no pre-selected toUserId and there are friends, default to empty or keep initial
             } catch (err) {
-                console.error('Failed to load friends for suggestions:', err);
+                console.error('Failed to load followers for suggestions:', err);
             } finally {
                 setIsLoadingFriends(false);
             }
@@ -324,14 +319,14 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                     )}
                                 </div>
 
-                                {/* Friend Filter Input (if more than 3 friends) */}
+                                {/* Followers Filter Input (if more than 3 followers) */}
                                 {friends.length > 3 && (
                                     <div className="relative mb-1">
                                         <input
                                             type="text"
                                             value={friendSearch}
                                             onChange={(e) => setFriendSearch(e.target.value)}
-                                            placeholder="Search friends..."
+                                            placeholder="Search followers..."
                                             className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-[#2D2926] outline-none focus:border-[#ffb700]"
                                         />
                                         <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
@@ -340,14 +335,14 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                     </div>
                                 )}
 
-                                {/* Friends Checkbox List */}
+                                {/* Followers Checkbox List */}
                                 {isLoadingFriends ? (
                                     <div className="py-6 flex justify-center">
-                                        <BeeLoader size="small" message="Loading friends..." />
+                                        <BeeLoader size="small" message="Loading followers..." />
                                     </div>
                                 ) : friends.length === 0 ? (
                                     <div className="p-4 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-2xl border border-slate-200">
-                                        Follow other users to suggest titles to them!
+                                        No followers yet. When cinephiles follow you, you can suggest movies to them!
                                     </div>
                                 ) : (
                                     <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-1">
