@@ -68,11 +68,13 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
     const fetchUsers = useCallback(async (q: string) => {
         setIsLoadingUsers(true);
         try {
-            if (!cachedFollowersRef.current) {
-                const followers = await userService.getFollowers(currentUser?.id || '').catch(() => []);
-                cachedFollowersRef.current = followers || [];
+            if (!cachedFollowersRef.current || cachedFollowersRef.current.length === 0) {
+                const followers = await userService.getFollowers(currentUser?.id).catch(() => []);
+                if (followers && followers.length > 0) {
+                    cachedFollowersRef.current = followers;
+                }
             }
-            const allFollowers = cachedFollowersRef.current;
+            const allFollowers = cachedFollowersRef.current || [];
             if (q.trim().length > 0) {
                 const query = q.trim().toLowerCase();
                 const filtered = allFollowers.filter(u => 

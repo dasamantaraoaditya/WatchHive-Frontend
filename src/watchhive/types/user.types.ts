@@ -23,6 +23,7 @@ export interface User {
     hasGoogleLinked?: boolean;
     hasPassword?: boolean;
     isFollowing?: boolean;
+    isFollower?: boolean;
     isRequested?: boolean;
     isIncomingRequest?: boolean;
     incomingRequestId?: string | null;

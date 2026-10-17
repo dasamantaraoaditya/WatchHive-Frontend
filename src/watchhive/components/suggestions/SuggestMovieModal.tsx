@@ -143,8 +143,10 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
         }
     };
 
+    const isSingleRecipientNotFollower = Boolean(!isLoadingFriends && toUserId && !friends.some(f => f.id === toUserId));
+
     const handleSendSuggestion = async () => {
-        if (!selectedMovie) return;
+        if (!selectedMovie || isSingleRecipientNotFollower) return;
         const targetIds = Array.from(selectedUserIds);
         if (targetIds.length === 0) {
             setError('Please select at least one friend to receive this suggestion.');
@@ -319,6 +321,13 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                     )}
                                 </div>
 
+                                {isSingleRecipientNotFollower && (
+                                    <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-2xl flex items-center gap-2 text-amber-800 text-xs font-bold">
+                                        <span className="material-symbols-outlined text-sm text-amber-600 shrink-0">info</span>
+                                        <span>@{toUserName || 'This user'} is not following you yet. Only followers can receive suggestions.</span>
+                                    </div>
+                                )}
+
                                 {/* Followers Filter Input (if more than 3 followers) */}
                                 {friends.length > 3 && (
                                     <div className="relative mb-1">
@@ -416,7 +425,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                 {/* Footer Action */}
                 <div className="p-4 bg-[#FFF9F0]/40 border-t border-[#ffb700]/10 shrink-0">
                     <button
-                        disabled={!selectedMovie || selectedUserIds.size === 0 || isSending}
+                        disabled={!selectedMovie || selectedUserIds.size === 0 || isSending || isSingleRecipientNotFollower}
                         onClick={handleSendSuggestion}
                         className="w-full py-3.5 bg-[#ffb700] text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale cursor-pointer"
                     >
