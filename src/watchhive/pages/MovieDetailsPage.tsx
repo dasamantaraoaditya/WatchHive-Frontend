@@ -133,7 +133,7 @@ export const MovieDetailsPage: React.FC = () => {
     const location = useLocation();
     const { setPageTitle, setPageIcon } = useUI();
     const { alert, confirm } = useCustomAlert();
-    const { addToList, removeFromList, isInWatchlist } = useWatchlist();
+    const { promptAddToWatchlist, removeFromList, isInWatchlist } = useWatchlist();
 
     const mediaType = (paramMediaType === 'tv' ? 'tv' : 'movie') as 'movie' | 'tv';
     const tmdbId = paramTmdbId ? parseInt(paramTmdbId, 10) : null;
@@ -289,10 +289,18 @@ export const MovieDetailsPage: React.FC = () => {
         if (!tmdbId) return;
         try {
             const suggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id;
+            const suggestedByUser = location.state?.suggestedByUser;
             if (inWatchlist) {
                 await removeFromList(tmdbId);
             } else {
-                await addToList(tmdbId, mediaType, suggestedByUserId);
+                promptAddToWatchlist({
+                    tmdbId,
+                    mediaType,
+                    title,
+                    posterPath: details?.poster_path,
+                    suggestedByUserId,
+                    suggestedByUser,
+                });
             }
         } catch (err) {
             console.error('Watchlist action failed', err);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import apiClient from '../../services/api.js';
-import { MovieDetailsModal, Modal, CardDropdownMenu } from '../common';
+import { MovieDetailsModal, Modal, CardDropdownMenu, Avatar } from '../common';
 import { entriesApi } from '../../services/entries.service';
 import { EntryForm } from '../entries/EntryForm';
 import './Profile.css';
@@ -211,8 +211,13 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
             <div className="watchlist-card__info gap-1 p-4 flex flex-col h-full bg-white border-t border-slate-50">
                 <h4 className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={title}>{title}</h4>
                 {suggestedByUser && (
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200/70 rounded-md text-[#2D2926] text-[9px] font-bold w-fit mt-0.5">
-                        <span>💡 Suggested by</span>
+                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50/90 border border-amber-200/80 rounded-lg text-[#2D2926] text-[10px] font-bold w-fit mt-0.5 shadow-2xs">
+                        <Avatar
+                            src={suggestedByUser.profilePictureUrl || undefined}
+                            name={suggestedByUser.displayName || suggestedByUser.username}
+                            size="xxs"
+                        />
+                        <span className="text-[#2D2926]/70">Suggested by</span>
                         <span className="font-black text-amber-800">@{suggestedByUser.username}</span>
                     </div>
                 )}

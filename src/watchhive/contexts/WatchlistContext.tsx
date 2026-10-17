@@ -1,6 +1,21 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import listsApi, { List } from '../services/lists.service';
 import { useAuth } from './AuthContext';
+import { AddToWatchlistModal } from '../components/profile/AddToWatchlistModal';
+
+export interface PromptAddToWatchlistParams {
+    tmdbId: number;
+    mediaType?: 'movie' | 'tv';
+    title?: string;
+    posterPath?: string | null;
+    suggestedByUserId?: string | null;
+    suggestedByUser?: {
+        id: string;
+        username: string;
+        displayName?: string | null;
+        profilePictureUrl?: string | null;
+    } | null;
+}
 
 interface WatchlistContextType {
     watchlist: List | null;
@@ -8,6 +23,7 @@ interface WatchlistContextType {
     hasLoaded: boolean;
     error: string | null;
     addToList: (tmdbId: number, mediaType?: 'movie' | 'tv', suggestedByUserId?: string | null) => Promise<void>;
+    promptAddToWatchlist: (params: PromptAddToWatchlistParams) => void;
     removeFromList: (tmdbId: number) => Promise<void>;
     isInWatchlist: (tmdbId: number) => boolean;
     fetchWatchlist: () => Promise<void>;
@@ -29,6 +45,11 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const [isLoading, setIsLoading] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [modalParams, setModalParams] = useState<PromptAddToWatchlistParams | null>(null);
+
+    const promptAddToWatchlist = useCallback((params: PromptAddToWatchlistParams) => {
+        setModalParams(params);
+    }, []);
 
     const fetchWatchlist = useCallback(async () => {
         if (!isAuthenticated) {
@@ -143,8 +164,23 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     return (
-        <WatchlistContext.Provider value={{ watchlist, isLoading, hasLoaded, error, addToList, removeFromList, isInWatchlist, fetchWatchlist }}>
+        <WatchlistContext.Provider value={{ watchlist, isLoading, hasLoaded, error, addToList, promptAddToWatchlist, removeFromList, isInWatchlist, fetchWatchlist }}>
             {children}
+            {modalParams && (
+                <AddToWatchlistModal
+                    isOpen={!!modalParams}
+                    onClose={() => setModalParams(null)}
+                    tmdbId={modalParams.tmdbId}
+                    mediaType={modalParams.mediaType}
+                    title={modalParams.title}
+                    posterPath={modalParams.posterPath}
+                    initialSuggestedByUserId={modalParams.suggestedByUserId}
+                    initialSuggestedByUser={modalParams.suggestedByUser}
+                    onConfirm={async (suggestedByUserId) => {
+                        await addToList(modalParams.tmdbId, modalParams.mediaType, suggestedByUserId);
+                    }}
+                />
+            )}
         </WatchlistContext.Provider>
     );
 };

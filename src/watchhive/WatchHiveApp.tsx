@@ -56,7 +56,7 @@ const WatchersHiveRedirect: React.FC = () => {
 // App Routes Component
 const AppRoutes: React.FC = () => {
     const { isAuthenticated } = useAuth();
-    const { addToList } = useWatchlist();
+    const { promptAddToWatchlist } = useWatchlist();
     const [activeAction, setActiveAction] = React.useState<'log' | 'watching' | 'watchlist' | 'suggest' | null>(null);
     const [selectedMedia, setSelectedMedia] = React.useState<{ tmdbId: number; mediaType: 'movie' | 'tv' } | null>(null);
 
@@ -67,7 +67,7 @@ const AppRoutes: React.FC = () => {
 
     const handleSearchSelect = async (tmdbId: number, mediaType: 'movie' | 'tv') => {
         if (activeAction === 'watchlist') {
-            await addToList(tmdbId, mediaType);
+            promptAddToWatchlist({ tmdbId, mediaType });
             closeAll();
         } else if (activeAction === 'suggest') {
             setSelectedMedia({ tmdbId, mediaType });

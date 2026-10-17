@@ -21,10 +21,9 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     onSearchChange,
     readOnly = false
 }) => {
-    const { watchlist: contextWatchlist, isLoading: contextLoading, hasLoaded: contextHasLoaded, error: contextError, fetchWatchlist, addToList } = useWatchlist();
+    const { watchlist: contextWatchlist, isLoading: contextLoading, hasLoaded: contextHasLoaded, error: contextError, fetchWatchlist, promptAddToWatchlist } = useWatchlist();
     const [sortBy, setSortBy] = useState('recent-desc');
     const [showAddModal, setShowAddModal] = useState(false);
-    const [isAdding, setIsAdding] = useState(false);
     const PAGE_SIZE = 20;
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -35,16 +34,8 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     const showSkeleton = loading && !contextHasLoaded;
 
     const handleAddToWatchlist = async (tmdbId: number, mediaType: 'movie' | 'tv') => {
-        setIsAdding(true);
-        try {
-            await addToList(tmdbId, mediaType);
-            setShowAddModal(false);
-            if (!propItems) fetchWatchlist();
-        } catch (err) {
-            console.error('Failed to add to watchlist', err);
-        } finally {
-            setIsAdding(false);
-        }
+        setShowAddModal(false);
+        promptAddToWatchlist({ tmdbId, mediaType });
     };
 
     const filteredItems = [...items]
@@ -156,8 +147,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                         {!searchQuery && !readOnly && (
                             <button
                                 onClick={() => setShowAddModal(true)}
-                                disabled={isAdding}
-                                className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
                             >
                                 <span className="material-symbols-outlined text-base font-bold">bookmark_add</span>
                                 Add to Watchlist
