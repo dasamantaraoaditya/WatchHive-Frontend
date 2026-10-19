@@ -1,5 +1,49 @@
 import { apiClient } from './api';
 
+export interface TasteBreadth {
+    entropy: number;
+    normalizedBreadth: number;
+    label: string;
+    description: string;
+    genreDistribution: {
+        genre: string;
+        percentage: number;
+        weight: number;
+    }[];
+}
+
+export interface AffectiveState {
+    mood: string;
+    status: string;
+    quadrant: string;
+    valence: number;
+    arousal: number;
+    description: string;
+    icon: string;
+    confidence: number;
+    recentTitles: string[];
+}
+
+export interface CriticalRigor {
+    averageRating: number;
+    variance: number;
+    standardDeviation: number;
+    label: string;
+    reviewRatio: number;
+    totalRated: number;
+}
+
+export interface CognitiveArchetype {
+    id: string;
+    name: string;
+    tagline: string;
+    description: string;
+    icon: string;
+    color: string;
+    scientificBasis: string;
+    coreTraits: string[];
+}
+
 export interface MoodPrediction {
     mood: string;
     status: string;
@@ -7,6 +51,9 @@ export interface MoodPrediction {
     icon: string;
     confidence: number;
     recentTitles: string[];
+    quadrant?: string;
+    valence?: number;
+    arousal?: number;
 }
 
 export interface BehavioralTrail {
@@ -45,6 +92,8 @@ export interface RecommenderStat {
     currentlyWatchingCount: number;
     conversionRate: number;
     avgRating: number | null;
+    smoothedRating?: number;
+    trustScore?: number;
     highHitCount: number;
     influenceScore: number;
     badge: string;
@@ -67,18 +116,32 @@ export interface SuggestionAnalytics {
 
 export interface MindLensData {
     hasEnoughData: boolean;
+    milestoneStage?: 'CALIBRATING' | 'FOUNDATIONAL' | 'FULL';
+    calibrationProgress?: {
+        current: number;
+        target: number;
+    };
     message?: string;
     userProfile?: {
         totalEntries: number;
         primaryMood: string;
+        tasteBreadth?: TasteBreadth;
+        criticalRigor?: CriticalRigor;
     };
     persona?: {
         name: string;
+        tagline?: string;
         description: string;
         icon: string;
         imageUrl?: string;
         color: string;
+        scientificBasis?: string;
+        traits?: string[];
     };
+    archetype?: CognitiveArchetype;
+    tasteBreadth?: TasteBreadth;
+    affectiveState?: AffectiveState;
+    criticalRigor?: CriticalRigor;
     moodPrediction?: MoodPrediction;
     behavioralTrails?: BehavioralTrail[];
     badges?: UserBadge[];
@@ -99,5 +162,5 @@ export interface MindLensData {
 export const mindLensApi = {
     getInsights: async (): Promise<MindLensData> => {
         return await apiClient.get<MindLensData>('/mindlens/insights');
-    }
+    },
 };
