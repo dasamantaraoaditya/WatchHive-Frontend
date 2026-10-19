@@ -11,6 +11,7 @@ WatchHive Frontend is the user-facing web portal for the WatchersHive platform. 
 - **Social Movie Recommendations**: Send and receive movie suggestions, see recommendation impact scores, and thank suggesters.
 - **Cinematic Watch Logging**: Log ratings, tags, watch dates, and reviews with live TMDb search integration.
 - **Activity & Social Discovery**: Follow friends, discover trending movies across the community, and interact via likes and comments.
+- **MindLens 2.0 Behavioral Intelligence**: Interactive telemetry visualizing Shannon Information Entropy ($H(G)$) for taste breadth, Russell's Circumplex Affective State, and Bayesian Recommender Trust. Documented in [MINDLENS_SPECIFICATION.md](docs/MINDLENS_SPECIFICATION.md).
 - **Offline-First PWA Experience**: Installable as a native desktop/mobile app with offline caching and automatic synchronization when reconnected.
 
 ---
