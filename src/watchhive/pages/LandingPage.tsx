@@ -296,7 +296,7 @@ export const LandingPage: React.FC = () => {
 
     // Reveal references
     const heroReveal = useReveal(0.04);
-    const androidReveal = useReveal(0.08);
+    const mobileReveal = useReveal(0.08);
     const suggestionSectionReveal = useReveal(0.08);
     const stacksSectionReveal = useReveal(0.08);
     const mindLensSectionReveal = useReveal(0.08);
@@ -391,51 +391,114 @@ export const LandingPage: React.FC = () => {
                     </Link>
 
                     <a 
-                        href="#android-launch"
-                        className="w-full sm:w-auto bg-white border border-amber-300 hover:border-amber-500 text-amber-900 text-base font-extrabold px-6 py-4 rounded-2xl hover:bg-amber-50 transition-all flex items-center justify-center gap-2 shadow-xs"
+                        href="#mobile-launch"
+                        className="w-full sm:w-auto bg-white border border-amber-300 hover:border-amber-500 text-amber-900 text-base font-extrabold px-6 py-4 rounded-2xl hover:bg-amber-50 transition-all flex items-center justify-center gap-2.5 shadow-xs group"
                     >
-                        <span className="material-symbols-outlined text-[20px] text-emerald-600">android</span>
-                        <span>Android App Launch</span>
+                        <div className="flex items-center gap-1.5 text-stone-900">
+                            <svg className="w-4 h-4 fill-current text-stone-900" viewBox="0 0 24 24">
+                                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.93.04-2.02.63-2.66 1.38-.56.65-.99 1.7-0.88 2.73.99.08 2.02-.53 2.53-1.24z"/>
+                            </svg>
+                            <span className="material-symbols-outlined text-[19px] text-emerald-600">android</span>
+                        </div>
+                        <span>iOS & Android Apps</span>
                     </a>
                 </div>
 
-                {/* Android App Launch Announcement Banner (Joyful & Professional) */}
-                <div id="android-launch" className={`w-full max-w-5xl bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 text-white rounded-3xl p-6 sm:p-8 border border-amber-400/30 shadow-xl mb-16 text-left relative overflow-hidden lp-reveal ${androidReveal.visible ? 'is-visible' : ''}`} ref={androidReveal.ref}>
+                {/* Apple iOS & Android App Launch Announcement Banner */}
+                <div id="mobile-launch" className={`w-full max-w-5xl bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 text-white rounded-3xl p-6 sm:p-8 border border-amber-400/30 shadow-xl mb-16 text-left relative overflow-hidden lp-reveal ${mobileReveal.visible ? 'is-visible' : ''}`} ref={mobileReveal.ref}>
+                    <span id="android-launch" className="sr-only"></span>
                     <div className="absolute -right-20 -top-20 w-64 h-64 bg-[#ffb700]/15 rounded-full blur-3xl pointer-events-none"></div>
 
-                    <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
-                        <div className="space-y-2">
+                    <div className="relative z-10 space-y-6">
+                        {/* Header Badges & Title */}
+                        <div className="space-y-3">
                             <div className="flex flex-wrap items-center gap-2.5">
-                                <span className="bg-emerald-500 text-stone-950 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center gap-1">
+                                <span className="bg-white/15 text-white border border-white/20 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-xs">
+                                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.93.04-2.02.63-2.66 1.38-.56.65-.99 1.7-0.88 2.73.99.08 2.02-.53 2.53-1.24z"/>
+                                    </svg>
+                                    <span>Apple App Store & TestFlight</span>
+                                </span>
+                                <span className="bg-emerald-500 text-stone-950 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-xs">
                                     <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                    <span>Play Store Internal Testing</span>
+                                    <span className="material-symbols-outlined text-[13px]">android</span>
+                                    <span>Google Play Store</span>
                                 </span>
                                 <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-bold px-2.5 py-1 rounded-md">
-                                    Flutter v1.0.33+34 Ready
+                                    Flutter Native v1.0.33 Ready
                                 </span>
                             </div>
-                            <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                                WatchersHive for Android — Launching Soon!
+                            <h3 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white">
+                                WatchersHive for iOS & Android — Launching Soon!
                             </h3>
-                            <p className="text-sm text-stone-300 font-medium max-w-2xl leading-relaxed">
-                                Experience buttery 60/120 FPS native performance, offline theater mode with local SQLite queuing (rate & log even with zero cellular bars in the cinema), and seamless background synchronization.
+                            <p className="text-sm sm:text-base text-stone-300 font-medium max-w-3xl leading-relaxed">
+                                Crafted natively with Flutter for iPhone, iPad, and Android. Experience silky 120 FPS ProMotion fluidity, native haptics, offline theater mode with local SQLite queuing (rate & log in the cinema even with zero bars), and real-time push alerts.
                             </p>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full lg:w-auto">
-                            <button
-                                onClick={handleInstall}
-                                className="bg-[#ffb700] hover:bg-amber-300 text-stone-950 font-black text-xs px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm"
+                        {/* Dual OS Highlight Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-start gap-3.5 hover:border-white/20 transition-colors">
+                                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0 text-white">
+                                    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.93.04-2.02.63-2.66 1.38-.56.65-.99 1.7-0.88 2.73.99.08 2.02-.53 2.53-1.24z"/>
+                                    </svg>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-black text-white">Apple iOS Experience</span>
+                                        <span className="text-[10px] font-black text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">TestFlight Beta</span>
+                                    </div>
+                                    <p className="text-xs text-stone-300 leading-relaxed">
+                                        Apple Sign-In & Google Sign-In, native Cupertino haptics, APNs push alerts, and buttery 120Hz ProMotion support.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-start gap-3.5 hover:border-white/20 transition-colors">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0 text-emerald-400">
+                                    <span className="material-symbols-outlined text-[24px]">android</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-black text-white">Android Experience</span>
+                                        <span className="text-[10px] font-black text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">Google Play Beta</span>
+                                    </div>
+                                    <p className="text-xs text-stone-300 leading-relaxed">
+                                        Material design, predictive back navigation, Google Play Services auth, and instant background sync.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Action Footer Bar */}
+                        <div className="pt-4 border-t border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                <Link
+                                    to="/watch-hive/support"
+                                    className="bg-[#ffb700] hover:bg-amber-300 text-stone-950 font-black text-xs px-6 py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm text-center"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">verified_user</span>
+                                    <span>Request iOS & Android Beta Access</span>
+                                </Link>
+                                <button
+                                    onClick={handleInstall}
+                                    className="bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs px-5 py-3.5 rounded-xl border border-white/20 transition-all flex items-center justify-center gap-2 text-center"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">download</span>
+                                    <span>{isInstalled ? 'PWA Ready on Device' : 'Install PWA Today'}</span>
+                                </button>
+                            </div>
+
+                            <a
+                                href="https://github.com/dasamantaraoaditya/WatchHive-Mobile"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-bold text-amber-300 hover:text-amber-200 flex items-center justify-center sm:justify-start gap-1.5 transition-colors py-1"
                             >
-                                <span className="material-symbols-outlined text-[18px]">download</span>
-                                <span>{isInstalled ? 'PWA Ready on Device' : 'Install PWA Today'}</span>
-                            </button>
-                            <Link
-                                to="/watch-hive/support"
-                                className="bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs px-5 py-3 rounded-xl border border-white/20 transition-all text-center"
-                            >
-                                Request Tester Access
-                            </Link>
+                                <span>Explore Mobile Repo</span>
+                                <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                            </a>
                         </div>
                     </div>
 
@@ -1105,16 +1168,21 @@ export const LandingPage: React.FC = () => {
                     >
                         <div>
                             <div className="flex justify-between items-start mb-4">
-                                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-emerald-700">
-                                    <span className="material-symbols-outlined text-[22px]">phone_iphone</span>
+                                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-stone-900">
+                                    <div className="flex items-center gap-1.5">
+                                        <svg className="w-4 h-4 fill-current text-stone-900" viewBox="0 0 24 24">
+                                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.93.04-2.02.63-2.66 1.38-.56.65-.99 1.7-0.88 2.73.99.08 2.02-.53 2.53-1.24z"/>
+                                        </svg>
+                                        <span className="material-symbols-outlined text-[17px] text-emerald-600">android</span>
+                                    </div>
                                 </div>
-                                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Mobile Companion</span>
+                                <span className="text-[10px] font-black text-amber-900 bg-amber-100 px-2 py-0.5 rounded">iOS & Android App</span>
                             </div>
                             <h4 className="text-lg font-black text-stone-950 mb-1 group-hover:text-amber-600 transition-colors">
-                                Movies In Your Pocket
+                                Cinema in Your Pocket
                             </h4>
                             <p className="text-xs text-stone-600 font-medium leading-relaxed">
-                                Log movies straight from the theater seat. Smooth animations, instant offline logging, and home-screen widgets for Android & iOS.
+                                Log movies straight from the theater seat. Smooth animations, instant offline logging, and native performance for Apple iOS (TestFlight) & Android.
                             </p>
                         </div>
                         <div className="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between text-xs font-black text-amber-900">
