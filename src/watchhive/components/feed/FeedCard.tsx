@@ -3,6 +3,10 @@ import { FeedItem } from '../../services/feed.service';
 import { useTmdbDetails } from '../../hooks/useTmdbDetails';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, WatchlistButton } from '../common';
+import { Modal } from '../common/Modal';
+import { EntryForm } from '../entries/EntryForm';
+import { SuggestMovieModal } from '../suggestions/SuggestMovieModal';
+import { useAuth } from '../../contexts/AuthContext';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
 import whLogo from '../../assets/images/watchhive-logo.png';
@@ -17,6 +21,7 @@ const TMDB_BACKDROP_IMG = 'https://image.tmdb.org/t/p/w780';
 
 export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const navigate = useNavigate();
+    const { user: currentUser } = useAuth();
     const isSuggestion = item.type === 'SUGGESTION';
     const entryData = isSuggestion ? null : item.data;
     const targetTmdbId = isSuggestion ? item.data.id : entryData?.tmdbId;
@@ -29,6 +34,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [showShareFeedback, setShowShareFeedback] = useState<boolean>(false);
     const [isCommented, setIsCommented] = useState<boolean>(entryData?.isCommented || false);
     const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
+    const [showLogModal, setShowLogModal] = useState<boolean>(false);
+    const [showSuggestModal, setShowSuggestModal] = useState<boolean>(false);
 
     const shouldFetchDetails = !isSuggestion;
     const fetchTmdbId = shouldFetchDetails ? targetTmdbId : null;
@@ -69,6 +76,18 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const avatarUrl = isSuggestion
         ? null // Suggestions don't have user avatars
         : (userAvatar || undefined);
+
+    // Determine prefilled suggestor for quick log
+    const isOwnPost = Boolean(currentUser?.id && userId === currentUser.id);
+    const prefilledSuggestor = entryData?.suggestedByUser
+        ? entryData.suggestedByUser
+        : (!isOwnPost && userId && username ? {
+            id: userId,
+            username,
+            displayName,
+            profilePictureUrl: avatarUrl || null,
+        } : null);
+    const prefilledSuggestorId = prefilledSuggestor?.id || null;
 
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
@@ -338,21 +357,54 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    {/* Quick Actions (Watchlist, Log Watch, Suggest, Share) */}
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                        {/* 1. Quick Add to Watchlist */}
+                        {targetTmdbId && (
+                            <div className="relative group/btn" title="Save to Watchlist">
+                                <WatchlistButton 
+                                    tmdbId={targetTmdbId} 
+                                    variant="icon" 
+                                    className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/50 hover:text-[#ffb700] hover:bg-white flex items-center justify-center shadow-xs hover:shadow-sm text-[18px] transition-all cursor-pointer" 
+                                />
+                            </div>
+                        )}
+
+                        {/* 2. Quick Log Watch (Prefilled with Movie & Suggestor) */}
+                        {targetTmdbId && (
+                            <button
+                                type="button"
+                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/50 hover:text-[#ffb700] hover:bg-white flex items-center justify-center shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                                title={`Log watch${prefilledSuggestor ? ` (Suggested by @${prefilledSuggestor.username})` : ''}`}
+                                onClick={() => setShowLogModal(true)}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">add_task</span>
+                            </button>
+                        )}
+
+                        {/* 3. Quick Suggest to a Friend */}
+                        {targetTmdbId && (
+                            <button
+                                type="button"
+                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/50 hover:text-[#ffb700] hover:bg-white flex items-center justify-center shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                                title="Suggest to a friend"
+                                onClick={() => setShowSuggestModal(true)}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">forward</span>
+                            </button>
+                        )}
+
+                        {/* 4. Share activity */}
                         <button
-                            className={`icon-only-btn transition-all ${showShareFeedback ? 'text-green-500' : ''}`}
+                            type="button"
+                            className={`w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/50 hover:text-[#ffb700] hover:bg-white flex items-center justify-center shadow-xs hover:shadow-sm transition-all cursor-pointer ${showShareFeedback ? 'text-green-500!' : ''}`}
                             title={showShareFeedback ? "Link Copied!" : "Share activity"}
                             onClick={handleShare}
                         >
-                            <span className="material-symbols-outlined text-[20px]">
+                            <span className="material-symbols-outlined text-[18px]">
                                 {showShareFeedback ? 'check_circle' : 'share'}
                             </span>
                         </button>
-                        {!item.data?.isWatched && targetTmdbId && (
-                            <div className="flex items-center gap-2">
-                                <WatchlistButton tmdbId={targetTmdbId} variant="icon" className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm text-[20px]" />
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
@@ -372,6 +424,48 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     onCommentDeleted={(newCount) => {
                         setCommentCount(prev => Math.max(0, newCount ?? prev - 1));
                     }}
+                />
+            )}
+
+            {/* Quick Log Watch Modal (Prefilled with Movie & Suggestor) */}
+            {showLogModal && targetTmdbId && (
+                <Modal
+                    isOpen={showLogModal}
+                    onClose={() => setShowLogModal(false)}
+                    title="Log your watch"
+                    maxWidth="max-w-4xl"
+                >
+                    <EntryForm
+                        isModal={true}
+                        prefillData={{
+                            tmdbId: targetTmdbId,
+                            title: title,
+                            type: normMediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                            posterPath: posterPathRaw || null,
+                            overview: details?.overview || null,
+                            suggestedByUserId: prefilledSuggestorId,
+                            suggestedByUser: prefilledSuggestor,
+                        }}
+                        onSuccess={() => setShowLogModal(false)}
+                        onCancel={() => setShowLogModal(false)}
+                    />
+                </Modal>
+            )}
+
+            {/* Quick Suggest to Friend Modal (Prefilled with Movie) */}
+            {showSuggestModal && targetTmdbId && (
+                <SuggestMovieModal
+                    isOpen={showSuggestModal}
+                    initialMovie={{
+                        id: targetTmdbId,
+                        title: title,
+                        name: title,
+                        media_type: normMediaType,
+                        poster_path: posterPathRaw || null,
+                        overview: details?.overview,
+                    }}
+                    onClose={() => setShowSuggestModal(false)}
+                    onSuccess={() => setShowSuggestModal(false)}
                 />
             )}
         </>
