@@ -346,15 +346,8 @@ export const LandingPage: React.FC = () => {
                         </div>
                     </Link>
                     
+                    {/* Preserved center space for future top-level routes */}
                     <div className="hidden lg:flex items-center gap-8 font-extrabold text-sm text-stone-700">
-                        <a href="#android-launch" className="hover:text-amber-600 transition-colors flex items-center gap-1.5 text-amber-800 bg-amber-100/70 px-3 py-1 rounded-full border border-amber-300/60">
-                            <span className="material-symbols-outlined text-[16px] text-amber-600">android</span>
-                            <span>Android App Coming</span>
-                        </a>
-                        <a href="#suggestions" className="hover:text-amber-600 transition-colors">Direct Suggestions</a>
-                        <a href="#stacks" className="hover:text-amber-600 transition-colors">Report Card Stacks</a>
-                        <a href="#mindlens" className="hover:text-amber-600 transition-colors">MindLens</a>
-                        <a href="#open-source" className="hover:text-amber-600 transition-colors">Open Source</a>
                     </div>
                     
                     <div className="flex items-center gap-3">
@@ -488,30 +481,30 @@ export const LandingPage: React.FC = () => {
             <section id="suggestions" className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto lp-reveal ${suggestionSectionReveal.visible ? 'is-visible' : ''}`} ref={suggestionSectionReveal.ref}>
                 <div className="text-center mb-16 max-w-3xl mx-auto">
                     <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
-                        Feature 1: Direct Human Suggestions
+                        Word of Mouth
                     </span>
                     <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
-                        Movie Suggestions That Cheer You Up.
+                        Recommendations from People Who Actually Know You.
                     </h2>
                     <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
-                        In WatchersHive, you don't scroll aimless recommendation algorithms. Friends handpick titles with thoughtful personal notes. And you can see which friends in your circle provide the suggestions that truly impact you.
+                        Stop letting cold corporate algorithms guess what you should watch next. Your friends know your taste best. Receive handpicked movie suggestions with heartfelt personal notes — and discover whose recommendations never miss.
                     </p>
                 </div>
 
-                {/* Interactive Showcase: Exact Web App SuggestionCard Widget */}
+                {/* Interactive Showcase */}
                 <div className="bg-white rounded-[36px] p-6 sm:p-10 border border-amber-200/90 shadow-[0_12px_40px_rgba(255,183,0,0.08)] text-left">
                     
                     {/* Top Switcher for Friends */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-stone-200 gap-4">
                         <div>
                             <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full inline-block mb-1">
-                                Live Web App Widget Demo
+                                Try It Live
                             </span>
                             <h3 className="text-xl sm:text-2xl font-black text-stone-950">
-                                Received Suggestion Card (As Rendered in Hive)
+                                A Note Waiting Just For You
                             </h3>
                             <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
-                                Select a friend to view their recommendation note and suggester impact:
+                                Select a friend below to see how recommendations feel when they land in your Hive:
                             </p>
                         </div>
 
@@ -636,29 +629,29 @@ export const LandingPage: React.FC = () => {
                                 <div className="bg-amber-50/70 border border-amber-200 rounded-3xl p-6 space-y-4">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-black text-amber-950 uppercase tracking-wider">
-                                            Suggester Impact Insights
-                                        </span>
+                                            Friend Taste Chemistry
+                                         </span>
                                         <span className="text-xs font-black bg-white px-3 py-1 rounded-full border border-amber-300 text-amber-800">
                                             {activeFriend.tag}
                                         </span>
                                     </div>
 
                                     <p className="text-sm text-stone-700 font-medium leading-relaxed">
-                                        WatchersHive automatically calculates how often {activeFriend.name.split(' ')[0]}'s suggestions resonate with your cinematic journey. No guessing—you know who gives the recommendations that never miss.
+                                        WatchersHive keeps track of whose recommendations you enjoy most. No more wondering whose taste aligns with yours — see your circle's hit rate at a glance.
                                     </p>
 
                                     {/* 3 Metrics */}
                                     <div className="grid grid-cols-3 gap-3 pt-2 text-center">
                                         <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-xs">
-                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">Resonance Rate</span>
+                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">Taste Match</span>
                                             <span className="text-2xl font-black text-emerald-600">{activeFriend.resonanceScore}%</span>
                                         </div>
                                         <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-xs">
-                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">Loved & Watched</span>
+                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">Watched & Loved</span>
                                             <span className="text-2xl font-black text-stone-900">{activeFriend.suggestionsWatched} / {activeFriend.suggestionsSent}</span>
                                         </div>
                                         <div className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-xs">
-                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">Top Stacked</span>
+                                            <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">All-Time Favorites</span>
                                             <span className="text-2xl font-black text-amber-700">#{activeFriend.topStacked} Films</span>
                                         </div>
                                     </div>
@@ -668,8 +661,8 @@ export const LandingPage: React.FC = () => {
                             {/* Cheer Up Button & Interactive Response */}
                             <div className="p-5 bg-white rounded-2xl border border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                                 <div>
-                                    <span className="text-xs font-black text-stone-900 block">Cheer back your suggester</span>
-                                    <span className="text-xs text-stone-600 font-medium">Send a buzz of appreciation for this thoughtful pick.</span>
+                                    <span className="text-xs font-black text-stone-900 block">Say thanks to your friend</span>
+                                    <span className="text-xs text-stone-600 font-medium">Send a quick buzz to let them know their pick hit the spot.</span>
                                 </div>
 
                                 <div className="flex items-center gap-3">
@@ -705,13 +698,13 @@ export const LandingPage: React.FC = () => {
                     
                     <div className="text-center mb-16 max-w-3xl mx-auto">
                         <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
-                            Feature 2: Cinematic Stacks
+                            Beyond Star Ratings
                         </span>
                         <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
-                            Your Personal Movie Experience Report Card.
+                            Your Movie Journey, Told as a Personal Story.
                         </h2>
                         <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
-                            We don't obsess over sterile decimal ratings. A Cinematic Stack is your emotional footprint: the order of movies you preserve tells the world who you are, what you treasure, and the monumental impact cinema had on your journey.
+                            A sterile 5-star rating or decimal number can't explain how a movie changed you. Cinematic Stacks are your living, curated collections: rank the stories that reshaped your perspective, the comfort watches you replay on rainy nights, and the films you'll cherish forever.
                         </p>
                     </div>
 
@@ -722,10 +715,10 @@ export const LandingPage: React.FC = () => {
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-amber-300/60 gap-4">
                             <div>
                                 <span className="text-[10px] font-black text-amber-900 uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-amber-300 inline-block mb-1">
-                                    Reorder Live (Click ▲ / ▼)
+                                    Click ▲ / ▼ to reorder
                                 </span>
                                 <h3 className="text-xl sm:text-2xl font-black text-stone-950">
-                                    Stack: {activeStackTheme === 'worldview' ? '"Films That Changed My Worldview"' : '"Sanctuary for a Tired Soul"'}
+                                    Collection: {activeStackTheme === 'worldview' ? '"Films That Changed My Worldview"' : '"Sanctuary for a Tired Soul"'}
                                 </h3>
                             </div>
 
@@ -734,13 +727,13 @@ export const LandingPage: React.FC = () => {
                                     onClick={() => setActiveStackTheme('worldview')}
                                     className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${activeStackTheme === 'worldview' ? 'bg-[#ffb700] text-stone-950 shadow-xs' : 'text-stone-600 hover:text-stone-900'}`}
                                 >
-                                    Worldview Stack
+                                    Worldview Shifters
                                 </button>
                                 <button
                                     onClick={() => setActiveStackTheme('comfort')}
                                     className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${activeStackTheme === 'comfort' ? 'bg-[#ffb700] text-stone-950 shadow-xs' : 'text-stone-600 hover:text-stone-900'}`}
                                 >
-                                    Sanctuary Stack
+                                    Soul Sanctuary
                                 </button>
                             </div>
                         </div>
@@ -815,41 +808,41 @@ export const LandingPage: React.FC = () => {
                                     <div className="flex items-center gap-2 mb-3">
                                         <span className="material-symbols-outlined text-amber-600">badge</span>
                                         <h4 className="font-black text-xs text-amber-900 uppercase tracking-widest">
-                                            Your Experience Report Card
+                                            What Your Stack Says
                                         </h4>
                                     </div>
 
                                     <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 mb-5">
                                         <span className="text-[10px] font-black text-stone-500 uppercase tracking-widest block mb-1">
-                                            Crown Film In Your Stack
+                                            Top Pick In This Collection
                                         </span>
                                         <h5 className="font-black text-lg text-stone-950 mb-1">
-                                            {topStackMovie.title} is at #1
+                                            {topStackMovie.title} takes the crown
                                         </h5>
                                         <p className="text-xs text-stone-700 font-medium leading-relaxed">
-                                            Prioritizing <strong>{topStackMovie.title}</strong> signals that your soul values <strong className="text-amber-900">{topStackMovie.emotionalTone}</strong>. Anyone who inspects your profile instantly knows what leaves an indelible mark on you.
+                                            Placing <strong>{topStackMovie.title}</strong> at #1 shows your love for <strong className="text-amber-900">{topStackMovie.emotionalTone}</strong>. Anyone viewing your profile gets an instant glimpse into the kind of stories that move you.
                                         </p>
                                     </div>
 
                                     <div className="space-y-3">
                                         <div className="flex justify-between items-center text-xs pb-2.5 border-b border-stone-200">
-                                            <span className="font-bold text-stone-600">Emotional Impact Tier</span>
+                                            <span className="font-bold text-stone-600">Emotional Vibe</span>
                                             <span className="font-black text-emerald-700">{topStackMovie.impactTier}</span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs pb-2.5 border-b border-stone-200">
-                                            <span className="font-bold text-stone-600">Hive Alignment</span>
-                                            <span className="font-black text-stone-900">Matches 1.4k Cinephiles</span>
+                                            <span className="font-bold text-stone-600">Shared Taste</span>
+                                            <span className="font-black text-stone-900">Loved by 1.4k Members</span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs">
-                                            <span className="font-bold text-stone-600">Stack Purpose</span>
-                                            <span className="font-black text-amber-900">Personal Memory Monument</span>
+                                            <span className="font-bold text-stone-600">Collection Purpose</span>
+                                            <span className="font-black text-amber-900">Personal Favorites</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="mt-6 pt-5 border-t border-stone-200">
                                     <p className="text-xs text-stone-600 font-medium leading-relaxed">
-                                        💡 Your stacks are not a competitive leaderboard. They are your personal report card of movies you treasure, and proof of how cinema touched your life.
+                                        💡 Your stacks aren't a scoreboard. They are a personal celebration of the movies you cherish and the memories tied to them.
                                     </p>
                                 </div>
                             </div>
@@ -864,13 +857,13 @@ export const LandingPage: React.FC = () => {
             <section id="mindlens" className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto lp-reveal ${mindLensSectionReveal.visible ? 'is-visible' : ''}`} ref={mindLensSectionReveal.ref}>
                 <div className="text-center mb-16 max-w-3xl mx-auto">
                     <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
-                        Feature 3: Psychological Mirror
+                        AI For Self-Discovery
                     </span>
                     <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
-                        MindLens™ Analytics & Soul Persona.
+                        Discover What Your Movie Habits Say About You.
                     </h2>
                     <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
-                        WatchersHive goes beyond genre labels like "Action" or "Drama". MindLens maps the emotional density of what you watch into psychological traits, predicted mood states, and your cinephile Soul Persona.
+                        Ever wonder why you crave quiet, slow dramas on Sunday evenings or intense thrillers after a chaotic week? MindLens looks at the emotional rhythm of what you watch to reveal your cinephile persona, your mood patterns, and the feelings you seek out most.
                     </p>
                 </div>
 
@@ -879,10 +872,10 @@ export const LandingPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-stone-200 gap-4">
                         <div>
                             <span className="text-[10px] font-black text-amber-900 uppercase tracking-widest bg-amber-100 px-3 py-1 rounded-full inline-block mb-1">
-                                MindLens Engine Demo
+                                Interactive Preview
                             </span>
                             <h3 className="text-xl sm:text-2xl font-black text-stone-950">
-                                Psychological State & Predicted Mood
+                                Your Mood Patterns & Persona
                             </h3>
                         </div>
 
@@ -894,7 +887,7 @@ export const LandingPage: React.FC = () => {
                                     onClick={() => setMindLensMood(moodKey)}
                                     className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-black capitalize transition-all ${mindLensMood === moodKey ? 'bg-white text-stone-950 shadow-xs border border-stone-200' : 'text-stone-600 hover:text-stone-900'}`}
                                 >
-                                    {moodKey === 'existential' ? 'Cosmic Void' : moodKey === 'comfort' ? 'Comfort Sanctuary' : 'Kinetic Epic'}
+                                    {moodKey === 'existential' ? 'Deep & Thoughtful' : moodKey === 'comfort' ? 'Warm & Comforting' : 'High Adrenaline'}
                                 </button>
                             ))}
                         </div>
@@ -909,7 +902,7 @@ export const LandingPage: React.FC = () => {
                                 <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
                                     <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-amber-300">
                                         <span className="text-lg">{activeMoodData.icon}</span>
-                                        <span className="text-xs font-black uppercase tracking-wider text-amber-900">Predicted Mood State</span>
+                                        <span className="text-xs font-black uppercase tracking-wider text-amber-900">Current Vibe</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 text-xs font-black text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
                                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -932,7 +925,7 @@ export const LandingPage: React.FC = () => {
                             {/* Trigger Titles */}
                             <div className="pt-4 border-t border-amber-300/60">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-stone-500 block mb-2">
-                                    Recent Mood Triggers
+                                    Recent Movies Shaping This Vibe
                                 </span>
                                 <div className="flex flex-wrap gap-2">
                                     {activeMoodData.recentTitles.map((title, i) => (
@@ -954,7 +947,7 @@ export const LandingPage: React.FC = () => {
                                 </div>
 
                                 <span className="text-[10px] font-black uppercase tracking-widest text-amber-800 mb-1">
-                                    Soul Persona
+                                    Your Film Persona
                                 </span>
                                 <h4 className="text-xl font-black text-stone-950 mb-2">
                                     {activeMoodData.persona}
@@ -968,7 +961,7 @@ export const LandingPage: React.FC = () => {
                             <div className="w-full space-y-2.5 pt-4 border-t border-stone-200 text-left">
                                 <div>
                                     <div className="flex justify-between text-[11px] font-bold text-stone-700 mb-1">
-                                        <span>Atmosphere Resonance</span>
+                                        <span>Visual & Sound Immersion</span>
                                         <span>{activeMoodData.atmosphere}%</span>
                                     </div>
                                     <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
@@ -977,7 +970,7 @@ export const LandingPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <div className="flex justify-between text-[11px] font-bold text-stone-700 mb-1">
-                                        <span>Existential Depth</span>
+                                        <span>Emotional & Mental Depth</span>
                                         <span>{activeMoodData.depth}%</span>
                                     </div>
                                     <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
@@ -991,18 +984,18 @@ export const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* ── Section 4: The Swarm Social Feed (Accurate FeedCard Replica) ── */}
+            {/* ── Section 4: Pure Community Feed ─────────────────── */}
             <section className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 bg-white border-t border-amber-200/80 lp-reveal ${feedSectionReveal.visible ? 'is-visible' : ''}`} ref={feedSectionReveal.ref}>
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16 max-w-3xl mx-auto">
                         <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
-                            Feature 4: The Swarm Feed
+                            Pure Community
                         </span>
                         <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
-                            Micro-Reviews & Community Buzz.
+                            Real Conversations with Real Film Lovers.
                         </h2>
                         <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
-                            A live social feed without ads or promotional spam. See what your friends are binging, give reviews a "Buzz", and join vibrant discussions about cinema you love.
+                            A calm, ad-free social feed where friends share heartfelt reactions. See what people in your circle are watching, exchange thoughts, and talk about cinema that moves you.
                         </p>
                     </div>
 
@@ -1063,17 +1056,17 @@ export const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            {/* ── Section 5: Open Source Collaborative Ground ───────── */}
+            {/* ── Section 5: Open Source & Community First ─────────── */}
             <section id="open-source" className={`py-20 md:py-28 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto lp-reveal ${openSourceReveal.visible ? 'is-visible' : ''}`} ref={openSourceReveal.ref}>
                 <div className="text-center mb-16 max-w-3xl mx-auto">
                     <span className="text-xs font-black uppercase tracking-widest text-amber-900 bg-amber-100 px-4 py-1.5 rounded-full inline-block border border-amber-300 mb-3">
-                        Built For The Public Good
+                        100% Free & Open
                     </span>
                     <h2 className="text-3xl sm:text-5xl font-black text-stone-950 tracking-tight mb-4">
-                        100% Open Source Ground.
+                        Built for Film Lovers. Not Wall Street.
                     </h2>
                     <p className="text-base sm:text-lg text-stone-700 font-medium leading-relaxed">
-                        No closed corporate silos. WatchersHive is built openly on GitHub so developers, designers, and movie buffs can collaborate on building the ultimate movie tracking, suggestion, and review platform.
+                        No corporate paywalls, tracking pixels, or algorithmic tricks. WatchersHive is community-powered and open source — designed to serve cinema enthusiasts, forever.
                     </p>
                 </div>
 
@@ -1089,17 +1082,17 @@ export const LandingPage: React.FC = () => {
                                 <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-800">
                                     <span className="material-symbols-outlined text-[22px]">laptop</span>
                                 </div>
-                                <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded">React • Vite</span>
+                                <span className="text-[10px] font-black text-amber-800 bg-amber-100 px-2 py-0.5 rounded">Web & Desktop</span>
                             </div>
                             <h4 className="text-lg font-black text-stone-950 mb-1 group-hover:text-amber-600 transition-colors">
-                                WatchHive-Frontend
+                                Fast Everywhere
                             </h4>
                             <p className="text-xs text-stone-600 font-medium leading-relaxed">
-                                Complete web app, PWA service worker with offline caching, interactive Stacks ranker, and MindLens UI.
+                                Access your watchlist anywhere. Instantly responsive, works offline on your laptop or tablet, and installs like a native app.
                             </p>
                         </div>
                         <div className="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between text-xs font-black text-amber-900">
-                            <span>Inspect on GitHub</span>
+                            <span>Explore Web Project</span>
                             <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </div>
                     </a>
@@ -1115,17 +1108,17 @@ export const LandingPage: React.FC = () => {
                                 <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-emerald-700">
                                     <span className="material-symbols-outlined text-[22px]">phone_iphone</span>
                                 </div>
-                                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Flutter • Android & iOS</span>
+                                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Mobile Companion</span>
                             </div>
                             <h4 className="text-lg font-black text-stone-950 mb-1 group-hover:text-amber-600 transition-colors">
-                                WatchHive-Mobile
+                                Movies In Your Pocket
                             </h4>
                             <p className="text-xs text-stone-600 font-medium leading-relaxed">
-                                Cross-platform mobile app in internal testing for Google Play Store, featuring offline SQLite queuing and 120Hz animations.
+                                Log movies straight from the theater seat. Smooth animations, instant offline logging, and home-screen widgets for Android & iOS.
                             </p>
                         </div>
                         <div className="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between text-xs font-black text-amber-900">
-                            <span>Inspect on GitHub</span>
+                            <span>Explore Mobile App</span>
                             <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </div>
                     </a>
@@ -1139,19 +1132,19 @@ export const LandingPage: React.FC = () => {
                         <div>
                             <div className="flex justify-between items-start mb-4">
                                 <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-blue-700">
-                                    <span className="material-symbols-outlined text-[22px]">database</span>
+                                    <span className="material-symbols-outlined text-[22px]">lock_open</span>
                                 </div>
-                                <span className="text-[10px] font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded">Node • Express • SQL</span>
+                                <span className="text-[10px] font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded">Transparent & Private</span>
                             </div>
                             <h4 className="text-lg font-black text-stone-950 mb-1 group-hover:text-amber-600 transition-colors">
-                                WatchHive-Backend
+                                Your Movie Life Stays Yours
                             </h4>
                             <p className="text-xs text-stone-600 font-medium leading-relaxed">
-                                High-throughput API server with TMDb caching layer, suggestion notifications, and JWT authentication.
+                                No algorithmic manipulation, no data harvesting for ad networks. 100% open-source code built purely for the love of film.
                             </p>
                         </div>
                         <div className="mt-6 pt-4 border-t border-stone-200 flex items-center justify-between text-xs font-black text-amber-900">
-                            <span>Inspect on GitHub</span>
+                            <span>Explore Core Platform</span>
                             <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </div>
                     </a>
