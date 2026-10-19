@@ -59,8 +59,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         ? `${TMDB_BACKDROP_IMG}${backdropPathRaw}`
         : (posterPathRaw ? `${TMDB_POSTER_IMG}${posterPathRaw}` : null);
 
-    const username = isSuggestion ? 'WatchersHive Suggestion' : (entryData?.user?.username || 'User');
-    const displayName = isSuggestion ? (item.reason || 'Trending Now') : (entryData?.user?.displayName || username);
+    const username = isSuggestion ? 'WatchersHive' : (entryData?.user?.username || 'User');
+    const displayName = isSuggestion ? 'WatchersHive' : (entryData?.user?.displayName || username);
     const userId = !isSuggestion ? (entryData?.user?.id || entryData?.userId) : null;
 
     // Support both profilePictureUrl and avatarUrl (defensive)
@@ -155,7 +155,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         return entryData.review ? 'reviewed' : 'just watched';
     })();
 
-    const releaseYear = (details?.release_date || details?.first_air_date || '').substring(0, 4);
+    const releaseYear = (details?.release_date || details?.first_air_date || (item.data as any)?.release_date || (item.data as any)?.first_air_date || '').substring(0, 4);
     const runtime = details?.runtime || (details?.episode_run_time && details.episode_run_time[0]);
     const genreText = details?.genres?.map((g: any) => g.name).slice(0, 2).join(', ');
 
@@ -168,17 +168,18 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     return (
         <>
             <div className={`feed-card glass group ${isSuggestion ? 'feed-card--suggestion' : ''}`}>
-                {/* Suggestion Badge (Optional: if we want to keep it explicitly visual outside the text) */}
+                {/* Suggestion Reason Badge */}
                 {isSuggestion && (
-                    <div className="absolute -top-3 left-6 bg-primary text-background-dark text-xs font-bold px-3 py-1 rounded-full border border-primary/20 shadow-sm z-10">
-                        ✨ Recommended for You
+                    <div className="absolute -top-3 left-6 bg-primary text-background-dark text-xs font-bold px-3 py-1 rounded-full border border-primary/20 shadow-sm z-10 flex items-center gap-1.5 max-w-[90%] truncate">
+                        <span>✨</span>
+                        <span className="truncate">{item.reason || 'Recommended for You'}</span>
                     </div>
                 )}
 
                 {/* Header: Avatar, Name & Action */}
                 <div className="feed-card-header">
                     <div className="feed-card-avatar-wrapper ring-2 ring-primary ring-offset-4 ring-offset-background-dark">
-                        <Link to={userId ? `/watch-hive/profile/${userId}` : '#'}>
+                        <Link to={userId ? `/watch-hive/profile/${userId}` : '/watch-hive'}>
                             <Avatar
                                 src={isSuggestion ? whLogo : avatarUrl}
                                 name={isSuggestion ? 'WatchersHive' : username}

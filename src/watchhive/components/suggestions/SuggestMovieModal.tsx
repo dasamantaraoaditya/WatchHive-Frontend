@@ -10,6 +10,16 @@ interface SuggestMovieModalProps {
     isOpen?: boolean;
     toUserId?: string;
     toUserName?: string;
+    initialMovie?: {
+        id: number;
+        title?: string;
+        name?: string;
+        media_type?: string;
+        poster_path?: string | null;
+        overview?: string;
+        release_date?: string;
+        first_air_date?: string;
+    } | null;
     onClose: () => void;
     onSuccess?: () => void;
 }
@@ -29,6 +39,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     isOpen = true,
     toUserId,
     toUserName,
+    initialMovie,
     onClose,
     onSuccess
 }) => {
@@ -40,7 +51,36 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<TmdbResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [selectedMovie, setSelectedMovie] = useState<TmdbResult | null>(null);
+    const [selectedMovie, setSelectedMovie] = useState<TmdbResult | null>(() => {
+        if (initialMovie) {
+            return {
+                id: initialMovie.id,
+                title: initialMovie.title,
+                name: initialMovie.name,
+                media_type: initialMovie.media_type || 'movie',
+                poster_path: initialMovie.poster_path || null,
+                overview: initialMovie.overview,
+                release_date: initialMovie.release_date,
+                first_air_date: initialMovie.first_air_date,
+            };
+        }
+        return null;
+    });
+
+    useEffect(() => {
+        if (initialMovie) {
+            setSelectedMovie({
+                id: initialMovie.id,
+                title: initialMovie.title,
+                name: initialMovie.name,
+                media_type: initialMovie.media_type || 'movie',
+                poster_path: initialMovie.poster_path || null,
+                overview: initialMovie.overview,
+                release_date: initialMovie.release_date,
+                first_air_date: initialMovie.first_air_date,
+            });
+        }
+    }, [initialMovie, isOpen]);
 
     // Multi-Recipient State
     const [friends, setFriends] = useState<User[]>([]);
