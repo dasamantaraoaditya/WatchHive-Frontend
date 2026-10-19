@@ -592,6 +592,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 savedEntry = await entriesApi.createEntry(payload as CreateEntryData);
             }
             onSuccess?.(savedEntry);
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('watchhive:entry-created', { detail: savedEntry }));
+            }
         } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to save entry');
         } finally {

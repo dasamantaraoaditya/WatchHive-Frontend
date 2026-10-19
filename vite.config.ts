@@ -50,21 +50,6 @@ export default defineConfig({
                         },
                     },
                     {
-                        urlPattern: /\/api\/.*/i,
-                        handler: 'NetworkFirst',
-                        options: {
-                            cacheName: 'api-cache',
-                            networkTimeoutSeconds: 5,
-                            expiration: {
-                                maxEntries: 50,
-                                maxAgeSeconds: 60 * 60 * 24,
-                            },
-                            cacheableResponse: {
-                                statuses: [0, 200],
-                            },
-                        },
-                    },
-                    {
                         urlPattern: /^https?:\/\/.*\.(?:png|jpg|jpeg|svg|gif|webp)(?:\?.*)?$/i,
                         handler: 'StaleWhileRevalidate',
                         options: {

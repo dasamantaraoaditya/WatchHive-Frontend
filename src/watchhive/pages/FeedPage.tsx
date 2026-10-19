@@ -131,6 +131,14 @@ export const FeedPage: React.FC = () => {
         }
     }, [fetchFeed, isOnline]);
 
+    useEffect(() => {
+        const handleEntryCreated = () => {
+            fetchFeed(1);
+        };
+        window.addEventListener('watchhive:entry-created', handleEntryCreated);
+        return () => window.removeEventListener('watchhive:entry-created', handleEntryCreated);
+    }, [fetchFeed]);
+
     // Handle offline
     if (!isOnline && items.length === 0) {
         return (
