@@ -150,62 +150,49 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                 onClose={() => setIsSuggestModalOpen(false)} 
                 onSuccess={fetchSuggestions}
             />
-            {/* Header Action Banner */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 bg-[#FFF9F0] border border-[#ffb700]/30 rounded-3xl shadow-xs">
-                <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-[#ffb700]/20 flex items-center justify-center text-[#ffb700] text-xl shrink-0">
-                        🎬
-                    </div>
-                    <div>
-                        <h3 className="text-base font-black text-[#2D2926]">Recommendations Hub</h3>
-                        <p className="text-xs font-bold text-slate-500">
-                            Suggest movies & TV shows to friends or view their recommendations
-                        </p>
-                    </div>
+            {/* Sub-tabs for Suggestions (Received) vs Suggested (Sent) & Suggest to Friends Action */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2 p-1.5 bg-black/5 rounded-2xl w-fit self-start">
+                    <button
+                        onClick={() => setSubTab('received')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                            subTab === 'received'
+                                ? 'bg-white text-[#2D2926] shadow-xs'
+                                : 'text-slate-500 hover:text-[#2D2926]'
+                        }`}
+                    >
+                        <span className="material-symbols-outlined text-base">inbox</span>
+                        <span>Suggestions</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                            subTab === 'received' ? 'bg-[#ffb700]/20 text-amber-800' : 'bg-black/5 text-slate-500'
+                        }`}>
+                            {receivedGroups.length}
+                        </span>
+                    </button>
+                    <button
+                        onClick={() => setSubTab('sent')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                            subTab === 'sent'
+                                ? 'bg-white text-[#2D2926] shadow-xs'
+                                : 'text-slate-500 hover:text-[#2D2926]'
+                        }`}
+                    >
+                        <span className="material-symbols-outlined text-base">send</span>
+                        <span>Suggested</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                            subTab === 'sent' ? 'bg-[#ffb700]/20 text-amber-800' : 'bg-black/5 text-slate-500'
+                        }`}>
+                            {sentGroups.length}
+                        </span>
+                    </button>
                 </div>
 
                 <button
                     onClick={() => setIsSuggestModalOpen(true)}
-                    className="px-4 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center gap-2 cursor-pointer shrink-0 self-end sm:self-center"
+                    className="px-4 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 self-end sm:self-center"
                 >
                     <span className="material-symbols-outlined text-lg">auto_awesome</span>
                     <span>Suggest to Friends</span>
-                </button>
-            </div>
-
-            {/* Sub-tabs for Suggestions (Received) vs Suggested (Sent) */}
-            <div className="flex items-center gap-2 p-1.5 bg-black/5 rounded-2xl w-fit self-start">
-                <button
-                    onClick={() => setSubTab('received')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                        subTab === 'received'
-                            ? 'bg-white text-[#2D2926] shadow-xs'
-                            : 'text-slate-500 hover:text-[#2D2926]'
-                    }`}
-                >
-                    <span className="material-symbols-outlined text-base">inbox</span>
-                    <span>Suggestions</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                        subTab === 'received' ? 'bg-[#ffb700]/20 text-amber-800' : 'bg-black/5 text-slate-500'
-                    }`}>
-                        {receivedGroups.length}
-                    </span>
-                </button>
-                <button
-                    onClick={() => setSubTab('sent')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                        subTab === 'sent'
-                            ? 'bg-white text-[#2D2926] shadow-xs'
-                            : 'text-slate-500 hover:text-[#2D2926]'
-                    }`}
-                >
-                    <span className="material-symbols-outlined text-base">send</span>
-                    <span>Suggested</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                        subTab === 'sent' ? 'bg-[#ffb700]/20 text-amber-800' : 'bg-black/5 text-slate-500'
-                    }`}>
-                        {sentGroups.length}
-                    </span>
                 </button>
             </div>
 
