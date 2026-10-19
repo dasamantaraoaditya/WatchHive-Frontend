@@ -77,6 +77,10 @@ export const userService = {
     async getDetailedStats(days = 30, type?: string, genre?: string, minRating?: number): Promise<any> {
         return apiClient.get('/stats/detailed', { params: { days, type, genre, minRating } });
     },
+
+    async deleteAccount(): Promise<void> {
+        return apiClient.delete('/users/me');
+    },
 };
 
 export default userService;
