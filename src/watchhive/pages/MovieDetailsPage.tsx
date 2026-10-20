@@ -175,6 +175,15 @@ export const MovieDetailsPage: React.FC = () => {
     const [view, setView] = useState<'details' | 'log' | 'suggest'>(
         initialAction === 'log' ? 'log' : initialAction === 'suggest' ? 'suggest' : 'details'
     );
+
+    useEffect(() => {
+        const action = searchParams.get('action');
+        if (action === 'log') {
+            setView('log');
+        } else if (action === 'suggest') {
+            setView('suggest');
+        }
+    }, [searchParams]);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [isCompletingWatch, setIsCompletingWatch] = useState(false);
     const [isNavVisible, setIsNavVisible] = useState(true);

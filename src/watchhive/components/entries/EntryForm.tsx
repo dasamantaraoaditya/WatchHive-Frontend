@@ -411,6 +411,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         isWatching: defaultIsWatching !== undefined ? defaultIsWatching : (entry?.isWatching || false),
         watchLocation: entry?.watchLocation || '',
         suggestedByUserId: entry?.suggestedByUserId || prefillData?.suggestedByUserId || undefined,
+        postToFeed: entry?.postToFeed !== undefined ? entry.postToFeed : true,
     });
 
     // ── UI state ──
@@ -816,8 +817,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         <div className="flex items-center gap-2.5 flex-shrink-0">
                                             <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
                                                 ${formData.isRewatch
-                                                    ? 'bg-[#ffb700]/10 text-[#ffb700]'
-                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
+                                                    ? 'bg-[#ffb700] text-black font-extrabold shadow-sm'
+                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/40'}`}>
                                                 {formData.isRewatch ? 'YES' : 'NO'}
                                             </span>
                                             <div className="relative">
@@ -853,6 +854,31 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     className="sr-only peer"
                                                 />
                                                 <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#22c55e] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
+                                            </div>
+                                        </div>
+                                    </label>
+
+                                    {/* Post to Feed Toggle */}
+                                    <label className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FFF9F0]/50 transition-all cursor-pointer group">
+                                        <div className="flex flex-col gap-0.5 min-w-0 pr-2">
+                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">Post to Feed</span>
+                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Publish this watch activity to your followers and public feed</span>
+                                        </div>
+                                        <div className="flex items-center gap-2.5 flex-shrink-0">
+                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
+                                                ${formData.postToFeed
+                                                    ? 'bg-[#ffb700] text-black font-extrabold shadow-sm'
+                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/40'}`}>
+                                                {formData.postToFeed ? 'YES' : 'NO'}
+                                            </span>
+                                            <div className="relative">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.postToFeed ?? true}
+                                                    onChange={(e) => setFormData((prev) => ({ ...prev, postToFeed: e.target.checked }))}
+                                                    className="sr-only peer"
+                                                />
+                                                <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#ffb700] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
                                             </div>
                                         </div>
                                     </label>
