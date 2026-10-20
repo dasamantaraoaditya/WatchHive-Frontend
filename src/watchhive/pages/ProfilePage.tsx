@@ -7,7 +7,7 @@ import { ImportPreviewModal } from '../components/profile/ImportPreviewModal';
 import { User, UpdateUserData } from '../types';
 import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
-import { ExportFormat, ImportResult, ImportPreviewResult } from '../services/data.service';
+import { ExportFormat, ImportResult, ImportPreviewResult, AI_IMPORT_PROMPT } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
 import { AvatarLightboxModal, ModalBeeOverlay } from '../components/common';
 
@@ -45,7 +45,14 @@ export const ProfilePage: React.FC = () => {
     const [previewData, setPreviewData] = useState<ImportPreviewResult | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isCommittingImport, setIsCommittingImport] = useState(false);
+    const [copiedPrompt, setCopiedPrompt] = useState(false);
     const importFileRef = useRef<HTMLInputElement>(null);
+
+    const handleCopyAiPrompt = () => {
+        navigator.clipboard.writeText(AI_IMPORT_PROMPT);
+        setCopiedPrompt(true);
+        setTimeout(() => setCopiedPrompt(false), 2000);
+    };
 
     useEffect(() => {
         if (user) {
@@ -261,8 +268,8 @@ export const ProfilePage: React.FC = () => {
                 <div className="flex flex-col md:flex-row items-center gap-8 mt-2 md:mt-0">
 
                     {/* Avatar */}
-                    <div 
-                        className="relative group cursor-pointer shrink-0" 
+                    <div
+                        className="relative group cursor-pointer shrink-0"
                         onClick={() => setIsAvatarModalOpen(true)}
                         title="Click to view full picture"
                     >
@@ -270,11 +277,11 @@ export const ProfilePage: React.FC = () => {
                         <div className="relative p-1 bg-gradient-to-br from-[#ffb700] via-[#ffaa00] to-transparent rounded-full shadow-lg transition-transform group-hover:scale-105 duration-300">
                             <div className="bg-white rounded-full p-1 w-32 h-32 md:w-40 md:h-40 overflow-hidden relative">
                                 {resolveAvatarUrl(user.profilePictureUrl) && !avatarError ? (
-                                    <img 
-                                        className={`w-full h-full object-cover rounded-full ${uploading ? 'opacity-50' : ''}`} 
-                                        src={resolveAvatarUrl(user.profilePictureUrl)!} 
+                                    <img
+                                        className={`w-full h-full object-cover rounded-full ${uploading ? 'opacity-50' : ''}`}
+                                        src={resolveAvatarUrl(user.profilePictureUrl)!}
                                         alt={user.username}
-                                        onError={() => setAvatarError(true)} 
+                                        onError={() => setAvatarError(true)}
                                     />
                                 ) : (
                                     <div className="w-full h-full rounded-full bg-[#ffb700]/5 flex items-center justify-center text-[#ffb700]">
@@ -288,7 +295,7 @@ export const ProfilePage: React.FC = () => {
                             </div>
                         </div>
                         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-                        
+
                         {/* Camera upload button */}
                         <button
                             type="button"
@@ -381,8 +388,8 @@ export const ProfilePage: React.FC = () => {
 
             {/* Privacy Settings Block */}
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700]">
+                <div className="flex items-start gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0 mt-0.5">
                         <span className="material-symbols-outlined">lock</span>
                     </div>
                     <div>
@@ -490,8 +497,8 @@ export const ProfilePage: React.FC = () => {
 
             {/* Notification Preferences Block */}
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700]">
+                <div className="flex items-start gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0 mt-0.5">
                         <span className="material-symbols-outlined">notifications</span>
                     </div>
                     <div>
@@ -533,9 +540,9 @@ export const ProfilePage: React.FC = () => {
                     onChange={e => handleImportFile(e.target.files?.[0])}
                 />
 
-                <div className="flex items-center justify-between gap-3 sm:gap-4 mb-6">
-                    <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0">
+                <div className="flex items-start justify-between gap-3 sm:gap-4 mb-6">
+                    <div className="flex items-start gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0 mt-0.5">
                             <span className="material-symbols-outlined">{dataActionTab === 'export' ? 'file_download' : 'file_upload'}</span>
                         </div>
                         <div className="min-w-0">
@@ -643,6 +650,18 @@ export const ProfilePage: React.FC = () => {
                 ) : (
                     /* ─── IMPORT VIEW ─────────────────────────────────────── */
                     <div className="space-y-6 animate-[fade-in_0.2s_ease-out]">
+                        {/* Tips for Best Results */}
+                        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-300/70 text-slate-800 space-y-1.5">
+                            <div className="flex items-start gap-2">
+                                <span className="material-symbols-outlined text-amber-600 text-lg sm:text-xl shrink-0">tips_and_updates</span>
+                                <h4 className="text-xs sm:text-sm font-black text-amber-950 uppercase tracking-wider">
+                                    Tips for Best Import Results
+                                </h4>
+                            </div>
+                            <p className="text-xs text-slate-700 leading-relaxed">
+                                For your diary timeline, calendar, and statistics to accurately reflect your viewing journey, include the title and watch date for each item whenever possible. Ratings, written reviews, tags, and watch location will also be automatically preserved.
+                            </p>
+                        </div>
                         <div
                             onClick={() => !dataLoading && importFileRef.current?.click()}
                             className={`border-2 border-dashed rounded-[32px] p-8 sm:p-10 text-center cursor-pointer transition-all ${dataLoading
@@ -692,10 +711,38 @@ export const ProfilePage: React.FC = () => {
                         </div>
 
                         <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-[11px] text-amber-900 leading-relaxed">
-                            <span className="material-symbols-outlined text-base text-amber-600 shrink-0 mt-0.5">info</span>
+                            <span className="material-symbols-outlined text-base text-amber-600 shrink-0 mt-0.5">psychology</span>
                             <p>
-                                <strong>Feed Protection:</strong> Imported watch history and entries are saved to your personal library & stats only and will not flood your followers' community feeds.
+                                <strong>MindLens Optimization:</strong> Having complete details like <strong>title</strong>, <strong>watch date</strong>, and <strong>watch time</strong> ensures accurate diary timelines and deep, personalized MindLens insights into your viewing habits.
                             </p>
+                        </div>
+
+                        {/* AI Formatting Helper — Clean & Jargon-free */}
+                        <div className="p-5 sm:p-6 rounded-[28px] border border-amber-200/80 bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+                                <div className="w-11 h-11 rounded-2xl bg-[#ffb700] text-white flex items-center justify-center shadow-md shadow-[#ffb700]/30 shrink-0">
+                                    <span className="material-symbols-outlined text-2xl">auto_fix_high</span>
+                                </div>
+                                <div className="min-w-0">
+                                    <h4 className="text-sm sm:text-base font-black text-slate-800">
+                                        Format Your Watch History with AI
+                                    </h4>
+                                    <p className="text-xs text-slate-500 font-medium mt-0.5 leading-relaxed">
+                                        Have a list or export from Notion, Letterboxd, or your Notes app? Copy our prompt, paste it into ChatGPT, Claude, or Gemini with your list, and get a file ready to upload in seconds.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleCopyAiPrompt}
+                                className="px-4 py-3 rounded-2xl bg-[#ffb700] hover:bg-[#ffaa00] text-white text-[11px] font-black uppercase tracking-wider shadow-md shadow-[#ffb700]/20 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-base">
+                                    {copiedPrompt ? 'check' : 'content_copy'}
+                                </span>
+                                <span>{copiedPrompt ? 'Prompt Copied to Clipboard!' : 'Copy AI Formatting Prompt'}</span>
+                            </button>
                         </div>
 
                         {importResult && (
@@ -754,14 +801,14 @@ export const ProfilePage: React.FC = () => {
             {/* Danger Zone: Account Deletion */}
             <div className="relative overflow-hidden rounded-3xl border border-rose-200 bg-white p-6 md:p-8 shadow-sm">
                 <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500">
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 shrink-0 mt-0.5">
                             <span className="material-symbols-outlined text-xl">warning</span>
                         </div>
                         <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-start gap-2">
                                 <h2 className="text-xl font-black text-rose-600">Danger Zone</h2>
-                                <span className="bg-rose-100 text-rose-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-rose-200">
+                                <span className="bg-rose-100 mt-1 text-rose-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-rose-200">
                                     Irreversible
                                 </span>
                             </div>
@@ -804,9 +851,9 @@ export const ProfilePage: React.FC = () => {
 
             {/* Help & Support Card */}
             <div className="bg-white border border-black/5 rounded-[32px] p-6 sm:p-8 shadow-sm">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-12 rounded-2xl bg-[#ffb700]/15 flex items-center justify-center text-[#ffb700] border border-[#ffb700]/25">
+                <div className="flex items-start justify-between flex-wrap gap-4">
+                    <div className="flex items-start gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-[#ffb700]/15 flex items-center justify-center text-[#ffb700] border border-[#ffb700]/25 shrink-0 mt-0.5">
                             <span className="material-symbols-outlined text-2xl font-bold">support_agent</span>
                         </div>
                         <div>

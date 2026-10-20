@@ -198,7 +198,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                     </div>
                 </div>
 
-                {/* Banner Alert */}
+                {/* Banner Alerts */}
                 {unmatchedCount > 0 && (
                     <div className="mx-4 sm:mx-6 mt-3 sm:mt-4 p-3 sm:p-3.5 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-2.5 sm:gap-3">
                         <span className="material-symbols-outlined text-amber-500 text-base sm:text-lg shrink-0 mt-0.5">info</span>
@@ -208,6 +208,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                         </p>
                     </div>
                 )}
+
 
                 {/* Entries List (2-column on desktop, 1-column on mobile) */}
                 <div className="flex-1 overflow-y-auto p-3 sm:p-6">
@@ -270,7 +271,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                                     </p>
                                                 )}
 
-                                                {/* Meta badges: rating & date */}
+                                                {/* Meta badges: rating & date & location */}
                                                 <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                                                     {entry.rating ? (
                                                         <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
@@ -281,12 +282,33 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                                     )}
 
                                                     {entry.watchedAt ? (
-                                                        <span className="text-[10px] font-medium text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md">
-                                                            📅 {new Date(entry.watchedAt).toLocaleDateString()}
+                                                        <span className="text-[10px] font-medium text-slate-600 bg-slate-50 border border-slate-200/60 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                            <span>📅</span>
+                                                            <span>
+                                                                {new Date(entry.watchedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                                                                {new Date(entry.watchedAt).getHours() !== 12 || new Date(entry.watchedAt).getMinutes() !== 0 ? (
+                                                                    <span className="text-slate-400 font-bold ml-1">
+                                                                        · {new Date(entry.watchedAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                                                                    </span>
+                                                                ) : null}
+                                                            </span>
                                                         </span>
                                                     ) : (
-                                                        <span className="text-[10px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md" title="Will default to Jan 1 of previous year">
-                                                            📅 Prev Year
+                                                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                                            <span>📅</span>
+                                                            <span>No date</span>
+                                                        </span>
+                                                    )}
+
+                                                    {entry.watchLocation && (
+                                                        <span className="text-[10px] font-medium text-purple-700 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                                            <span>📍</span> {entry.watchLocation}
+                                                        </span>
+                                                    )}
+
+                                                    {entry.isRewatch && (
+                                                        <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                                            <span className="material-symbols-outlined text-[11px]">replay</span> Rewatch
                                                         </span>
                                                     )}
 
@@ -296,6 +318,12 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                                         </span>
                                                     )}
                                                 </div>
+
+                                                {entry.review && (
+                                                    <p className="text-[11px] text-slate-500 italic line-clamp-1 mt-1.5">
+                                                        "{entry.review}"
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
 

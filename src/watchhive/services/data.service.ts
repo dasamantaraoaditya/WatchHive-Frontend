@@ -45,6 +45,7 @@ export interface ImportPreviewResult {
     matchedCount: number;
     unmatchedCount: number;
     duplicateCount?: number;
+    missingDateCount?: number;
     entries: PreviewEntry[];
     lists?: any[];
 }
@@ -136,11 +137,19 @@ export function isWatchDateHeader(raw: string): boolean {
     }
 
     // Generic "date" or "watched" (and confirmed not release date)
-    if (/^(?:date|watched|logged|viewed|finished|completed|time|timestamp)$/i.test(s)) {
+    if (/^(?:date|watched|logged|viewed|finished|completed|timestamp)$/i.test(s)) {
         return true;
     }
 
     return false;
+}
+
+/**
+ * Identifies dedicated Watch Time column.
+ */
+export function isWatchTimeHeader(raw: string): boolean {
+    const s = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return /^(?:watchtime|time|watchedtime|timewatched|hour|watchhour)$/i.test(s);
 }
 
 /**
@@ -271,29 +280,69 @@ function parseRating(raw: string): string | null {
 }
 
 /**
- * Parses date string (handles Notion @ mentions, ranges, ISO, formatted dates)
+ * Combines date string and optional time string, falling back to 12:00:00 (midday)
+ * if time is omitted. Returns null if date is missing or invalid.
+ * NOTE: Time can have a fallback, but Date cannot.
  */
-function parseDateString(raw: string): { watchedAt: string; startedAt?: string; completedAt?: string } | null {
+function parseSingleDateWithTime(rawDate: string, rawTime?: string): Date | null {
+    if (!rawDate || !rawDate.trim()) return null;
+    let dStr = rawDate.trim().replace(/^@/, '').trim();
+    const tStr = rawTime?.trim() || '';
+
+    // Check if dStr already contains a time component
+    const hasEmbeddedTime = /T\d{2}:\d{2}/i.test(dStr) || /\b\d{1,2}:\d{2}(?::\d{2})?(?:\s*[ap]m)?\b/i.test(dStr);
+
+    if (tStr && !hasEmbeddedTime) {
+        const combined = new Date(`${dStr} ${tStr}`);
+        if (!isNaN(combined.getTime())) {
+            return combined;
+        }
+    }
+
+    // Try parsing date string
+    let parsed = new Date(dStr);
+
+    // Standard ISO YYYY-MM-DD: set to 12:00:00 UTC to protect against date rollover across timezones
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dStr)) {
+        parsed = new Date(`${dStr}T12:00:00Z`);
+    } else if (!isNaN(parsed.getTime()) && !hasEmbeddedTime) {
+        // Fallback time to 12:00:00 if time was completely omitted
+        if (parsed.getHours() === 0 && parsed.getMinutes() === 0) {
+            parsed.setHours(12, 0, 0, 0);
+        }
+    }
+
+    if (!isNaN(parsed.getTime())) {
+        return parsed;
+    }
+
+    return null;
+}
+
+/**
+ * Parses date string (handles Notion @ mentions, ranges, ISO, formatted dates, and optional time)
+ */
+function parseDateString(raw: string, timeRaw?: string): { watchedAt: string; startedAt?: string; completedAt?: string } | null {
     if (!raw || !raw.trim()) return null;
     let s = raw.trim().replace(/^@/, '').trim();
 
     // Handle range e.g. "2024-01-01 -> 2024-01-05" or "May 1, 2024 to May 5, 2024"
     if (s.includes('->') || s.includes(' to ')) {
         const parts = s.split(/->|\bto\b/).map(p => p.trim());
-        const d1 = new Date(parts[0]);
-        const d2 = parts[1] ? new Date(parts[1]) : null;
-        if (!isNaN(d1.getTime())) {
+        const d1 = parseSingleDateWithTime(parts[0], timeRaw);
+        const d2 = parts[1] ? parseSingleDateWithTime(parts[1]) : null;
+        if (d1) {
             const res: { watchedAt: string; startedAt?: string; completedAt?: string } = {
-                watchedAt: d2 && !isNaN(d2.getTime()) ? d2.toISOString() : d1.toISOString(),
+                watchedAt: d2 ? d2.toISOString() : d1.toISOString(),
                 startedAt: d1.toISOString(),
             };
-            if (d2 && !isNaN(d2.getTime())) res.completedAt = d2.toISOString();
+            if (d2) res.completedAt = d2.toISOString();
             return res;
         }
     }
 
-    const d = new Date(s);
-    if (!isNaN(d.getTime())) {
+    const d = parseSingleDateWithTime(s, timeRaw);
+    if (d) {
         return { watchedAt: d.toISOString() };
     }
 
@@ -376,18 +425,19 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
                         obj[h] = row[idx];
                     });
                     if (obj.title) {
+                        const dateInfo = obj.watchedat ? parseDateString(obj.watchedat, obj.watchedtime || obj.time) : null;
                         entries.push({
                             tmdbId: obj.tmdbid ? Number(obj.tmdbid) : undefined,
                             title: obj.title,
                             type: obj.type || 'MOVIE',
-                            watchedAt: obj.watchedat || undefined,
+                            watchedAt: dateInfo?.watchedAt || obj.watchedat || undefined,
                             rating: obj.rating || null,
                             review: obj.review || null,
                             tags: obj.tags ? String(obj.tags).split('|').filter(Boolean) : [],
                             isRewatch: obj.isrewatch === 'true' || obj.isrewatch === '1',
                             isWatching: obj.iswatching === 'true' || obj.iswatching === '1',
-                            startedAt: obj.startedat || null,
-                            completedAt: obj.completedat || null,
+                            startedAt: dateInfo?.startedAt || obj.startedat || null,
+                            completedAt: dateInfo?.completedAt || obj.completedat || null,
                             watchLocation: obj.watchlocation || null,
                             inWatchlist: obj.inwatchlist === 'true' || obj.inwatchlist === '1',
                         });
@@ -444,6 +494,7 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
     // Find column indices with precision regex classifiers
     const titleIdx = rawHeaders.findIndex(isTitleHeader);
     const watchDateIdx = rawHeaders.findIndex(isWatchDateHeader);
+    const watchTimeIdx = rawHeaders.findIndex(isWatchTimeHeader);
     const releaseYearIdx = rawHeaders.findIndex(isReleaseYearHeader);
     const ratingIdx = rawHeaders.findIndex(isRatingHeader);
     const typeIdx = rawHeaders.findIndex(isTypeHeader);
@@ -503,9 +554,10 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
         const isWatching = statusRaw.includes('watching') || statusRaw.includes('in progress') || statusRaw.includes('current');
         const isWatchlist = statusRaw.includes('plan') || statusRaw.includes('to watch') || statusRaw.includes('want to watch') || statusRaw.includes('watchlist') || statusRaw.includes('queue') || statusRaw.includes('backlog');
 
-        // Watch date: strictly ignores release date
+        // Watch date & time: date is required, time falls back to 12:00:00
         const dateRaw = watchDateIdx !== -1 ? row[watchDateIdx] : '';
-        const dateInfo = dateRaw ? parseDateString(dateRaw) : null;
+        const timeRaw = watchTimeIdx !== -1 ? row[watchTimeIdx] : '';
+        const dateInfo = dateRaw ? parseDateString(dateRaw, timeRaw) : null;
 
         // Release year: strictly used for TMDb search disambiguation, NEVER as watchedAt
         const releaseYearRaw = releaseYearIdx !== -1 ? row[releaseYearIdx]?.trim() : '';
@@ -587,12 +639,58 @@ export function parseImportFileContent(text: string, isCsvFileName: boolean): { 
             const payload = JSON.parse(text);
             parsedJson = true;
 
-            if (Array.isArray(payload.entries)) body.entries = payload.entries;
-            if (Array.isArray(payload.lists)) body.lists = payload.lists;
+            let rawList: any[] = [];
+            if (Array.isArray(payload.entries)) rawList = payload.entries;
+            else if (Array.isArray(payload)) rawList = payload;
+            else if (Array.isArray(payload.movies)) rawList = payload.movies;
+            else if (Array.isArray(payload.items)) rawList = payload.items;
 
-            if (!body.entries && !body.lists && Array.isArray(payload)) {
-                body.entries = payload;
+            if (rawList.length > 0) {
+                body.entries = rawList.map(item => {
+                    const title = item.title || item.name || item.movie || item.film || '';
+                    const typeRaw = item.type || item.mediaType || item.media_type || (item.season || item.episode ? 'TV_SHOW' : 'MOVIE');
+                    const type = parseMediaType(String(typeRaw || 'MOVIE'));
+
+                    const rawDate = item.watchedAt || item.date || item.watched_at || item.watchDate || item.watchedDate || null;
+                    const rawTime = item.time || item.watchTime || item.watchedTime || null;
+                    const dateInfo = rawDate ? parseDateString(String(rawDate), rawTime ? String(rawTime) : undefined) : null;
+                    const watchedAt = dateInfo ? dateInfo.watchedAt : null;
+
+                    const rating = item.rating != null ? parseRating(String(item.rating)) : (item.score != null ? parseRating(String(item.score)) : null);
+                    const review = item.review || item.notes || item.comment || null;
+
+                    let tags: string[] = [];
+                    if (Array.isArray(item.tags)) tags = item.tags.map(String).filter(Boolean);
+                    else if (Array.isArray(item.genres)) tags = item.genres.map(String).filter(Boolean);
+                    else if (typeof item.tags === 'string') tags = item.tags.split(/[,|;]/).map((t: string) => t.trim()).filter(Boolean);
+
+                    const watchLocation = item.watchLocation || item.location || item.platform || item.theater || null;
+                    const isRewatch = Boolean(item.isRewatch || item.rewatch);
+                    const isWatching = Boolean(item.isWatching || item.watching);
+                    const tmdbId = item.tmdbId || item.tmdb_id || undefined;
+                    const imdbId = item.imdbId || item.imdb_id || undefined;
+                    const year = item.year || item.releaseYear || item.release_year || undefined;
+
+                    return {
+                        title: String(title).trim(),
+                        type,
+                        watchedAt,
+                        startedAt: dateInfo?.startedAt || item.startedAt || null,
+                        completedAt: dateInfo?.completedAt || item.completedAt || null,
+                        rating,
+                        review: review ? String(review) : null,
+                        tags,
+                        watchLocation: watchLocation ? String(watchLocation) : null,
+                        isRewatch,
+                        isWatching,
+                        tmdbId: tmdbId ? Number(tmdbId) : undefined,
+                        imdbId: imdbId ? String(imdbId) : undefined,
+                        year: year ? String(year) : undefined,
+                    };
+                });
             }
+
+            if (Array.isArray(payload.lists)) body.lists = payload.lists;
         } catch {
             // Not valid JSON, fallback to CSV parsing below
         }
@@ -712,6 +810,76 @@ export const exportLists = (format: ExportFormat) =>
 export const importEntries = (file: File) => importData(file);
 export const importLists = (file: File) => importData(file);
 
+export const SAMPLE_IMPORT_JSON = {
+    entries: [
+        {
+            title: "Inception",
+            year: 2010,
+            type: "MOVIE",
+            tmdbId: 27205,
+            watchedAt: "2024-03-15T20:30:00Z",
+            rating: 9.5,
+            review: "Mind-bending dream heist with an incredible Hans Zimmer score. The hallway sequence remains unmatched.",
+            tags: ["sci-fi", "thriller", "favorites", "cinema"],
+            isRewatch: false,
+            watchLocation: "IMAX Theater",
+            startedAt: "2024-03-15T20:30:00Z",
+            completedAt: "2024-03-15T23:00:00Z",
+        },
+        {
+            title: "Severance",
+            year: 2022,
+            type: "TV_SHOW",
+            tmdbId: 97546,
+            watchedAt: "2024-04-02T21:15:00Z",
+            rating: 10.0,
+            review: "Flawless workplace dystopian mystery. The tension in the season finale is breathtaking.",
+            tags: ["mystery", "sci-fi", "apple-tv", "binge"],
+            isRewatch: false,
+            watchLocation: "Living Room TV",
+        },
+    ],
+    lists: [
+        {
+            name: "All-Time Favorites",
+            description: "Personal top-tier cinema and shows",
+            type: "CUSTOM",
+            isPublic: true,
+            items: [
+                { title: "Inception", tmdbId: 27205, mediaType: "movie" },
+            ],
+        },
+    ],
+};
+
+export const AI_IMPORT_PROMPT = `Convert my movie/TV watch history notes into a valid WatchHive import JSON object.
+
+Output MUST strictly follow this JSON format:
+{
+  "entries": [
+    {
+      "title": "Exact Title of the movie or show (Required)",
+      "year": 2024,
+      "type": "MOVIE" or "TV_SHOW",
+      "watchedAt": "YYYY-MM-DDTHH:mm:ssZ (Watch date is mandatory. If exact time is unknown, use 12:00:00Z)",
+      "rating": 8.5,
+      "review": "Your review or reaction notes",
+      "tags": ["sci-fi", "cinema", "action"],
+      "isRewatch": false,
+      "watchLocation": "Cinema / Home / Netflix"
+    }
+  ]
+}
+
+Key Rules:
+1. "title" is mandatory for TMDb auto-matching.
+2. "watchedAt" is required for timeline logs: format as ISO 8601 (e.g. "2024-05-12T20:30:00Z"). If time is omitted in my notes, default to 12:00:00Z. DO NOT invent dates if missing.
+3. "rating" must be a number on a 0.0 to 10.0 scale (convert 5-star ratings by multiplying by 2).
+4. Output ONLY valid JSON without Markdown backticks or commentary so I can save directly to a .json file.
+
+Here is my watch history:
+[PASTE YOUR NOTES OR LIST HERE]`;
+
 export const dataService = {
     exportData,
     exportEntries,
@@ -722,6 +890,8 @@ export const dataService = {
     importData,
     importEntries,
     importLists,
+    SAMPLE_IMPORT_JSON,
+    AI_IMPORT_PROMPT,
 };
 
 export default dataService;
