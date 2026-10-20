@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts';
+import { useAuth, useUI } from '../../contexts';
 import './BottomNav.css';
 
 export const BottomNav: React.FC = () => {
     const { isAuthenticated } = useAuth();
+    const { isModalOpen } = useUI();
     const location = useLocation();
 
-    if (!isAuthenticated) return null;
+    if (!isAuthenticated || isModalOpen) return null;
 
     const isActive = (path: string) => location.pathname === path;
 

@@ -3,6 +3,7 @@ import { suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import userService from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUI } from '../../contexts';
 import { BeeLoader, ModalBeeOverlay } from '../common';
 import { User } from '../../types';
 
@@ -43,8 +44,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     onClose,
     onSuccess
 }) => {
-    if (!isOpen) return null;
-
+    const { registerModal } = useUI();
     const { user: currentUser } = useAuth();
 
     // Movie Search State
@@ -95,6 +95,13 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     const [error, setError] = useState<string | null>(null);
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        return registerModal();
+    }, [isOpen, registerModal]);
+
+    if (!isOpen) return null;
 
     // Helper to format avatar URL
     const getAvatarUrl = (url: string | null | undefined, seed: string) => {
@@ -223,7 +230,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     });
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display">
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display">
             <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#ffb700]/20 max-h-[90vh] relative">
                 {isSending && <ModalBeeOverlay message="Delivering your recommendation to friends..." />}
                 {/* Header */}
@@ -402,11 +409,10 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                                 <div
                                                     key={friend.id}
                                                     onClick={() => toggleUserSelection(friend.id)}
-                                                    className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer ${
-                                                        isSelected
-                                                            ? 'bg-[#FFF9F0] border-[#ffb700]/40 shadow-2xs'
-                                                            : 'bg-white border-slate-100 hover:border-slate-200'
-                                                    }`}
+                                                    className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer ${isSelected
+                                                        ? 'bg-[#FFF9F0] border-[#ffb700]/40 shadow-2xs'
+                                                        : 'bg-white border-slate-100 hover:border-slate-200'
+                                                        }`}
                                                 >
                                                     <div className="flex items-center gap-2.5 min-w-0">
                                                         <img
@@ -427,9 +433,8 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                                         </div>
                                                     </div>
 
-                                                    <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${
-                                                        isSelected ? 'bg-[#ffb700] text-white' : 'border border-slate-300 bg-slate-50'
-                                                    }`}>
+                                                    <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isSelected ? 'bg-[#ffb700] text-white' : 'border border-slate-300 bg-slate-50'
+                                                        }`}>
                                                         {isSelected && (
                                                             <span className="material-symbols-outlined text-xs font-black">check</span>
                                                         )}
@@ -482,8 +487,8 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                     {selectedUserIds.size > 1
                                         ? `Send Suggestion to ${selectedUserIds.size} Friends`
                                         : selectedUserIds.size === 1
-                                        ? 'Send Suggestion'
-                                        : 'Select Recipients to Send'}
+                                            ? 'Send Suggestion'
+                                            : 'Select Recipients to Send'}
                                 </span>
                             </>
                         )}

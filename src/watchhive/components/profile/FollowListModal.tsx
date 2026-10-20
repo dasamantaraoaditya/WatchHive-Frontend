@@ -3,6 +3,7 @@ import { User } from '../../types/user.types';
 import userService from '../../services/userService';
 import { Avatar, BeeLoader } from '../common';
 import { Link } from 'react-router-dom';
+import { useUI } from '../../contexts';
 
 interface FollowListModalProps {
     isOpen: boolean;
@@ -12,17 +13,19 @@ interface FollowListModalProps {
 }
 
 export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClose, userId, type }) => {
+    const { registerModal } = useUI();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        if (!isOpen) return;
+        return registerModal();
+    }, [isOpen, registerModal]);
+
+    useEffect(() => {
         if (isOpen) {
             fetchUsers();
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
         }
-        return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen, userId, type]);
 
     const fetchUsers = async () => {
@@ -42,7 +45,7 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-4 animate-[fade-in_0.2s_ease-out]" onClick={onClose}>
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-4 animate-[fade-in_0.2s_ease-out]" onClick={onClose}>
             <div 
                 className="bg-[#FFF9F0] w-full max-w-md max-h-[85vh] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-[#ffb700]/10 animate-[slide-up_0.3s_cubic-bezier(0.16,1,0.3,1)]" 
                 onClick={e => e.stopPropagation()}

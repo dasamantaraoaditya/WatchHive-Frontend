@@ -2,11 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { pushNotificationService } from '../../services/pushNotification.service';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUI } from '../../contexts';
 
 export const PushPromptModal: React.FC = () => {
     const { user } = useAuth();
+    const { registerModal } = useUI();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        return registerModal();
+    }, [isOpen, registerModal]);
 
     useEffect(() => {
         if (!user) return;
@@ -41,7 +48,7 @@ export const PushPromptModal: React.FC = () => {
 
     return (
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs font-display">
+            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs font-display">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 15 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}

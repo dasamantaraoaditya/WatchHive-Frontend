@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar, BeeLoader } from '../common';
 import { interactionService, Comment } from '../../services/interaction.service';
-import { useAuth, useCustomAlert } from '../../contexts';
+import { useAuth, useCustomAlert, useUI } from '../../contexts';
 
 interface CommentsModalProps {
     isOpen: boolean;
@@ -40,7 +40,13 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 }) => {
     const { user } = useAuth();
     const { confirm, alert } = useCustomAlert();
+    const { registerModal } = useUI();
     const [comments, setComments] = useState<Comment[]>([]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        return registerModal();
+    }, [isOpen, registerModal]);
     const [newComment, setNewComment] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -186,7 +192,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-0 sm:p-4"
+            className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-0 sm:p-4"
             onClick={onClose}
         >
             <div

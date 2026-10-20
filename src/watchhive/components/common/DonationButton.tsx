@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useUI } from '../../contexts';
 import './DonationButton.css';
 
 export const DonationButton: React.FC = () => {
+    const { isModalOpen } = useUI();
     const [isVisible, setIsVisible] = useState<boolean>(false);
 
     useEffect(() => {
@@ -19,7 +21,7 @@ export const DonationButton: React.FC = () => {
         localStorage.setItem('wh_hide_donation', 'true');
     };
 
-    if (!isVisible) return null;
+    if (!isVisible || isModalOpen) return null;
 
     return (
         <div className="donation-wrapper">

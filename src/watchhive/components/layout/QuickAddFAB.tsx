@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useUI } from '../../contexts';
 
 interface QuickAddFABProps {
     onLogWatch: () => void;
@@ -14,6 +15,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
     onSuggest, 
     onWatchlist 
 }) => {
+    const { isModalOpen } = useUI();
     const [isScrolling, setIsScrolling] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -61,10 +63,10 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
         },
     ];
 
-    const isVisible = !isScrolling || isHovered;
+    const isVisible = (!isScrolling || isHovered) && !isModalOpen;
 
     return (
-        <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-8 left-0 right-0 z-[1300] flex justify-center pointer-events-none px-3 sm:px-4">
+        <div className="wh-quick-add-fab fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-8 left-0 right-0 z-[1300] flex justify-center pointer-events-none px-3 sm:px-4">
             <motion.div
                 initial={{ y: 20, opacity: 0, scale: 0.95 }}
                 animate={{
