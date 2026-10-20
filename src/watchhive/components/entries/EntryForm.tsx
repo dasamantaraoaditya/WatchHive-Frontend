@@ -817,8 +817,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         <div className="flex items-center gap-2.5 flex-shrink-0">
                                             <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
                                                 ${formData.isRewatch
-                                                    ? 'bg-[#ffb700]/10 text-[#ffb700]'
-                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
+                                                    ? 'bg-[#ffb700] text-black font-extrabold shadow-sm'
+                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/40'}`}>
                                                 {formData.isRewatch ? 'YES' : 'NO'}
                                             </span>
                                             <div className="relative">
@@ -867,8 +867,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         <div className="flex items-center gap-2.5 flex-shrink-0">
                                             <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
                                                 ${formData.postToFeed
-                                                    ? 'bg-[#ffb700]/10 text-[#ffb700]'
-                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
+                                                    ? 'bg-[#ffb700] text-black font-extrabold shadow-sm'
+                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/40'}`}>
                                                 {formData.postToFeed ? 'YES' : 'NO'}
                                             </span>
                                             <div className="relative">
