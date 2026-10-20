@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, TourProvider } from './contexts';
+import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, useCustomAlert, TourProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
-import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, MovieDetailsModal, QuickCurrentlyWatchingModal } from './components/common';
+import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
+import { SuggestMovieModal } from './components/suggestions/SuggestMovieModal';
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -56,21 +57,18 @@ const WatchersHiveRedirect: React.FC = () => {
 // App Routes Component
 const AppRoutes: React.FC = () => {
     const { isAuthenticated } = useAuth();
+    const { alert } = useCustomAlert();
     const { promptAddToWatchlist } = useWatchlist();
     const [activeAction, setActiveAction] = React.useState<'log' | 'watching' | 'watchlist' | 'suggest' | null>(null);
-    const [selectedMedia, setSelectedMedia] = React.useState<{ tmdbId: number; mediaType: 'movie' | 'tv' } | null>(null);
 
     const closeAll = () => {
         setActiveAction(null);
-        setSelectedMedia(null);
     };
 
     const handleSearchSelect = async (tmdbId: number, mediaType: 'movie' | 'tv') => {
         if (activeAction === 'watchlist') {
             promptAddToWatchlist({ tmdbId, mediaType });
             closeAll();
-        } else if (activeAction === 'suggest') {
-            setSelectedMedia({ tmdbId, mediaType });
         }
     };
 
@@ -270,21 +268,23 @@ const AppRoutes: React.FC = () => {
                         />
 
                         <SearchMediaModal
-                            isOpen={(activeAction === 'watchlist' || activeAction === 'suggest') && !selectedMedia}
+                            isOpen={activeAction === 'watchlist'}
                             onClose={closeAll}
-                            title={activeAction === 'watchlist' ? 'Add to Watchlist' : 'Suggest to a Friend'}
+                            title="Add to Watchlist"
                             onSelect={handleSearchSelect}
                         />
 
-                        {selectedMedia && activeAction === 'suggest' && (
-                            <MovieDetailsModal
-                                isOpen={true}
-                                onClose={closeAll}
-                                tmdbId={selectedMedia.tmdbId}
-                                mediaType={selectedMedia.mediaType}
-                                initialView="suggest"
-                            />
-                        )}
+                        <SuggestMovieModal
+                            isOpen={activeAction === 'suggest'}
+                            onClose={closeAll}
+                            onSuccess={() => {
+                                closeAll();
+                                alert('Suggestion sent successfully to your hive!', {
+                                    title: 'Suggestion Sent',
+                                    severity: 'success',
+                                });
+                            }}
+                        />
                     </>
                 )}
 

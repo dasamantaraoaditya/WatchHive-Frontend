@@ -25,6 +25,7 @@ export interface Entry {
     startedAt?: string;
     completedAt?: string;
     watchLocation: string | null;
+    postToFeed?: boolean;
     createdAt: string;
     updatedAt: string;
     user: {
@@ -53,6 +54,7 @@ export interface CreateEntryData {
     completedAt?: string;
     watchLocation?: string;
     suggestedByUserId?: string | null;
+    postToFeed?: boolean;
 }
 
 export interface UpdateEntryData {
@@ -68,6 +70,7 @@ export interface UpdateEntryData {
     completedAt?: string;
     watchLocation?: string;
     suggestedByUserId?: string | null;
+    postToFeed?: boolean;
 }
 
 export interface GetEntriesParams {
