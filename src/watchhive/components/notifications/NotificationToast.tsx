@@ -36,6 +36,8 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ toast, onC
             case 'FOLLOW_REQUEST': return 'person_add';
             case 'FOLLOW_ACCEPT': return 'how_to_reg';
             case 'SUGGESTION': return 'auto_awesome';
+            case 'FRIEND_STARTED_WATCHING': return 'visibility';
+            case 'FRIEND_LOGGED_WATCH': return 'movie';
             default: return 'notifications';
         }
     };
@@ -56,6 +58,17 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ toast, onC
                 return `${actor} accepted your follow request`;
             case 'SUGGESTION':
                 return `${actor} suggested a title for you`;
+            case 'FRIEND_STARTED_WATCHING':
+                return `${actor} started watching "${notification.content.entryTitle || ''}"`;
+            case 'FRIEND_LOGGED_WATCH':
+                if (notification.content.rating && notification.content.review) {
+                    return `${actor} watched & reviewed "${notification.content.entryTitle || ''}" (${notification.content.rating}★)`;
+                } else if (notification.content.rating) {
+                    return `${actor} watched "${notification.content.entryTitle || ''}" (${notification.content.rating}★)`;
+                } else if (notification.content.review) {
+                    return `${actor} reviewed "${notification.content.entryTitle || ''}"`;
+                }
+                return `${actor} finished watching "${notification.content.entryTitle || ''}"`;
             default:
                 return `${actor} sent you a notification`;
         }
@@ -63,7 +76,7 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({ toast, onC
 
     const handleClick = () => {
         onClose();
-        if (['LIKE', 'COMMENT', 'REPLY'].includes(notification.type)) {
+        if (['LIKE', 'COMMENT', 'REPLY', 'FRIEND_STARTED_WATCHING', 'FRIEND_LOGGED_WATCH'].includes(notification.type)) {
             navigate('/watch-hive/feed');
         } else {
             navigate('/watch-hive/notifications');

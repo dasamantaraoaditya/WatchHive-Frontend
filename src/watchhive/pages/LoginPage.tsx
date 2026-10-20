@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts';
 import { GoogleSignInButton } from '../components/auth';
+import { BeeLoader } from '../components/common';
 import whLogo from '../assets/images/watchhive-logo.png';
 
 export const LoginPage: React.FC = () => {
@@ -228,7 +229,7 @@ export const LoginPage: React.FC = () => {
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                                    <BeeLoader size="mini" message="" />
                                     <span>Signing in...</span>
                                 </>
                             ) : (
@@ -246,9 +247,13 @@ export const LoginPage: React.FC = () => {
                             Sign up
                         </Link>
                     </p>
-                    <p className="text-[13px] font-medium text-[#2D2926]/30">
+                    <p className="text-[13px] font-medium text-[#2D2926]/40 flex items-center justify-center gap-2">
                         <Link to="/watch-hive/privacy" className="hover:text-[#2D2926]/60 transition-colors">
                             Privacy Policy
+                        </Link>
+                        <span>·</span>
+                        <Link to="/watch-hive/support" className="hover:text-[#ffb700] transition-colors font-bold text-[#b07d00]">
+                            Help & Support
                         </Link>
                     </p>
                 </div>

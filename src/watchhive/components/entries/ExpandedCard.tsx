@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Entry } from '../../services/entries.service';
 import { TmdbDetails, formatDate } from './types';
+import { Avatar } from '../common/Avatar';
 
 export interface ExpandedCardProps {
     entry: Entry;
@@ -20,7 +21,7 @@ const getDirectLink = (providerName: string, fallbackLink: string, title: string
     const query = encodeURIComponent(title);
     if (name.includes('netflix')) return `https://www.netflix.com/search?q=${query}`;
     if (name.includes('amazon') || name.includes('prime')) return `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${query}`;
-    if (name.includes('hotstar')) return `https://www.hotstar.com/in/explore?searchQuery=${query}`;
+    if (name.includes('hotstar') || name.includes('disney')) return `https://www.hotstar.com/in/explore?searchQuery=${query}`;
     if (name.includes('zee5')) return `https://www.zee5.com/search?q=${query}`;
     if (name.includes('sonyliv')) return `https://www.sonyliv.com/search?query=${query}`;
     if (name.includes('jiocinema')) return `https://www.jiocinema.com/search?q=${query}`;
@@ -175,14 +176,14 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                                 <span>💡</span> Suggested By
                             </span>
                             <div className="flex items-center gap-2 mt-1 min-w-0">
-                                {entry.suggestedByUser.profilePictureUrl ? (
-                                    <img src={entry.suggestedByUser.profilePictureUrl} alt="" className="w-5 h-5 rounded-full object-cover shrink-0" />
-                                ) : (
-                                    <div className="w-5 h-5 rounded-full bg-[#ffb700] text-white font-black text-[9px] flex items-center justify-center shrink-0">
-                                        {entry.suggestedByUser.displayName?.[0] || entry.suggestedByUser.username[0]}
-                                    </div>
-                                )}
-                                <span className="text-[#2D2926] text-xs font-black truncate">@{entry.suggestedByUser.username}</span>
+                                <Avatar 
+                                    src={entry.suggestedByUser.profilePictureUrl} 
+                                    name={entry.suggestedByUser.displayName || entry.suggestedByUser.username} 
+                                    size="xxs" 
+                                />
+                                <span className="text-[#2D2926] text-xs font-black truncate" title={`@${entry.suggestedByUser.username}`}>
+                                    @{entry.suggestedByUser.username.length > 10 ? `${entry.suggestedByUser.username.slice(0, 10)}...` : entry.suggestedByUser.username}
+                                </span>
                             </div>
                         </div>
                     )}

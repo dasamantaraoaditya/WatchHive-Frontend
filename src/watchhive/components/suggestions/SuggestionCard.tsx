@@ -18,6 +18,7 @@ interface SuggestionCardProps {
         overview: string;
         poster_path: string | null;
     };
+    isSent?: boolean;
 }
 
 interface TmdbDetails {
@@ -31,7 +32,7 @@ interface TmdbDetails {
     genres: string[];
 }
 
-export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange, preloadedDetails }) => {
+export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusChange, preloadedDetails, isSent = false }) => {
     const navigate = useNavigate();
     const [details, setDetails] = useState<TmdbDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -77,16 +78,24 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
     }, [group.tmdbId, group.mediaType, preloadedDetails]);
 
     // De-duplicate suggestors
-    const uniqueSuggestors = group.suggestors.reduce((acc: any[], current) => {
+    const uniqueSuggestors = (group.suggestors || []).reduce((acc: any[], current) => {
         if (!acc.find(s => s.id === current.id)) acc.push(current);
         return acc;
     }, []);
 
-    // Extract non-empty suggestion messages with their respective author
+    // De-duplicate recipients (for sent suggestions)
+    const uniqueRecipients = (group.recipients || []).reduce((acc: any[], current) => {
+        if (!acc.find(s => s.id === current.id)) acc.push(current);
+        return acc;
+    }, []);
+
+    // Extract non-empty suggestion messages with their respective author or recipient
     const suggestionMessages = group.suggestions
         .filter(s => s.message && s.message.trim().length > 0)
         .map(s => {
-            const author = group.suggestors.find(u => u.id === s.fromUserId) || uniqueSuggestors[0];
+            const author = isSent
+                ? (s.recipient || uniqueRecipients.find(u => u.id === s.toUserId) || uniqueRecipients[0])
+                : (group.suggestors?.find(u => u.id === s.fromUserId) || uniqueSuggestors[0]);
             return {
                 id: s.id,
                 message: s.message!.trim(),
@@ -160,8 +169,8 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
         if (isDismissing) return;
         
         const title = details?.name || details?.title || 'this suggestion';
-        const confirmed = await confirm(`Delete suggestions for "${title}"?`, {
-            title: 'Delete Suggestion',
+        const confirmed = await confirm(`Delete ${isSent ? 'sent ' : ''}suggestions for "${title}"?`, {
+            title: isSent ? 'Delete Sent Suggestion' : 'Delete Suggestion',
             confirmText: 'Delete',
             severity: 'warning'
         });
@@ -193,8 +202,8 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                 onClick={() => {
                     navigate(`/watch-hive/details/${group.mediaType}/${group.tmdbId}`, { 
                         state: { 
-                            suggestedByUserId: uniqueSuggestors[0]?.id,
-                            suggestedByUser: uniqueSuggestors[0],
+                            suggestedByUserId: isSent ? null : uniqueSuggestors[0]?.id,
+                            suggestedByUser: isSent ? null : uniqueSuggestors[0],
                             from: window.location.pathname + window.location.search 
                         } 
                     });
@@ -258,7 +267,10 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     {/* Badge Overlay */}
                     <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
                         <span className="bg-[#ffb700] text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider opacity-90">
-                            {group.suggestions.length > 1 ? `${group.suggestions.length} Suggestions` : 'Suggested'}
+                            {isSent
+                                ? (group.suggestions.length > 1 ? `Sent to ${group.suggestions.length}` : 'Suggested')
+                                : (group.suggestions.length > 1 ? `${group.suggestions.length} Suggestions` : 'Suggested')
+                            }
                         </span>
                     </div>
                 </div>
@@ -272,7 +284,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                         {details?.overview || 'No description available'}
                     </p>
 
-                    {/* Recommendation Comment / Note from Friend */}
+                    {/* Recommendation Comment / Note */}
                     {suggestionMessages.length > 0 && (
                         <div className="mt-2 p-2.5 rounded-2xl bg-amber-50/90 border border-amber-200/70 text-[#2D2926] text-[11px] leading-relaxed shadow-xs">
                             <div className="flex items-start gap-1.5">
@@ -282,11 +294,16 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                                         "{suggestionMessages[0].message}"
                                     </p>
                                     <div className="flex items-center justify-between gap-1 mt-1">
-                                        {suggestionMessages[0].author && (
-                                            <span className="text-[10px] font-bold text-amber-800/80 truncate">
-                                                — @{suggestionMessages[0].author.username || suggestionMessages[0].author.displayName}
-                                            </span>
-                                        )}
+                                        {suggestionMessages[0].author && (() => {
+                                            const authorUser = suggestionMessages[0].author;
+                                            const rawName = authorUser.username || authorUser.displayName || '';
+                                            const formattedName = rawName.length > 10 ? `${rawName.slice(0, 10)}...` : rawName;
+                                            return (
+                                                <span className="text-[10px] font-bold text-amber-800/80 truncate" title={`${isSent ? 'To: ' : '— '}@${rawName}`}>
+                                                    {isSent ? 'To: ' : '— '}@{formattedName}
+                                                </span>
+                                            );
+                                        })()}
                                         {suggestionMessages.length > 1 && (
                                             <span className="text-[9px] font-bold text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded-full shrink-0">
                                                 +{suggestionMessages.length - 1} more note{suggestionMessages.length > 2 ? 's' : ''}
@@ -300,9 +317,11 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                     
                     <div className="mt-auto pt-3 border-t border-[#ffb700]/10">
                         <div className="flex flex-col gap-2">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-[#2D2926]/40">From your Hive</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-[#2D2926]/40">
+                                {isSent ? 'Suggested to' : 'From your Hive'}
+                            </span>
                             <div className="flex -space-x-2 overflow-hidden">
-                                {uniqueSuggestors.slice(0, 4).map(s => (
+                                {(isSent ? uniqueRecipients : uniqueSuggestors).slice(0, 4).map(s => (
                                     <Avatar
                                         key={s.id}
                                         src={s.profilePictureUrl || `https://ui-avatars.com/api/?name=${s.displayName || s.username}&background=ffb700&color=fff`}
@@ -310,9 +329,9 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                                         size="xs"
                                     />
                                 ))}
-                                {uniqueSuggestors.length > 4 && (
+                                {(isSent ? uniqueRecipients : uniqueSuggestors).length > 4 && (
                                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-[#2D2926] ring-2 ring-white">
-                                        +{uniqueSuggestors.length - 4}
+                                        +{(isSent ? uniqueRecipients : uniqueSuggestors).length - 4}
                                     </div>
                                 )}
                             </div>

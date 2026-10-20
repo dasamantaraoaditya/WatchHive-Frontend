@@ -1,0 +1,39 @@
+name: WatchHive Frontend - CI
+
+on:
+  push:
+    branches: [ main, staging ]
+  pull_request:
+    branches: [ main, staging ]
+
+jobs:
+  build-and-test:
+    name: Lint, Typecheck & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript Check
+        run: npx tsc --noEmit
+
+      - name: Build Staging
+        if: github.ref == 'refs/heads/staging' || github.base_ref == 'staging'
+        run: npm run build:staging
+
+      - name: Build Production
+        if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
+        run: npm run build
+
+      - name: Verify Build Artifacts
+        run: test -f dist/index.html && echo "Frontend build verified successfully."

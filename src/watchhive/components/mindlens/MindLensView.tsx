@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { mindLensApi, MindLensData } from '../../services/mindlens.service';
 import { MindLensHighlightsSkeleton } from '../common/Skeleton';
-import { ErrorState } from '../common';
+import { ErrorState, Avatar } from '../common';
 import { Link } from 'react-router-dom';
 import { ProfileStats } from '../profile';
 import { DailyLogInspectorModal } from './DailyLogInspectorModal';
@@ -12,11 +12,10 @@ export const MindLensView: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [activeSubTab, setActiveSubTab] = useState<'highlights' | 'analytics'>('highlights');
 
-    // Frequency chart & image fallback controls
+    // Frequency chart controls
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
     const [hoveredDayIndex, setHoveredDayIndex] = useState<number | null>(null);
     const [selectedDayForModal, setSelectedDayForModal] = useState<number | null>(null);
-    const [imageError, setImageError] = useState(false);
 
     const fetchInsights = useCallback(async () => {
         setIsLoading(true);
@@ -37,16 +36,18 @@ export const MindLensView: React.FC = () => {
     }, [fetchInsights]);
 
     const formatInsight = (text: string) => {
-        const parts = text.split(/(\*\*.*?\*\*)/g);
+        const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g);
         return (
-            <p className="text-sm text-[#2D2926]/70 leading-relaxed font-medium mb-3">
-                {parts.map((part, i) =>
-                    part.startsWith('**') && part.endsWith('**') ? (
-                        <strong key={i} className="text-[#2D2926] font-black">{part.slice(2, -2)}</strong>
-                    ) : (
-                        part
-                    )
-                )}
+            <p className="text-sm text-[#2D2926]/75 leading-relaxed font-medium mb-3">
+                {parts.map((part, i) => {
+                    if (part.startsWith('**') && part.endsWith('**')) {
+                        return <strong key={i} className="text-[#2D2926] font-black">{part.slice(2, -2)}</strong>;
+                    }
+                    if (part.startsWith('*') && part.endsWith('*')) {
+                        return <em key={i} className="text-[#ffb700] not-italic font-bold">{part.slice(1, -1)}</em>;
+                    }
+                    return part;
+                })}
             </p>
         );
     };
@@ -80,12 +81,18 @@ export const MindLensView: React.FC = () => {
         return (
             <div className="bg-white border border-[#ffb700]/15 shadow-sm rounded-[32px] p-12 md:p-16 text-center max-w-2xl mx-auto">
                 <div className="w-20 h-20 bg-[#ffb700]/10 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl border border-[#ffb700]/20">
-                    🌱
+                    🔬
                 </div>
-                <h3 className="text-2xl font-black text-[#2D2926] tracking-tight mb-3">MindLens Profile Unlocking...</h3>
+                <h3 className="text-2xl font-black text-[#2D2926] tracking-tight mb-3">MindLens Profile Calibrating...</h3>
                 <p className="text-[#2D2926]/70 text-base font-medium leading-relaxed mb-6">{data.message}</p>
+                <div className="w-full max-w-xs mx-auto bg-slate-100 rounded-full h-2.5 mb-6 overflow-hidden">
+                    <div 
+                        className="bg-[#ffb700] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, ((data.calibrationProgress?.current || 0) / (data.calibrationProgress?.target || 3)) * 100)}%` }}
+                    />
+                </div>
                 <p className="text-[10px] font-black text-[#2D2926]/40 uppercase tracking-widest mb-8">
-                    Log at least 3 titles to generate your mood prediction and psychological traits
+                    Log at least 3 titles to initialize your Taste Entropy and Affective State models
                 </p>
                 <Link to="/watch-hive/feed" className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#ffb700] text-white font-black text-[11px] uppercase tracking-widest rounded-2xl shadow-lg shadow-[#ffb700]/25 hover:-translate-y-0.5 transition-all">
                     <span className="material-symbols-outlined text-lg">movie</span>
@@ -95,7 +102,6 @@ export const MindLensView: React.FC = () => {
         );
     }
 
-    // Chart calculations for Daily Time Series
     const timeSeries = data.dailyTimeSeries || [];
     const maxCount = Math.max(...timeSeries.map(d => d.count), 1);
     const chartHeight = 180;
@@ -115,9 +121,36 @@ export const MindLensView: React.FC = () => {
         ? `${linePath} L ${getX(timeSeries.length - 1)} ${chartHeight} L ${getX(0)} ${chartHeight} Z`
         : '';
 
+    const tasteBreadth = data.tasteBreadth || data.userProfile?.tasteBreadth;
+    const archetype = data.archetype || data.persona;
+    const affectiveState = data.affectiveState || data.moodPrediction;
+
     return (
         <div className="space-y-8 animate-[fade-in_0.3s_ease-out]">
-            {/* WatchHive Standard Sub-tab Navigation */}
+            {/* Milestone Progress Banner if not full */}
+            {data.milestoneStage && data.milestoneStage !== 'FULL' && (
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-[#ffb700]/25 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                    <div className="flex items-center gap-3">
+                        <span className="text-xl">🧬</span>
+                        <div>
+                            <span className="text-[10px] font-black uppercase tracking-wider text-[#ffb700] block">
+                                Stage: {data.milestoneStage} CALIBRATION ({data.calibrationProgress?.current || 0}/15 Entries)
+                            </span>
+                            <span className="text-xs font-semibold text-[#2D2926]/70">
+                                MindLens unlocks deeper circadian variance and Bayesian rigor as you reach 15 logs.
+                            </span>
+                        </div>
+                    </div>
+                    <div className="w-full sm:w-32 bg-slate-200/80 rounded-full h-2 overflow-hidden shrink-0">
+                        <div 
+                            className="bg-gradient-to-r from-[#ffb700] to-emerald-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(100, (((data.calibrationProgress?.current || 0) / 15) * 100))}%` }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Sub-tab Navigation */}
             <div className="flex bg-[#FFF9F0] border border-[#ffb700]/15 p-1.5 rounded-2xl w-full max-w-xs mx-auto shadow-xs">
                 <button
                     onClick={() => setActiveSubTab('highlights')}
@@ -127,7 +160,7 @@ export const MindLensView: React.FC = () => {
                             : 'text-[#2D2926]/40 hover:text-[#2D2926]'
                     }`}
                 >
-                    Psych Highlights
+                    Psych Intelligence
                 </button>
                 <button
                     onClick={() => setActiveSubTab('analytics')}
@@ -151,46 +184,58 @@ export const MindLensView: React.FC = () => {
                 </div>
             ) : (
                 <div className="space-y-8">
-                    {/* Hero Grid: Mood Predictor & Soul Persona */}
+                    {/* Hero Grid: Affective State & Cognitive Archetype */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Current Mental State & Mood Prediction Card */}
-                        {data.moodPrediction && (
+                        {/* Current Affective State Card (Russell's Circumplex Model) */}
+                        {affectiveState && (
                             <div className="lg:col-span-2 bg-white rounded-[32px] p-6 md:p-8 border border-[#ffb700]/15 shadow-sm relative overflow-hidden flex flex-col justify-between group">
                                 <div className="absolute top-0 right-0 w-72 h-72 bg-[#ffb700]/10 rounded-full blur-[80px] pointer-events-none"></div>
 
                                 <div>
                                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                                         <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFF9F0] border border-[#ffb700]/20">
-                                            <span className="text-lg">{data.moodPrediction.icon}</span>
+                                            <span className="text-lg">{affectiveState.icon}</span>
                                             <span className="text-[10px] font-black uppercase tracking-widest text-[#ffb700]">
-                                                Predicted Mood State
+                                                Current Affective State
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 uppercase tracking-widest">
-                                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                            <span>{data.moodPrediction.confidence}% Confidence</span>
+                                        <div className="flex items-center gap-2">
+                                            {affectiveState.quadrant && (
+                                                <span className="text-[10px] font-black text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200 uppercase tracking-widest">
+                                                    {affectiveState.quadrant}
+                                                </span>
+                                            )}
+                                            <div className="flex items-center gap-1.5 text-[10px] font-black text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 uppercase tracking-widest">
+                                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                <span>{affectiveState.confidence}% Confidence</span>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-1 text-[#2D2926]">
-                                        {data.moodPrediction.mood}
+                                        {affectiveState.mood}
                                     </h2>
                                     <p className="text-[11px] font-black text-[#ffb700] uppercase tracking-widest mb-4">
-                                        Status: {data.moodPrediction.status}
+                                        Status: {affectiveState.status}
                                     </p>
 
-                                    <p className="text-sm font-medium text-[#2D2926]/70 leading-relaxed max-w-xl mb-6">
-                                        {data.moodPrediction.description}
+                                    <p className="text-sm font-medium text-[#2D2926]/75 leading-relaxed max-w-xl mb-6">
+                                        {affectiveState.description}
                                     </p>
                                 </div>
 
-                                {data.moodPrediction.recentTitles.length > 0 && (
+                                {affectiveState.recentTitles && affectiveState.recentTitles.length > 0 && (
                                     <div className="pt-4 border-t border-[#ffb700]/10">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40 mb-2">
-                                            Recent Triggers (Last Logged)
-                                        </p>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40">
+                                                Recent Affective Drivers (Decay-Weighted)
+                                            </p>
+                                            <span className="text-[10px] font-bold text-[#2D2926]/40">
+                                                λ = 0.20 Recency Weight
+                                            </span>
+                                        </div>
                                         <div className="flex flex-wrap gap-2">
-                                            {data.moodPrediction.recentTitles.map((title, idx) => (
+                                            {affectiveState.recentTitles.map((title, idx) => (
                                                 <span
                                                     key={idx}
                                                     className="px-3 py-1 rounded-xl bg-[#FFF9F0] border border-[#ffb700]/15 text-xs font-bold text-[#2D2926] truncate max-w-[200px]"
@@ -204,56 +249,123 @@ export const MindLensView: React.FC = () => {
                             </div>
                         )}
 
-                        {/* Soul Persona Card */}
-                        {data.persona && (
+                        {/* Cognitive Archetype Card */}
+                        {archetype && (
                             <div className="bg-white border border-[#ffb700]/15 shadow-sm rounded-[32px] p-6 md:p-8 relative overflow-hidden flex flex-col items-center text-center justify-between">
                                 <div
-                                    className="absolute -right-12 -top-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-15"
-                                    style={{ backgroundColor: data.persona.color }}
+                                    className="absolute -right-12 -top-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-20"
+                                    style={{ backgroundColor: archetype.color }}
                                 ></div>
 
-                                <div className="flex flex-col items-center">
+                                <div className="flex flex-col items-center w-full">
                                     <div
-                                        className="w-24 h-24 rounded-full p-1 mb-4 shadow-md"
+                                        className="w-20 h-20 rounded-2xl flex items-center justify-center mb-4 shadow-md transition-transform hover:scale-105"
                                         style={{
-                                            background: `linear-gradient(135deg, ${data.persona.color}, #ffb700)`,
+                                            background: `linear-gradient(135deg, ${archetype.color}, #ffb700)`,
+                                            color: '#ffffff'
                                         }}
                                     >
-                                        <div className="w-full h-full rounded-full bg-[#FFF9F0] flex items-center justify-center overflow-hidden border-2 border-white">
-                                            {data.persona.imageUrl && !imageError ? (
-                                                <img
-                                                    src={data.persona.imageUrl}
-                                                    alt={data.persona.name}
-                                                    className="w-full h-full object-cover"
-                                                    onError={() => setImageError(true)}
-                                                />
-                                            ) : (
-                                                <span className="text-4xl">{data.persona.icon}</span>
-                                            )}
-                                        </div>
+                                        <span className="material-symbols-outlined text-4xl">{archetype.icon || 'psychology'}</span>
                                     </div>
 
                                     <span
                                         className="text-[10px] font-black uppercase tracking-[0.2em] mb-1"
-                                        style={{ color: data.persona.color }}
+                                        style={{ color: archetype.color }}
                                     >
-                                        Soul Persona
+                                        Cognitive Archetype
                                     </span>
-                                    <h3 className="text-xl font-black text-[#2D2926] mb-2">{data.persona.name}</h3>
-                                    <p className="text-xs font-medium text-[#2D2926]/60 leading-relaxed mb-4">
-                                        {data.persona.description}
+                                    <h3 className="text-xl font-black text-[#2D2926] mb-1">{archetype.name}</h3>
+                                    {archetype.tagline && (
+                                        <p className="text-[11px] font-bold text-[#ffb700] mb-3">
+                                            {archetype.tagline}
+                                        </p>
+                                    )}
+                                    <p className="text-xs font-medium text-[#2D2926]/70 leading-relaxed mb-4">
+                                        {archetype.description}
                                     </p>
+
+                                    {/* Traits */}
+                                    {((archetype as any).coreTraits || (archetype as any).traits || []).length > 0 && (
+                                        <div className="flex flex-wrap justify-center gap-1.5 mb-4">
+                                            {((archetype as any).coreTraits || (archetype as any).traits || []).map((t: string, idx: number) => (
+                                                <span key={idx} className="text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                                                    {t}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className="w-full pt-3 border-t border-[#ffb700]/10 flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40">
-                                    <span>Dominant Vibe</span>
-                                    <span className="font-black text-[#ffb700]">
-                                        {data.userProfile?.primaryMood || 'Balanced'}
-                                    </span>
+                                <div className="w-full pt-3 border-t border-[#ffb700]/10 flex flex-col gap-1 text-[10px] text-[#2D2926]/40">
+                                    {archetype.scientificBasis && (
+                                        <span className="text-[9px] italic font-medium text-[#2D2926]/50">
+                                            {archetype.scientificBasis}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         )}
                     </div>
+
+                    {/* Taste Breadth & Shannon Information Entropy Section */}
+                    {tasteBreadth && (
+                        <div className="bg-white border border-[#ffb700]/15 shadow-sm rounded-[32px] p-6 md:p-8">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="material-symbols-outlined text-[#ffb700] text-2xl">all_inclusive</span>
+                                        <h3 className="text-xl font-black text-[#2D2926] tracking-tight">
+                                            Taste Breadth & Genre Dispersion
+                                        </h3>
+                                    </div>
+                                    <p className="text-xs font-medium text-[#2D2926]/60">
+                                        Grounded in Shannon Information Entropy H(G) to measure your genuine appetite for genre diversity vs. focus
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-4 bg-[#FFF9F0] border border-[#ffb700]/20 px-5 py-3 rounded-2xl shrink-0">
+                                    <div className="text-right">
+                                        <span className="text-[10px] font-black uppercase text-[#2D2926]/40 block">Taste Breadth</span>
+                                        <span className="text-2xl font-black text-[#2D2926]">
+                                            {Math.round(tasteBreadth.normalizedBreadth * 100)}%
+                                        </span>
+                                    </div>
+                                    <div className="w-[1px] h-8 bg-[#ffb700]/20" />
+                                    <div>
+                                        <span className="text-[10px] font-black uppercase text-[#ffb700] block">Classification</span>
+                                        <span className="text-sm font-black text-[#2D2926]">
+                                            {tasteBreadth.label}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Genre Distribution Bars */}
+                            {tasteBreadth.genreDistribution && tasteBreadth.genreDistribution.length > 0 && (
+                                <div className="space-y-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                                        {tasteBreadth.genreDistribution.map((item, idx) => (
+                                            <div key={idx} className="bg-[#FFF9F0]/60 border border-[#ffb700]/15 rounded-2xl p-3 flex flex-col justify-between">
+                                                <div className="flex justify-between items-center text-[11px] font-black text-[#2D2926] mb-2">
+                                                    <span className="truncate">{item.genre}</span>
+                                                    <span className="text-[#ffb700] font-black text-[10px]">{item.percentage}%</span>
+                                                </div>
+                                                <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                                    <div 
+                                                        className="bg-[#ffb700] h-full rounded-full transition-all duration-500" 
+                                                        style={{ width: `${Math.min(100, item.percentage)}%` }} 
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] text-[#2D2926]/40 italic text-right pt-1">
+                                        Primary tags weighted 1.0; secondary tags weighted 0.3. Disliked titles (&lt; 5.0) are excluded to prevent hate-watch distortion.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Interactive Watch Frequency Chart */}
                     {timeSeries.length > 0 && (
@@ -276,7 +388,7 @@ export const MindLensView: React.FC = () => {
                                             className={`p-1.5 rounded-lg transition-all ${
                                                 chartType === 'line'
                                                     ? 'bg-[#ffb700] text-white shadow-xs'
-                                                    : 'text-[#2D2926]/30 hover:text-[#2D2926]'
+                                                     : 'text-[#2D2926]/30 hover:text-[#2D2926]'
                                             }`}
                                             title="Curve view"
                                         >
@@ -297,109 +409,62 @@ export const MindLensView: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* SVG Chart */}
-                            <div className="relative w-full overflow-visible min-h-[190px]">
+                            <div className="relative w-full overflow-hidden" style={{ height: `${chartHeight}px` }}>
                                 <svg
                                     viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-                                    className="w-full h-auto overflow-visible cursor-crosshair"
+                                    className="w-full h-full overflow-visible"
+                                    preserveAspectRatio="none"
                                 >
                                     <defs>
                                         <linearGradient id="mindLensGradient" x1="0%" x2="0%" y1="0%" y2="100%">
-                                            <stop offset="0%" style={{ stopColor: '#ffb700', stopOpacity: 0.2 }} />
-                                            <stop offset="100%" style={{ stopColor: '#ffb700', stopOpacity: 0 }} />
+                                            <stop offset="0%" stopColor="#ffb700" stopOpacity="0.25" />
+                                            <stop offset="100%" stopColor="#ffb700" stopOpacity="0.0" />
                                         </linearGradient>
                                     </defs>
-
-                                    {/* Grid Lines */}
-                                    <line
-                                        x1={padding}
-                                        y1={chartHeight - padding}
-                                        x2={chartWidth - padding}
-                                        y2={chartHeight - padding}
-                                        stroke="#ffb700"
-                                        strokeOpacity="0.15"
-                                        strokeWidth="1.5"
-                                    />
-                                    {[0, 0.5, 1].map(v => (
-                                        <line
-                                            key={v}
-                                            x1={padding}
-                                            y1={chartHeight - (v * (chartHeight - padding * 2) + padding)}
-                                            x2={chartWidth - padding}
-                                            y2={chartHeight - (v * (chartHeight - padding * 2) + padding)}
-                                            stroke="#ffb700"
-                                            strokeOpacity="0.05"
-                                            strokeDasharray="3 3"
-                                        />
-                                    ))}
 
                                     {chartType === 'line' ? (
                                         <>
                                             <path d={areaPath} fill="url(#mindLensGradient)" className="transition-all duration-500" />
-                                            <path
-                                                d={linePath}
-                                                fill="none"
-                                                stroke="#ffb700"
-                                                strokeWidth="4"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="transition-all duration-500"
-                                            />
+                                            <path d={linePath} fill="none" stroke="#ffb700" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                                             {timeSeries.map((d, i) => (
                                                 <circle
                                                     key={i}
                                                     cx={getX(i)}
                                                     cy={getY(d.count)}
-                                                    r={hoveredDayIndex === i ? '7' : d.count > 0 ? '4' : '2'}
-                                                    fill={hoveredDayIndex === i ? '#ffb700' : d.count > 0 ? '#ffb700' : '#d1d5db'}
-                                                    stroke="white"
-                                                    strokeWidth="2"
-                                                    className="transition-all cursor-pointer"
+                                                    r={hoveredDayIndex === i ? 6 : (d.count > 0 ? 3.5 : 2)}
+                                                    fill={hoveredDayIndex === i ? '#2D2926' : (d.count > 0 ? '#ffb700' : '#cbd5e1')}
+                                                    stroke="#ffffff"
+                                                    strokeWidth="1.5"
+                                                    className="cursor-pointer transition-all duration-200"
                                                     onMouseEnter={() => setHoveredDayIndex(i)}
+                                                    onMouseLeave={() => setHoveredDayIndex(null)}
+                                                    onClick={() => setSelectedDayForModal(i)}
                                                 />
                                             ))}
                                         </>
                                     ) : (
                                         timeSeries.map((d, i) => {
-                                            const barWidth = Math.max((chartWidth / timeSeries.length) * 0.6, 6);
-                                            const h = (d.count / maxCount) * (chartHeight - padding * 2);
+                                            const barW = Math.max(4, (chartWidth / timeSeries.length) * 0.6);
+                                            const barH = ((d.count / maxCount) * (chartHeight - padding * 2));
                                             return (
                                                 <rect
                                                     key={i}
-                                                    x={getX(i) - barWidth / 2}
-                                                    y={chartHeight - padding - h}
-                                                    width={barWidth}
-                                                    height={Math.max(h, 4)}
-                                                    fill={hoveredDayIndex === i ? '#ffb700' : '#ffb700cc'}
-                                                    rx="4"
-                                                    className="transition-all cursor-pointer"
+                                                    x={getX(i) - barW / 2}
+                                                    y={chartHeight - barH - padding}
+                                                    width={barW}
+                                                    height={barH}
+                                                    rx={barW / 2}
+                                                    fill={hoveredDayIndex === i ? '#2D2926' : '#ffb700'}
+                                                    className="cursor-pointer transition-all"
                                                     onMouseEnter={() => setHoveredDayIndex(i)}
+                                                    onMouseLeave={() => setHoveredDayIndex(null)}
+                                                    onClick={() => setSelectedDayForModal(i)}
                                                 />
                                             );
                                         })
                                     )}
-
-                                    {/* Invisible Overlay for Mouse Hover & Click */}
-                                    {timeSeries.map((_, i) => (
-                                        <rect
-                                            key={i}
-                                            x={getX(i) - (chartWidth / timeSeries.length) / 2}
-                                            y={0}
-                                            width={chartWidth / timeSeries.length}
-                                            height={chartHeight}
-                                            fill="transparent"
-                                            className="cursor-pointer"
-                                            onMouseEnter={() => setHoveredDayIndex(i)}
-                                            onClick={() => {
-                                                if (timeSeries[i] && timeSeries[i].count > 0) {
-                                                    setSelectedDayForModal(i);
-                                                }
-                                            }}
-                                        />
-                                    ))}
                                 </svg>
 
-                                {/* WatchHive Standard Dark Tooltip */}
                                 {hoveredDayIndex !== null && timeSeries[hoveredDayIndex] && (
                                     <div
                                         className="absolute z-30 pointer-events-none transition-all animate-[fade-in_0.15s_ease-out]"
@@ -500,23 +565,23 @@ export const MindLensView: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Suggestion Influence & Recommender Network Section */}
+                    {/* Suggestion Influence & Recommender Network (Bayesian Grounded) */}
                     {data.suggestionAnalytics && (
                         <div className="bg-gradient-to-br from-amber-50/60 via-white to-orange-50/30 border border-[#ffb700]/25 shadow-sm rounded-[32px] p-6 md:p-8">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="material-symbols-outlined text-[#ffb700] text-2xl">insights</span>
-                                        <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Suggestion Influence & Network Impact</h3>
+                                        <h3 className="text-xl font-black text-[#2D2926] tracking-tight">Top 5 Tastemakers & Recommender Network</h3>
                                     </div>
                                     <p className="text-xs font-medium text-[#2D2926]/60">
-                                        Discover who recommended your favorite movies and how your friends shape your watch history
+                                        Empirically smoothed using Bayesian trust scores to reveal who genuinely guides your taste without 1-hit wonder bias
                                     </p>
                                 </div>
 
                                 <div className="flex items-center gap-3 bg-white/80 border border-[#ffb700]/20 px-4 py-2 rounded-2xl shrink-0">
                                     <div className="flex flex-col items-center">
-                                        <span className="text-[10px] font-black uppercase text-[#2D2926]/40">Overall Conversion</span>
+                                        <span className="text-[10px] font-black uppercase text-[#2D2926]/40">Network Conversion</span>
                                         <span className="text-sm font-black text-[#2D2926]">
                                             {data.suggestionAnalytics.summary.overallConversionRate}%
                                         </span>
@@ -531,28 +596,24 @@ export const MindLensView: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Recommenders Leaderboard Cards */}
                             {data.suggestionAnalytics.recommenders && data.suggestionAnalytics.recommenders.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {data.suggestionAnalytics.recommenders.map((rec, rank) => (
+                                    {data.suggestionAnalytics.recommenders.slice(0, 5).map((rec, rank) => (
                                         <div 
                                             key={rec.userId} 
                                             className="bg-white border border-[#ffb700]/20 rounded-2xl p-4 flex flex-col justify-between shadow-xs hover:shadow-md hover:border-[#ffb700]/40 transition-all relative overflow-hidden"
                                         >
-                                            {/* Rank Badge */}
                                             <div className="flex items-center justify-between mb-3">
                                                 <div className="flex items-center gap-2.5">
                                                     <span className={`w-6 h-6 rounded-full font-black text-[11px] flex items-center justify-center ${rank === 0 ? 'bg-[#ffb700] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}>
                                                         #{rank + 1}
                                                     </span>
                                                     <Link to={`/watch-hive/profile/${rec.userId}`} className="flex items-center gap-2 group/user min-w-0">
-                                                        {rec.profilePictureUrl ? (
-                                                            <img src={rec.profilePictureUrl} alt="" className="w-8 h-8 rounded-full object-cover border border-[#ffb700]/30" />
-                                                        ) : (
-                                                            <div className="w-8 h-8 rounded-full bg-[#ffb700] text-white font-black text-xs flex items-center justify-center">
-                                                                {(rec.displayName?.[0] || rec.username[0]).toUpperCase()}
-                                                            </div>
-                                                        )}
+                                                        <Avatar 
+                                                            src={rec.profilePictureUrl} 
+                                                            name={rec.displayName || rec.username} 
+                                                            size="xs" 
+                                                        />
                                                         <div className="flex flex-col min-w-0">
                                                             <span className="text-xs font-black text-[#2D2926] group-hover/user:text-[#ffb700] transition-colors truncate">
                                                                 {rec.displayName || rec.username}
@@ -569,11 +630,10 @@ export const MindLensView: React.FC = () => {
                                                 </span>
                                             </div>
 
-                                            {/* Metrics Stats */}
                                             <div className="grid grid-cols-3 gap-2 py-2.5 border-y border-[#ffb700]/10 text-center my-1 bg-[#FFF9F0]/40 rounded-xl">
                                                 <div>
-                                                    <span className="text-[9px] font-bold text-[#2D2926]/40 uppercase block">Suggested</span>
-                                                    <span className="text-xs font-black text-[#2D2926]">{rec.totalSuggested}</span>
+                                                    <span className="text-[9px] font-bold text-[#2D2926]/40 uppercase block">Trust Score</span>
+                                                    <span className="text-xs font-black text-[#ffb700]">{rec.trustScore || rec.influenceScore}</span>
                                                 </div>
                                                 <div>
                                                     <span className="text-[9px] font-bold text-[#2D2926]/40 uppercase block">Watched</span>
@@ -581,16 +641,15 @@ export const MindLensView: React.FC = () => {
                                                 </div>
                                                 <div>
                                                     <span className="text-[9px] font-bold text-[#2D2926]/40 uppercase block">Avg Rating</span>
-                                                    <span className="text-xs font-black text-[#ffb700]">
+                                                    <span className="text-xs font-black text-[#2D2926]">
                                                         {rec.avgRating ? `★ ${rec.avgRating}` : '-'}
                                                     </span>
                                                 </div>
                                             </div>
 
-                                            {/* Conversion Rate Bar */}
                                             <div className="mt-2.5">
                                                 <div className="flex justify-between text-[10px] font-bold mb-1">
-                                                    <span className="text-[#2D2926]/50">Conversion Rate</span>
+                                                    <span className="text-[#2D2926]/50">Conversion Velocity</span>
                                                     <span className="text-[#2D2926] font-black">{rec.conversionRate}%</span>
                                                 </div>
                                                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -615,14 +674,13 @@ export const MindLensView: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Aesthetic Profile & Insights Grid */}
+                    {/* Observational Insights Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Behavioral Verbal Insights */}
                         {data.insights && data.insights.length > 0 && (
                             <div className="lg:col-span-2 bg-white border border-[#ffb700]/15 shadow-sm rounded-[32px] p-6 md:p-8">
                                 <h3 className="text-lg font-black text-[#2D2926] mb-4 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-[#ffb700]">lightbulb</span>
-                                    Psychological Insights
+                                    <span className="material-symbols-outlined text-[#ffb700]">psychology</span>
+                                    Observational Insights
                                 </h3>
                                 {data.insights.map((insight: string, i: number) => (
                                     <div key={i}>{formatInsight(insight)}</div>
@@ -630,7 +688,6 @@ export const MindLensView: React.FC = () => {
                             </div>
                         )}
 
-                        {/* Aesthetic Profile Chips */}
                         {data.aesthetics && data.aesthetics.length > 0 && (
                             <div className="bg-white border border-[#ffb700]/15 shadow-sm rounded-[32px] p-6 md:p-8">
                                 <h3 className="text-lg font-black text-[#2D2926] mb-4 flex items-center gap-2">

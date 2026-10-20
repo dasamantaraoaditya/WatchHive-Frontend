@@ -3,6 +3,10 @@ import { FeedItem } from '../../services/feed.service';
 import { useTmdbDetails } from '../../hooks/useTmdbDetails';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, WatchlistButton } from '../common';
+import { Modal } from '../common/Modal';
+import { EntryForm } from '../entries/EntryForm';
+import { SuggestMovieModal } from '../suggestions/SuggestMovieModal';
+import { useAuth } from '../../contexts/AuthContext';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
 import whLogo from '../../assets/images/watchhive-logo.png';
@@ -17,6 +21,7 @@ const TMDB_BACKDROP_IMG = 'https://image.tmdb.org/t/p/w780';
 
 export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const navigate = useNavigate();
+    const { user: currentUser } = useAuth();
     const isSuggestion = item.type === 'SUGGESTION';
     const entryData = isSuggestion ? null : item.data;
     const targetTmdbId = isSuggestion ? item.data.id : entryData?.tmdbId;
@@ -29,6 +34,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [showShareFeedback, setShowShareFeedback] = useState<boolean>(false);
     const [isCommented, setIsCommented] = useState<boolean>(entryData?.isCommented || false);
     const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
+    const [showLogModal, setShowLogModal] = useState<boolean>(false);
+    const [showSuggestModal, setShowSuggestModal] = useState<boolean>(false);
 
     const shouldFetchDetails = !isSuggestion;
     const fetchTmdbId = shouldFetchDetails ? targetTmdbId : null;
@@ -59,8 +66,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         ? `${TMDB_BACKDROP_IMG}${backdropPathRaw}`
         : (posterPathRaw ? `${TMDB_POSTER_IMG}${posterPathRaw}` : null);
 
-    const username = isSuggestion ? 'WatchersHive Suggestion' : (entryData?.user?.username || 'User');
-    const displayName = isSuggestion ? (item.reason || 'Trending Now') : (entryData?.user?.displayName || username);
+    const username = isSuggestion ? 'WatchersHive' : (entryData?.user?.username || 'User');
+    const displayName = isSuggestion ? 'WatchersHive' : (entryData?.user?.displayName || username);
     const userId = !isSuggestion ? (entryData?.user?.id || entryData?.userId) : null;
 
     // Support both profilePictureUrl and avatarUrl (defensive)
@@ -69,6 +76,18 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const avatarUrl = isSuggestion
         ? null // Suggestions don't have user avatars
         : (userAvatar || undefined);
+
+    // Determine prefilled suggestor for quick log
+    const isOwnPost = Boolean(currentUser?.id && userId === currentUser.id);
+    const prefilledSuggestor = entryData?.suggestedByUser
+        ? entryData.suggestedByUser
+        : (!isOwnPost && userId && username ? {
+            id: userId,
+            username,
+            displayName,
+            profilePictureUrl: avatarUrl || null,
+        } : null);
+    const prefilledSuggestorId = prefilledSuggestor?.id || null;
 
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
@@ -162,7 +181,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
         return entryData.review ? 'reviewed' : 'watched';
     })();
 
-    const releaseYear = (details?.release_date || details?.first_air_date || '').substring(0, 4);
+    const releaseYear = (details?.release_date || details?.first_air_date || (item.data as any)?.release_date || (item.data as any)?.first_air_date || '').substring(0, 4);
     const runtime = details?.runtime || (details?.episode_run_time && details.episode_run_time[0]);
     const genreText = details?.genres?.map((g: any) => g.name).slice(0, 2).join(', ');
 
@@ -175,17 +194,18 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     return (
         <>
             <div className={`feed-card glass group ${isSuggestion ? 'feed-card--suggestion' : ''}`}>
-                {/* Suggestion Badge (Optional: if we want to keep it explicitly visual outside the text) */}
+                {/* Suggestion Reason Badge */}
                 {isSuggestion && (
-                    <div className="absolute -top-3 left-6 bg-primary text-background-dark text-xs font-bold px-3 py-1 rounded-full border border-primary/20 shadow-sm z-10">
-                        ✨ Recommended for You
+                    <div className="absolute -top-3 left-6 bg-primary text-background-dark text-xs font-bold px-3 py-1 rounded-full border border-primary/20 shadow-sm z-10 flex items-center gap-1.5 max-w-[90%] truncate">
+                        <span>✨</span>
+                        <span className="truncate">{item.reason || 'Recommended for You'}</span>
                     </div>
                 )}
 
                 {/* Header: Avatar, Name & Action */}
                 <div className="feed-card-header">
                     <div className="feed-card-avatar-wrapper ring-2 ring-primary ring-offset-4 ring-offset-background-dark">
-                        <Link to={userId ? `/watch-hive/profile/${userId}` : '#'}>
+                        <Link to={userId ? `/watch-hive/profile/${userId}` : '/watch-hive'}>
                             <Avatar
                                 src={isSuggestion ? whLogo : avatarUrl}
                                 name={isSuggestion ? 'WatchersHive' : username}
@@ -220,11 +240,12 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
                                 {entryData?.suggestedByUser && (
                                     <div className="mt-1 flex items-center gap-1.5 text-xs text-[#2D2926]/70 font-medium">
-                                        <span className="text-[11px] font-medium text-[#2D2926]/60">Suggested by</span>
+                                        <span className="text-[11px] font-medium text-[#2D2926]/60 shrink-0">Suggested by</span>
                                         <Link 
                                             to={`/watch-hive/profile/${entryData.suggestedByUser.id}`} 
-                                            className="inline-flex items-center gap-1.5 font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors"
+                                            className="inline-flex items-center gap-1.5 font-bold text-[#2D2926] hover:text-[#ffb700] transition-colors truncate max-w-[200px]"
                                             onClick={(e) => e.stopPropagation()}
+                                            title={`@${entryData.suggestedByUser.username}`}
                                         >
                                             <Avatar
                                                 src={entryData.suggestedByUser.profilePictureUrl}
@@ -232,7 +253,9 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                                 size="xxs"
                                                 showBorder={false}
                                             />
-                                            <span>@{entryData.suggestedByUser.username}</span>
+                                            <span className="truncate">
+                                                @{entryData.suggestedByUser.username.length > 10 ? `${entryData.suggestedByUser.username.slice(0, 10)}...` : entryData.suggestedByUser.username}
+                                            </span>
                                         </Link>
                                     </div>
                                 )}
@@ -341,21 +364,54 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    {/* Quick Actions (Watchlist, Log Watch, Suggest, Share) */}
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                        {/* 1. Quick Add to Watchlist */}
+                        {targetTmdbId && (
+                            <div className="relative group/btn" title="Save to Watchlist">
+                                <WatchlistButton 
+                                    tmdbId={targetTmdbId} 
+                                    variant="icon" 
+                                    className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/50 hover:text-[#ffb700] hover:bg-white flex items-center justify-center shadow-xs hover:shadow-sm text-[18px] transition-all cursor-pointer" 
+                                />
+                            </div>
+                        )}
+
+                        {/* 2. Quick Log Watch (Prefilled with Movie & Suggestor) */}
+                        {targetTmdbId && (
+                            <button
+                                type="button"
+                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/50 hover:text-[#ffb700] hover:bg-white flex items-center justify-center shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                                title={`Log watch${prefilledSuggestor ? ` (Suggested by @${prefilledSuggestor.username})` : ''}`}
+                                onClick={() => setShowLogModal(true)}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">add_task</span>
+                            </button>
+                        )}
+
+                        {/* 3. Quick Suggest to a Friend */}
+                        {targetTmdbId && (
+                            <button
+                                type="button"
+                                className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/50 hover:text-[#ffb700] hover:bg-white flex items-center justify-center shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                                title="Suggest to a friend"
+                                onClick={() => setShowSuggestModal(true)}
+                            >
+                                <span className="material-symbols-outlined text-[18px]">forward</span>
+                            </button>
+                        )}
+
+                        {/* 4. Share activity */}
                         <button
-                            className={`icon-only-btn transition-all ${showShareFeedback ? 'text-green-500' : ''}`}
+                            type="button"
+                            className={`w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/50 hover:text-[#ffb700] hover:bg-white flex items-center justify-center shadow-xs hover:shadow-sm transition-all cursor-pointer ${showShareFeedback ? 'text-green-500!' : ''}`}
                             title={showShareFeedback ? "Link Copied!" : "Share activity"}
                             onClick={handleShare}
                         >
-                            <span className="material-symbols-outlined text-[20px]">
+                            <span className="material-symbols-outlined text-[18px]">
                                 {showShareFeedback ? 'check_circle' : 'share'}
                             </span>
                         </button>
-                        {!item.data?.isWatched && targetTmdbId && (
-                            <div className="flex items-center gap-2">
-                                <WatchlistButton tmdbId={targetTmdbId} variant="icon" className="w-8 h-8 rounded-full bg-white/90 text-[#2D2926]/40 hover:text-[#ffb700] flex items-center justify-center shadow-sm text-[20px]" />
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
@@ -375,6 +431,48 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     onCommentDeleted={(newCount) => {
                         setCommentCount(prev => Math.max(0, newCount ?? prev - 1));
                     }}
+                />
+            )}
+
+            {/* Quick Log Watch Modal (Prefilled with Movie & Suggestor) */}
+            {showLogModal && targetTmdbId && (
+                <Modal
+                    isOpen={showLogModal}
+                    onClose={() => setShowLogModal(false)}
+                    title="Log your watch"
+                    maxWidth="max-w-4xl"
+                >
+                    <EntryForm
+                        isModal={true}
+                        prefillData={{
+                            tmdbId: targetTmdbId,
+                            title: title,
+                            type: normMediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                            posterPath: posterPathRaw || null,
+                            overview: details?.overview || null,
+                            suggestedByUserId: prefilledSuggestorId,
+                            suggestedByUser: prefilledSuggestor,
+                        }}
+                        onSuccess={() => setShowLogModal(false)}
+                        onCancel={() => setShowLogModal(false)}
+                    />
+                </Modal>
+            )}
+
+            {/* Quick Suggest to Friend Modal (Prefilled with Movie) */}
+            {showSuggestModal && targetTmdbId && (
+                <SuggestMovieModal
+                    isOpen={showSuggestModal}
+                    initialMovie={{
+                        id: targetTmdbId,
+                        title: title,
+                        name: title,
+                        media_type: normMediaType,
+                        poster_path: posterPathRaw || null,
+                        overview: details?.overview,
+                    }}
+                    onClose={() => setShowSuggestModal(false)}
+                    onSuccess={() => setShowSuggestModal(false)}
                 />
             )}
         </>

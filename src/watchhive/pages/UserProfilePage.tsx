@@ -12,6 +12,9 @@ import { listsApi, ListItem, List } from '../services/lists.service';
 import { WatchlistGrid } from '../components/profile/WatchlistGrid';
 import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
+import { formatUserFriendlyError } from '../utils/errorHandler';
+import { resolveAvatarUrl } from '../components/common/Avatar';
+import { AvatarLightboxModal, BeeLoader } from '../components/common';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -52,8 +55,11 @@ export const UserProfilePage: React.FC = () => {
 
     const [userRankings, setUserRankings] = useState<List[] | null>(null);
     const [isRankingsLoading, setIsRankingsLoading] = useState(false);
+    const [avatarError, setAvatarError] = useState(false);
+    const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
 
     useEffect(() => {
+        setAvatarError(false);
         if (!id) return;
         if (currentUser && id === currentUser.id) {
             navigate('/watch-hive/profile');
@@ -69,7 +75,10 @@ export const UserProfilePage: React.FC = () => {
                 setPageIcon('person');
             } catch (err) {
                 console.error(err);
-                setError('User not found');
+                setError(formatUserFriendlyError(err, {
+                    resourceType: 'profile',
+                    defaultMessage: 'This user profile could not be found.'
+                }));
             } finally {
                 if (showLoading) setLoading(false);
             }
@@ -239,17 +248,30 @@ export const UserProfilePage: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex flex-col md:flex-row items-center gap-8">
-                        <div className="relative">
-                            <div className="absolute -inset-2 bg-[#ffb700]/20 rounded-full blur-xl opacity-30"></div>
-                            <div className="relative p-1 bg-gradient-to-br from-[#ffb700] to-transparent rounded-full">
+                        <div 
+                            className="relative group cursor-pointer"
+                            onClick={() => setIsAvatarModalOpen(true)}
+                            title="Click to view full picture"
+                        >
+                            <div className="absolute -inset-2 bg-[#ffb700]/20 rounded-full blur-xl opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                            <div className="relative p-1 bg-gradient-to-br from-[#ffb700] via-[#ffaa00] to-transparent rounded-full shadow-lg transition-transform group-hover:scale-105 duration-300">
                                 <div className="bg-white rounded-full p-1 relative overflow-hidden">
-                                    {profileUser.profilePictureUrl ? (
-                                        <img className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover" src={profileUser.profilePictureUrl} alt="User profile" />
+                                    {resolveAvatarUrl(profileUser.profilePictureUrl) && !avatarError ? (
+                                        <img 
+                                            className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover" 
+                                            src={resolveAvatarUrl(profileUser.profilePictureUrl)!} 
+                                            alt={profileUser.displayName || profileUser.username}
+                                            onError={() => setAvatarError(true)} 
+                                        />
                                     ) : (
                                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
                                             <span className="material-symbols-outlined text-5xl">person</span>
                                         </div>
                                     )}
+                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 rounded-full flex flex-col items-center justify-center transition-opacity">
+                                        <span className="material-symbols-outlined text-white text-2xl drop-shadow">zoom_in</span>
+                                        <span className="text-[10px] font-black text-white uppercase tracking-wider mt-0.5">View</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -308,6 +330,7 @@ export const UserProfilePage: React.FC = () => {
                                         </button>
                                         <button 
                                             onClick={() => setIsSuggestModalOpen(true)}
+                                            title={profileUser.isFollower === false ? `@${profileUser.username} must follow you to receive suggestions` : 'Suggest a title to this user'}
                                             className="flex-1 font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/5 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-md shadow-black/5 flex items-center justify-center gap-1 cursor-pointer"
                                         >
                                             <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
@@ -355,6 +378,7 @@ export const UserProfilePage: React.FC = () => {
                                     </button>
                                     <button 
                                         onClick={() => setIsSuggestModalOpen(true)}
+                                        title={profileUser.isFollower === false ? `@${profileUser.username} must follow you to receive suggestions` : 'Suggest a title to this user'}
                                         className="flex-1 font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/5 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-sm flex items-center justify-center gap-1 cursor-pointer"
                                     >
                                         <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
@@ -457,7 +481,7 @@ export const UserProfilePage: React.FC = () => {
 
                                     {isRankingsLoading ? (
                                         <div className="py-12 flex justify-center">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#ffb700]"></div>
+                                            <BeeLoader size="medium" message="Loading rankings..." />
                                         </div>
                                     ) : !userRankings || userRankings.length === 0 ? (
                                         <div className="bg-white border border-black/5 rounded-3xl p-12 text-center text-slate-400 font-bold">
@@ -574,6 +598,15 @@ export const UserProfilePage: React.FC = () => {
                         onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
                         userId={profileUser.id}
                         type={modalConfig.type}
+                    />
+                )}
+                {profileUser && (
+                    <AvatarLightboxModal
+                        isOpen={isAvatarModalOpen}
+                        onClose={() => setIsAvatarModalOpen(false)}
+                        src={resolveAvatarUrl(profileUser.profilePictureUrl)}
+                        name={profileUser.displayName || profileUser.username}
+                        username={profileUser.username}
                     />
                 )}
                 {profileUser && isSuggestModalOpen && (

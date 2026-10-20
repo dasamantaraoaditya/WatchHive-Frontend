@@ -23,20 +23,34 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
-function resolveAvatarUrl(src: string | null | undefined): string | null {
-    if (!src) return null;
+export function resolveAvatarUrl(src: string | null | undefined): string | null {
+    if (!src || typeof src !== 'string' || src.trim() === '') return null;
 
-    // If it's already a full URL (e.g. Google profile pic), return as-is
-    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
-        return src;
+    const trimmed = src.trim();
+
+    // If it's already a full URL (e.g. Google profile pic, backend API URL), return as-is
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+        return trimmed;
     }
 
-    // Otherwise it's a relative path from our server.
-    // Ensure we don't end up with double slashes or missing slashes
-    const cleanBase = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
-    const cleanSrc = src.startsWith('/') ? src : `/${src}`;
+    // Normalize relative path or raw storage key
+    let filename = trimmed;
+    if (filename.startsWith('/uploads/avatars/')) {
+        filename = filename.replace('/uploads/avatars/', '');
+    } else if (filename.startsWith('uploads/avatars/')) {
+        filename = filename.replace('uploads/avatars/', '');
+    } else if (filename.startsWith('/uploads/')) {
+        filename = filename.replace('/uploads/', '');
+    } else if (filename.startsWith('avatars/')) {
+        filename = filename.replace('avatars/', '');
+    } else if (filename.startsWith('/avatars/')) {
+        filename = filename.replace('/avatars/', '');
+    } else if (filename.startsWith('/')) {
+        filename = filename.slice(1);
+    }
 
-    return `${cleanBase}${cleanSrc}`;
+    const cleanBase = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
+    return `${cleanBase}/api/v1/avatars/${filename}`;
 }
 
 function getInitials(name: string): string {

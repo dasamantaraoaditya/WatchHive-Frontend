@@ -9,6 +9,12 @@ export interface Suggestion {
     message: string | null;
     status: 'pending' | 'accepted' | 'ignored';
     createdAt: string;
+    recipient?: {
+        id: string;
+        username: string;
+        displayName: string | null;
+        profilePictureUrl: string | null;
+    };
 }
 
 export interface GroupedSuggestion {
@@ -16,6 +22,12 @@ export interface GroupedSuggestion {
     mediaType: 'movie' | 'tv';
     suggestions: Suggestion[];
     suggestors: {
+        id: string;
+        username: string;
+        displayName: string | null;
+        profilePictureUrl: string | null;
+    }[];
+    recipients?: {
         id: string;
         username: string;
         displayName: string | null;
@@ -39,6 +51,10 @@ export const suggestionsApi = {
 
     getMySuggestions: async (): Promise<GroupedSuggestion[]> => {
         return await apiClient.get<GroupedSuggestion[]>('/suggestions/me');
+    },
+
+    getSentSuggestions: async (): Promise<GroupedSuggestion[]> => {
+        return await apiClient.get<GroupedSuggestion[]>('/suggestions/sent');
     },
 
     deleteSuggestion: async (id: string): Promise<void> => {

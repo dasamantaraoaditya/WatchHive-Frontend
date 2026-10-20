@@ -13,6 +13,7 @@ export interface User {
     showCurrentlyWatching: boolean;
     showWatchlist: boolean;
     showRankings?: boolean;
+    notifyFollowingActivity?: boolean;
     xp: number;
     level: number;
     badges: Badge[];
@@ -22,6 +23,7 @@ export interface User {
     hasGoogleLinked?: boolean;
     hasPassword?: boolean;
     isFollowing?: boolean;
+    isFollower?: boolean;
     isRequested?: boolean;
     isIncomingRequest?: boolean;
     incomingRequestId?: string | null;
@@ -58,4 +60,5 @@ export interface UpdateUserData {
     showCurrentlyWatching?: boolean;
     showWatchlist?: boolean;
     showRankings?: boolean;
+    notifyFollowingActivity?: boolean;
 }

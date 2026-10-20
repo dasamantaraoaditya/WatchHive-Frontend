@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { entriesApi, CreateEntryData, Entry, SuggestedUser } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import { HiveDatePicker } from '../common/HiveDatePicker';
+import { Avatar } from '../common/Avatar';
+import { BeeLoader, ModalBeeOverlay } from '../common';
 import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services/userService';
 import { suggestionsApi } from '../../services/suggestions.service';
@@ -208,13 +210,15 @@ const StarRating: React.FC<{
 
 const CinemaIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <path d="M4 4h16a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V6a2 2 0 0 1 2-2z" fill="url(#ticketGrad)" stroke="#FFD700" strokeWidth="1" />
-        <line x1="8" y1="5" x2="8" y2="19" stroke="#FFD700" strokeDasharray="2 2" />
-        <circle cx="15" cy="12" r="1.5" fill="#FFF" />
+        <rect width="24" height="24" rx="5" fill="url(#cinemaBg)" />
+        <path d="M4 8h16M4 12h16M4 16h16" stroke="#FFD700" strokeWidth="0.8" strokeDasharray="1.5 1.5" strokeOpacity="0.4" />
+        <path d="M5 6h14a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 6z" fill="#D32F2F" stroke="#FFD700" strokeWidth="1" />
+        <circle cx="12" cy="12" r="2.2" fill="#FFD700" />
+        <polygon points="11,10.5 14,12 11,13.5" fill="#B71C1C" />
         <defs>
-            <linearGradient id="ticketGrad" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stopColor="#B33939" />
-                <stop offset="100%" stopColor="#210808" />
+            <linearGradient id="cinemaBg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#7F1D1D" />
+                <stop offset="100%" stopColor="#350808" />
             </linearGradient>
         </defs>
     </svg>
@@ -222,13 +226,14 @@ const CinemaIcon = () => (
 
 const HomeIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M2 12a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z" fill="url(#sofaGrad)" />
-        <rect x="5" y="12" width="6" height="5" rx="1" fill="#FFF" fillOpacity="0.25" />
-        <rect x="13" y="12" width="6" height="5" rx="1" fill="#FFF" fillOpacity="0.25" />
+        <rect width="24" height="24" rx="5" fill="url(#homeBg)" />
+        <path d="M5 11V8a1.5 1.5 0 0 1 1.5-1.5h11A1.5 1.5 0 0 1 19 8v3M4 12a1.5 1.5 0 0 1 1.5-1.5h13a1.5 1.5 0 0 1 1.5 1.5v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z" fill="#FFF" fillOpacity="0.9" />
+        <rect x="6.5" y="12.5" width="4.5" height="3.5" rx="0.8" fill="#F59E0B" />
+        <rect x="13" y="12.5" width="4.5" height="3.5" rx="0.8" fill="#F59E0B" />
         <defs>
-            <linearGradient id="sofaGrad" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stopColor="#F39C12" />
-                <stop offset="100%" stopColor="#D35400" />
+            <linearGradient id="homeBg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#F59E0B" />
+                <stop offset="100%" stopColor="#B45309" />
             </linearGradient>
         </defs>
     </svg>
@@ -236,23 +241,45 @@ const HomeIcon = () => (
 
 const NetflixIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="#141414" />
-        <path d="M7 4.5h3l3.5 10.5V4.5h3v15h-3L7 9.5v10H7V4.5z" fill="#E50914" />
-        <path d="M10 4.5v15l3.5-10.5V4.5H10z" fill="#B20710" />
+        <rect width="24" height="24" rx="5" fill="#000000" />
+        {/* Left vertical pillar */}
+        <path d="M6 3.5h3.6v17H6z" fill="#B81D24" />
+        {/* Right vertical pillar */}
+        <path d="M14.4 3.5h3.6v17h-3.6z" fill="#B81D24" />
+        {/* Center diagonal sash (bright red) with 3D shadow */}
+        <path 
+            d="M6 3.5h3.6l8.4 17h-3.6L6 3.5z" 
+            fill="#E50914" 
+            style={{ filter: 'drop-shadow(-1px 0px 2px rgba(0, 0, 0, 0.45))' }}
+        />
     </svg>
 );
 
-const DisneyIcon = () => (
+const HotstarIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="url(#disneyGrad)" />
-        <path d="M12 4c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm-0.5 7h-1v-1h1v1zm3 0h-1v-1h1v1z" fill="#FFF" fillOpacity="0.4" />
-        <path d="M5 8c1-1 2.5-1.5 4-1.5s3 .5 4 1.5M3 12c0-3 1.5-5 3.5-6M21 12c0 3-1.5 5-3.5 6" stroke="#FFF" strokeWidth="0.8" strokeLinecap="round" strokeDasharray="1 2.5" />
-        <polygon points="12,7 13.5,10 16,10 14,11.5 15,14 12,12.5 9,14 10,11.5 8,10 10.5,10" fill="#FFF" />
+        <rect width="24" height="24" rx="5" fill="url(#hotstarBg)" />
+        {/* Disney+ Swoosh Arc */}
+        <path d="M4 14C5.2 8.5 9.8 5.8 15.5 6.2c1.2.1 2.5.4 3.5.8" stroke="url(#disneyArcGrad)" strokeWidth="1.6" strokeLinecap="round" />
+        {/* Hotstar Star Emblem */}
+        <path d="M16.5 4.5L17.5 7.5L20.5 8.5L17.5 9.5L16.5 12.5L15.5 9.5L12.5 8.5L15.5 7.5Z" fill="url(#starGrad)" />
+        <circle cx="16.5" cy="8.5" r="0.8" fill="#FFF" />
+        {/* "D" shape at bottom-left */}
+        <path d="M6 11.5v6.5h2.2c2.2 0 3.8-1.2 3.8-3.25S10.4 11.5 8.2 11.5H6zm1.8 1.5h.4c1.2 0 2 .6 2 1.75s-.8 1.75-2 1.75h-.4V13z" fill="#FFF" />
+        <path d="M13 14.75h2.5M14.25 13.5v2.5" stroke="#00D2D3" strokeWidth="1.2" strokeLinecap="round" />
         <defs>
-            <linearGradient id="disneyGrad" x1="0" x2="1" y1="0" y2="1">
+            <linearGradient id="hotstarBg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stopColor="#0B133A" />
-                <stop offset="60%" stopColor="#1E3E8F" />
-                <stop offset="100%" stopColor="#3B82F6" />
+                <stop offset="60%" stopColor="#0F1F54" />
+                <stop offset="100%" stopColor="#060C24" />
+            </linearGradient>
+            <linearGradient id="disneyArcGrad" x1="4" y1="10" x2="19" y2="6" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#FFF" />
+                <stop offset="100%" stopColor="#00D2D3" />
+            </linearGradient>
+            <linearGradient id="starGrad" x1="12.5" y1="4.5" x2="20.5" y2="12.5" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#FFE066" />
+                <stop offset="50%" stopColor="#FFB700" />
+                <stop offset="100%" stopColor="#FF8800" />
             </linearGradient>
         </defs>
     </svg>
@@ -260,56 +287,79 @@ const DisneyIcon = () => (
 
 const PrimeIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="url(#primeGrad)" />
-        <path d="M6 14.5c3 1.5 9 1.5 12 0" stroke="#FF9900" strokeWidth="2.2" strokeLinecap="round" />
-        <path d="M18 14.5l-3-.3M18 14.5v-2.5" stroke="#FF9900" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        <polygon points="10,8 15,11 10,14" fill="#FFF" />
+        <rect width="24" height="24" rx="5" fill="#00050D" />
+        <rect width="24" height="3" rx="1.5" fill="#00A8E8" />
+        {/* Play triangle */}
+        <polygon points="10,8 15,11 10,14" fill="#FFFFFF" />
+        {/* Amazon Smile Arrow in Vibrant Cyan */}
+        <path d="M5.5 17C8.5 18.5 14.5 18.5 18.5 16.5" stroke="#00A8E8" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M18.8 16.2l-1.8 1.4M18.8 16.2l-1.5-.8" stroke="#00A8E8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+const JioCinemaIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <rect width="24" height="24" rx="5" fill="url(#jioGrad)" />
+        <circle cx="12" cy="12" r="7.5" fill="rgba(255,255,255,0.18)" />
+        <polygon points="10.5,8.5 15.5,12 10.5,15.5" fill="#FFFFFF" />
         <defs>
-            <linearGradient id="primeGrad" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stopColor="#00A8E8" />
-                <stop offset="100%" stopColor="#005A9C" />
+            <linearGradient id="jioGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#D80064" />
+                <stop offset="100%" stopColor="#80003C" />
             </linearGradient>
         </defs>
+    </svg>
+);
+
+const YouTubeIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <rect width="24" height="24" rx="5" fill="#0F0F0F" />
+        <rect x="3.5" y="6" width="17" height="12" rx="3.5" fill="#FF0000" />
+        <polygon points="10,9 15.5,12 10,15" fill="#FFFFFF" />
+    </svg>
+);
+
+const AppleTvIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+        <rect width="24" height="24" rx="5" fill="#1C1C1E" />
+        <path d="M7.8 7.8c.4-.5.7-1.2.6-1.8-.6 0-1.3.4-1.7.9-.4.4-.7 1.1-.6 1.7.7.1 1.3-.3 1.7-.8zM8.5 8.7c-.9 0-1.7.5-2.1.5-.5 0-1.1-.5-1.9-.5-1 0-1.9.6-2.4 1.5-1 1.8-.3 4.4.7 5.8.5.7 1 1.4 1.8 1.4.7 0 1-.5 1.8-.5s1.1.5 1.8.5c.8 0 1.3-.7 1.8-1.4.5-.8.8-1.5.8-1.6-.1 0-1.5-.6-1.5-2.2 0-1.4 1.1-2 1.2-2.1-.6-1-1.6-1.4-2.2-1.5z" fill="#FFFFFF" />
+        <text x="12" y="14" fill="#FFFFFF" fontSize="6.5" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif">tv+</text>
     </svg>
 );
 
 const MobileIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect x="6" y="2" width="12" height="20" rx="2.5" fill="url(#mobileGrad)" stroke="#FFF" strokeWidth="0.5" />
-        <circle cx="12" cy="19.5" r="1" fill="#FFF" fillOpacity="0.8" />
-        <rect x="8" y="4" width="8" height="12" rx="0.5" fill="#1e272e" />
-        <polygon points="11,8 14,10 11,12" fill="#00D2D3" />
+        <rect width="24" height="24" rx="5" fill="url(#mobileGrad)" />
+        <rect x="7" y="3.5" width="10" height="17" rx="2" fill="#0F172A" stroke="#38BDF8" strokeWidth="1" />
+        <circle cx="12" cy="18" r="0.8" fill="#38BDF8" />
+        <polygon points="10.8,9.5 14,11.5 10.8,13.5" fill="#38BDF8" />
         <defs>
-            <linearGradient id="mobileGrad" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stopColor="#00D2D3" />
-                <stop offset="100%" stopColor="#01A3A4" />
-            </linearGradient>
-        </defs>
-    </svg>
-);
-
-const AnimaxIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="url(#animaxGrad)" />
-        <path d="M7 16.5L12 6L17 16.5M9 13.2H15" stroke="#FFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-        <defs>
-            <linearGradient id="animaxGrad" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stopColor="#8A2BE2" />
-                <stop offset="100%" stopColor="#4B0082" />
+            <linearGradient id="mobileGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#0284C7" />
+                <stop offset="100%" stopColor="#0369A1" />
             </linearGradient>
         </defs>
     </svg>
 );
 
 /* ── OTT Presets Mapping ── */
-const LOCATION_PRESETS = [
+interface LocationPreset {
+    label: string;
+    value: string;
+    altValues?: string[];
+    renderIcon: () => React.ReactNode;
+}
+
+const LOCATION_PRESETS: LocationPreset[] = [
     { label: 'Cinema', value: 'Cinema', renderIcon: () => <CinemaIcon /> },
     { label: 'Home', value: 'Home', renderIcon: () => <HomeIcon /> },
     { label: 'Netflix', value: 'Netflix', renderIcon: () => <NetflixIcon /> },
-    { label: 'Disney+', value: 'Disney+', renderIcon: () => <DisneyIcon /> },
-    { label: 'Prime', value: 'Prime Video', renderIcon: () => <PrimeIcon /> },
-    { label: 'Animax', value: 'Animax', renderIcon: () => <AnimaxIcon /> },
-    { label: 'Mobile', value: 'On the Go', renderIcon: () => <MobileIcon /> },
+    { label: 'Hotstar', value: 'Disney+ Hotstar', altValues: ['Disney+', 'Hotstar'], renderIcon: () => <HotstarIcon /> },
+    { label: 'Prime', value: 'Prime Video', altValues: ['Prime'], renderIcon: () => <PrimeIcon /> },
+    { label: 'JioCinema', value: 'JioCinema', renderIcon: () => <JioCinemaIcon /> },
+    { label: 'YouTube', value: 'YouTube', renderIcon: () => <YouTubeIcon /> },
+    { label: 'Apple TV+', value: 'Apple TV+', renderIcon: () => <AppleTvIcon /> },
+    { label: 'On the Go', value: 'On the Go', altValues: ['Mobile'], renderIcon: () => <MobileIcon /> },
 ];
 
 /* ── Cinephile Mood Phrases ── */
@@ -333,7 +383,7 @@ const toLocalISOString = (dateInput: Date | string | number) => {
     return localTime.toISOString().slice(0, 16);
 };
 
-export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false, defaultIsWatching = false }) => {
+export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false, defaultIsWatching }) => {
     const navigate = useNavigate();
     const isEditing = !!entry;
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -358,7 +408,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         review: entry?.review || '',
         tags: entry?.tags || [],
         isRewatch: entry?.isRewatch || false,
-        isWatching: entry?.isWatching || defaultIsWatching,
+        isWatching: defaultIsWatching !== undefined ? defaultIsWatching : (entry?.isWatching || false),
         watchLocation: entry?.watchLocation || '',
         suggestedByUserId: entry?.suggestedByUserId || prefillData?.suggestedByUserId || undefined,
     });
@@ -417,18 +467,27 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const searchRef = useRef<HTMLDivElement>(null);
     const suggestorRef = useRef<HTMLDivElement>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const cachedFollowersRef = useRef<SuggestedUser[] | null>(null);
 
     const fetchConnections = useCallback(async (q: string) => {
         setIsSearchingSuggestors(true);
         try {
+            if (!cachedFollowersRef.current || cachedFollowersRef.current.length === 0) {
+                const followers = await userService.getFollowers(user?.id).catch(() => []);
+                if (followers && followers.length > 0) {
+                    cachedFollowersRef.current = followers as SuggestedUser[];
+                }
+            }
+            const allFollowers = cachedFollowersRef.current || [];
             if (q.trim().length > 0) {
-                const res = await userService.searchUsers(q);
-                setSuggestorResults((res.users || []) as SuggestedUser[]);
+                const query = q.trim().toLowerCase();
+                const filtered = allFollowers.filter(u => 
+                    (u.displayName && u.displayName.toLowerCase().includes(query)) ||
+                    u.username.toLowerCase().includes(query)
+                );
+                setSuggestorResults(filtered);
             } else {
-                const followers = await userService.getFollowers(user?.id || '').catch(() => []);
-                const following = await userService.getFollowing(user?.id || '').catch(() => []);
-                const combined = Array.from(new Map([...(followers || []), ...(following || [])].map(u => [u.id, u])).values());
-                setSuggestorResults(combined as SuggestedUser[]);
+                setSuggestorResults(allFollowers);
             }
         } catch {
             setSuggestorResults([]);
@@ -533,6 +592,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 savedEntry = await entriesApi.createEntry(payload as CreateEntryData);
             }
             onSuccess?.(savedEntry);
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('watchhive:entry-created', { detail: savedEntry }));
+            }
         } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to save entry');
         } finally {
@@ -548,20 +610,39 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const hasSelection = formData.tmdbId > 0 && formData.title.length > 0;
 
     return (
-        <div className={`w-full ${!isModal ? 'max-w-4xl mx-auto py-2 md:py-6' : ''}`}>
+        <div className={`w-full ${!isModal ? 'max-w-4xl mx-auto py-2 md:py-6' : ''} relative`}>
+            {isLoading && (
+                <ModalBeeOverlay
+                    message={
+                        isEditing
+                            ? (entry?.isWatching && !formData.isWatching ? 'Completing your watch...' : 'Updating your entry...')
+                            : (formData.isWatching ? "Saving what you're watching..." : 'Logging to your Hive...')
+                    }
+                />
+            )}
             <div className={`${!isModal ? 'bg-white border border-[#ffb700]/15 shadow-sm rounded-[32px] p-5 md:p-8' : 'p-0'}`}>
                 {!isModal && (
                     <div className="flex flex-col gap-2 mb-6 border-b border-[#ffb700]/10 pb-4">
                         <h2 className="text-2xl font-black text-[#2D2926] flex items-center gap-2.5">
                             {isEditing ? (
-                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">edit</span>
+                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">
+                                    {entry?.isWatching && !formData.isWatching ? 'task_alt' : 'edit'}
+                                </span>
                             ) : (
-                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">movie</span>
+                                <span className="text-[#ffb700] material-symbols-outlined text-[28px]">
+                                    {formData.isWatching ? 'visibility' : 'movie'}
+                                </span>
                             )}
-                            {isEditing ? 'Edit Your Entry' : 'Log a Watch'}
+                            {isEditing
+                                ? (entry?.isWatching && !formData.isWatching ? 'Complete Your Watch' : 'Edit Your Entry')
+                                : (formData.isWatching ? 'Track What You\'re Watching' : 'Log a Watch')}
                         </h2>
                         <p className="text-xs text-[#2D2926]/50 font-bold uppercase tracking-wider">
-                            {isEditing ? 'Refine your rating, review, and details below.' : 'Search for a movie or TV show, rate it, and add it to your history.'}
+                            {isEditing
+                                ? (entry?.isWatching && !formData.isWatching
+                                    ? 'Give your rating and final thoughts to complete this watch.'
+                                    : 'Refine your rating, review, and details below.')
+                                : 'Search for a movie or TV show, rate it, and add it to your history.'}
                         </p>
                     </div>
                 )}
@@ -596,7 +677,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 autoComplete="off"
                                             />
                                             {isSearching && (
-                                                <div className="absolute right-3.5 animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-[#ffb700]"></div>
+                                                <div className="absolute right-3.5">
+                                                    <BeeLoader size="mini" message="" />
+                                                </div>
                                             )}
                                         </div>
 
@@ -644,7 +727,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                             setShowResults(false);
                                                             navigate(`/watch-hive/search?mode=movies&deep=true&q=${encodeURIComponent(searchQuery)}`);
                                                         }}
-                                                        className="w-full sm:w-auto px-3.5 py-2 bg-[#ffb700] hover:bg-[#ffc83b] active:scale-95 text-white rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all text-center cursor-pointer flex-shrink-0"
+                                                        className="w-full sm:w-auto px-3.5 py-2 bg-[#ffb700] hover:bg-[#ffc83b] active:scale-95 text-[#2D2926] rounded-xl font-black text-[10px] uppercase tracking-wider shadow-sm transition-all text-center cursor-pointer flex-shrink-0"
                                                     >
                                                         Deep Search 🔎
                                                     </button>
@@ -802,7 +885,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Where did you watch it?</label>
                                 <div className="flex flex-wrap gap-2">
                                     {LOCATION_PRESETS.map((l) => {
-                                        const isSelected = formData.watchLocation === l.value;
+                                        const isSelected = formData.watchLocation === l.value || (l.altValues?.includes(formData.watchLocation || '') ?? false);
                                         return (
                                             <button
                                                 key={l.value}
@@ -811,7 +894,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 ${isSelected
                                                         ? 'bg-white border-[#ffb700] shadow-[0_4px_15px_-4px_rgba(255,183,0,0.22)] scale-[1.03]'
                                                         : 'bg-white/50 border-[#ffb700]/10 text-[#2D2926]/60 hover:border-[#ffb700]/30 hover:bg-white hover:scale-[1.02]'}`}
-                                                onClick={() => setFormData((prev) => ({ ...prev, watchLocation: prev.watchLocation === l.value ? '' : l.value }))}
+                                                onClick={() => setFormData((prev) => ({ ...prev, watchLocation: isSelected ? '' : l.value }))}
                                             >
                                                 <div className="transition-transform group-hover/loc:scale-110 duration-300">
                                                     {l.renderIcon()}
@@ -857,7 +940,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                     <button
                                         type="button"
                                         onClick={handleAddTag}
-                                        className="absolute right-2 px-3 py-1 bg-[#ffb700]/10 hover:bg-[#ffb700] text-[#ffb700] hover:text-white rounded-lg text-[9px] font-black uppercase tracking-wider transition-all"
+                                        className="absolute right-2 px-3 py-1 bg-[#ffb700] hover:bg-[#ffb700]/90 text-[#2D2926] rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
                                     >
                                         Add +
                                     </button>
@@ -866,12 +949,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 {formData.tags && formData.tags.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 mt-1">
                                         {formData.tags.map((tag) => (
-                                            <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/5 border border-[#ffb700]/20 text-[#ffb700] px-2.5 py-1.5 rounded-lg text-xs font-black hover:bg-[#ffb700]/10 transition-colors">
+                                            <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/15 border border-[#ffb700]/30 text-[#2D2926] px-2.5 py-1.5 rounded-lg text-xs font-black transition-colors">
                                                 #{tag}
                                                 <button
                                                     type="button"
                                                     onClick={() => handleRemoveTag(tag)}
-                                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-[#ffb700]/10 hover:bg-red-500 hover:text-white text-[#ffb700] transition-colors ml-1 focus:outline-none text-[8px] font-black"
+                                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-[#2D2926]/10 hover:bg-red-500 hover:text-white text-[#2D2926] transition-colors ml-1 focus:outline-none text-[8px] font-black cursor-pointer"
                                                     aria-label={`Remove tag ${tag}`}
                                                 >
                                                     ✕
@@ -892,13 +975,11 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 {suggestedUser ? (
                                     <div className="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200/80 rounded-2xl">
                                         <div className="flex items-center gap-2.5">
-                                            {suggestedUser.profilePictureUrl ? (
-                                                <img src={suggestedUser.profilePictureUrl} alt="" className="w-7 h-7 rounded-full object-cover border border-amber-300" />
-                                            ) : (
-                                                <div className="w-7 h-7 rounded-full bg-[#ffb700] text-white font-black text-xs flex items-center justify-center">
-                                                    {suggestedUser.displayName?.[0] || suggestedUser.username[0]}
-                                                </div>
-                                            )}
+                                            <Avatar 
+                                                src={suggestedUser.profilePictureUrl} 
+                                                name={suggestedUser.displayName || suggestedUser.username} 
+                                                size="xs" 
+                                            />
                                             <div className="flex flex-col">
                                                 <span className="text-xs font-black text-[#2D2926]">{suggestedUser.displayName || suggestedUser.username}</span>
                                                 <span className="text-[10px] text-amber-700 font-bold">@{suggestedUser.username}</span>
@@ -932,16 +1013,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     fetchConnections(e.target.value);
                                                 }}
                                                 className="w-full pl-9 pr-4 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
-                                                placeholder="Search follower/friend username to tag suggestor..."
+                                                placeholder="Search follower username to tag suggestor..."
                                             />
                                         </div>
 
                                         {showSuggestorPicker && (
                                             <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
                                                 {isSearchingSuggestors ? (
-                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading connections...</div>
+                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading followers...</div>
                                                 ) : suggestorResults.length === 0 ? (
-                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">No connected friends found</div>
+                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">No followers found</div>
                                                 ) : (
                                                     suggestorResults.map(u => (
                                                         <button
@@ -955,13 +1036,11 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                             }}
                                                             className="w-full flex items-center gap-2.5 p-2 hover:bg-[#ffb700]/10 rounded-xl transition-colors text-left"
                                                         >
-                                                            {u.profilePictureUrl ? (
-                                                                <img src={u.profilePictureUrl} alt="" className="w-6 h-6 rounded-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-6 h-6 rounded-full bg-[#ffb700] text-white font-black text-[10px] flex items-center justify-center">
-                                                                    {u.displayName?.[0] || u.username[0]}
-                                                                </div>
-                                                            )}
+                                                            <Avatar 
+                                                                src={u.profilePictureUrl} 
+                                                                name={u.displayName || u.username} 
+                                                                size="xxs" 
+                                                            />
                                                             <div className="flex flex-col min-w-0 flex-1">
                                                                 <span className="text-xs font-bold text-[#2D2926] truncate">{u.displayName || u.username}</span>
                                                                 <span className="text-[9px] text-[#2D2926]/40 font-bold truncate">@{u.username}</span>
@@ -992,20 +1071,24 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                         )}
                         <button
                             type="submit"
-                            className="flex items-center justify-center gap-1.5 px-7 py-3 bg-[#ffb700] text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none cursor-pointer active:scale-97"
+                            className="flex items-center justify-center gap-1.5 px-7 py-3 bg-[#ffb700] text-[#2D2926] font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none cursor-pointer active:scale-97"
                             disabled={isLoading || (!isEditing && !hasSelection)}
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="animate-spin rounded-full h-3.5 w-3.5 border-t-2 border-b-2 border-white"></div>
+                                    <BeeLoader size="mini" message="" />
                                     Saving...
                                 </>
                             ) : (
                                 <>
                                     <span className="material-symbols-outlined text-sm font-bold">
-                                        {isEditing ? 'edit_note' : 'add'}
+                                        {isEditing
+                                            ? (entry?.isWatching && !formData.isWatching ? 'task_alt' : 'edit_note')
+                                            : (formData.isWatching ? 'visibility' : 'add')}
                                     </span>
-                                    {isEditing ? 'Update Entry' : 'Log Entry'}
+                                    {isEditing
+                                        ? (entry?.isWatching && !formData.isWatching ? 'Complete Watch' : 'Update Entry')
+                                        : (formData.isWatching ? 'Track Watching' : 'Log Entry')}
                                 </>
                             )}
                         </button>

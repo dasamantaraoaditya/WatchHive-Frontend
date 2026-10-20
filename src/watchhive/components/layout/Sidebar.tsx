@@ -47,6 +47,10 @@ export const Sidebar: React.FC = () => {
                             <span className="material-symbols-outlined">format_list_numbered</span>
                             <span className="font-semibold">Rankings</span>
                         </Link>
+                        <Link to="/watch-hive/support" className={`wh-sidebar__link ${isActive('/watch-hive/support') ? 'wh-sidebar__link--active' : ''}`}>
+                            <span className="material-symbols-outlined">support_agent</span>
+                            <span className="font-semibold">Support</span>
+                        </Link>
                     </nav>
                 </div>
                 

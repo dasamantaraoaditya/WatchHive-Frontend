@@ -61,6 +61,17 @@ const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
                 return <>{actor} accepted your follow request</>;
             case 'FOLLOW_REJECT':
                 return <>{actor} rejected your follow request</>;
+            case 'FRIEND_STARTED_WATCHING':
+                return <>{actor} started watching <strong>{content.entryTitle}</strong></>;
+            case 'FRIEND_LOGGED_WATCH':
+                if (content.rating && content.review) {
+                    return <>{actor} watched & reviewed <strong>{content.entryTitle}</strong> ({content.rating}★)</>;
+                } else if (content.rating) {
+                    return <>{actor} watched <strong>{content.entryTitle}</strong> ({content.rating}★)</>;
+                } else if (content.review) {
+                    return <>{actor} reviewed <strong>{content.entryTitle}</strong></>;
+                }
+                return <>{actor} finished watching <strong>{content.entryTitle}</strong></>;
             default:
                 return 'New activity in your network';
         }
@@ -75,6 +86,8 @@ const NotificationList: React.FC<NotificationListProps> = ({ onClose }) => {
             case 'FOLLOW_REQUEST': return '🔒';
             case 'FOLLOW_ACCEPT': return '✅';
             case 'FOLLOW_REJECT': return '❌';
+            case 'FRIEND_STARTED_WATCHING': return '👁️';
+            case 'FRIEND_LOGGED_WATCH': return '🎬';
             default: return '🔔';
         }
     };

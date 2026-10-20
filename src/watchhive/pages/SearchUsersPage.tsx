@@ -835,8 +835,8 @@ export const SearchUsersPage: React.FC = () => {
                                             <h3 className="font-bold text-xs text-[#2D2926] group-hover:text-[#ffb700] transition-colors mt-2 truncate w-full">
                                                 {user.displayName || user.username}
                                             </h3>
-                                            <p className="text-[10px] font-semibold text-slate-400 truncate w-full">
-                                                @{user.username}
+                                            <p className="text-[10px] font-semibold text-slate-400 truncate w-full" title={`@${user.username}`}>
+                                                @{user.username.length > 10 ? `${user.username.slice(0, 10)}...` : user.username}
                                             </p>
                                         </div>
 

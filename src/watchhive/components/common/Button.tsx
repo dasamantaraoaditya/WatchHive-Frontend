@@ -1,5 +1,6 @@
 import React, { ButtonHTMLAttributes } from 'react';
 import './Button.css';
+import { BeeLoader } from './BeeLoader';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
@@ -32,17 +33,8 @@ export const Button: React.FC<ButtonProps> = ({
     return (
         <button className={classes} disabled={disabled || isLoading} {...props}>
             {isLoading && (
-                <span className="wh-button__spinner">
-                    <svg className="wh-spinner" viewBox="0 0 24 24">
-                        <circle
-                            className="wh-spinner__circle"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            fill="none"
-                            strokeWidth="3"
-                        />
-                    </svg>
+                <span className="wh-button__spinner mr-1">
+                    <BeeLoader size="mini" />
                 </span>
             )}
             <span className={isLoading ? 'wh-button__text--loading' : ''}>{children}</span>

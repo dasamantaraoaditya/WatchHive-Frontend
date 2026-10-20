@@ -42,14 +42,24 @@ export const userService = {
         return apiClient.get(`/follows/stats/${userId}`);
     },
 
-    async getFollowers(userId: string): Promise<User[]> {
-        const response: any = await apiClient.get(`/follows/${userId}/followers`);
-        return response.followers;
+    async getFollowers(userId?: string): Promise<User[]> {
+        let targetId = userId?.trim();
+        if (!targetId) {
+            const me = await this.getMe();
+            targetId = me.id;
+        }
+        const response: any = await apiClient.get(`/follows/${targetId}/followers?limit=100`);
+        return response.followers || [];
     },
 
-    async getFollowing(userId: string): Promise<User[]> {
-        const response: any = await apiClient.get(`/follows/${userId}/following`);
-        return response.following;
+    async getFollowing(userId?: string): Promise<User[]> {
+        let targetId = userId?.trim();
+        if (!targetId) {
+            const me = await this.getMe();
+            targetId = me.id;
+        }
+        const response: any = await apiClient.get(`/follows/${targetId}/following?limit=100`);
+        return response.following || [];
     },
 
     async searchUsers(query: string, page = 1, limit = 10): Promise<{ users: User[], hasMore: boolean }> {
@@ -66,6 +76,10 @@ export const userService = {
 
     async getDetailedStats(days = 30, type?: string, genre?: string, minRating?: number): Promise<any> {
         return apiClient.get('/stats/detailed', { params: { days, type, genre, minRating } });
+    },
+
+    async deleteAccount(): Promise<void> {
+        return apiClient.delete('/users/me');
     },
 };
 
