@@ -92,10 +92,13 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
 
-    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM"
+    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM", guarding against future skew
     const displayTimestamp = item.timestamp || entryData?.updatedAt || entryData?.createdAt;
+    const now = new Date();
+    const rawDate = displayTimestamp ? new Date(displayTimestamp) : now;
+    const effectiveDate = !isNaN(rawDate.getTime()) && rawDate.getTime() > now.getTime() ? now : rawDate;
     const timestamp = !isSuggestion && displayTimestamp
-        ? new Date(displayTimestamp).toLocaleString(undefined, {
+        ? effectiveDate.toLocaleString(undefined, {
             month: 'short', day: 'numeric', year: 'numeric',
             hour: 'numeric', minute: '2-digit'
         }).replace(',', ' at')
