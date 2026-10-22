@@ -34,8 +34,7 @@ WatchHive Frontend is the user-facing web portal for the WatchersHive platform. 
 ## 🚀 3. How to Setup
 
 ### Prerequisites
-- Node.js (v18.x or v20.x+)
-- npm (v9+)
+- [Bun](https://bun.sh) (v1.1+ or higher)
 
 ### Installation Steps
 
@@ -47,7 +46,7 @@ WatchHive Frontend is the user-facing web portal for the WatchersHive platform. 
 
 2. **Install dependencies**:
    ```bash
-   npm install
+   bun install
    ```
 
 3. **Configure Environment Variables**:
@@ -66,19 +65,19 @@ WatchHive Frontend is the user-facing web portal for the WatchersHive platform. 
 
 4. **Start Development Server**:
    ```bash
-   npm run dev
+   bun run dev
    ```
    Open `http://localhost:5173` in your browser.
 
 5. **Build for Production**:
    ```bash
-   npm run build
+   bun run build
    ```
    Outputs the static production bundle to `dist/`.
 
 6. **Preview Production Build**:
    ```bash
-   npm run preview
+   bun run preview
    ```
 
 ---
