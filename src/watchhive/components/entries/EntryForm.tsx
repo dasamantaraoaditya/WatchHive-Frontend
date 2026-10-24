@@ -301,6 +301,36 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const [hasWatchedBefore, setHasWatchedBefore] = useState(false);
+    const [previousEntry, setPreviousEntry] = useState<any | null>(null);
+
+    const checkPreviousWatch = useCallback(async (tmdbId: number) => {
+        if (!tmdbId || isEditing) {
+            setHasWatchedBefore(false);
+            setPreviousEntry(null);
+            return;
+        }
+        try {
+            const res: any = await apiClient.get(`/entries/check/${tmdbId}`);
+            if (res && res.hasWatched) {
+                setHasWatchedBefore(true);
+                setPreviousEntry(res.existingEntry);
+                setFormData(prev => ({ ...prev, isRewatch: true }));
+            } else {
+                setHasWatchedBefore(false);
+                setPreviousEntry(null);
+            }
+        } catch (err) {
+            console.error('Failed to check previous watch status:', err);
+        }
+    }, [isEditing]);
+
+    useEffect(() => {
+        if (formData.tmdbId && !isEditing) {
+            checkPreviousWatch(formData.tmdbId);
+        }
+    }, [formData.tmdbId, checkPreviousWatch, isEditing]);
+
     const [suggestedUser, setSuggestedUser] = useState<SuggestedUser | null>(
         entry?.suggestedByUser || prefillData?.suggestedByUser || null
     );
@@ -449,6 +479,10 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         e.preventDefault();
         if (!formData.tmdbId || !formData.title) {
             setError('Please search for and select a movie or TV show');
+            return;
+        }
+        if (hasWatchedBefore && !formData.isRewatch && !formData.isWatching) {
+            setError('You have already watched this title. Rewatch must be enabled to log a duplicate entry.');
             return;
         }
         setIsLoading(true);
@@ -691,6 +725,68 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 </div>
 
                                 <div className="flex flex-col gap-2.5">
+                                    {/* Already Watched Notice & Previous Logged Item Card */}
+                                    {hasWatchedBefore && (
+                                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex flex-col gap-2.5 animate-fade-in shadow-xs">
+                                            <div className="flex items-start gap-2.5">
+                                                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                                    <span className="material-symbols-outlined text-[20px]">history</span>
+                                                </div>
+                                                <div className="flex flex-col gap-0.5 min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <h4 className="text-xs font-black text-amber-950 dark:text-amber-200 uppercase tracking-wide">
+                                                            You already watched this title!
+                                                        </h4>
+                                                        <span className="bg-amber-500/25 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
+                                                            Rewatch Required
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[11px] font-bold text-amber-900/80 dark:text-amber-200/80 leading-relaxed">
+                                                        Rewatch is enabled by default to record this viewing, creating another entry in your Hive history.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Previous Logged Item Card */}
+                                            {previousEntry && (
+                                                <div className="bg-white/95 dark:bg-[#1a1510] border border-amber-200/60 dark:border-amber-500/20 rounded-xl p-3 flex flex-col gap-2 shadow-xs">
+                                                    <div className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40 dark:text-white/40">
+                                                        Previously Logged Watch
+                                                    </div>
+                                                    <div className="flex items-center justify-between border-b border-amber-100 dark:border-white/5 pb-2">
+                                                        <div className="flex items-center gap-1.5 text-amber-900 dark:text-amber-300 text-[11px] font-extrabold">
+                                                            <span className="material-symbols-outlined text-[15px]">calendar_today</span>
+                                                            <span>
+                                                                Watched on {previousEntry.watchedAt ? new Date(previousEntry.watchedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Previous session'}
+                                                            </span>
+                                                        </div>
+                                                        {previousEntry.rating ? (
+                                                            <div className="flex items-center gap-1 bg-amber-100/80 dark:bg-amber-500/20 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded-md text-[11px] font-black">
+                                                                <span className="material-symbols-outlined text-amber-500 text-[13px]">star</span>
+                                                                <span>{previousEntry.rating}/10</span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[10px] font-bold text-stone-400">Unrated</span>
+                                                        )}
+                                                    </div>
+
+                                                    {previousEntry.watchLocation && (
+                                                        <div className="flex items-center gap-1.5 text-stone-600 dark:text-stone-300 text-[11px] font-semibold">
+                                                            <span className="material-symbols-outlined text-[13px] text-amber-600">location_on</span>
+                                                            <span>Watched at <strong>{previousEntry.watchLocation}</strong></span>
+                                                        </div>
+                                                    )}
+
+                                                    {previousEntry.review && (
+                                                        <div className="text-[11px] font-medium text-stone-700 dark:text-stone-300 italic bg-amber-50/50 dark:bg-white/[0.02] rounded-lg p-2 border-l-2 border-amber-400">
+                                                            "{previousEntry.review}"
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {/* Rewatch Toggle Card */}
                                     <label
                                         className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
@@ -714,7 +810,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     Rewatch
                                                 </span>
                                                 <span className="text-[10px] font-medium text-[#2D2926]/50 dark:text-white/50 truncate">
-                                                    Repeat viewing of this movie or show
+                                                    {hasWatchedBefore
+                                                        ? 'Rewatch enabled for title already in Hive'
+                                                        : 'Repeat viewing of this movie or show'}
                                                 </span>
                                             </div>
                                         </div>
@@ -733,7 +831,14 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.isRewatch}
-                                                    onChange={(e) => setFormData((prev) => ({ ...prev, isRewatch: e.target.checked }))}
+                                                    onChange={(e) => {
+                                                        if (hasWatchedBefore && !e.target.checked) {
+                                                            setError('You already watched this title. Rewatch must be enabled to log a duplicate entry.');
+                                                            return;
+                                                        }
+                                                        setError(null);
+                                                        setFormData((prev) => ({ ...prev, isRewatch: e.target.checked }));
+                                                    }}
                                                     className="sr-only"
                                                 />
                                                 <div
