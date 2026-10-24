@@ -130,7 +130,7 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
                     bg: 'bg-amber-50 border-amber-500/10',
                     iconBg: 'bg-amber-500/10',
                     iconColor: 'text-amber-500',
-                    btnColor: 'bg-[#ffb700] hover:bg-[#e59700] shadow-[#ffb700]/20 text-white',
+                    btnColor: 'bg-[#ffb700] hover:bg-[#e59700] shadow-[#ffb700]/20 text-[#2D2926]',
                 };
             case 'info':
                 return {
@@ -147,7 +147,7 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
                     bg: 'bg-[#fffbea] border-[#ffb700]/10',
                     iconBg: 'bg-[#ffb700]/10',
                     iconColor: 'text-[#ffb700]',
-                    btnColor: 'bg-[#ffb700] hover:bg-[#e59700] shadow-[#ffb700]/20 text-white',
+                    btnColor: 'bg-[#ffb700] hover:bg-[#e59700] shadow-[#ffb700]/20 text-[#2D2926]',
                 };
         }
     };

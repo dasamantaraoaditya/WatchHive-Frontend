@@ -98,7 +98,7 @@ export const TmdbExpandedCard: React.FC<TmdbExpandedCardProps> = ({ tmdbId, medi
 
                 <div className="flex items-center gap-2 pointer-events-auto">
                     {isWatched ? (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ffb700] text-white font-bold text-sm shadow-md whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ffb700] text-[#2D2926] font-bold text-sm shadow-md whitespace-nowrap">
                             <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                             Watched
                         </div>

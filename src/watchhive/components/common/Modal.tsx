@@ -92,7 +92,7 @@ export const Modal: React.FC<ModalProps> = ({
                                 </h3>
                                 <button
                                     onClick={onClose}
-                                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-2xl bg-[#ffb700]/10 text-[#ffb700] hover:bg-[#ffb700] hover:text-white transition-all transform hover:rotate-90 active:scale-95 shadow-sm shrink-0"
+                                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-2xl bg-[#ffb700]/10 text-[#ffb700] hover:bg-[#ffb700] hover:text-[#2D2926] transition-all transform hover:rotate-90 active:scale-95 shadow-sm shrink-0"
                                     title="Close"
                                 >
                                     <span className="material-symbols-outlined text-[20px] font-bold">close</span>

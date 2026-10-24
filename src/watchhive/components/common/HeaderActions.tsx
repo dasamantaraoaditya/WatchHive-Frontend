@@ -95,7 +95,7 @@ export const HeaderActions: React.FC = () => {
             <Link to="/watch-hive/notifications" className="relative w-10 h-10 flex items-center justify-center rounded-full bg-black/5 text-[#2D2926] hover:bg-[#ffb700]/10 transition-all" title="Notifications">
                 <span className="material-symbols-outlined text-[22px]">notifications</span>
                 {unreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-[#ffb700] border-2 border-white text-white text-[9px] w-5 h-5 flex items-center justify-center rounded-full font-black animate-pulse shadow-sm z-10">
+                    <span className="absolute -top-0.5 -right-0.5 bg-[#ffb700] border-2 border-white text-[#2D2926] text-[9px] w-5 h-5 flex items-center justify-center rounded-full font-black animate-pulse shadow-sm z-10">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
@@ -148,7 +148,7 @@ export const HeaderActions: React.FC = () => {
                                     Pending Requests
                                 </div>
                                 {pendingCount > 0 && (
-                                    <span className="bg-[#ffb700] text-white px-2 py-0.5 rounded-full text-[9px] font-black tracking-normal">
+                                    <span className="bg-[#ffb700] text-[#2D2926] px-2 py-0.5 rounded-full text-[9px] font-black tracking-normal">
                                         {pendingCount}
                                     </span>
                                 )}

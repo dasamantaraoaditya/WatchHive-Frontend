@@ -470,7 +470,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                         <button
                             type="submit"
                             disabled={isSubmitting || !newComment.trim()}
-                            className="shrink-0 h-11 px-5 bg-[#ffb700] hover:brightness-105 disabled:opacity-40 disabled:hover:brightness-100 text-white font-bold rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                            className="shrink-0 h-11 px-5 bg-[#ffb700] hover:brightness-105 disabled:opacity-40 disabled:hover:brightness-100 text-[#2D2926] font-bold rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? (
                                 <BeeLoader size="mini" message="" />

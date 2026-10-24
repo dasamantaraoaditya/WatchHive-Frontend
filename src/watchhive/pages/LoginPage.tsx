@@ -225,7 +225,7 @@ export const LoginPage: React.FC = () => {
                         <button
                             type="submit"
                             disabled={isLoading || isGoogleLoading}
-                            className={`w-full h-14 bg-[#ffb700] text-white font-black text-[16px] rounded-2xl shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
+                            className={`w-full h-14 bg-[#ffb700] text-[#2D2926] font-black text-[16px] rounded-2xl shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
                         >
                             {isLoading ? (
                                 <>

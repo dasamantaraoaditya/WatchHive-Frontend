@@ -223,7 +223,7 @@ App Diagnostics:
                     <button
                         type="button"
                         onClick={handleSendMailto}
-                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/20 cursor-pointer"
+                        className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/20 cursor-pointer"
                     >
                         <span className="material-symbols-outlined text-base">outgoing_mail</span>
                         <span>Email App</span>

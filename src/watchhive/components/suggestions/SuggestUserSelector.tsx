@@ -227,7 +227,7 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                 <button
                     onClick={handleSend}
                     disabled={isSending || selectedUserIds.size === 0}
-                    className="w-full py-3.5 bg-[#ffb700] text-white font-black text-xs uppercase tracking-[0.15em] rounded-2xl shadow-lg shadow-[#ffb700]/20 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale cursor-pointer shrink-0"
+                    className="w-full py-3.5 bg-[#ffb700] text-[#2D2926] font-black text-xs uppercase tracking-[0.15em] rounded-2xl shadow-lg shadow-[#ffb700]/20 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale cursor-pointer shrink-0"
                 >
                     {isSending ? (
                         <>
