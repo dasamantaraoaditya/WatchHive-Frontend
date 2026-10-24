@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { BeeLoader, ErrorState, Avatar } from '../components/common';
 import apiClient from '../services/api';
 import { useWatchlist } from '../contexts/WatchlistContext';
+import { useAuth } from '../contexts/AuthContext';
 import { EntryForm } from '../components/entries/EntryForm';
 import { SuggestUserSelector } from '../components/suggestions/SuggestUserSelector';
 import { useUI, useCustomAlert } from '../contexts';
@@ -134,6 +135,7 @@ export const MovieDetailsPage: React.FC = () => {
     const { setPageTitle, setPageIcon } = useUI();
     const { alert, confirm } = useCustomAlert();
     const { watchlist, promptAddToWatchlist, removeFromList, isInWatchlist } = useWatchlist();
+    const { user } = useAuth();
 
     const mediaType = (paramMediaType === 'tv' ? 'tv' : 'movie') as 'movie' | 'tv';
     const tmdbId = paramTmdbId ? parseInt(paramTmdbId, 10) : null;
@@ -250,8 +252,11 @@ export const MovieDetailsPage: React.FC = () => {
     const primaryGenre = details?.genres?.[0]?.name;
     const inWatchlist = tmdbId ? isInWatchlist(tmdbId) : false;
     const watchlistItem = tmdbId ? watchlist?.items?.find((item) => Number(item.tmdbId) === Number(tmdbId)) : undefined;
-    const resolvedSuggestedByUser = location.state?.suggestedByUser || watchlistItem?.suggestedByUser || null;
-    const resolvedSuggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || watchlistItem?.suggestedByUserId || watchlistItem?.suggestedByUser?.id || null;
+    const querySuggestedByUserId = searchParams.get('suggestedByUserId') || searchParams.get('suggestedBy') || searchParams.get('ref');
+    const querySuggestedByUsername = searchParams.get('suggestedByUsername') || searchParams.get('refUsername');
+
+    const resolvedSuggestedByUser = location.state?.suggestedByUser || watchlistItem?.suggestedByUser || (querySuggestedByUsername ? { id: querySuggestedByUserId || '', username: querySuggestedByUsername } : null);
+    const resolvedSuggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || watchlistItem?.suggestedByUserId || watchlistItem?.suggestedByUser?.id || querySuggestedByUserId || null;
 
     const posterUrl = details?.poster_path
         ? `https://image.tmdb.org/t/p/original${details.poster_path}`
@@ -324,17 +329,25 @@ export const MovieDetailsPage: React.FC = () => {
 
     const handleShare = async () => {
         if (!details) return;
+        const shareUrl = new URL(window.location.href);
+        if (user?.id) {
+            shareUrl.searchParams.set('suggestedByUserId', user.id);
+            if (user.username) {
+                shareUrl.searchParams.set('suggestedByUsername', user.username);
+            }
+        }
+        const finalUrl = shareUrl.toString();
         const shareData = {
             title,
             text: `Check out ${title} on WatchersHive!`,
-            url: window.location.href,
+            url: finalUrl,
         };
 
         try {
             if (navigator.share) {
                 await navigator.share(shareData);
             } else {
-                await navigator.clipboard.writeText(window.location.href);
+                await navigator.clipboard.writeText(finalUrl);
                 await alert('Link copied to clipboard!', { title: 'Link Copied', severity: 'success' });
             }
         } catch (err) {
