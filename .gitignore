@@ -15,6 +15,7 @@ pnpm-debug.log*
 
 # Build outputs
 dist/
+dev-dist/
 build/
 *.local
 

@@ -4,7 +4,7 @@ import { entriesApi, CreateEntryData, Entry, SuggestedUser } from '../../service
 import apiClient from '../../services/api.js';
 import { HiveDatePicker } from '../common/HiveDatePicker';
 import { Avatar } from '../common/Avatar';
-import { BeeLoader, ModalBeeOverlay } from '../common';
+import { BeeLoader, ModalBeeOverlay, WHRatingPicker } from '../common';
 import { useAuth } from '../../contexts/AuthContext';
 import { userService } from '../../services/userService';
 import { suggestionsApi } from '../../services/suggestions.service';
@@ -90,121 +90,7 @@ interface TmdbResult {
     vote_average?: number;
 }
 
-/* ── Premium Fractional Star Component ── */
-const FractionalStar: React.FC<{ fill: number; size: number; active: boolean }> = ({ fill, size, active }) => {
-    const id = React.useId();
-    // branding gold color vs soft background gray
-    const strokeColor = active ? '#ffb700' : 'rgba(45, 41, 38, 0.15)';
 
-    return (
-        <svg width={size} height={size} viewBox="0 0 24 24" className="drop-shadow-sm transition-all duration-300 transform hover:scale-115">
-            <defs>
-                <linearGradient id={id} x1="0" x2="100%" y1="0" y2="0">
-                    <stop offset={`${fill * 100}%`} stopColor="#ffb700" />
-                    <stop offset={`${fill * 100}%`} stopColor="transparent" />
-                </linearGradient>
-            </defs>
-            <path
-                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                fill={`url(#${id})`}
-                stroke={strokeColor}
-                strokeWidth={active ? "1" : "1.5"}
-                strokeLinejoin="round"
-            />
-        </svg>
-    );
-};
-
-/* ── Star Rating Component with Snapping Snaps ── */
-const StarRating: React.FC<{
-    value: number | undefined;
-    onChange: (v: number | undefined) => void;
-    disabled?: boolean;
-}> = ({ value, onChange, disabled }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [hoverValue, setHoverValue] = useState<number | null>(null);
-
-    const displayValue = hoverValue ?? (value ?? 0);
-
-    const calculateRating = (e: React.MouseEvent | React.TouchEvent) => {
-        if (!containerRef.current) return 0;
-        const rect = containerRef.current.getBoundingClientRect();
-        const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-        const x = clientX - rect.left;
-        const width = rect.width;
-
-        // Map 0-width to 0-10 rating, clamped
-        const rawRating = (x / width) * 10;
-        // Snap to nearest 0.5 step for incredibly user-friendly rating snaps!
-        return Math.max(0.5, Math.min(10, Math.round(rawRating * 2) / 2));
-    };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (disabled) return;
-        setHoverValue(calculateRating(e));
-    };
-
-    const handleClick = (e: React.MouseEvent) => {
-        if (disabled) return;
-        const newRating = calculateRating(e);
-        // If clicking the same exact value, toggle off
-        if (value === newRating) onChange(undefined);
-        else onChange(newRating);
-    };
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = parseFloat(e.target.value);
-        if (isNaN(val)) {
-            onChange(undefined);
-        } else {
-            onChange(Math.max(0, Math.min(10, Math.round(val * 2) / 2)));
-        }
-    };
-
-    return (
-        <div className="flex flex-wrap items-center gap-4" role="radiogroup" aria-label="Rating">
-            {/* The Interactive Star Row */}
-            <div
-                ref={containerRef}
-                className="flex items-center gap-1.5 cursor-pointer py-1.5"
-                onMouseMove={handleMouseMove}
-                onMouseLeave={() => setHoverValue(null)}
-                onClick={handleClick}
-            >
-                {[0, 1, 2, 3, 4].map((i) => {
-                    // Each star represents 2 points (0-2, 2-4, 4-6, 6-8, 8-10)
-                    const starStart = i * 2;
-                    const starFill = Math.max(0, Math.min(1, (displayValue - starStart) / 2));
-
-                    return (
-                        <FractionalStar
-                            key={i}
-                            fill={starFill}
-                            size={36}
-                            active={displayValue > starStart}
-                        />
-                    );
-                })}
-            </div>
-
-            {/* The High-Precision Numeric Control */}
-            <div className="flex items-center gap-1 bg-gradient-to-br from-[#FFF9F0] to-white border border-[#ffb700]/25 px-3 py-1.5 rounded-xl shadow-sm">
-                <input
-                    type="number"
-                    min="0"
-                    max="10"
-                    step="0.5"
-                    value={value ?? ''}
-                    onChange={handleInputChange}
-                    disabled={disabled}
-                    className="w-12 bg-transparent text-[#ffb700] font-black text-lg outline-none border-none p-0 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    placeholder="0.0"
-                />
-                <span className="text-[#2D2926]/30 font-black text-[10px] uppercase tracking-widest">/ 10</span>
-            </div>
-        </div>
-    );
-};
 
 /* ── Custom Brand SVGs for OTT Locations ── */
 
@@ -362,17 +248,7 @@ const LOCATION_PRESETS: LocationPreset[] = [
     { label: 'On the Go', value: 'On the Go', altValues: ['Mobile'], renderIcon: () => <MobileIcon /> },
 ];
 
-/* ── Cinephile Mood Phrases ── */
-const getRatingMood = (rating: number | undefined): { text: string; color: string; icon: string } => {
-    if (rating === undefined || rating === 0) return { text: "Select a rating to record your thoughts", color: "text-[#2D2926]/40", icon: "rate_review" };
-    if (rating <= 2.0) return { text: "Disaster / Complete Waste of Time 🗑️", color: "text-red-600 bg-red-50 border-red-100", icon: "sentiment_very_dissatisfied" };
-    if (rating <= 4.0) return { text: "Poor / Not Recommended 👎", color: "text-orange-600 bg-orange-50 border-orange-100", icon: "sentiment_dissatisfied" };
-    if (rating <= 5.5) return { text: "Mediocre / Average🍿", color: "text-yellow-700 bg-yellow-50 border-yellow-100", icon: "sentiment_neutral" };
-    if (rating <= 7.0) return { text: "Decent / Enjoyable 👍", color: "text-lime-700 bg-lime-50 border-lime-100", icon: "sentiment_satisfied" };
-    if (rating <= 8.5) return { text: "Excellent / Highly Recommended 🔥", color: "text-emerald-700 bg-emerald-50 border-emerald-100", icon: "sentiment_very_satisfied" };
-    if (rating <= 9.5) return { text: "Outstanding / Near Flawless 🌟", color: "text-amber-700 bg-amber-50 border-amber-100", icon: "grade" };
-    return { text: "Absolute Masterpiece / Cinematic Perfection 🏆", color: "text-yellow-600 bg-amber-50 border-amber-200 font-extrabold animate-pulse", icon: "emoji_events" };
-};
+
 
 /* ── Timezone-Aware Local ISO Formatter ── */
 const toLocalISOString = (dateInput: Date | string | number) => {
@@ -786,105 +662,214 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 </div>
                             )}
 
-                            {/* Premium Snapping Star Rating */}
-                            <div className={`flex flex-col gap-2.5 p-4 sm:p-4.5 ${isModal ? 'bg-[#FFF9F0]/40 rounded-3xl' : 'bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm'}`}>
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Rate this Cinematic Experience</label>
-                                <StarRating value={formData.rating} onChange={(v) => setFormData((prev) => ({ ...prev, rating: v }))} />
-
-                                {/* Interactive Mood Badge */}
-                                {(() => {
-                                    const mood = getRatingMood(formData.rating);
-                                    return (
-                                        <div className={`flex items-center gap-2 mt-1.5 px-3 py-2 border rounded-xl ${mood.color} text-xs font-bold transition-all duration-300`}>
-                                            <span className="material-symbols-outlined text-base">{mood.icon}</span>
-                                            <span>{mood.text}</span>
-                                        </div>
-                                    );
-                                })()}
+                            {/* Movie Checkpoint Slider Rating */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50 dark:text-white/50 px-1">
+                                    Rate this Cinematic Experience
+                                </label>
+                                <WHRatingPicker
+                                    rating={formData.rating}
+                                    onRatingChanged={(v) => setFormData((prev) => ({ ...prev, rating: v }))}
+                                />
                             </div>
 
                             {/* Date Picker & Switches */}
-                            <div className={`flex flex-col gap-3.5 p-4 sm:p-4.5 ${isModal ? 'bg-[#FFF9F0]/40 rounded-3xl' : 'bg-white border border-[#ffb700]/15 rounded-3xl shadow-sm'}`}>
+                            <div className="flex flex-col gap-3.5 p-4 sm:p-5 bg-white dark:bg-[#221c13] border border-[#ffb700]/25 rounded-3xl shadow-sm">
                                 <HiveDatePicker
                                     label="When did you watch this?"
                                     value={formData.watchedAt}
                                     onChange={(val: string) => setFormData((prev) => ({ ...prev, watchedAt: val || toLocalISOString(new Date()) }))}
                                 />
 
-                                <div className="h-[1px] bg-[#ffb700]/10 my-1" />
+                                {/* Dividing Line with Title */}
+                                <div className="flex items-center gap-2 pt-1 pb-0.5">
+                                    <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#ffb700]/30 to-transparent" />
+                                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2D2926]/50 dark:text-white/50 whitespace-nowrap">
+                                        Watch Options & Status
+                                    </span>
+                                    <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#ffb700]/30 to-transparent" />
+                                </div>
 
                                 <div className="flex flex-col gap-2.5">
-                                    {/* Rewatch Toggle */}
-                                    <label className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FFF9F0]/50 transition-all cursor-pointer group">
-                                        <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">Rewatch</span>
-                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Toggle if this is a repeat viewing of this movie or show</span>
+                                    {/* Rewatch Toggle Card */}
+                                    <label
+                                        className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
+                                            formData.isRewatch
+                                                ? 'bg-amber-500/[0.07] border-[#ffb700] shadow-sm'
+                                                : 'bg-white/80 dark:bg-white/[0.03] border-[#2D2926]/12 dark:border-white/10 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                                            <div
+                                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                                    formData.isRewatch
+                                                        ? 'bg-[#ffb700] text-black font-black'
+                                                        : 'bg-[#2D2926]/5 dark:bg-white/10 text-[#2D2926]/50 dark:text-white/50 group-hover:text-[#ffb700]'
+                                                }`}
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">replay</span>
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="font-extrabold text-[#2D2926] dark:text-white text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
+                                                    Rewatch
+                                                </span>
+                                                <span className="text-[10px] font-medium text-[#2D2926]/50 dark:text-white/50 truncate">
+                                                    Repeat viewing of this movie or show
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2.5 flex-shrink-0">
-                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
-                                                ${formData.isRewatch
-                                                    ? 'bg-[#ffb700] text-black font-extrabold shadow-sm'
-                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/40'}`}>
+
+                                        <div className="flex items-center gap-2.5 shrink-0">
+                                            <span
+                                                className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
+                                                    formData.isRewatch
+                                                        ? 'bg-[#ffb700] text-black font-extrabold border-[#ffb700] shadow-xs'
+                                                        : 'bg-[#2D2926]/5 dark:bg-white/5 text-[#2D2926]/40 dark:text-white/40 border-[#2D2926]/10 dark:border-white/10'
+                                                }`}
+                                            >
                                                 {formData.isRewatch ? 'YES' : 'NO'}
                                             </span>
-                                            <div className="relative">
+                                            <div className="relative inline-flex items-center">
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.isRewatch}
                                                     onChange={(e) => setFormData((prev) => ({ ...prev, isRewatch: e.target.checked }))}
-                                                    className="sr-only peer"
+                                                    className="sr-only"
                                                 />
-                                                <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#ffb700] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
+                                                <div
+                                                    className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
+                                                        formData.isRewatch
+                                                            ? 'bg-[#ffb700] border-[#ffb700]'
+                                                            : 'bg-[#2D2926]/15 dark:bg-white/20 border-[#2D2926]/20 dark:border-white/25'
+                                                    }`}
+                                                />
+                                                <div
+                                                    className={`absolute top-[2px] left-[2px] w-5 h-5 rounded-full bg-white shadow-md border border-[#2D2926]/10 transition-transform duration-200 ${
+                                                        formData.isRewatch ? 'translate-x-5' : 'translate-x-0'
+                                                    }`}
+                                                />
                                             </div>
                                         </div>
                                     </label>
 
-                                    {/* Currently Watching Toggle */}
-                                    <label className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FFF9F0]/50 transition-all cursor-pointer group">
-                                        <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#22c55e] transition-colors">Currently Watching</span>
-                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Keep in your active queue to track ongoing progress</span>
+                                    {/* Currently Watching Toggle Card */}
+                                    <label
+                                        className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
+                                            formData.isWatching
+                                                ? 'bg-emerald-500/[0.08] border-emerald-500 shadow-sm'
+                                                : 'bg-white/80 dark:bg-white/[0.03] border-[#2D2926]/12 dark:border-white/10 hover:border-emerald-500/40 hover:bg-emerald-50/20'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                                            <div
+                                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                                    formData.isWatching
+                                                        ? 'bg-[#22c55e] text-white font-black'
+                                                        : 'bg-[#2D2926]/5 dark:bg-white/10 text-[#2D2926]/50 dark:text-white/50 group-hover:text-[#22c55e]'
+                                                }`}
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">play_circle</span>
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="font-extrabold text-[#2D2926] dark:text-white text-xs uppercase tracking-wider group-hover:text-[#22c55e] transition-colors">
+                                                    Currently Watching
+                                                </span>
+                                                <span className="text-[10px] font-medium text-[#2D2926]/50 dark:text-white/50 truncate">
+                                                    Keep in your active queue to track progress
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2.5 flex-shrink-0">
-                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
-                                                ${formData.isWatching
-                                                    ? 'bg-[#22c55e]/10 text-[#22c55e]'
-                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/30'}`}>
+
+                                        <div className="flex items-center gap-2.5 shrink-0">
+                                            <span
+                                                className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
+                                                    formData.isWatching
+                                                        ? 'bg-[#22c55e] text-white font-extrabold border-[#22c55e] shadow-xs'
+                                                        : 'bg-[#2D2926]/5 dark:bg-white/5 text-[#2D2926]/40 dark:text-white/40 border-[#2D2926]/10 dark:border-white/10'
+                                                }`}
+                                            >
                                                 {formData.isWatching ? 'YES' : 'NO'}
                                             </span>
-                                            <div className="relative">
+                                            <div className="relative inline-flex items-center">
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.isWatching}
                                                     onChange={(e) => setFormData((prev) => ({ ...prev, isWatching: e.target.checked }))}
-                                                    className="sr-only peer"
+                                                    className="sr-only"
                                                 />
-                                                <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#22c55e] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
+                                                <div
+                                                    className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
+                                                        formData.isWatching
+                                                            ? 'bg-[#22c55e] border-[#22c55e]'
+                                                            : 'bg-[#2D2926]/15 dark:bg-white/20 border-[#2D2926]/20 dark:border-white/25'
+                                                    }`}
+                                                />
+                                                <div
+                                                    className={`absolute top-[2px] left-[2px] w-5 h-5 rounded-full bg-white shadow-md border border-[#2D2926]/10 transition-transform duration-200 ${
+                                                        formData.isWatching ? 'translate-x-5' : 'translate-x-0'
+                                                    }`}
+                                                />
                                             </div>
                                         </div>
                                     </label>
 
-                                    {/* Post to Feed Toggle */}
-                                    <label className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#FFF9F0]/50 transition-all cursor-pointer group">
-                                        <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                                            <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">Post to Feed</span>
-                                            <span className="text-[10px] font-bold text-[#2D2926]/40 truncate">Publish this watch activity to your followers and public feed</span>
+                                    {/* Post to Feed Toggle Card */}
+                                    <label
+                                        className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
+                                            formData.postToFeed
+                                                ? 'bg-amber-500/[0.07] border-[#ffb700] shadow-sm'
+                                                : 'bg-white/80 dark:bg-white/[0.03] border-[#2D2926]/12 dark:border-white/10 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0 pr-2">
+                                            <div
+                                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                                    formData.postToFeed
+                                                        ? 'bg-[#ffb700] text-black font-black'
+                                                        : 'bg-[#2D2926]/5 dark:bg-white/10 text-[#2D2926]/50 dark:text-white/50 group-hover:text-[#ffb700]'
+                                                }`}
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">campaign</span>
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="font-extrabold text-[#2D2926] dark:text-white text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
+                                                    Post to Feed
+                                                </span>
+                                                <span className="text-[10px] font-medium text-[#2D2926]/50 dark:text-white/50 truncate">
+                                                    Share this watch log to your community feed
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2.5 flex-shrink-0">
-                                            <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-all duration-300
-                                                ${formData.postToFeed
-                                                    ? 'bg-[#ffb700] text-black font-extrabold shadow-sm'
-                                                    : 'bg-[#2D2926]/5 text-[#2D2926]/40'}`}>
+
+                                        <div className="flex items-center gap-2.5 shrink-0">
+                                            <span
+                                                className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
+                                                    formData.postToFeed
+                                                        ? 'bg-[#ffb700] text-black font-extrabold border-[#ffb700] shadow-xs'
+                                                        : 'bg-[#2D2926]/5 dark:bg-white/5 text-[#2D2926]/40 dark:text-white/40 border-[#2D2926]/10 dark:border-white/10'
+                                                }`}
+                                            >
                                                 {formData.postToFeed ? 'YES' : 'NO'}
                                             </span>
-                                            <div className="relative">
+                                            <div className="relative inline-flex items-center">
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.postToFeed ?? true}
                                                     onChange={(e) => setFormData((prev) => ({ ...prev, postToFeed: e.target.checked }))}
-                                                    className="sr-only peer"
+                                                    className="sr-only"
                                                 />
-                                                <div className="w-10 h-5.5 bg-[#2D2926]/10 peer-focus:outline-none rounded-full peer-checked:bg-[#ffb700] after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-[18px] shadow-inner"></div>
+                                                <div
+                                                    className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
+                                                        formData.postToFeed
+                                                            ? 'bg-[#ffb700] border-[#ffb700]'
+                                                            : 'bg-[#2D2926]/15 dark:bg-white/20 border-[#2D2926]/20 dark:border-white/25'
+                                                    }`}
+                                                />
+                                                <div
+                                                    className={`absolute top-[2px] left-[2px] w-5 h-5 rounded-full bg-white shadow-md border border-[#2D2926]/10 transition-transform duration-200 ${
+                                                        formData.postToFeed ? 'translate-x-5' : 'translate-x-0'
+                                                    }`}
+                                                />
                                             </div>
                                         </div>
                                     </label>
