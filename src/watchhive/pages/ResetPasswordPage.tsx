@@ -31,7 +31,7 @@ export const ResetPasswordPage: React.FC = () => {
                     </p>
                     <Link
                         to="/watch-hive/forgot-password"
-                        className="w-full h-12 bg-[#ffb700] text-white font-black text-[15px] rounded-2xl flex items-center justify-center shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.4)] hover:-translate-y-0.5 transition-all"
+                        className="w-full h-12 bg-[#ffb700] text-[#2D2926] font-black text-[15px] rounded-2xl flex items-center justify-center shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.4)] hover:-translate-y-0.5 transition-all"
                     >
                         Request New Link
                     </Link>
@@ -207,7 +207,7 @@ export const ResetPasswordPage: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => navigate('/watch-hive/login')}
-                                className="w-full h-14 bg-[#ffb700] text-white font-black text-[16px] rounded-2xl shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.4)] hover:-translate-y-0.5 transition-all"
+                                className="w-full h-14 bg-[#ffb700] text-[#2D2926] font-black text-[16px] rounded-2xl shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.4)] hover:-translate-y-0.5 transition-all"
                             >
                                 Go to Sign In
                             </button>

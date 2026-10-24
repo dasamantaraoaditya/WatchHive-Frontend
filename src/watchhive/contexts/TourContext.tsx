@@ -456,7 +456,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 ) : (
                                     <button
                                         onClick={nextStep}
-                                        className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer active:scale-95"
+                                        className="px-4 py-1.5 bg-[#ffb700] text-[#2D2926] hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer active:scale-95"
                                     >
                                         <span>Next</span>
                                         <span className="material-symbols-outlined text-[10px] font-bold">arrow_forward</span>

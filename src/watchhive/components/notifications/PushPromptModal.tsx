@@ -72,7 +72,7 @@ export const PushPromptModal: React.FC = () => {
                         <button
                             onClick={handleEnable}
                             disabled={loading}
-                            className="w-full py-3.5 px-4 bg-[#ffb700] hover:brightness-105 active:scale-98 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-md shadow-[#ffb700]/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+                            className="w-full py-3.5 px-4 bg-[#ffb700] hover:brightness-105 active:scale-98 text-[#2D2926] font-black text-xs uppercase tracking-widest rounded-2xl shadow-md shadow-[#ffb700]/25 transition-all cursor-pointer flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <span>Enabling...</span>

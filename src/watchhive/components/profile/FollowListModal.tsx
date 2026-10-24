@@ -105,7 +105,7 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                                         </div>
                                     </div>
                                     {/* Light Mode "View" Button Outline */}
-                                    <div className="px-4 py-1.5 rounded-full border border-[#ffb700]/30 text-[#ffb700] text-[12px] font-bold bg-[#ffb700]/5 group-hover:bg-[#ffb700] group-hover:text-white transition-colors">
+                                    <div className="px-4 py-1.5 rounded-full border border-[#ffb700]/30 text-[#ffb700] text-[12px] font-bold bg-[#ffb700]/5 group-hover:bg-[#ffb700] group-hover:text-[#2D2926] transition-colors">
                                         View
                                     </div>
                                 </Link>

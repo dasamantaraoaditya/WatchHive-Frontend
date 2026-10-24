@@ -52,7 +52,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
                     <button
                         type="button"
                         onClick={onRetry}
-                        className="bg-[#ffb700] hover:bg-[#ffc83b] text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/25 active:scale-95 flex items-center gap-2"
+                        className="bg-[#ffb700] hover:bg-[#ffc83b] text-[#2D2926] font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/25 active:scale-95 flex items-center gap-2"
                     >
                         <span className="material-symbols-outlined text-base font-bold">refresh</span>
                         Retry Connection
