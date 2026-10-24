@@ -61,6 +61,17 @@ const AppRoutes: React.FC = () => {
     const { promptAddToWatchlist } = useWatchlist();
     const [activeAction, setActiveAction] = React.useState<'log' | 'watching' | 'watchlist' | 'suggest' | null>(null);
 
+    React.useEffect(() => {
+        const handleOpenQuickAdd = (e: Event) => {
+            const customEvent = e as CustomEvent<{ action: 'log' | 'watching' | 'watchlist' | 'suggest' }>;
+            if (customEvent.detail?.action) {
+                setActiveAction(customEvent.detail.action);
+            }
+        };
+        window.addEventListener('watchhive:open-quick-add', handleOpenQuickAdd);
+        return () => window.removeEventListener('watchhive:open-quick-add', handleOpenQuickAdd);
+    }, []);
+
     const closeAll = () => {
         setActiveAction(null);
     };

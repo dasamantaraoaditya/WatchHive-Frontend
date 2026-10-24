@@ -309,16 +309,25 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center justify-end gap-2.5 pt-1.5 border-t border-[#ffb700]/10">
+                        <div className="flex items-center justify-end gap-2 pt-1.5 border-t border-[#ffb700]/10 flex-wrap">
                             <button
                                 onClick={skipTour}
-                                className="px-3.5 py-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-700 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                                className="px-3 py-1.5 bg-neutral-50 hover:bg-neutral-100 text-neutral-500 hover:text-neutral-700 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                             >
                                 Skip
                             </button>
                             <button
+                                onClick={() => {
+                                    skipTour();
+                                    window.dispatchEvent(new CustomEvent('watchhive:open-quick-add', { detail: { action: 'log' } }));
+                                }}
+                                className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer font-bold"
+                            >
+                                Log First Watch 🎬
+                            </button>
+                            <button
                                 onClick={startTour}
-                                className="px-4 py-2 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 cursor-pointer"
+                                className="px-3.5 py-1.5 bg-[#ffb700] text-stone-950 hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 cursor-pointer font-bold"
                             >
                                 Start Tour
                             </button>
@@ -426,13 +435,33 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 >
                                     Back
                                 </button>
-                                <button
-                                    onClick={nextStep}
-                                    className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer active:scale-95"
-                                >
-                                    <span>{currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'}</span>
-                                    <span className="material-symbols-outlined text-[10px] font-bold">arrow_forward</span>
-                                </button>
+                                {currentStepIndex === TOUR_STEPS.length - 1 ? (
+                                    <div className="flex items-center gap-1.5">
+                                        <button
+                                            onClick={completeTour}
+                                            className="px-2.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-[9px] font-black uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
+                                        >
+                                            Done
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                completeTour();
+                                                window.dispatchEvent(new CustomEvent('watchhive:open-quick-add', { detail: { action: 'log' } }));
+                                            }}
+                                            className="px-3.5 py-1.5 bg-[#ffb700] text-stone-950 font-black hover:brightness-105 text-[9px] uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer active:scale-95"
+                                        >
+                                            <span>Log First Watch 🎬</span>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={nextStep}
+                                        className="px-4 py-1.5 bg-[#ffb700] text-white hover:brightness-105 text-[9px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md shadow-[#ffb700]/15 flex items-center gap-1 cursor-pointer active:scale-95"
+                                    >
+                                        <span>Next</span>
+                                        <span className="material-symbols-outlined text-[10px] font-bold">arrow_forward</span>
+                                    </button>
+                                )}
                             </div>
                         </motion.div>
                     </>
