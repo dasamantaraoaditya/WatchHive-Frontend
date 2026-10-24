@@ -22,3 +22,4 @@ export * from './QuickCurrentlyWatchingModal';
 export * from './CardDropdownMenu';
 export * from './AvatarLightboxModal';
 export * from './SupportModal';
+export * from './WHRatingPicker';
