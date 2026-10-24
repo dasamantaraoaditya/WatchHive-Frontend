@@ -225,7 +225,11 @@ export const EntryCard: React.FC<{
                     )}
                     <div className="watchlist-card__meta text-[11px] font-bold mt-auto text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
                         <span className="truncate flex-1">{metadataString || '-'}</span>
-                        {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
+                        {entry.rating != null && Number(entry.rating) > 0 && (
+                            <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">
+                                ⭐ {Number(entry.rating).toFixed(1)}
+                            </span>
+                        )}
                     </div>
                 </motion.div>
             </motion.div>

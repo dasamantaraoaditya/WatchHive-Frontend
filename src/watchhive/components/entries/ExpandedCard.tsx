@@ -156,7 +156,7 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Your Rating</span>
-                        <span className="text-[#2D2926] text-2xl font-black">{entry.rating ? `⭐ ${entry.rating}` : '-'}</span>
+                        <span className="text-[#2D2926] text-2xl font-black">{entry.rating ? `⭐ ${Number(entry.rating).toFixed(1)}` : '-'}</span>
                     </div>
                     <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Watched On</span>
