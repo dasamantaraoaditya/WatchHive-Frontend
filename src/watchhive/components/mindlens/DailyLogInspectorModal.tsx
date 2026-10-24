@@ -128,7 +128,7 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
                                             <Link
                                                 to={`/watch-hive/movie/${item.tmdbId}`}
                                                 onClick={onClose}
-                                                className="px-3.5 py-1.5 rounded-xl bg-[#ffb700] text-white text-[11px] font-black uppercase tracking-widest hover:bg-[#2D2926] transition-colors shadow-xs"
+                                                className="px-3.5 py-1.5 rounded-xl bg-[#ffb700] text-[#2D2926] text-[11px] font-black uppercase tracking-widest hover:bg-[#2D2926] transition-colors shadow-xs"
                                             >
                                                 View
                                             </Link>
@@ -136,7 +136,7 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
                                             <Link
                                                 to="/watch-hive/entries"
                                                 onClick={onClose}
-                                                className="px-3 py-1.5 rounded-xl bg-[#FFF9F0] border border-[#ffb700]/30 text-[#ffb700] text-[11px] font-black hover:bg-[#ffb700] hover:text-white transition-colors"
+                                                className="px-3 py-1.5 rounded-xl bg-[#FFF9F0] border border-[#ffb700]/30 text-[#ffb700] text-[11px] font-black hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors"
                                             >
                                                 Details
                                             </Link>
@@ -153,7 +153,7 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
                     <span>WatchersHive Inspection Log</span>
                     <button
                         onClick={onClose}
-                        className="px-5 py-2 rounded-xl bg-[#2D2926] text-white text-[10px] uppercase font-black tracking-widest hover:bg-[#ffb700] transition-colors"
+                        className="px-5 py-2 rounded-xl bg-[#2D2926] text-[#2D2926] text-[10px] uppercase font-black tracking-widest hover:bg-[#ffb700] transition-colors"
                     >
                         Close
                     </button>

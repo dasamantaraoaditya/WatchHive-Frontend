@@ -752,7 +752,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             )}
                                             <div className="flex-1 pt-1 min-w-0 relative z-10">
                                                 <h3 className="text-base font-black text-[#2D2926] truncate leading-snug">{formData.title}</h3>
-                                                <span className="inline-block px-2 py-0.5 bg-[#ffb700]/10 text-[#ffb700] font-black text-[9px] uppercase tracking-wider rounded-md mt-1 mb-2">
+                                                <span className="inline-block px-2 py-0.5 bg-[#ffb700]/15 text-[#2D2926] font-black text-[9px] uppercase tracking-wider rounded-md mt-1 mb-2">
                                                     {formData.type === 'TV_SHOW' ? '📺 TV Show' : '🎬 Movie'}
                                                 </span>
                                                 {selectedOverview && (

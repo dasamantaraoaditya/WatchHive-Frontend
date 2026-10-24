@@ -86,7 +86,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.96 }}
                         onClick={onLogWatch}
-                        className="relative group bg-[#ffb700] hover:bg-[#ffa700] text-white font-black text-[11px] sm:text-xs uppercase tracking-wider px-3 sm:px-4 py-2 sm:py-2.5 rounded-full flex items-center gap-1.5 sm:gap-2 shadow-md shadow-[#ffb700]/30 transition-all overflow-hidden whitespace-nowrap shrink-0"
+                        className="relative group bg-[#ffb700] hover:bg-[#ffa700] text-[#2D2926] font-black text-[11px] sm:text-xs uppercase tracking-wider px-3 sm:px-4 py-2 sm:py-2.5 rounded-full flex items-center gap-1.5 sm:gap-2 shadow-md shadow-[#ffb700]/30 transition-all overflow-hidden whitespace-nowrap shrink-0"
                         title="Log an Entry"
                     >
                         <span className="material-symbols-outlined text-base sm:text-lg font-bold">edit_note</span>

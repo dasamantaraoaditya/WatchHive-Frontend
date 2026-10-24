@@ -218,7 +218,7 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
                                 type="button"
                                 onClick={handleConfirmStartWatching}
                                 disabled={isSubmitting}
-                                className="flex items-center justify-center gap-1.5 px-6 py-3 bg-[#ffb700] text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 cursor-pointer active:scale-97"
+                                className="flex items-center justify-center gap-1.5 px-6 py-3 bg-[#ffb700] text-[#2D2926] font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 cursor-pointer active:scale-97"
                             >
                                 {isSubmitting ? (
                                     <>

@@ -300,7 +300,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                         type="button"
                         onClick={handleAdd}
                         disabled={isSubmitting}
-                        className="px-5 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="px-5 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                     >
                         {isSubmitting ? (
                             <>

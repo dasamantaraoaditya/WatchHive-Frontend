@@ -191,7 +191,7 @@ export const EntryCard: React.FC<{
                                 <span className="absolute inline-flex h-full w-full rounded-full bg-[#ffb700] opacity-75 animate-ping" />
                                 
                                 {/* Animated Watching Badge */}
-                                <span className="relative inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#ffb700] text-white shadow-md border border-white/30 backdrop-blur-sm transition-transform duration-300 group-hover/watching:scale-110">
+                                <span className="relative inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#ffb700] text-[#2D2926] shadow-md border border-white/30 backdrop-blur-sm transition-transform duration-300 group-hover/watching:scale-110">
                                     <span className="material-symbols-outlined text-[13px] font-black animate-pulse">play_arrow</span>
                                 </span>
 
@@ -551,7 +551,7 @@ export const EntryList: React.FC<EntryListProps> = ({
                     {!hasSearch && onAddNew && (
                         <button
                             onClick={onAddNew}
-                            className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
+                            className="bg-[#ffb700] hover:brightness-105 text-[#2D2926] font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
                         >
                             <span className="material-symbols-outlined text-base font-bold">add</span>
                             Log a Watch

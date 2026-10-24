@@ -114,7 +114,7 @@ export const PushOptInBanner: React.FC<PushOptInBannerProps> = ({ onSubscribed }
                 <button
                     onClick={handleEnable}
                     disabled={subscribing}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-2xs transition-all cursor-pointer flex items-center gap-1"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black text-[10px] sm:text-xs uppercase tracking-wider shadow-2xs transition-all cursor-pointer flex items-center gap-1"
                 >
                     {subscribing ? (
                         <span>Enabling...</span>

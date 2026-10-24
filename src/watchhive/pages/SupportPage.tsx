@@ -332,7 +332,7 @@ App Diagnostics:
                 <div className="flex flex-col sm:flex-row gap-3 mb-12">
                     <button
                         onClick={handleSendMailto}
-                        className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-[#ffb700]/25 cursor-pointer active:scale-[0.99]"
+                        className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-[#ffb700]/25 cursor-pointer active:scale-[0.99]"
                     >
                         <span className="material-symbols-outlined text-lg">outgoing_mail</span>
                         <span>Send via Email Client</span>

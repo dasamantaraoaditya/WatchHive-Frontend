@@ -203,7 +203,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 )}
 
                 <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
-                    <span className="bg-[#ffb700] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90 uppercase tracking-tighter">
+                    <span className="bg-[#ffb700] text-[#2D2926] text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm opacity-90 uppercase tracking-tighter">
                         {mediaType === 'tv' ? '📺 TV' : '🎬 Movie'}
                     </span>
                 </div>

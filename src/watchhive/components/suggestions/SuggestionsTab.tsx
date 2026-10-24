@@ -189,7 +189,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
 
                 <button
                     onClick={() => setIsSuggestModalOpen(true)}
-                    className="px-4 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 self-end sm:self-center"
+                    className="px-4 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 self-end sm:self-center"
                 >
                     <span className="material-symbols-outlined text-lg">auto_awesome</span>
                     <span>Suggest to Friends</span>
@@ -242,7 +242,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                     </p>
                     <button
                         onClick={() => setIsSuggestModalOpen(true)}
-                        className="bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-[#ffb700]/20 flex items-center gap-2 cursor-pointer"
+                        className="bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-[#ffb700]/20 flex items-center gap-2 cursor-pointer"
                     >
                         <span className="material-symbols-outlined text-lg">auto_awesome</span>
                         <span>Suggest a Movie to Friends</span>

@@ -516,7 +516,7 @@ export const MovieDetailsPage: React.FC = () => {
                                                     setIsCompletingWatch(false);
                                                     setView('log');
                                                 }}
-                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#ffb700] text-white hover:brightness-105 flex items-center gap-2 transition-all shadow-md shadow-[#ffb700]/20 cursor-pointer"
+                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#ffb700] text-[#2D2926] hover:brightness-105 flex items-center gap-2 transition-all shadow-md shadow-[#ffb700]/20 cursor-pointer"
                                             >
                                                 <span className="material-symbols-outlined text-[18px]">edit_note</span>
                                                 Log Watch

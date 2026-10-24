@@ -337,7 +337,7 @@ export const CinematicStacksPage: React.FC = () => {
                                                          e.stopPropagation();
                                                          handleAddItem(result);
                                                      }}
-                                                     className="material-symbols-outlined text-[#ffb700] bg-slate-50 hover:bg-[#ffb700] hover:text-white transition-colors w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer"
+                                                     className="material-symbols-outlined text-[#ffb700] bg-slate-50 hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer"
                                                      title="Add to stack"
                                                  >
                                                      add
