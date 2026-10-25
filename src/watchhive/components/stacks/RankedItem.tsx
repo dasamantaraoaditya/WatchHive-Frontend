@@ -83,7 +83,15 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, 
             className="ranked-item-card group flex w-full"
         >
             {/* Rank Indicator */}
-            <div className="ranked-item__rank">
+            <div className={`ranked-item__rank ${
+                rank === 1
+                    ? 'ranked-item__rank--1'
+                    : rank === 2
+                    ? 'ranked-item__rank--2'
+                    : rank === 3
+                    ? 'ranked-item__rank--3'
+                    : 'ranked-item__rank--default'
+            }`}>
                 {rank}
             </div>
 

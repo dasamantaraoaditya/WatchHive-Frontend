@@ -532,12 +532,12 @@ export const UserProfilePage: React.FC = () => {
                                                                     <div className="flex items-center gap-3.5 min-w-0">
                                                                         <span className={`w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 shadow-xs ${
                                                                             idx === 0 
-                                                                                ? 'bg-[#ffb700] text-white ring-2 ring-[#ffb700]/30' 
+                                                                                ? 'bg-[#ffb700] text-[#2D2926] ring-2 ring-[#ffb700]/30' 
                                                                                 : idx === 1 
-                                                                                ? 'bg-slate-300 text-slate-800' 
+                                                                                ? 'bg-slate-200 text-[#2D2926] ring-1 ring-slate-300' 
                                                                                 : idx === 2 
-                                                                                ? 'bg-amber-700 text-white' 
-                                                                                : 'bg-slate-200 text-slate-600'
+                                                                                ? 'bg-amber-600 text-white ring-1 ring-amber-700/30' 
+                                                                                : 'bg-white text-[#2D2926] border border-black/10 shadow-2xs'
                                                                         }`}>
                                                                             #{idx + 1}
                                                                         </span>
