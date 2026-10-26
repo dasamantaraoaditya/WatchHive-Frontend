@@ -146,10 +146,10 @@
     --z-dropdown: 1000;
     --z-sticky: 1020;
     --z-fixed: 1030;
-    --z-modal-backdrop: 1040;
-    --z-modal: 1050;
-    --z-popover: 1060;
-    --z-tooltip: 1070;
+    --z-modal-backdrop: 3400;
+    --z-modal: 3500;
+    --z-popover: 3600;
+    --z-tooltip: 3700;
 
     /* === Layout === */
     --container-xs: 20rem;
@@ -270,7 +270,11 @@ body {
 @media (max-width: 768px) {
     .app-main--with-sidebar {
         margin-left: 0;
-        padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+        padding-bottom: calc(10.5rem + env(safe-area-inset-bottom));
+    }
+
+    .app-main {
+        padding-bottom: calc(10.5rem + env(safe-area-inset-bottom));
     }
 }
 

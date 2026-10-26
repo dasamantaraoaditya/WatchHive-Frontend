@@ -371,7 +371,7 @@ export const MovieDetailsPage: React.FC = () => {
             animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } }}
             exit={{ opacity: 0, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } }}
             onScroll={handleScroll}
-            className="fixed inset-y-0 right-0 left-0 md:left-[256px] z-[100] flex flex-col bg-[#FFF9F0] overflow-y-auto no-scrollbar font-display pb-32 md:pb-24"
+            className="fixed inset-y-0 right-0 left-0 md:left-[256px] z-[100] flex flex-col bg-[#FFF9F0] overflow-y-auto no-scrollbar font-display pb-40 md:pb-24"
         >
             {/* Sticky Navigation Bar — with round arrow_back_ios button */}
             <div
@@ -462,7 +462,7 @@ export const MovieDetailsPage: React.FC = () => {
                             </div>
 
                             {/* Content Body */}
-                            <div className="px-6 md:px-10 pb-24 pt-4 flex flex-col gap-10 w-full relative z-10">
+                            <div className="px-4 sm:px-6 md:px-10 pb-36 md:pb-24 pt-4 flex flex-col gap-8 md:gap-10 w-full relative z-10">
                                 {/* Interactive Action Bar */}
                                 <div className="flex flex-wrap items-center justify-between gap-4 p-5 bg-white rounded-3xl border border-[#ffb700]/20 shadow-sm">
                                     <div className="flex flex-wrap items-center gap-3 md:gap-4">

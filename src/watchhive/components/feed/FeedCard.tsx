@@ -333,8 +333,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
 
                 {/* Actions Bar */}
-                <div className="feed-card-actions-bar">
-                    <div className="flex gap-6">
+                <div className="feed-card-actions-bar flex flex-wrap items-center justify-between gap-y-3 gap-x-2">
+                    <div className="flex gap-4 sm:gap-6 items-center">
                         {!isSuggestion && (
                             <>
                                 <button
@@ -362,7 +362,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     </div>
 
                     {/* Quick Actions (Watchlist, Log Watch, Suggest, Share) */}
-                    <div className="flex items-center gap-2 sm:gap-2.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                         {/* 1. Quick Add to Watchlist */}
                         {targetTmdbId && (
                             <div className="relative group/btn" title="Save to Watchlist">

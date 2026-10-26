@@ -98,10 +98,15 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => {
         if (state.isOpen) {
             document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
         } else {
             document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
         }
-        return () => { document.body.style.overflow = 'unset'; };
+        return () => { 
+            document.body.style.overflow = 'unset'; 
+            document.body.removeAttribute('data-modal-open');
+        };
     }, [state.isOpen]);
 
     // Severity specific colors and icons
@@ -160,7 +165,12 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             <AnimatePresence>
                 {state.isOpen && (
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+                    <div 
+                        role="dialog"
+                        aria-modal="true"
+                        data-modal-open="true"
+                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-hidden"
+                    >
                         {/* Backdrop with elegant blur */}
                         <motion.div
                             initial={{ opacity: 0 }}

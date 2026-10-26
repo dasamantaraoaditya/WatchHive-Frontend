@@ -16,8 +16,11 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
 }) => {
     const [isScrolling, setIsScrolling] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // 1. Detect scrolling on page
     useEffect(() => {
         const handleScroll = () => {
             if (isHovered) return;
@@ -40,6 +43,60 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
         };
     }, [isHovered]);
 
+    // 2. Hide when any modal, sheet, or dialog is open
+    useEffect(() => {
+        const checkModalState = () => {
+            const hasDialog =
+                document.querySelector('[role="dialog"]') !== null ||
+                document.querySelector('[data-modal-open="true"]') !== null ||
+                document.body.getAttribute('data-modal-open') === 'true' ||
+                document.body.style.overflow === 'hidden';
+            setIsModalOpen(hasDialog);
+        };
+
+        checkModalState();
+
+        const observer = new MutationObserver(checkModalState);
+        observer.observe(document.body, {
+            attributes: true,
+            childList: true,
+            subtree: true,
+            attributeFilter: ['style', 'data-modal-open', 'class'],
+        });
+
+        window.addEventListener('resize', checkModalState);
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', checkModalState);
+        };
+    }, []);
+
+    // 3. Hide when user focuses an input/textarea (virtual keyboard open on mobile)
+    useEffect(() => {
+        const handleFocus = (e: FocusEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+                setIsKeyboardOpen(true);
+            }
+        };
+
+        const handleBlur = () => {
+            setTimeout(() => {
+                const active = document.activeElement as HTMLElement | null;
+                if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA' && !active.isContentEditable)) {
+                    setIsKeyboardOpen(false);
+                }
+            }, 100);
+        };
+
+        window.addEventListener('focusin', handleFocus);
+        window.addEventListener('focusout', handleBlur);
+        return () => {
+            window.removeEventListener('focusin', handleFocus);
+            window.removeEventListener('focusout', handleBlur);
+        };
+    }, []);
+
     const secondaryActions = [
         {
             icon: 'visibility',
@@ -61,10 +118,10 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
         },
     ];
 
-    const isVisible = !isScrolling || isHovered;
+    const isVisible = (!isScrolling || isHovered) && !isModalOpen && !isKeyboardOpen;
 
     return (
-        <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-8 left-0 right-0 z-[1300] flex justify-center pointer-events-none px-3 sm:px-4">
+        <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-8 left-0 right-0 z-[1100] flex justify-center pointer-events-none px-3 sm:px-4">
             <motion.div
                 initial={{ y: 20, opacity: 0, scale: 0.95 }}
                 animate={{

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { User } from '../../types/user.types';
 import userService from '../../services/userService';
 import { Avatar, BeeLoader } from '../common';
@@ -19,10 +20,15 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
         if (isOpen) {
             fetchUsers();
             document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
         } else {
             document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
         }
-        return () => { document.body.style.overflow = 'unset'; };
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
     }, [isOpen, userId, type]);
 
     const fetchUsers = async () => {
@@ -41,8 +47,13 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-4 animate-[fade-in_0.2s_ease-out]" onClick={onClose}>
+    return createPortal(
+        <div 
+            className="fixed inset-0 z-[3500] flex items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-4 animate-[fade-in_0.2s_ease-out]" 
+            onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+        >
             <div 
                 className="bg-[#FFF9F0] w-full max-w-md max-h-[85vh] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-[#ffb700]/10 animate-[slide-up_0.3s_cubic-bezier(0.16,1,0.3,1)]" 
                 onClick={e => e.stopPropagation()}
@@ -119,6 +130,7 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                 @keyframes slide-up { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
                 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 };

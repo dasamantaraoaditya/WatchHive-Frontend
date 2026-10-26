@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useAuth, useUI } from '../contexts';
 import { userService, dataService } from '../services';
@@ -58,6 +59,20 @@ export const ProfilePage: React.FC = () => {
 
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
     const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (isDeleteModalOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
+    }, [isDeleteModalOpen]);
 
     if (!user) return <ProfileSkeleton />;
 
@@ -334,13 +349,13 @@ export const ProfilePage: React.FC = () => {
                             </p>
                         )}
 
-                        <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 pt-2">
-                            <div className="bg-[#ffb700]/5 border border-[#ffb700]/10 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] hover:shadow-sm transition-shadow">
+                        <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 pt-2 w-full max-w-sm sm:max-w-none">
+                            <div className="bg-[#ffb700]/5 border border-[#ffb700]/10 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-center flex-1 sm:flex-initial min-w-[74px] sm:min-w-[90px] md:min-w-[100px] hover:shadow-sm transition-shadow">
                                 <p className="text-xl md:text-2xl font-black text-[#ffb700]">{user._count?.entries || 0}</p>
                                 <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Watches</p>
                             </div>
                             <div 
-                                className="bg-slate-50 border border-slate-100 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
+                                className="bg-slate-50 border border-slate-100 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-center flex-1 sm:flex-initial min-w-[74px] sm:min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
                                 onClick={() => stats && setModalConfig({ isOpen: true, type: 'followers' })}
                             >
                                 {stats ? (
@@ -351,7 +366,7 @@ export const ProfilePage: React.FC = () => {
                                 <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Followers</p>
                             </div>
                             <div 
-                                className="bg-slate-50 border border-slate-100 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
+                                className="bg-slate-50 border border-slate-100 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-center flex-1 sm:flex-initial min-w-[74px] sm:min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
                                 onClick={() => stats && setModalConfig({ isOpen: true, type: 'following' })}
                             >
                                 {stats ? (
@@ -743,8 +758,13 @@ export const ProfilePage: React.FC = () => {
             />
 
             {/* Account Deletion Safety Modal */}
-            {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-[fade-in_0.2s_ease-out]">
+            {isDeleteModalOpen && createPortal(
+                <div 
+                    role="dialog"
+                    aria-modal="true"
+                    data-modal-open="true"
+                    className="fixed inset-0 z-[3500] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-[fade-in_0.2s_ease-out]"
+                >
                     <div className="bg-white rounded-[32px] border border-rose-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden text-left">
                         <div className="flex items-center gap-3.5 mb-5">
                             <div className="w-12 h-12 rounded-2xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0">
@@ -856,7 +876,8 @@ export const ProfilePage: React.FC = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             <style>{`
