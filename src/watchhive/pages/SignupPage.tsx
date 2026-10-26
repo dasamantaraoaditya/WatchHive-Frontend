@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts';
 import { GoogleSignInButton } from '../components/auth';
-import { BeeLoader } from '../components/common';
+import { BeeLoader, SigningInOverlay } from '../components/common';
 import whLogo from '../assets/images/watchhive-logo.png';
 
 export const SignupPage: React.FC = () => {
@@ -97,6 +97,12 @@ export const SignupPage: React.FC = () => {
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-[#FFF9F0] p-4 sm:p-6 lg:p-8 font-sans">
+            {(isLoading || isGoogleLoading) && (
+                <SigningInOverlay 
+                    message="Creating your WatchersHive account..." 
+                    submessage="Setting up your personal hive..." 
+                />
+            )}
             <div className="w-full max-w-[480px] flex flex-col items-center">
                 {/* Logo & Header */}
                 <div className="mb-8 flex flex-col items-center text-center">
