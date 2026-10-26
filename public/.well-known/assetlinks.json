@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.watchhive.watchhive_mobile",
+      "sha256_cert_fingerprints": [
+        "61:C0:52:A9:69:9B:80:42:D5:61:D6:46:95:AC:10:A3:30:A2:69:4B:56:9D:D6:64:14:9A:6F:5E:A0:3D:2E:92",
+        "35:19:BE:AF:DB:99:4E:EA:DA:EE:50:5C:A2:BF:BC:A8:D3:73:CF:89:E2:2A:C8:61:FE:75:CE:D2:E4:89:50:33"
+      ]
+    }
+  }
+]

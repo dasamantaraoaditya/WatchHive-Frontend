@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
 import { formatUserFriendlyError } from '../utils/errorHandler';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal, BeeLoader } from '../components/common';
+import { AvatarLightboxModal, BeeLoader, BadgeModal, StreakBadge } from '../components/common';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -47,6 +47,7 @@ export const UserProfilePage: React.FC = () => {
     }, [tabFromUrl]);
 
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
+    const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
     const [isHoveredRequested, setIsHoveredRequested] = useState(false);
     const [isHoveredFollowing, setIsHoveredFollowing] = useState(false);
 
@@ -282,7 +283,25 @@ export const UserProfilePage: React.FC = () => {
                                 <h1 className="text-3xl font-black text-[#2D2926] tracking-tighter leading-none mb-1">
                                     {profileUser.displayName || profileUser.username}
                                 </h1>
-                                <p className="text-[#ffb700] font-black text-sm uppercase tracking-widest">@{profileUser.username}</p>
+                                <div className="flex items-center gap-2 mt-1.5 flex-wrap justify-center md:justify-start">
+                                    <p className="text-[#ffb700] font-black text-sm uppercase tracking-widest">@{profileUser.username}</p>
+                                    <span className="text-slate-300">•</span>
+                                    <span className="text-[11px] font-black bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
+                                        LVL {profileUser.level || 1} · {profileUser.xp || 0} XP
+                                    </span>
+                                    {profileUser.watchStreak && profileUser.watchStreak > 0 ? (
+                                        <StreakBadge streak={profileUser.watchStreak} onClick={() => setIsBadgeModalOpen(true)} />
+                                    ) : null}
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setIsBadgeModalOpen(true)}
+                                        className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#ffb700]/15 hover:bg-[#ffb700]/25 text-[#92400e] px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                                        title="View Honey Level Badges"
+                                    >
+                                        <span className="material-symbols-outlined text-[13px]">military_tech</span>
+                                        <span>{(profileUser.badges || []).length} Badges</span>
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-slate-500 font-medium max-w-lg leading-relaxed">
                                 {profileUser.bio || "Building a hive of visual experiences. Passionate about storytelling and cinema."}
@@ -621,6 +640,15 @@ export const UserProfilePage: React.FC = () => {
                         src={resolveAvatarUrl(profileUser.profilePictureUrl)}
                         name={profileUser.displayName || profileUser.username}
                         username={profileUser.username}
+                    />
+                )}
+                {profileUser && (
+                    <BadgeModal
+                        isOpen={isBadgeModalOpen}
+                        onClose={() => setIsBadgeModalOpen(false)}
+                        userBadges={profileUser.badges || []}
+                        watchStreak={profileUser.watchStreak || 0}
+                        userName={profileUser.displayName || profileUser.username}
                     />
                 )}
                 {profileUser && isSuggestModalOpen && (

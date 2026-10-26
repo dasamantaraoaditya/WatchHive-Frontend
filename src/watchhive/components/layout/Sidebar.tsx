@@ -116,7 +116,9 @@ export const Sidebar: React.FC = () => {
             <BadgeModal 
                 isOpen={isBadgeModalOpen} 
                 onClose={() => setIsBadgeModalOpen(false)} 
-                userBadges={user?.badges || []} 
+                userBadges={user?.badges || []}
+                watchStreak={user?.watchStreak || 0}
+                userName={user?.displayName || user?.username}
             />
         </aside>
     );

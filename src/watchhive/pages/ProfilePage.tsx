@@ -8,7 +8,7 @@ import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
 import { ExportFormat, ImportResult } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal, ModalBeeOverlay } from '../components/common';
+import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge } from '../components/common';
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser, logout } = useAuth();
@@ -57,6 +57,7 @@ export const ProfilePage: React.FC = () => {
     }, [user?.bio]);
 
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+    const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
 
     if (!user) return <ProfileSkeleton />;
 
@@ -291,7 +292,25 @@ export const ProfilePage: React.FC = () => {
                     <div className="flex-1 text-center md:text-left space-y-4">
                         <div>
                             <h1 className="text-3xl font-black tracking-tight text-slate-900">{user.displayName || user.username}</h1>
-                            <p className="text-[#ffb700] font-bold text-sm uppercase tracking-widest mt-1">@{user.username}</p>
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap justify-center md:justify-start">
+                                <p className="text-[#ffb700] font-bold text-sm uppercase tracking-widest">@{user.username}</p>
+                                <span className="text-slate-300">•</span>
+                                <span className="text-[11px] font-black bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
+                                    LVL {user.level || 1} · {user.xp || 0} XP
+                                </span>
+                                {user.watchStreak && user.watchStreak > 0 ? (
+                                    <StreakBadge streak={user.watchStreak} onClick={() => setIsBadgeModalOpen(true)} />
+                                ) : null}
+                                <button 
+                                    type="button" 
+                                    onClick={() => setIsBadgeModalOpen(true)}
+                                    className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#ffb700]/15 hover:bg-[#ffb700]/25 text-[#92400e] px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                                    title="View Honey Level Badges"
+                                >
+                                    <span className="material-symbols-outlined text-[13px]">military_tech</span>
+                                    <span>{(user.badges || []).length} Badges</span>
+                                </button>
+                            </div>
                         </div>
                         
                         {isEditingBio ? (
@@ -713,6 +732,14 @@ export const ProfilePage: React.FC = () => {
                 src={resolveAvatarUrl(user.profilePictureUrl)}
                 name={user.displayName || user.username}
                 username={user.username}
+            />
+
+            <BadgeModal
+                isOpen={isBadgeModalOpen}
+                onClose={() => setIsBadgeModalOpen(false)}
+                userBadges={user.badges || []}
+                watchStreak={user.watchStreak || 0}
+                userName={user.displayName || user.username}
             />
 
             {/* Account Deletion Safety Modal */}

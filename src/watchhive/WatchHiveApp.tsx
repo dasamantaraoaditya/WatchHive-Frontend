@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, useCustomAlert, TourProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
-import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
+import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, OpenInAppBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
 import { SuggestMovieModal } from './components/suggestions/SuggestMovieModal';
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
@@ -85,6 +85,7 @@ const AppRoutes: React.FC = () => {
 
     return (
         <div className="app-layout">
+            <OpenInAppBanner />
             <OfflineBanner />
             <InstallPromptBanner />
             {isAuthenticated && <Sidebar />}
