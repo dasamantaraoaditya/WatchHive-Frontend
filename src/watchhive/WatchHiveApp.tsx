@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, useCustomAlert, TourProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
-import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, OpenInAppBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
+import { DonationButton, OfflineBanner, Modal, AppLoadingScreen, InstallPromptBanner, OpenInAppBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
 import { SuggestMovieModal } from './components/suggestions/SuggestMovieModal';
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
@@ -16,11 +16,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
-        return (
-            <div className="loading-screen">
-                <BeeLoader size="large" message="Loading your hive..." />
-            </div>
-        );
+        return <AppLoadingScreen message="Loading your hive..." submessage="Connecting to WatchersHive" />;
     }
 
     return isAuthenticated ? <>{children}</> : <Navigate to="/watch-hive/login" replace />;
@@ -31,11 +27,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
-        return (
-            <div className="loading-screen">
-                <BeeLoader size="large" message="Loading your hive..." />
-            </div>
-        );
+        return <AppLoadingScreen message="Loading your hive..." submessage="Connecting to WatchersHive" />;
     }
 
     return !isAuthenticated ? <>{children}</> : <Navigate to="/watch-hive/feed" replace />;
