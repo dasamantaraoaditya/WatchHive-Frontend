@@ -16,18 +16,10 @@ export interface ExpandedCardProps {
     actions?: (ctx: { entry: Entry; onClose: () => void }) => React.ReactNode;
 }
 
+import { getDirectProviderLink } from '../../utils/providerLinks';
+
 const getDirectLink = (providerName: string, fallbackLink: string, title: string) => {
-    const name = providerName.toLowerCase();
-    const query = encodeURIComponent(title);
-    if (name.includes('netflix')) return `https://www.netflix.com/search?q=${query}`;
-    if (name.includes('amazon') || name.includes('prime')) return `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${query}`;
-    if (name.includes('hotstar') || name.includes('disney')) return `https://www.hotstar.com/in/explore?searchQuery=${query}`;
-    if (name.includes('zee5')) return `https://www.zee5.com/search?q=${query}`;
-    if (name.includes('sonyliv')) return `https://www.sonyliv.com/search?query=${query}`;
-    if (name.includes('jiocinema')) return `https://www.jiocinema.com/search?q=${query}`;
-    if (name.includes('apple')) return `https://tv.apple.com/in/search?q=${query}`;
-    if (name.includes('youtube')) return `https://www.youtube.com/results?search_query=${query}+movie`;
-    return fallbackLink;
+    return getDirectProviderLink(providerName, fallbackLink, title);
 };
 
 export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onClose, actions }) => {

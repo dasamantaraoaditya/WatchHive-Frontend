@@ -17,6 +17,8 @@ export interface User {
     xp: number;
     level: number;
     badges: Badge[];
+    watchStreak?: number;
+    lastWatchDate?: string;
     createdAt: string;
     updatedAt: string;
     // Auth capability flags — set by the backend, never expose raw googleId/passwordHash
@@ -39,7 +41,9 @@ export interface Badge {
     name: string;
     description: string;
     icon: string;
-    unlockedAt: string;
+    emoji?: string;
+    category?: string;
+    unlockedAt?: string;
 }
 
 export interface UserStats {
