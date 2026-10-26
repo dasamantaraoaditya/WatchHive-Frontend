@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { pushNotificationService } from '../../services/pushNotification.service';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,6 +8,20 @@ export const PushPromptModal: React.FC = () => {
     const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
+    }, [isOpen]);
 
     useEffect(() => {
         if (!user) return;
@@ -39,9 +54,14 @@ export const PushPromptModal: React.FC = () => {
         setIsOpen(false);
     };
 
-    return (
+    return createPortal(
         <AnimatePresence>
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs font-display">
+            <div 
+                role="dialog"
+                aria-modal="true"
+                data-modal-open="true"
+                className="fixed inset-0 z-[3500] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs font-display"
+            >
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 15 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -93,7 +113,8 @@ export const PushPromptModal: React.FC = () => {
                     </div>
                 </motion.div>
             </div>
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 

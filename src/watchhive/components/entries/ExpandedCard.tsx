@@ -131,7 +131,7 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5, ease: 'easeOut' }}
-                className="px-6 md:px-10 pb-24 pt-4 flex flex-col gap-10 w-full relative z-10"
+                className="px-6 md:px-10 pb-40 md:pb-24 pt-4 flex flex-col gap-10 w-full relative z-10"
             >
                 {/* Synopsis */}
                 <div className="flex flex-col gap-4">

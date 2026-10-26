@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import userService from '../../services/userService';
@@ -108,6 +109,19 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
         const baseUrl = backendUrl.replace(/\/api\/v1\/?$/, '');
         return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     };
+
+    // Body scroll lock
+    useEffect(() => {
+        if (isOpen) {
+            const originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+            return () => {
+                document.body.style.overflow = originalOverflow;
+                document.body.removeAttribute('data-modal-open');
+            };
+        }
+    }, [isOpen]);
 
     // Load followers on mount
     useEffect(() => {
@@ -222,8 +236,12 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
         );
     });
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display">
+    return createPortal(
+        <div 
+            className="fixed inset-0 z-[3500] flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display"
+            role="dialog"
+            aria-modal="true"
+        >
             <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#ffb700]/20 max-h-[90vh] relative">
                 {isSending && <ModalBeeOverlay message="Delivering your recommendation to friends..." />}
                 {/* Header */}
@@ -490,7 +508,8 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

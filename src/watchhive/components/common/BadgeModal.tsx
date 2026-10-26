@@ -28,6 +28,20 @@ export const BadgeModal: React.FC<BadgeModalProps> = ({
     watchStreak = 0,
     userName
 }) => {
+    React.useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     // Set of earned IDs (also treat 'first_log' as alias of 'pioneer')
@@ -54,7 +68,13 @@ export const BadgeModal: React.FC<BadgeModalProps> = ({
     const earnedCount = allDisplayBadges.filter(b => earnedBadgeIds.has(b.id)).length;
 
     const modalContent = (
-        <div className="wh-badge-modal">
+        <div 
+            role="dialog"
+            aria-modal="true"
+            data-modal-open="true"
+            className="wh-badge-modal"
+            onClick={onClose}
+        >
             <div className="wh-badge-modal__container" onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="wh-badge-modal__header">

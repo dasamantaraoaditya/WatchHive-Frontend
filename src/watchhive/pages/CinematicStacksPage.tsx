@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { listsApi, List, ListItem } from '../services/lists.service';
@@ -54,6 +55,19 @@ export const CinematicStacksPage: React.FC = () => {
     const [searchResults, setSearchResults] = useState<TmdbResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Body scroll lock during search overlay
+    useEffect(() => {
+        if (isSearchOpen) {
+            const originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+            return () => {
+                document.body.style.overflow = originalOverflow;
+                document.body.removeAttribute('data-modal-open');
+            };
+        }
+    }, [isSearchOpen]);
 
     const loadLists = useCallback(async () => {
         try {
@@ -265,16 +279,19 @@ export const CinematicStacksPage: React.FC = () => {
 
     return (
         <PageLayout maxWidth="5xl">
-            <div className="flex flex-col gap-8 pb-24 animate-slide-up">
+            <div className="flex flex-col gap-8 pb-36 md:pb-24 animate-slide-up">
                 {/* Immersive Search Overlay */}
-                <AnimatePresence>
-                    {isSearchOpen && (
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[1000] bg-white/95 backdrop-blur-2xl p-6 pt-12 flex flex-col gap-8"
-                        >
+                {createPortal(
+                    <AnimatePresence>
+                        {isSearchOpen && (
+                            <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 z-[3500] bg-white/95 backdrop-blur-2xl p-4 sm:p-6 pt-8 sm:pt-12 flex flex-col gap-6 sm:gap-8"
+                                role="dialog"
+                                aria-modal="true"
+                            >
                             <div className="flex items-center gap-4 max-w-2xl mx-auto w-full">
                                 <button 
                                     onClick={() => setIsSearchOpen(false)}
@@ -355,7 +372,9 @@ export const CinematicStacksPage: React.FC = () => {
                             </div>
                         </motion.div>
                     )}
-                </AnimatePresence>
+                </AnimatePresence>,
+                document.body
+            )}
 
                 {/* Stacks Selector */}
                 {lists.length > 0 && !error && (

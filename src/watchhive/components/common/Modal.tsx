@@ -29,16 +29,21 @@ export const Modal: React.FC<ModalProps> = ({
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
         } else {
             document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
         }
-        return () => { document.body.style.overflow = 'unset'; };
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
     }, [isOpen]);
 
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+                <div className="fixed inset-0 z-[3500] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}

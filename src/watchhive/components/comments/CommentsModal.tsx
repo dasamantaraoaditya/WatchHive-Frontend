@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Avatar, BeeLoader } from '../common';
 import { interactionService, Comment } from '../../services/interaction.service';
@@ -58,6 +59,19 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
         }
     }, [isOpen, entryId]);
 
+    // Body scroll lock
+    useEffect(() => {
+        if (isOpen) {
+            const originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+            return () => {
+                document.body.style.overflow = originalOverflow;
+                document.body.removeAttribute('data-modal-open');
+            };
+        }
+    }, [isOpen]);
+
     // Handle Escape key
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -91,7 +105,13 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
         setReplyingToUser(name);
         setTimeout(() => {
             textareaRef.current?.focus();
-        }, 50);
+            if (commentsContainerRef.current) {
+                commentsContainerRef.current.scrollTo({
+                    top: commentsContainerRef.current.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }, 60);
     };
 
     const cancelReply = () => {
@@ -184,13 +204,13 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 
     const totalCount = comments.reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0);
 
-    return (
+    return createPortal(
         <div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-0 sm:p-4"
+            className="fixed inset-0 z-[3500] flex items-end sm:items-center justify-center bg-[#2D2926]/60 backdrop-blur-sm p-0 sm:p-4"
             onClick={onClose}
         >
             <div
-                className="w-full max-w-lg bg-[#FFF9F0] rounded-t-[28px] sm:rounded-3xl shadow-2xl flex flex-col font-sans text-[#2D2926] max-h-[88vh] sm:max-h-[85vh] h-[82vh] sm:h-auto overflow-hidden border-t sm:border border-[#ffb700]/25"
+                className="w-full max-w-lg bg-[#FFF9F0] rounded-t-[28px] sm:rounded-3xl shadow-2xl flex flex-col font-sans text-[#2D2926] max-h-[92dvh] sm:max-h-[85vh] h-[88dvh] sm:h-auto overflow-hidden border-t sm:border border-[#ffb700]/25 relative animate-[slide-up_0.25s_cubic-bezier(0.16,1,0.3,1)]"
                 onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
@@ -199,7 +219,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                 <div className="w-10 h-1 rounded-full bg-[#2D2926]/20 mx-auto mt-2.5 mb-1 sm:hidden shrink-0" />
 
                 {/* Header */}
-                <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-[#ffb700]/15 flex items-center justify-between bg-white/60 backdrop-blur-md">
+                <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-[#ffb700]/15 flex items-center justify-between bg-white/70 backdrop-blur-md shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#ffb700]/15 text-[#ffb700] flex items-center justify-center shrink-0">
                             <span className="material-symbols-outlined text-[20px]">chat_bubble</span>
@@ -227,7 +247,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                 </div>
 
                 {/* Body / Comments List */}
-                <div ref={commentsContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-5 sm:gap-6">
+                <div ref={commentsContainerRef} className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 flex flex-col gap-5 sm:gap-6 min-h-0">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center py-10">
                             <BeeLoader size="small" message="Loading discussion..." />
@@ -421,13 +441,13 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                 </div>
 
                 {/* Footer / Input Area */}
-                <div className="border-t border-[#ffb700]/15 bg-white shadow-[0_-4px_20px_rgba(255,183,0,0.03)] rounded-b-none sm:rounded-b-3xl pb-[env(safe-area-inset-bottom,0px)]">
+                <div className="border-t border-[#ffb700]/15 bg-white shadow-[0_-4px_20px_rgba(255,183,0,0.06)] rounded-b-none sm:rounded-b-3xl pb-[max(12px,env(safe-area-inset-bottom,12px))] shrink-0 z-10">
                     {/* Replying banner */}
                     {replyingTo && (
-                        <div className="px-5 py-2.5 bg-[#ffb700]/10 border-b border-[#ffb700]/15 flex items-center justify-between text-xs font-semibold text-[#2D2926]">
-                            <div className="flex items-center gap-1.5 truncate">
-                                <span className="material-symbols-outlined text-[16px] text-[#ffb700]">reply</span>
-                                <span className="text-[#2D2926]/60 font-medium">Replying to</span>
+                        <div className="px-4 sm:px-5 py-2 sm:py-2.5 bg-[#ffb700]/15 border-b border-[#ffb700]/20 flex items-center justify-between text-xs font-semibold text-[#2D2926] shrink-0">
+                            <div className="flex items-center gap-1.5 truncate pr-2">
+                                <span className="material-symbols-outlined text-[16px] text-[#ffb700] shrink-0">reply</span>
+                                <span className="text-[#2D2926]/70 font-medium">Replying to</span>
                                 <span className="font-bold text-[#2D2926] truncate">
                                     @{replyingToUser || replyingTo.user?.displayName || replyingTo.user?.username || 'user'}
                                 </span>
@@ -444,8 +464,8 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                         </div>
                     )}
 
-                    <form className="p-4 sm:p-5 flex items-end gap-3" onSubmit={handleSubmit}>
-                        <div className="flex-1 relative">
+                    <form className="p-3 sm:p-4 flex items-end gap-2.5 sm:gap-3" onSubmit={handleSubmit}>
+                        <div className="flex-1 relative min-w-0">
                             <textarea
                                 ref={textareaRef}
                                 value={newComment}
@@ -463,20 +483,20 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                                 }
                                 disabled={isSubmitting}
                                 rows={Math.min(3, Math.max(1, newComment.split('\n').length))}
-                                className="w-full bg-[#FFF9F0] border border-[#ffb700]/20 rounded-2xl px-4 py-3 text-[14px] font-medium text-[#2D2926] placeholder:text-[#2D2926]/35 focus:outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all resize-none block"
-                                style={{ minHeight: '46px', maxHeight: '120px' }}
+                                className="w-full bg-[#FFF9F0] border border-[#ffb700]/25 rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 text-[14px] font-medium text-[#2D2926] placeholder:text-[#2D2926]/40 focus:outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all resize-none block leading-relaxed"
+                                style={{ minHeight: '44px', maxHeight: '100px' }}
                             />
                         </div>
                         <button
                             type="submit"
                             disabled={isSubmitting || !newComment.trim()}
-                            className="shrink-0 h-11 px-5 bg-[#ffb700] hover:brightness-105 disabled:opacity-40 disabled:hover:brightness-100 text-[#2D2926] font-bold rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+                            className="shrink-0 h-11 px-4 sm:px-5 bg-[#ffb700] hover:brightness-105 active:scale-95 disabled:opacity-40 disabled:hover:brightness-100 disabled:active:scale-100 text-[#2D2926] font-black rounded-2xl transition-all shadow-sm flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer disabled:cursor-not-allowed"
                         >
                             {isSubmitting ? (
                                 <BeeLoader size="mini" message="" />
                             ) : (
                                 <>
-                                    <span>{replyingTo ? 'Reply' : 'Post'}</span>
+                                    <span className="text-xs sm:text-sm font-black uppercase tracking-wider">{replyingTo ? 'Reply' : 'Post'}</span>
                                     <span className="material-symbols-outlined text-[18px]">
                                         {replyingTo ? 'reply' : 'arrow_upward'}
                                     </span>
@@ -486,7 +506,8 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                     </form>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 
