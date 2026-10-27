@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { suggestionsApi, GroupedSuggestion } from '../../services/suggestions.service';
+import { suggestionsApi, GroupedSuggestion, SmartSuggestItem } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import { SuggestionCard } from './SuggestionCard';
+import { SmartSuggestCard } from './SmartSuggestCard';
+import { SmartSuggestDeckModal } from './SmartSuggestDeckModal';
 import { SkeletonCard, SkeletonGrid, ErrorState, FilterBar, Modal } from '../common';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import { SuggestMovieModal } from './SuggestMovieModal';
@@ -22,7 +24,12 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
     searchQuery = '',
     onSearchChange
 }) => {
-    const [subTab, setSubTab] = useState<'received' | 'sent'>('received');
+    const [subTab, setSubTab] = useState<'smart' | 'received' | 'sent'>('smart');
+    const [smartMode, setSmartMode] = useState<'social' | 'critic' | 'explore'>('social');
+    const [smartItems, setSmartItems] = useState<SmartSuggestItem[]>([]);
+    const [isSmartLoading, setIsSmartLoading] = useState(true);
+    const [isDeckOpen, setIsDeckOpen] = useState(false);
+
     const [receivedGroups, setReceivedGroups] = useState<DetailedGroupedSuggestion[]>([]);
     const [sentGroups, setSentGroups] = useState<DetailedGroupedSuggestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -100,7 +107,34 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
         fetchSuggestions();
     }, [fetchSuggestions]);
 
+    const fetchSmartSuggestions = useCallback(async (modeToFetch: 'social' | 'critic' | 'explore') => {
+        setIsSmartLoading(true);
+        try {
+            const res = await suggestionsApi.getSmartSuggestions(modeToFetch, 16);
+            setSmartItems(res.items || []);
+        } catch (e) {
+            console.error('Failed to fetch smart suggestions', e);
+        } finally {
+            setIsSmartLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (subTab === 'smart') {
+            fetchSmartSuggestions(smartMode);
+        }
+    }, [subTab, smartMode, fetchSmartSuggestions]);
+
     const activeGroups = subTab === 'received' ? receivedGroups : sentGroups;
+
+    const filteredSmartItems = smartItems.filter(item => {
+        if (!searchQuery) return true;
+        return (
+            item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.overview || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.genreNames.some(g => g.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+    });
 
     const filteredGroups = activeGroups
         .filter(group => {
@@ -150,12 +184,26 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                 onClose={() => setIsSuggestModalOpen(false)} 
                 onSuccess={fetchSuggestions}
             />
-            {/* Sub-tabs for Suggestions (Received) vs Suggested (Sent) & Suggest to Friends Action */}
+            {/* Sub-tabs for SmartSuggest vs Suggestions (Received) vs Suggested (Sent) & Suggest to Friends Action */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2 p-1.5 bg-black/5 rounded-2xl w-fit self-start">
+                <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 bg-black/5 rounded-2xl w-fit self-start overflow-x-auto max-w-full">
+                    <button
+                        onClick={() => setSubTab('smart')}
+                        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
+                            subTab === 'smart'
+                                ? 'bg-white text-[#2D2926] shadow-xs'
+                                : 'text-slate-500 hover:text-[#2D2926]'
+                        }`}
+                    >
+                        <span className="material-symbols-outlined text-base text-[#ffb700]">psychology</span>
+                        <span>SmartSuggest</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-black bg-[#ffb700] text-[#2D2926]">
+                            AI
+                        </span>
+                    </button>
                     <button
                         onClick={() => setSubTab('received')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
                             subTab === 'received'
                                 ? 'bg-white text-[#2D2926] shadow-xs'
                                 : 'text-slate-500 hover:text-[#2D2926]'
@@ -171,7 +219,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                     </button>
                     <button
                         onClick={() => setSubTab('sent')}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                        className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
                             subTab === 'sent'
                                 ? 'bg-white text-[#2D2926] shadow-xs'
                                 : 'text-slate-500 hover:text-[#2D2926]'
@@ -196,95 +244,196 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                 </button>
             </div>
 
-            <FilterBar 
-                search={searchQuery}
-                onSearchChange={onSearchChange}
-                placeholder={subTab === 'received' ? "Search suggestions from friends..." : "Search items you suggested..."}
-                sortBy={sortBy}
-                onSortChange={setSortBy}
-                sortOptions={[
-                    { value: 'recent-desc', label: 'Recently Suggested' },
-                    { value: 'recent-asc', label: 'Oldest Suggested' },
-                    { value: 'title-asc', label: 'Title: A-Z' },
-                    { value: 'title-desc', label: 'Title: Z-A' }
-                ]}
-                count={filteredGroups.length}
-                countLabel={searchQuery ? (subTab === 'received' ? "Matching Suggestions" : "Matching Items") : (subTab === 'received' ? "Titles Suggested" : "Items Suggested")}
-                isLoading={isLoading}
-            />
-
-            {isLoading ? (
-                <SkeletonGrid count={4} />
-            ) : error && filteredGroups.length === 0 ? (
-                <div className="py-8 flex justify-center w-full">
-                    <ErrorState message={error} onRetry={fetchSuggestions} />
-                </div>
-            ) : filteredGroups.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
-                    <div className="w-20 h-20 rounded-full bg-[#FFF9F0] flex items-center justify-center mb-5 border border-[#ffb700]/20 relative">
-                        <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
-                        <span className="material-symbols-outlined text-4xl text-[#ffb700] relative z-10">
-                            {searchQuery ? "travel_explore" : (subTab === 'received' ? "auto_awesome" : "send")}
-                        </span>
-                    </div>
-                    <h3 className="text-2xl font-black text-[#2D2926] mb-2">
-                        {searchQuery 
-                            ? (subTab === 'received' ? "No matching suggestions" : "No matching suggested items")
-                            : (subTab === 'received' ? "No suggestions yet" : "No suggested items yet")
-                        }
-                    </h3>
-                    <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
-                        {searchQuery
-                            ? `We couldn't find any ${subTab === 'received' ? 'suggestions' : 'suggested items'} matching "${searchQuery}"`
-                            : (subTab === 'received'
-                                ? "When your friends suggest movies or shows to you, they will appear here!"
-                                : "You haven't suggested any movies or shows to friends yet. Use 'Suggest to Friends' to share your favorite titles!")}
-                    </p>
-                    <button
-                        onClick={() => setIsSuggestModalOpen(true)}
-                        className="bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-[#ffb700]/20 flex items-center gap-2 cursor-pointer"
-                    >
-                        <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                        <span>Suggest a Movie to Friends</span>
-                    </button>
-                </div>
-            ) : (
+            {subTab === 'smart' ? (
                 <>
-                    <div className="watchlist-grid outline-none">
-                        {filteredGroups.slice(0, visibleCount).map((group) => (
-                            <SuggestionCard 
-                                key={`${subTab}-${group.mediaType}-${group.tmdbId}`} 
-                                group={group} 
-                                isSent={subTab === 'sent'}
-                                onStatusChange={fetchSuggestions}
-                                onLogEntry={(prefill) => setEntryFormPrefill(prefill)}
-                                preloadedDetails={{
-                                    title: group.title,
-                                    overview: group.overview,
-                                    poster_path: group.posterPath
-                                }}
-                            />
-                        ))}
+                    {/* SmartSuggest Mode Selector & Deck Launcher Bar */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-black/5 shadow-xs">
+                        <div className="flex items-center gap-1.5 p-1 bg-black/5 rounded-xl self-start overflow-x-auto max-w-full">
+                            <button
+                                onClick={() => setSmartMode('social')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                                    smartMode === 'social' ? 'bg-[#ffb700] text-[#2D2926] shadow-xs' : 'text-slate-500 hover:text-[#2D2926]'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-sm">groups</span>
+                                <span>Hive Mind</span>
+                            </button>
+                            <button
+                                onClick={() => setSmartMode('critic')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                                    smartMode === 'critic' ? 'bg-[#ffb700] text-[#2D2926] shadow-xs' : 'text-slate-500 hover:text-[#2D2926]'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-sm">verified</span>
+                                <span>Certified Gold</span>
+                            </button>
+                            <button
+                                onClick={() => setSmartMode('explore')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                                    smartMode === 'explore' ? 'bg-[#ffb700] text-[#2D2926] shadow-xs' : 'text-slate-500 hover:text-[#2D2926]'
+                                }`}
+                            >
+                                <span className="material-symbols-outlined text-sm">cached</span>
+                                <span>Palate Cleanser</span>
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => setIsDeckOpen(true)}
+                            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-[#ffb700] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer self-end sm:self-center"
+                        >
+                            <span className="material-symbols-outlined text-base">style</span>
+                            <span>Launch Decision Deck</span>
+                        </button>
                     </div>
 
-                    <div ref={observerTarget} className="h-4 w-full mt-4" />
+                    {/* Filter / Search Bar */}
+                    <FilterBar 
+                        search={searchQuery}
+                        onSearchChange={onSearchChange}
+                        placeholder="Search smart recommendations by title or genre..."
+                        sortBy={sortBy}
+                        onSortChange={setSortBy}
+                        sortOptions={[
+                            { value: 'recent-desc', label: 'Top Match Score' },
+                            { value: 'title-asc', label: 'Title: A-Z' },
+                            { value: 'title-desc', label: 'Title: Z-A' }
+                        ]}
+                        count={filteredSmartItems.length}
+                        countLabel="Smart Recommendations"
+                        isLoading={isSmartLoading}
+                    />
 
-                    {hasMoreSuggestions && (
-                        <div className="watchlist-grid mt-4">
-                            {[...Array(4)].map((_, i) => <SkeletonCard key={`sug-more-${i}`} />)}
+                    {/* Smart Suggest Grid */}
+                    {isSmartLoading ? (
+                        <SkeletonGrid count={8} />
+                    ) : filteredSmartItems.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                            <div className="w-20 h-20 rounded-full bg-[#FFF9F0] flex items-center justify-center mb-5 border border-[#ffb700]/20 relative">
+                                <span className="material-symbols-outlined text-4xl text-[#ffb700]">psychology</span>
+                            </div>
+                            <h3 className="text-2xl font-black text-[#2D2926] mb-2">Building Your Taste Graph</h3>
+                            <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
+                                SmartSuggest learns from the movies you log and your hive interactions. Log a few more watches or connect with friends to see customized recommendations!
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="watchlist-grid outline-none">
+                            {filteredSmartItems.map((item) => (
+                                <SmartSuggestCard
+                                    key={`smart-${item.mediaType}-${item.tmdbId}`}
+                                    item={item}
+                                    onLogWatch={(it) => setEntryFormPrefill({
+                                        tmdbId: it.tmdbId,
+                                        title: it.title,
+                                        type: it.mediaType === 'tv' ? 'TV_SHOW' : 'MOVIE',
+                                        posterPath: it.posterPath
+                                    })}
+                                />
+                            ))}
                         </div>
                     )}
-                    
-                    <div className="mt-8 flex items-center gap-3 p-6 bg-white border border-dashed border-[#ffb700]/30 rounded-3xl group hover:border-[#ffb700]/50 transition-colors">
-                        <span className="material-symbols-outlined text-[#ffb700] animate-pulse">info</span>
-                        <p className="text-sm text-[#2D2926]/60 font-medium italic">
-                            {subTab === 'received'
-                                ? "Suggestions from friends are automatically grouped by title for a cleaner view."
-                                : "Items you suggested to friends are organized by title with recipient notes."}
-                        </p>
-                    </div>
+                </>
+            ) : (
+                <>
+                    <FilterBar 
+                        search={searchQuery}
+                        onSearchChange={onSearchChange}
+                        placeholder={subTab === 'received' ? "Search suggestions from friends..." : "Search items you suggested..."}
+                        sortBy={sortBy}
+                        onSortChange={setSortBy}
+                        sortOptions={[
+                            { value: 'recent-desc', label: 'Recently Suggested' },
+                            { value: 'recent-asc', label: 'Oldest Suggested' },
+                            { value: 'title-asc', label: 'Title: A-Z' },
+                            { value: 'title-desc', label: 'Title: Z-A' }
+                        ]}
+                        count={filteredGroups.length}
+                        countLabel={searchQuery ? (subTab === 'received' ? "Matching Suggestions" : "Matching Items") : (subTab === 'received' ? "Titles Suggested" : "Items Suggested")}
+                        isLoading={isLoading}
+                    />
+
+                    {isLoading ? (
+                        <SkeletonGrid count={4} />
+                    ) : error && filteredGroups.length === 0 ? (
+                        <div className="py-8 flex justify-center w-full">
+                            <ErrorState message={error} onRetry={fetchSuggestions} />
+                        </div>
+                    ) : filteredGroups.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
+                            <div className="w-20 h-20 rounded-full bg-[#FFF9F0] flex items-center justify-center mb-5 border border-[#ffb700]/20 relative">
+                                <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
+                                <span className="material-symbols-outlined text-4xl text-[#ffb700] relative z-10">
+                                    {searchQuery ? "travel_explore" : (subTab === 'received' ? "auto_awesome" : "send")}
+                                </span>
+                            </div>
+                            <h3 className="text-2xl font-black text-[#2D2926] mb-2">
+                                {searchQuery 
+                                    ? (subTab === 'received' ? "No matching suggestions" : "No matching suggested items")
+                                    : (subTab === 'received' ? "No suggestions yet" : "No suggested items yet")
+                                }
+                            </h3>
+                            <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
+                                {searchQuery
+                                    ? `We couldn't find any ${subTab === 'received' ? 'suggestions' : 'suggested items'} matching "${searchQuery}"`
+                                    : (subTab === 'received'
+                                        ? "When your friends suggest movies or shows to you, they will appear here!"
+                                        : "You haven't suggested any movies or shows to friends yet. Use 'Suggest to Friends' to share your favorite titles!")}
+                            </p>
+                            <button
+                                onClick={() => setIsSuggestModalOpen(true)}
+                                className="bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-[#ffb700]/20 flex items-center gap-2 cursor-pointer"
+                            >
+                                <span className="material-symbols-outlined text-lg">auto_awesome</span>
+                                <span>Suggest a Movie to Friends</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="watchlist-grid outline-none">
+                                {filteredGroups.slice(0, visibleCount).map((group) => (
+                                    <SuggestionCard 
+                                        key={`${subTab}-${group.mediaType}-${group.tmdbId}`} 
+                                        group={group} 
+                                        isSent={subTab === 'sent'}
+                                        onStatusChange={fetchSuggestions}
+                                        onLogEntry={(prefill) => setEntryFormPrefill(prefill)}
+                                        preloadedDetails={{
+                                            title: group.title,
+                                            overview: group.overview,
+                                            poster_path: group.posterPath
+                                        }}
+                                    />
+                                ))}
+                            </div>
+
+                            <div ref={observerTarget} className="h-4 w-full mt-4" />
+
+                            {hasMoreSuggestions && (
+                                <div className="watchlist-grid mt-4">
+                                    {[...Array(4)].map((_, i) => <SkeletonCard key={`sug-more-${i}`} />)}
+                                </div>
+                            )}
+                            
+                            <div className="mt-8 flex items-center gap-3 p-6 bg-white border border-dashed border-[#ffb700]/30 rounded-3xl group hover:border-[#ffb700]/50 transition-colors">
+                                <span className="material-symbols-outlined text-[#ffb700] animate-pulse">info</span>
+                                <p className="text-sm text-[#2D2926]/60 font-medium italic">
+                                    {subTab === 'received'
+                                        ? "Suggestions from friends are automatically grouped by title for a cleaner view."
+                                        : "Items you suggested to friends are organized by title with recipient notes."}
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </>
             )}
+
+            {/* SmartSuggest Decision Deck Modal */}
+            <SmartSuggestDeckModal
+                isOpen={isDeckOpen}
+                onClose={() => setIsDeckOpen(false)}
+                initialMode={smartMode}
+            />
 
             {entryFormPrefill && (
                 <Modal
