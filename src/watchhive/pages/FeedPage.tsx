@@ -11,6 +11,7 @@ import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { useUI } from '../contexts';
 import { PageLayout } from '../components/layout';
+import { SmartSuggestHeroCard } from '../components/suggestions';
 
 export const FeedPage: React.FC = () => {
     const isOnline = useOnlineStatus();
@@ -160,6 +161,9 @@ export const FeedPage: React.FC = () => {
                 {/* Main Feed Content Area - Centered in the remaining space */}
                 <div className="flex-1 flex justify-center min-w-0">
                     <div className="w-full max-w-[680px] flex flex-col gap-6">
+                        {/* SmartSuggest Hero Spark Card */}
+                        <SmartSuggestHeroCard />
+
                         {/* Error State */}
                         {error && (
                             <ErrorState
