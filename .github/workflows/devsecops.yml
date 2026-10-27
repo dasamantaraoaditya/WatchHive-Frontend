@@ -1,0 +1,123 @@
+name: DevSecOps - Security & Static Code Analysis (Frontend & PWA)
+
+on:
+  push:
+    branches: [ main, staging ]
+  pull_request:
+    branches: [ main, staging ]
+  schedule:
+    # Run weekly automated security sweep every Monday at 04:00 UTC
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # =========================================================================
+  # 1. SECRET SCANNING (Gitleaks)
+  # Prevents hardcoding API keys, private tokens, or backend credentials in Web code
+  # =========================================================================
+  secret-scan:
+    name: Secret Shield (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks Secret Scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+
+  # =========================================================================
+  # 2. STATIC APPLICATION SECURITY TESTING (Semgrep SAST)
+  # Scans for React DOM XSS, prototype pollution, unsafe link targets, unescaped HTML
+  # =========================================================================
+  sast-analysis:
+    name: SAST Code Analysis (Semgrep React/Web)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep SAST
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/owasp-top-10
+            p/react
+            p/typescript
+        env:
+          SEMGREP_RULES: >-
+            p/owasp-top-10
+            p/react
+            p/typescript
+
+  # =========================================================================
+  # 3. SOFTWARE COMPOSITION ANALYSIS (SCA) & DEPENDENCY AUDIT
+  # =========================================================================
+  sca-dependency-audit:
+    name: Dependency Audit & CVE Shield
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies (Safe Mode)
+        run: npm ci --ignore-scripts
+
+      - name: Production Dependency Audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Google OSV Vulnerability Scanner
+        uses: google/osv-scanner-action@v1.9.0
+        with:
+          scan-args: |-
+            --lockfile=package-lock.json
+
+  # =========================================================================
+  # 4. BUILD INTEGRITY & ASSET LEAK DEFENSE
+  # Guarantees that built client bundles do not leak private environment strings
+  # =========================================================================
+  build-and-bundle-audit:
+    name: Build Integrity & Bundle Leak Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: TypeScript Static Validation
+        run: npx tsc --noEmit
+
+      - name: Production Web Build
+        run: npm run build
+
+      - name: Client Bundle Leak Verification
+        # Verifies that no sensitive backend credentials or env variables were leaked into dist/
+        run: |
+          echo "Auditing client JS/CSS bundles for accidental credential leakage..."
+          if grep -rnEi "(DATABASE_URL|POSTGRES_PASSWORD|AWS_SECRET_ACCESS_KEY|JWT_SECRET)" dist/assets/; then
+            echo "❌ CRITICAL SECURITY ERROR: Private credential variable detected in client bundle!"
+            exit 1
+          fi
+          echo "✅ Client bundle audit passed. No private environment variables found in production build."
