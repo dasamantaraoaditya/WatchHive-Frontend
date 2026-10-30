@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useUI } from '../contexts';
 import { userService, dataService } from '../services';
-import { FollowListModal, SetPasswordSection } from '../components/profile';
+import { FollowListModal, SetPasswordSection, AddFriendsModal } from '../components/profile';
 import { User, UpdateUserData } from '../types';
 import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
@@ -14,6 +14,7 @@ import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge } from '.
 export const ProfilePage: React.FC = () => {
     const { user, updateUser, logout } = useAuth();
     const { setPageTitle, setPageIcon } = useUI();
+    const navigate = useNavigate();
 
     useEffect(() => {
         setPageTitle('My Profile');
@@ -29,6 +30,7 @@ export const ProfilePage: React.FC = () => {
     const [stats, setStats] = useState<{ followersCount: number; followingCount: number } | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
     const [privacyUpdating, setPrivacyUpdating] = useState(false);
+    const [isAddFriendsModalOpen, setIsAddFriendsModalOpen] = useState(false);
     
     // Danger Zone / Account deletion state
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -119,32 +121,6 @@ export const ProfilePage: React.FC = () => {
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
-        }
-    };
-
-    const handleInvite = async () => {
-        const inviteUrl = `${window.location.origin}/signup?ref=${user.username}`;
-        const inviteText = `Join me on WatchersHive! Check out my cinematic journey and let's build our movie hive together. 🐝🎥`;
-
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'WatchersHive Invite',
-                    text: inviteText,
-                    url: inviteUrl,
-                });
-            } catch (err) {
-                console.log('Share failed or canceled', err);
-            }
-        } else {
-            try {
-                await navigator.clipboard.writeText(`${inviteText} ${inviteUrl}`);
-                setSuccessMsg('Invite link copied to clipboard!');
-                setTimeout(() => setSuccessMsg(null), 3000);
-            } catch (err) {
-                console.error('Failed to copy link', err);
-                setError('Failed to copy link');
-            }
         }
     };
 
@@ -380,15 +356,32 @@ export const ProfilePage: React.FC = () => {
                     </div>
                     
                     {/* Buttons Container */}
-                    <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto h-full justify-center md:pt-4">
-                        <button onClick={() => setIsEditingBio(true)} className="flex-1 md:w-40 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-bold py-3 rounded-xl transition-all text-[13px] shadow-md shadow-[#ffb700]/20 flex items-center justify-center gap-2">
+                    <div className="flex flex-row md:flex-col gap-2.5 w-full md:w-auto h-full justify-center md:pt-4">
+                        <button 
+                            onClick={() => setIsEditingBio(true)} 
+                            className="flex-1 md:w-44 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-bold py-3 rounded-xl transition-all text-[13px] shadow-md shadow-[#ffb700]/20 flex items-center justify-center gap-2 cursor-pointer"
+                        >
                             <span className="material-symbols-outlined text-[18px]">edit</span>
-                            Edit Profile
+                            <span>Edit Profile</span>
                         </button>
-                        <button onClick={handleInvite} className="flex-1 md:w-40 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all text-[13px] flex items-center justify-center gap-2 shadow-sm">
-                            <span className="material-symbols-outlined text-[18px]">person_add</span>
-                            Invite Friends
-                        </button>
+                        <div className="flex items-center gap-2 flex-1 md:w-44">
+                            <button 
+                                onClick={() => navigate(`/watch-hive/profile/${user.id}?preview=true`)} 
+                                className="flex-1 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all text-[13px] flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                                title="View your public profile as others see it"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">visibility</span>
+                                <span>Public View</span>
+                            </button>
+                            <button 
+                                onClick={() => setIsAddFriendsModalOpen(true)} 
+                                className="w-12 h-12 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 border border-amber-500/30 font-bold rounded-xl transition-all flex items-center justify-center shadow-sm shrink-0 cursor-pointer"
+                                title="Add Friends to your Hive"
+                                aria-label="Add Friends"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">person_add</span>
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -739,6 +732,12 @@ export const ProfilePage: React.FC = () => {
                 onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
                 userId={user.id}
                 type={modalConfig.type}
+            />
+
+            <AddFriendsModal
+                isOpen={isAddFriendsModalOpen}
+                onClose={() => setIsAddFriendsModalOpen(false)}
+                currentUser={user}
             />
 
             <AvatarLightboxModal

@@ -52,13 +52,23 @@ export const SearchUsersPage: React.FC = () => {
         setPageIcon('explore');
     }, [setPageTitle, setPageIcon]);
 
-    const initialMode = searchParams.get('mode') === 'movies' || searchParams.get('tab') === 'media' ? 'media' : 'media';
+    const paramTab = searchParams.get('tab') || searchParams.get('mode');
+    const initialMode: ActiveSearchTab = (paramTab === 'people' || paramTab === 'users' || paramTab === 'friends') ? 'people' : 'media';
     const initialQuery = searchParams.get('q') || '';
     const initialDeep = searchParams.get('deep') === 'true';
 
     // State
     const [query, setQuery] = useState(initialQuery);
     const [activeTab, setActiveTab] = useState<ActiveSearchTab>(initialMode);
+
+    useEffect(() => {
+        const currentParamTab = searchParams.get('tab') || searchParams.get('mode');
+        if (currentParamTab === 'people' || currentParamTab === 'users' || currentParamTab === 'friends') {
+            setActiveTab('people');
+        } else if (currentParamTab === 'media' || currentParamTab === 'movies') {
+            setActiveTab('media');
+        }
+    }, [searchParams]);
 
     // Discovery State
     const [selectedFilter, setSelectedFilter] = useState<TrendingFilterOption>(TRENDING_FILTERS[0]);

@@ -118,6 +118,17 @@ export const LoginPage: React.FC = () => {
                     </p>
                 </div>
 
+                {/* Top Redirection to Sign Up */}
+                <div className="mb-6 flex items-center justify-center gap-1.5 text-[14px] font-medium text-[#2D2926]/60 bg-white/80 backdrop-blur-sm py-2 px-5 rounded-full border border-[#ffb700]/15 shadow-sm">
+                    <span>Don't have an account?</span>
+                    <Link
+                        to="/watch-hive/signup"
+                        className="text-[#d99b00] hover:text-[#b07d00] font-bold transition-colors inline-flex items-center gap-0.5 hover:underline"
+                    >
+                        Sign up <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </Link>
+                </div>
+
                 {/* Login Card */}
                 <div className="w-full bg-white rounded-[32px] shadow-sm border border-[#ffb700]/10 p-6 sm:p-8 relative overflow-hidden">
                     {/* Top Accent Gradient */}
@@ -247,12 +258,6 @@ export const LoginPage: React.FC = () => {
 
                 {/* Footer Links */}
                 <div className="mt-8 text-center flex flex-col gap-4">
-                    <p className="text-[14px] font-semibold text-[#2D2926]/50">
-                        Don't have an account?{' '}
-                        <Link to="/watch-hive/signup" className="text-[#ffb700] hover:underline hover:text-[#ffb700]/80 font-bold transition-colors">
-                            Sign up
-                        </Link>
-                    </p>
                     <p className="text-[13px] font-medium text-[#2D2926]/40 flex items-center justify-center gap-2">
                         <Link to="/watch-hive/privacy" className="hover:text-[#2D2926]/60 transition-colors">
                             Privacy Policy
