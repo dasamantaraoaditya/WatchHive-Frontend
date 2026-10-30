@@ -410,7 +410,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                     </div>
                                 ) : friends.length === 0 ? (
                                     <div className="p-4 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-2xl border border-slate-200">
-                                        No followers yet. When cinephiles follow you, you can suggest movies to them!
+                                        No followers yet. When friends follow you, you can suggest movies to them!
                                     </div>
                                 ) : (
                                     <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-1">

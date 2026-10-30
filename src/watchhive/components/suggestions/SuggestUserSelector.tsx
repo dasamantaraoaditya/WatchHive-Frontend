@@ -159,7 +159,7 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                         <div className="py-12 text-center bg-[#FFF9F0]/50 rounded-2xl border border-[#ffb700]/10 p-6">
                             <p className="text-[#2D2926]/60 font-bold italic text-sm">No followers yet</p>
                             <p className="text-[10px] uppercase font-black text-[#ffb700] mt-2 tracking-widest">
-                                When cinephiles follow you, you can suggest movies to them
+                                When friends follow you, you can suggest movies to them
                             </p>
                         </div>
                     ) : filteredUsers.length === 0 ? (
