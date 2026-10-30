@@ -34,12 +34,12 @@ export const LoginPage: React.FC = () => {
     const validate = () => {
         const newErrors: typeof errors = {};
         if (!formData.email) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email is invalid';
+            newErrors.email = 'Please enter your email or username';
+        } else if (formData.email.includes('@') && !/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Please enter a valid email address';
         }
         if (!formData.password) {
-            newErrors.password = 'Password is required';
+            newErrors.password = 'Please enter your password';
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -61,8 +61,12 @@ export const LoginPage: React.FC = () => {
                 setIsGoogleOnlyAccount(true);
                 setErrors({});
             } else {
+                let errorMsg = data?.error || data?.message;
+                if (!errorMsg || errorMsg.toLowerCase().includes('validation failed')) {
+                    errorMsg = data?.details?.[0]?.message || 'Incorrect email, username, or password. Please verify your details.';
+                }
                 setErrors({
-                    general: data?.error || 'Login failed. Please check your credentials.',
+                    general: errorMsg,
                 });
             }
         } finally {
@@ -183,18 +187,18 @@ export const LoginPage: React.FC = () => {
                     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                         <div className="flex flex-col gap-1.5">
                             <label htmlFor="email" className="text-[13px] font-bold text-[#2D2926]/80 ml-1">
-                                Email Address <span className="text-rose-500">*</span>
+                                Email or Username <span className="text-rose-500">*</span>
                             </label>
                             <input
                                 id="email"
                                 ref={emailInputRef}
-                                type="email"
+                                type="text"
                                 name="email"
-                                placeholder="you@example.com"
+                                placeholder="you@example.com or username"
                                 value={formData.email}
                                 onChange={handleChange}
                                 className={`w-full bg-[#FFF9F0]/50 border rounded-2xl px-4 py-3.5 text-[15px] font-semibold text-[#2D2926] placeholder:text-[#2D2926]/20 transition-all focus:outline-none focus:bg-white focus:ring-4 ${errors.email ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-400/10' : 'border-[#ffb700]/20 focus:border-[#ffb700] focus:ring-[#ffb700]/10'}`}
-                                autoComplete="email"
+                                autoComplete="username"
                                 required
                             />
                             {errors.email && (
