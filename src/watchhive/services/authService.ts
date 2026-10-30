@@ -38,8 +38,8 @@ export const authService = {
     },
 
     /** Request a password reset email for the given address */
-    async forgotPassword(email: string): Promise<{ message: string; devToken?: string }> {
-        return apiClient.post<{ message: string; devToken?: string }>('/auth/forgot-password', { email });
+    async forgotPassword(email: string): Promise<{ message: string }> {
+        return apiClient.post<{ message: string }>('/auth/forgot-password', { email });
     },
 
     /** Complete a password reset using the token from the reset email link */
