@@ -63,7 +63,8 @@ export const UserProfilePage: React.FC = () => {
     useEffect(() => {
         setAvatarError(false);
         if (!id) return;
-        if (currentUser && id === currentUser.id) {
+        const isPreview = searchParams.get('preview') === 'true' || searchParams.get('view') === 'public';
+        if (currentUser && id === currentUser.id && !isPreview) {
             navigate('/watch-hive/profile');
             return;
         }
@@ -328,7 +329,21 @@ export const UserProfilePage: React.FC = () => {
                         </div>
                         
                         <div className="flex flex-col gap-2.5 w-full md:w-64">
-                            {profileUser.isIncomingRequest ? (
+                            {isOwner ? (
+                                <div className="flex flex-col gap-2 w-full">
+                                    <div className="text-[10px] font-black text-center uppercase tracking-wider text-amber-700 bg-amber-500/10 border border-amber-500/20 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
+                                        <span className="material-symbols-outlined text-sm text-amber-600">visibility</span>
+                                        <span>Your Public View</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => navigate('/watch-hive/profile')}
+                                        className="w-full font-bold py-2.5 px-4 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">edit</span>
+                                        <span>Back to Edit Profile</span>
+                                    </button>
+                                </div>
+                            ) : profileUser.isIncomingRequest ? (
                                 <div className="flex flex-col gap-2 w-full">
                                     <p className="text-[9px] font-black text-center uppercase tracking-[0.15em] text-[#ffb700] bg-[#ffb700]/5 border border-[#ffb700]/15 py-2 rounded-xl">
                                         Wants to Follow You
