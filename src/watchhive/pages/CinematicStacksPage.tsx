@@ -279,7 +279,7 @@ export const CinematicStacksPage: React.FC = () => {
 
     return (
         <PageLayout maxWidth="5xl">
-            <div className="flex flex-col gap-8 pb-36 md:pb-24 animate-slide-up">
+            <div className="flex flex-col gap-8 pb-8 md:pb-12 animate-slide-up">
                 {/* Immersive Search Overlay */}
                 {createPortal(
                     <AnimatePresence>

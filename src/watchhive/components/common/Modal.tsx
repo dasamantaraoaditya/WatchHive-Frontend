@@ -43,7 +43,7 @@ export const Modal: React.FC<ModalProps> = ({
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[3500] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+                <div className={`fixed inset-0 z-[3500] flex ${isMobile ? 'items-end justify-center p-0' : 'items-center justify-center p-4 sm:p-6'} overflow-hidden`}>
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -66,16 +66,16 @@ export const Modal: React.FC<ModalProps> = ({
                         }}
                         className={`
                             relative w-full ${maxWidth} bg-white 
-                            flex flex-col max-h-[92vh] overflow-hidden border border-[#ffb700]/10
+                            flex flex-col max-h-[92vh] max-h-[92dvh] overflow-hidden border border-[#ffb700]/10
                             ${isMobile 
-                                ? 'rounded-t-[32px] rounded-b-none mt-auto' 
+                                ? 'rounded-t-[32px] rounded-b-none mt-auto pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_rgba(0,0,0,0.15)]' 
                                 : 'rounded-[40px] shadow-2xl shadow-black/20 m-4'
                             }
                         `}
                     >
                         {/* Mobile Handle */}
-                        <div className="md:hidden flex justify-center pt-3 pb-1">
-                            <div className="w-12 h-1.5 bg-[#2D2926]/10 rounded-full" />
+                        <div className="md:hidden flex justify-center pt-3 pb-1 shrink-0">
+                            <div className="w-12 h-1.5 bg-[#2D2926]/20 rounded-full" />
                         </div>
 
                         {/* Close button when no title is provided (absolute top-right floating) */}

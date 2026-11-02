@@ -11,6 +11,7 @@ import { ExportFormat, ImportResult } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
 import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge } from '../components/common';
 import { LegalDisclaimerModal } from '../components/legal/LegalDisclaimerModal';
+import { WatchPreferencesModal } from '../components/onboarding/WatchPreferencesModal';
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser, logout } = useAuth();
@@ -33,6 +34,7 @@ export const ProfilePage: React.FC = () => {
     const [privacyUpdating, setPrivacyUpdating] = useState(false);
     const [isAddFriendsModalOpen, setIsAddFriendsModalOpen] = useState(false);
     const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+    const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
     
     // Danger Zone / Account deletion state
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -530,6 +532,55 @@ export const ProfilePage: React.FC = () => {
                 </div>
             </div>
 
+            {/* Watch Preferences Block */}
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0">
+                            <span className="material-symbols-outlined">tune</span>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-slate-800">Watch Preferences</h2>
+                            <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Languages, genres & streaming services</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setIsPreferencesModalOpen(true)}
+                        className="px-4 py-2.5 bg-[#ffb700] hover:bg-[#ffa700] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                    >
+                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                        <span>Customize</span>
+                    </button>
+                </div>
+
+                {/* Summary chips */}
+                <div className="flex flex-wrap gap-2 pt-2">
+                    {(user.preferences?.languages || []).map(lang => (
+                        <span key={lang} className="text-xs font-bold px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200/60 rounded-full flex items-center gap-1">
+                            <span>🌐</span> {lang.toUpperCase()}
+                        </span>
+                    ))}
+                    {(user.preferences?.genres || []).map(genre => (
+                        <span key={genre} className="text-xs font-bold px-3 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-full flex items-center gap-1">
+                            <span>🎭</span> {genre}
+                        </span>
+                    ))}
+                    {(user.preferences?.streamingPlatforms || []).map(plat => (
+                        <span key={plat} className="text-xs font-bold px-3 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-full flex items-center gap-1">
+                            <span>📺</span> {plat}
+                        </span>
+                    ))}
+                    {(!user.preferences || (
+                        (!user.preferences.languages || user.preferences.languages.length === 0) &&
+                        (!user.preferences.genres || user.preferences.genres.length === 0) &&
+                        (!user.preferences.streamingPlatforms || user.preferences.streamingPlatforms.length === 0)
+                    )) && (
+                        <p className="text-xs text-slate-400 font-medium">No preferences set yet. Tap Customize to personalize your feed & recommendations.</p>
+                    )}
+                </div>
+            </div>
+
             {/* Account Security Block — only shown for Google-only accounts */}
             <SetPasswordSection />
 
@@ -784,6 +835,12 @@ export const ProfilePage: React.FC = () => {
             <LegalDisclaimerModal
                 isOpen={isLegalModalOpen}
                 onClose={() => setIsLegalModalOpen(false)}
+            />
+
+            <WatchPreferencesModal
+                isOpen={isPreferencesModalOpen}
+                onClose={() => setIsPreferencesModalOpen(false)}
+                isEditing={true}
             />
 
             {/* Account Deletion Safety Modal */}

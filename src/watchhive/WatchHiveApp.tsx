@@ -4,6 +4,7 @@ import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, useCustomAlert,
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
 import { DonationButton, OfflineBanner, Modal, AppLoadingScreen, InstallPromptBanner, OpenInAppBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
 import { SuggestMovieModal } from './components/suggestions/SuggestMovieModal';
+import { WatchPreferencesModal } from './components/onboarding/WatchPreferencesModal';
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -48,10 +49,36 @@ const WatchersHiveRedirect: React.FC = () => {
 
 // App Routes Component
 const AppRoutes: React.FC = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { alert } = useCustomAlert();
     const { promptAddToWatchlist } = useWatchlist();
     const [activeAction, setActiveAction] = React.useState<'log' | 'watching' | 'watchlist' | 'suggest' | null>(null);
+    const [showPreferencesModal, setShowPreferencesModal] = React.useState(false);
+
+    // Auto-prompt onboarding preferences if user is authenticated but has not completed onboarding
+    React.useEffect(() => {
+        if (isAuthenticated && user) {
+            const hasCompleted = user.hasCompletedOnboarding;
+            const prefs = user.preferences;
+            const hasPrefs = prefs && (
+                (prefs.languages && prefs.languages.length > 0) ||
+                (prefs.genres && prefs.genres.length > 0) ||
+                (prefs.streamingPlatforms && prefs.streamingPlatforms.length > 0)
+            );
+            const promptedSession = sessionStorage.getItem(`watchhive_pref_prompted_${user.id}`);
+            if (!hasCompleted && !hasPrefs && !promptedSession) {
+                setShowPreferencesModal(true);
+                sessionStorage.setItem(`watchhive_pref_prompted_${user.id}`, 'true');
+            }
+        }
+    }, [isAuthenticated, user]);
+
+    // Global event listener to open preferences from anywhere (e.g. ProfilePage)
+    React.useEffect(() => {
+        const handleOpenPrefs = () => setShowPreferencesModal(true);
+        window.addEventListener('watchhive:open-preferences', handleOpenPrefs);
+        return () => window.removeEventListener('watchhive:open-preferences', handleOpenPrefs);
+    }, []);
 
     React.useEffect(() => {
         const handleOpenQuickAdd = (e: Event) => {
@@ -288,6 +315,13 @@ const AppRoutes: React.FC = () => {
                                     severity: 'success',
                                 });
                             }}
+                        />
+
+                        {/* Watch Preferences Onboarding / Customization Modal */}
+                        <WatchPreferencesModal
+                            isOpen={showPreferencesModal}
+                            onClose={() => setShowPreferencesModal(false)}
+                            isEditing={Boolean(user?.hasCompletedOnboarding || (user?.preferences && Object.keys(user.preferences).length > 0))}
                         />
                     </>
                 )}
