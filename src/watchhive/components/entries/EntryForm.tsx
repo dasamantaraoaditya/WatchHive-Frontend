@@ -1144,7 +1144,23 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 {isSearchingSuggestors ? (
                                                     <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading followers...</div>
                                                 ) : suggestorResults.length === 0 ? (
-                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">No followers found</div>
+                                                    <div className="p-3.5 text-center flex flex-col items-center gap-1.5">
+                                                        <span className="material-symbols-outlined text-slate-400 text-lg">group_off</span>
+                                                        <p className="text-xs text-slate-500 font-bold">
+                                                            {suggestorSearchQuery ? `No followers matching "${suggestorSearchQuery}"` : "No friends in your hive yet"}
+                                                        </p>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setShowSuggestorPicker(false);
+                                                                navigate('/watch-hive/search?tab=people');
+                                                            }}
+                                                            className="text-[11px] font-black text-[#ffb700] hover:underline flex items-center gap-1 cursor-pointer"
+                                                        >
+                                                            <span className="material-symbols-outlined text-xs">person_search</span>
+                                                            Find friends to follow
+                                                        </button>
+                                                    </div>
                                                 ) : (
                                                     suggestorResults.map(u => (
                                                         <button

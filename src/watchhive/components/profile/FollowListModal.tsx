@@ -87,9 +87,17 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                             <h4 className="text-lg font-bold text-[#2D2926]">
                                 {type === 'followers' ? 'No followers yet' : 'Not following anyone'}
                             </h4>
-                            <p className="text-sm font-medium text-[#2D2926]/50">
-                                {type === 'followers' ? 'Share your profile to build your hive.' : 'Find users to see their cinematic journey.'}
+                            <p className="text-sm font-medium text-[#2D2926]/50 max-w-xs">
+                                {type === 'followers' ? 'Share your profile or find friends to follow to build your hive.' : 'Find users to see their cinematic journey and exchange recommendations.'}
                             </p>
+                            <Link
+                                to="/watch-hive/search?tab=people"
+                                onClick={onClose}
+                                className="mt-2 px-5 py-2.5 bg-[#ffb700] hover:bg-[#e5a600] text-white text-xs font-black rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                            >
+                                <span className="material-symbols-outlined text-base">person_search</span>
+                                <span>Find Friends to Follow</span>
+                            </Link>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-1 p-2">
