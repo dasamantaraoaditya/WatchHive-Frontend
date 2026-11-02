@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TmdbDetails, formatDate } from './types';
 import { ExpandedCard } from './ExpandedCard';
 import { useCustomAlert } from '../../contexts';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 
 interface EntryListProps {
     onEdit?: (entry: Entry) => void;
@@ -420,13 +421,41 @@ export const EntryList: React.FC<EntryListProps> = ({
         onClose: () => void;
     }> = ({ entry, onClose: closeCard }) => {
         const [menuOpen, setMenuOpen] = useState(false);
+        const [sharedFeedback, setSharedFeedback] = useState(false);
         const hasActions = onEdit || !readOnly;
         if (!hasActions) return null;
+
+        const handleShare = async () => {
+            const success = await shareCompletedWatch({
+                title: entry.title,
+                rating: entry.rating,
+                review: entry.review,
+                tmdbId: entry.tmdbId,
+                mediaType: entry.type === 'TV_SHOW' ? 'tv' : 'movie',
+            });
+            if (success) {
+                setSharedFeedback(true);
+                setTimeout(() => setSharedFeedback(false), 2000);
+            }
+        };
 
         return (
             <div className="relative flex items-center gap-2">
                 {/* Desktop: full buttons */}
                 <div className="hidden md:flex items-center gap-2">
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                        onClick={handleShare}
+                        className={`px-4 py-2 rounded-full bg-white/20 flex items-center gap-2 font-bold text-sm hover:bg-white/30 transition-all cursor-pointer ${sharedFeedback ? 'text-green-500!' : 'text-[#ffb700]'}`}
+                        title={sharedFeedback ? 'Shared!' : 'Share Watch'}
+                    >
+                        <span className="material-symbols-outlined text-[18px]">
+                            {sharedFeedback ? 'check_circle' : 'share'}
+                        </span>
+                        {sharedFeedback ? 'Shared!' : 'Share'}
+                    </motion.button>
                     {onEdit && (
                         <motion.button
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -474,6 +503,13 @@ export const EntryList: React.FC<EntryListProps> = ({
                             transition={{ duration: 0.15 }}
                             className="absolute top-12 right-0 z-[200] flex flex-col gap-1 bg-white/20 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-xl overflow-hidden min-w-[160px] p-1"
                         >
+                            <button
+                                onClick={() => { setMenuOpen(false); handleShare(); }}
+                                className="flex items-center gap-3 px-4 py-3 text-[#2D2926]/90 font-bold text-sm hover:bg-white/30 active:bg-white/40 transition-all rounded-xl"
+                            >
+                                <span className="material-symbols-outlined text-[18px] text-[#ffb700]">share</span>
+                                Share Watch
+                            </button>
                             {onEdit && (
                                 <button
                                     onClick={() => { setMenuOpen(false); closeCard(); onEdit(entry); }}

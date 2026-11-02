@@ -10,6 +10,7 @@ import { PageLayout } from '../components/layout';
 import { ExportFormat, ImportResult } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
 import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge } from '../components/common';
+import { LegalDisclaimerModal } from '../components/legal/LegalDisclaimerModal';
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser, logout } = useAuth();
@@ -31,6 +32,7 @@ export const ProfilePage: React.FC = () => {
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
     const [privacyUpdating, setPrivacyUpdating] = useState(false);
     const [isAddFriendsModalOpen, setIsAddFriendsModalOpen] = useState(false);
+    const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
     
     // Danger Zone / Account deletion state
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -727,6 +729,29 @@ export const ProfilePage: React.FC = () => {
                 </div>
             </div>
 
+            {/* Legal & Non-Commercial Disclaimer Card */}
+            <div className="bg-white border border-black/5 rounded-[32px] p-6 sm:p-8 shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/15 flex items-center justify-center text-amber-700 border border-amber-500/25">
+                            <span className="material-symbols-outlined text-2xl font-bold">gavel</span>
+                        </div>
+                        <div>
+                            <h3 className="text-base font-black text-[#2D2926]">Legal & Non-Commercial Notice</h3>
+                            <p className="text-xs text-slate-400 font-bold">Non-profit status, TMDb API attribution & copyright protection</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setIsLegalModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/30 hover:border-[#ffb700] text-xs font-black uppercase tracking-wider text-slate-800 transition-all hover:shadow-sm cursor-pointer"
+                    >
+                        <span>View Disclaimer</span>
+                        <span className="material-symbols-outlined text-sm font-bold text-[#ffb700]">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+
             <FollowListModal
                 isOpen={modalConfig.isOpen}
                 onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
@@ -754,6 +779,11 @@ export const ProfilePage: React.FC = () => {
                 userBadges={user.badges || []}
                 watchStreak={user.watchStreak || 0}
                 userName={user.displayName || user.username}
+            />
+
+            <LegalDisclaimerModal
+                isOpen={isLegalModalOpen}
+                onClose={() => setIsLegalModalOpen(false)}
             />
 
             {/* Account Deletion Safety Modal */}
