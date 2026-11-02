@@ -156,7 +156,7 @@ export const FeedPage: React.FC = () => {
     }
 
     return (
-        <PageLayout maxWidth="none" className="w-full px-4 md:px-12">
+        <PageLayout maxWidth="none" className="w-full px-0 sm:px-4 md:px-12">
             <div className="feed-page-layout flex flex-row gap-8 items-start justify-between w-full">
                 {/* Main Feed Content Area - Centered in the remaining space */}
                 <div className="flex-1 flex justify-center min-w-0">

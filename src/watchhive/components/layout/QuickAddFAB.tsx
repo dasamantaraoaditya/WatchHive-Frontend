@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface QuickAddFABProps {
     onLogWatch: () => void;
@@ -14,16 +14,16 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
     onSuggest, 
     onWatchlist 
 }) => {
+    const [isOpen, setIsOpen] = useState(false);
     const [isScrolling, setIsScrolling] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
     const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // 1. Detect scrolling on page
+    // 1. Detect scrolling on page to collapse/hide temporarily
     useEffect(() => {
         const handleScroll = () => {
-            if (isHovered) return;
+            if (isOpen) return; // Keep visible if speed dial is open
 
             setIsScrolling(true);
             if (scrollTimeoutRef.current) {
@@ -31,7 +31,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
             }
             scrollTimeoutRef.current = setTimeout(() => {
                 setIsScrolling(false);
-            }, 220);
+            }, 200);
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -41,7 +41,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                 clearTimeout(scrollTimeoutRef.current);
             }
         };
-    }, [isHovered]);
+    }, [isOpen]);
 
     // 2. Hide when any modal, sheet, or dialog is open
     useEffect(() => {
@@ -52,6 +52,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
                 document.body.getAttribute('data-modal-open') === 'true' ||
                 document.body.style.overflow === 'hidden';
             setIsModalOpen(hasDialog);
+            if (hasDialog) setIsOpen(false);
         };
 
         checkModalState();
@@ -77,6 +78,7 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
             const target = e.target as HTMLElement | null;
             if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
                 setIsKeyboardOpen(true);
+                setIsOpen(false);
             }
         };
 
@@ -97,90 +99,132 @@ export const QuickAddFAB: React.FC<QuickAddFABProps> = ({
         };
     }, []);
 
-    const secondaryActions = [
+    const actions = [
         {
-            icon: 'visibility',
-            label: 'Add Currently Watching',
-            onClick: onCurrentlyWatching,
-            hoverClass: 'hover:bg-emerald-50 hover:text-emerald-600',
+            label: 'Log an Entry',
+            icon: 'edit_note',
+            color: 'text-amber-700 bg-amber-50 border-amber-200 hover:bg-[#ffb700] hover:text-[#2D2926]',
+            badgeColor: 'bg-[#ffb700] text-[#2D2926]',
+            onClick: () => {
+                setIsOpen(false);
+                onLogWatch();
+            },
         },
         {
-            icon: 'bookmark_add',
+            label: 'Currently Watching',
+            icon: 'play_circle',
+            color: 'text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-500 hover:text-white',
+            badgeColor: 'bg-emerald-500 text-white',
+            onClick: () => {
+                setIsOpen(false);
+                onCurrentlyWatching();
+            },
+        },
+        {
             label: 'Add to Watchlist',
-            onClick: onWatchlist,
-            hoverClass: 'hover:bg-amber-50 hover:text-[#ffb700]',
+            icon: 'bookmark_add',
+            color: 'text-amber-800 bg-amber-50/80 border-amber-200 hover:bg-amber-400 hover:text-black',
+            badgeColor: 'bg-amber-400 text-black',
+            onClick: () => {
+                setIsOpen(false);
+                onWatchlist();
+            },
         },
         {
+            label: 'Suggest to Friend',
             icon: 'send',
-            label: 'Suggest',
-            onClick: onSuggest,
-            hoverClass: 'hover:bg-purple-50 hover:text-purple-600',
+            color: 'text-purple-700 bg-purple-50 border-purple-200 hover:bg-purple-600 hover:text-white',
+            badgeColor: 'bg-purple-600 text-white',
+            onClick: () => {
+                setIsOpen(false);
+                onSuggest();
+            },
         },
     ];
 
-    const isVisible = (!isScrolling || isHovered) && !isModalOpen && !isKeyboardOpen;
+    const isVisible = (!isScrolling || isOpen) && !isModalOpen && !isKeyboardOpen;
 
     return (
-        <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-8 left-0 right-0 z-[1100] flex justify-center pointer-events-none px-3 sm:px-4">
-            <motion.div
-                initial={{ y: 20, opacity: 0, scale: 0.95 }}
-                animate={{
-                    y: isVisible ? 0 : 20,
-                    opacity: isVisible ? 1 : 0,
-                    scale: isVisible ? 1 : 0.95,
-                }}
-                transition={{
-                    duration: 0.24,
-                    ease: [0.16, 1, 0.3, 1],
-                }}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                className={`max-w-full ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
-            >
-                <div className="bg-white/95 backdrop-blur-xl border border-[#ffb700]/30 shadow-[0_8px_30px_rgba(0,0,0,0.12)] p-1 sm:p-1.5 rounded-full flex items-center gap-1 sm:gap-1.5 transition-all">
-                    {/* Primary Action Button: Log an Entry / Log Watch */}
+        <>
+            {/* Speed Dial Backdrop overlay when open */}
+            {isOpen && (
+                <div 
+                    onClick={() => setIsOpen(false)}
+                    className="fixed inset-0 z-[1090] bg-[#2D2926]/30 backdrop-blur-[2px] transition-opacity"
+                    aria-hidden="true"
+                />
+            )}
+
+            <div className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-8 right-4 md:right-8 z-[1100] flex flex-col items-end pointer-events-none">
+                <motion.div
+                    initial={{ y: 20, opacity: 0, scale: 0.95 }}
+                    animate={{
+                        y: isVisible ? 0 : 20,
+                        opacity: isVisible ? 1 : 0,
+                        scale: isVisible ? 1 : 0.95,
+                    }}
+                    transition={{
+                        duration: 0.22,
+                        ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className={`flex flex-col items-end gap-2.5 ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}`}
+                >
+                    {/* Expanding Speed-Dial Action Items */}
+                    <AnimatePresence>
+                        {isOpen && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 15 }}
+                                transition={{ duration: 0.18, staggerChildren: 0.04 }}
+                                className="flex flex-col items-end gap-2.5 mb-1.5"
+                            >
+                                {actions.map((act, index) => (
+                                    <motion.button
+                                        key={act.label}
+                                        initial={{ opacity: 0, scale: 0.85, x: 10 }}
+                                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                                        exit={{ opacity: 0, scale: 0.85, x: 10 }}
+                                        transition={{ delay: index * 0.03 }}
+                                        whileHover={{ scale: 1.03 }}
+                                        whileTap={{ scale: 0.96 }}
+                                        onClick={act.onClick}
+                                        className="flex items-center gap-2.5 py-2 px-3.5 bg-white/95 backdrop-blur-xl border border-black/10 rounded-full shadow-lg shadow-black/10 group cursor-pointer active:scale-95 transition-all"
+                                    >
+                                        <span className="text-xs font-black text-[#2D2926] tracking-wide whitespace-nowrap pl-1">
+                                            {act.label}
+                                        </span>
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border shadow-xs transition-colors ${act.color}`}>
+                                            <span className="material-symbols-outlined text-[18px]">
+                                                {act.icon}
+                                            </span>
+                                        </div>
+                                    </motion.button>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Main Floating Action Button (Speed-Dial Trigger) */}
                     <motion.button
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.96 }}
-                        onClick={onLogWatch}
-                        className="relative group bg-[#ffb700] hover:bg-[#ffa700] text-[#2D2926] font-black text-[11px] sm:text-xs uppercase tracking-wider px-3 sm:px-4 py-2 sm:py-2.5 rounded-full flex items-center gap-1.5 sm:gap-2 shadow-md shadow-[#ffb700]/30 transition-all overflow-hidden whitespace-nowrap shrink-0"
-                        title="Log an Entry"
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.94 }}
+                        onClick={() => setIsOpen(prev => !prev)}
+                        className={`w-14 h-14 rounded-full flex items-center justify-center transition-all cursor-pointer shadow-xl ${
+                            isOpen
+                                ? 'bg-white text-[#2D2926] border-2 border-[#ffb700] shadow-black/15'
+                                : 'bg-gradient-to-tr from-[#ffb700] to-[#ffd000] text-[#2D2926] border-2 border-white shadow-[#ffb700]/40'
+                        }`}
+                        title={isOpen ? 'Close' : 'Quick Actions'}
+                        aria-label="Quick Actions"
                     >
-                        <span className="material-symbols-outlined text-base sm:text-lg font-bold">edit_note</span>
-                        <span>Log an Entry</span>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+                        <span className={`material-symbols-outlined text-2xl font-black transition-transform duration-250 ${isOpen ? 'rotate-45 text-[#2D2926]' : 'rotate-0 text-[#2D2926]'}`}>
+                            add
+                        </span>
                     </motion.button>
-
-                    {/* Subtle Divider */}
-                    <div className="h-4 sm:h-5 w-px bg-slate-200 mx-0.5 shrink-0" />
-
-                    {/* Quick Secondary Actions */}
-                    <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
-                        {secondaryActions.map((action) => (
-                            <div key={action.label} className="relative group">
-                                <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.92 }}
-                                    onClick={action.onClick}
-                                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-slate-600 transition-colors ${action.hoverClass}`}
-                                    aria-label={action.label}
-                                >
-                                    <span className="material-symbols-outlined text-[18px] sm:text-[20px]">
-                                        {action.icon}
-                                    </span>
-                                </motion.button>
-
-                                {/* Floating Tooltip */}
-                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-y-1 group-hover:translate-y-0 bg-[#2D2926] text-white text-[10px] font-black uppercase tracking-wider py-1 px-2.5 rounded-lg whitespace-nowrap shadow-lg">
-                                    {action.label}
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-[#2D2926]" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </motion.div>
-        </div>
+                </motion.div>
+            </div>
+        </>
     );
 };
 

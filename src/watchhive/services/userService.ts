@@ -78,6 +78,10 @@ export const userService = {
         return apiClient.get('/stats/detailed', { params: { days, type, genre, minRating } });
     },
 
+    async updatePreferences(preferences: any, hasCompletedOnboarding = true): Promise<User> {
+        return apiClient.put<User>('/users/me/preferences', { preferences, hasCompletedOnboarding });
+    },
+
     async deleteAccount(): Promise<void> {
         return apiClient.delete('/users/me');
     },

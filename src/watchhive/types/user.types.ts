@@ -17,6 +17,13 @@ export interface User {
     xp: number;
     level: number;
     badges: Badge[];
+    preferences?: {
+        languages?: string[];
+        genres?: string[];
+        genreIds?: number[];
+        streamingPlatforms?: string[];
+    };
+    hasCompletedOnboarding?: boolean;
     watchStreak?: number;
     lastWatchDate?: string;
     createdAt: string;

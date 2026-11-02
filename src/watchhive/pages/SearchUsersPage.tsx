@@ -407,11 +407,11 @@ export const SearchUsersPage: React.FC = () => {
 
                 {/* Active Search Tabs (when searching query >= 2 chars) */}
                 {showSearchResults && (
-                    <div className="bg-[#2D2926]/5 p-1.5 rounded-full flex items-center gap-1 mt-4 border border-black/5 shadow-inner">
+                    <div className="bg-[#2D2926]/5 p-1 sm:p-1.5 rounded-full flex items-center gap-1 mt-4 border border-black/5 shadow-inner max-w-full overflow-x-auto no-scrollbar">
                         <button
                             type="button"
                             onClick={() => setActiveTab('media')}
-                            className={`relative px-6 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
+                            className={`relative px-3.5 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 ${
                                 activeTab === 'media' ? 'text-black' : 'text-slate-400 hover:text-slate-700'
                             }`}
                         >
@@ -426,7 +426,7 @@ export const SearchUsersPage: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => setActiveTab('people')}
-                            className={`relative px-6 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
+                            className={`relative px-3.5 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 ${
                                 activeTab === 'people' ? 'text-white' : 'text-slate-400 hover:text-slate-700'
                             }`}
                         >
