@@ -13,7 +13,6 @@ export const ForgotPasswordPage: React.FC = () => {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [devToken, setDevToken] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,10 +23,8 @@ export const ForgotPasswordPage: React.FC = () => {
         setError('');
         setIsLoading(true);
         try {
-            const result = await forgotPassword(email);
+            await forgotPassword(email);
             setSubmitted(true);
-            // In dev mode, the backend returns the raw token for easy testing
-            if (result.devToken) setDevToken(result.devToken);
         } catch (err: any) {
             setError(err.response?.data?.error || 'Something went wrong. Please try again.');
         } finally {
@@ -114,29 +111,11 @@ export const ForgotPasswordPage: React.FC = () => {
                                 </p>
                             </div>
 
-                            {/* Dev-mode token display */}
-                            {devToken && (
-                                <div className="w-full p-4 bg-amber-50 border border-amber-200 rounded-2xl">
-                                    <p className="text-[11px] font-bold text-amber-600 uppercase tracking-wider mb-2">
-                                        🛠 Dev Mode — Reset Token
-                                    </p>
-                                    <Link
-                                        to={`/watch-hive/reset-password?token=${devToken}&email=${encodeURIComponent(email)}`}
-                                        className="text-[13px] font-bold text-amber-700 hover:text-amber-800 underline break-all"
-                                    >
-                                        Click to open reset page →
-                                    </Link>
-                                </div>
-                            )}
-
                             <p className="text-[12px] font-medium text-[#2D2926]/40 text-center">
                                 Didn't receive it? Check your spam folder, or{' '}
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setSubmitted(false);
-                                        setDevToken(null);
-                                    }}
+                                    onClick={() => setSubmitted(false)}
                                     className="text-[#ffb700] font-bold hover:underline"
                                 >
                                     try again

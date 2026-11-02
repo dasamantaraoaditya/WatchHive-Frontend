@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import whLogo from '../assets/images/watchhive-logo.png';
 import { showInstallPrompt, isInstallPromptReady } from '../../serviceWorkerRegistration';
+import { LegalDisclaimerModal } from '../components/legal/LegalDisclaimerModal';
 
 /* ── TMDb poster URLs for showcasing popular movies ── */
 const TMDB_IMG = 'https://image.tmdb.org/t/p';
@@ -54,6 +55,7 @@ export const LandingPage: React.FC = () => {
     const [isInstallReady, setIsInstallReady] = useState(false);
     const [isInstalled, setIsInstalled] = useState(false);
     const [showInstallHint, setShowInstallHint] = useState(false);
+    const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
 
     // ── Interactive Widget 1: Real SuggestionCard Replica & Suggester Impact ──
     const [selectedFriend, setSelectedFriend] = useState<'maya' | 'karan' | 'elena'>('maya');
@@ -1263,7 +1265,7 @@ export const LandingPage: React.FC = () => {
                     </div>
                     
                     <p className="text-xs font-medium text-stone-500 text-center md:text-left">
-                        © 2026 WatchersHive. Crafted for true cinephiles worldwide. Open source & ad-free.
+                        © 2026 WatchersHive. Crafted for true cinephiles worldwide. Open source, non-commercial & ad-free. This product uses the TMDB API but is not endorsed or certified by TMDB.
                     </p>
                     
                     <div className="flex flex-wrap items-center gap-6 text-xs font-black text-stone-700">
@@ -1271,6 +1273,13 @@ export const LandingPage: React.FC = () => {
                         <Link to="/watch-hive/signup" className="hover:text-amber-600 transition-colors">Sign Up</Link>
                         <Link to="/watch-hive/support" className="hover:text-amber-600 transition-colors">Support</Link>
                         <Link to="/watch-hive/privacy" className="hover:text-amber-600 transition-colors">Privacy Policy</Link>
+                        <button
+                            type="button"
+                            onClick={() => setIsLegalModalOpen(true)}
+                            className="hover:text-amber-600 transition-colors cursor-pointer"
+                        >
+                            Legal Disclaimer
+                        </button>
                         <a 
                             href="https://github.com/dasamantaraoaditya/WatchHive-Frontend" 
                             target="_blank" 
@@ -1283,6 +1292,11 @@ export const LandingPage: React.FC = () => {
                     </div>
                 </div>
             </footer>
+
+            <LegalDisclaimerModal
+                isOpen={isLegalModalOpen}
+                onClose={() => setIsLegalModalOpen(false)}
+            />
 
         </div>
     );

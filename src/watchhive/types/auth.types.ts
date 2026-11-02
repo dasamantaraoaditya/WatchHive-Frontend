@@ -33,7 +33,7 @@ export interface AuthContextType {
     logout: () => void;
     updateUser: (user: User) => void;
     setPassword: (newPassword: string) => Promise<{ message: string }>;
-    forgotPassword: (email: string) => Promise<{ message: string; devToken?: string }>;
+    forgotPassword: (email: string) => Promise<{ message: string }>;
     resetPassword: (token: string, email: string, newPassword: string) => Promise<{ message: string }>;
 }
 

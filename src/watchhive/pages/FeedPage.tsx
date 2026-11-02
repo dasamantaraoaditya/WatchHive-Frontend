@@ -180,7 +180,7 @@ export const FeedPage: React.FC = () => {
                         ) : !loading && !initialLoading && !error ? (
                             <EmptyState
                                 title="Start Your Watch Journey"
-                                message="Your feed is quiet right now. Log your first movie or show to begin tracking your taste, or discover fellow cinephiles to build your swarm!"
+                                message="Your feed is quiet right now. Log your first movie or show to begin tracking your taste, or discover friends to build your swarm!"
                                 icon={<span className="material-symbols-outlined text-4xl text-primary">movie</span>}
                                 actionLabel="Log Your First Watch 🎬"
                                 onAction={() => window.dispatchEvent(new CustomEvent('watchhive:open-quick-add', { detail: { action: 'log' } }))}

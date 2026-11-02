@@ -124,7 +124,7 @@ export const AddFriendsModal: React.FC<AddFriendsModalProps> = ({ isOpen, onClos
                         </div>
                         <div>
                             <h2 className="text-lg font-black text-slate-800">Add Friends to Your Hive</h2>
-                            <p className="text-xs text-slate-500 font-medium">Discover cinephiles, share recommendations & compare taste</p>
+                            <p className="text-xs text-slate-500 font-medium">Find friends, share recommendations & compare movie taste</p>
                         </div>
                     </div>
                     <button 
@@ -155,7 +155,7 @@ export const AddFriendsModal: React.FC<AddFriendsModalProps> = ({ isOpen, onClos
                                 <span className="material-symbols-outlined text-slate-300 group-hover:text-amber-600 text-lg group-hover:translate-x-0.5 transition-all">arrow_forward</span>
                             </div>
                             <div>
-                                <h3 className="text-sm font-bold text-slate-800 group-hover:text-amber-900 transition-colors">Search Cinephiles</h3>
+                                <h3 className="text-sm font-bold text-slate-800 group-hover:text-amber-900 transition-colors">Search Friends &amp; People</h3>
                                 <p className="text-[11px] text-slate-500 font-medium leading-snug mt-0.5">Find friends by username, name, or taste</p>
                             </div>
                         </div>
@@ -213,12 +213,12 @@ export const AddFriendsModal: React.FC<AddFriendsModalProps> = ({ isOpen, onClos
                         </div>
                     </div>
 
-                    {/* Suggested Cinephiles Section */}
+                    {/* Suggested Friends Section */}
                     <div>
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
                                 <span className="material-symbols-outlined text-amber-600 text-lg">stars</span>
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Suggested Cinephiles</h3>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Suggested Friends</h3>
                             </div>
                             <button 
                                 onClick={fetchSuggestedUsers} 
@@ -232,7 +232,7 @@ export const AddFriendsModal: React.FC<AddFriendsModalProps> = ({ isOpen, onClos
 
                         {loadingSuggestions ? (
                             <div className="py-8 flex justify-center">
-                                <BeeLoader message="Finding cinephiles..." />
+                                <BeeLoader message="Finding friends..." />
                             </div>
                         ) : suggestedUsers.length === 0 ? (
                             <div className="text-center py-6 bg-white rounded-2xl border border-slate-100">

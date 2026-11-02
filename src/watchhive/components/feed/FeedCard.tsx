@@ -9,6 +9,7 @@ import { SuggestMovieModal } from '../suggestions/SuggestMovieModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 import whLogo from '../../assets/images/watchhive-logo.png';
 import './Feed.css';
 
@@ -130,6 +131,22 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     };
 
     const handleShare = async () => {
+        if (!isSuggestion && entryData && !entryData.isWatching) {
+            const success = await shareCompletedWatch({
+                title,
+                rating: rating ? Number(rating) : null,
+                review: review || null,
+                tmdbId: targetTmdbId,
+                mediaType: (item.data as any)?.type === 'TV_SHOW' ? 'tv' : 'movie',
+                username: displayName || username,
+            });
+            if (success) {
+                setShowShareFeedback(true);
+                setTimeout(() => setShowShareFeedback(false), 2000);
+            }
+            return;
+        }
+
         const shareTitle = 'WatchersHive';
         const shareText = isSuggestion
             ? `Check out this recommendation for "${title}" on WatchersHive! ✨`

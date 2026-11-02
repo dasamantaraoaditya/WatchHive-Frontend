@@ -383,7 +383,7 @@ export const SearchUsersPage: React.FC = () => {
                                 handleSelectTerm(query.trim());
                             }
                         }}
-                        placeholder="Search movies, TV shows, cinephiles..."
+                        placeholder="Search movies, TV shows, friends & people..."
                         className="w-full py-4 pl-14 pr-12 text-base md:text-lg bg-white border-2 border-black/5 rounded-full shadow-lg shadow-black/5 text-[#2D2926] font-bold outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all placeholder:text-slate-300 placeholder:font-bold"
                     />
                     {query.trim().length > 0 && (
@@ -420,7 +420,7 @@ export const SearchUsersPage: React.FC = () => {
                             )}
                             <span className="relative z-10 flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-base">movie</span>
-                                Media ({movieResults.length})
+                                Movies &amp; Shows ({movieResults.length})
                             </span>
                         </button>
                         <button
@@ -435,7 +435,7 @@ export const SearchUsersPage: React.FC = () => {
                             )}
                             <span className="relative z-10 flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-base">group</span>
-                                People ({userResults.length})
+                                Friends &amp; People ({userResults.length})
                             </span>
                         </button>
                     </div>
@@ -665,7 +665,7 @@ export const SearchUsersPage: React.FC = () => {
                             ) : userResults.length === 0 ? (
                                 <div className="py-16 text-center">
                                     <EmptyState
-                                        title="No users found"
+                                        title="No friends or people found"
                                         message={`Try searching with another username or name.`}
                                         icon={<span className="material-symbols-outlined text-5xl text-slate-300">person_search</span>}
                                     />
@@ -793,13 +793,13 @@ export const SearchUsersPage: React.FC = () => {
                         </section>
                     )}
 
-                    {/* 2. Suggested Cinephiles Section */}
+                    {/* 2. Suggested Friends Section */}
                     <section className="flex flex-col gap-3">
                         <div className="flex items-center justify-between px-1">
                             <div className="flex items-center gap-2">
                                 <span className="material-symbols-outlined text-xl text-[#ffb700]">stars</span>
                                 <h2 className="text-lg font-black text-[#2D2926] tracking-tight">
-                                    Suggested Cinephiles 🐝
+                                    Suggested Friends 🐝
                                 </h2>
                             </div>
                             {suggestedUsers.length > 0 && (
