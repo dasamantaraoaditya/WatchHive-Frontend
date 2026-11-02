@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import userService from '../../services/userService';
@@ -46,6 +47,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
 }) => {
     if (!isOpen) return null;
 
+    const navigate = useNavigate();
     const { user: currentUser } = useAuth();
 
     // Movie Search State
@@ -409,8 +411,31 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                         <BeeLoader size="small" message="Loading followers..." />
                                     </div>
                                 ) : friends.length === 0 ? (
+                                    <div className="p-4 text-center bg-amber-50/60 rounded-2xl border border-amber-200/70 flex flex-col items-center gap-2">
+                                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-[#ffb700]">
+                                            <span className="material-symbols-outlined text-lg">group_add</span>
+                                        </div>
+                                        <div>
+                                            <h5 className="text-xs font-black text-[#2D2926]">No friends in your hive yet</h5>
+                                            <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                                                Find friends to follow and start sharing movie suggestions!
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                onClose();
+                                                navigate('/watch-hive/search?tab=people');
+                                            }}
+                                            className="mt-1 px-3.5 py-1.5 bg-[#ffb700] hover:bg-[#e5a600] text-white text-xs font-black rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">person_search</span>
+                                            <span>Find Friends to Follow</span>
+                                        </button>
+                                    </div>
+                                ) : filteredFriends.length === 0 ? (
                                     <div className="p-4 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-2xl border border-slate-200">
-                                        No followers yet. When friends follow you, you can suggest movies to them!
+                                        No followers found matching "{friendSearch}"
                                     </div>
                                 ) : (
                                     <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-1">
