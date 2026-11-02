@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { suggestionsApi, GroupedSuggestion, SmartSuggestItem } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import { SuggestionCard } from './SuggestionCard';
@@ -24,6 +25,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
     searchQuery = '',
     onSearchChange
 }) => {
+    const navigate = useNavigate();
     const [subTab, setSubTab] = useState<'smart' | 'received' | 'sent'>('smart');
     const [smartMode, setSmartMode] = useState<'social' | 'critic' | 'explore'>('social');
     const [smartItems, setSmartItems] = useState<SmartSuggestItem[]>([]);
@@ -380,13 +382,22 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                                         ? "When your friends suggest movies or shows to you, they will appear here!"
                                         : "You haven't suggested any movies or shows to friends yet. Use 'Suggest to Friends' to share your favorite titles!")}
                             </p>
-                            <button
-                                onClick={() => setIsSuggestModalOpen(true)}
-                                className="bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black py-3.5 px-6 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-[#ffb700]/20 flex items-center gap-2 cursor-pointer"
-                            >
-                                <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                                <span>Suggest a Movie to Friends</span>
-                            </button>
+                            <div className="flex flex-wrap items-center justify-center gap-3">
+                                <button
+                                    onClick={() => setIsSuggestModalOpen(true)}
+                                    className="bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black py-3 px-5 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-[#ffb700]/20 flex items-center gap-2 cursor-pointer"
+                                >
+                                    <span className="material-symbols-outlined text-lg">auto_awesome</span>
+                                    <span>Suggest to Friends</span>
+                                </button>
+                                <button
+                                    onClick={() => navigate('/watch-hive/search?tab=people')}
+                                    className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-black py-3 px-5 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-2xs flex items-center gap-2 cursor-pointer"
+                                >
+                                    <span className="material-symbols-outlined text-lg text-[#ffb700]">person_search</span>
+                                    <span>Find Friends to Follow</span>
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <>

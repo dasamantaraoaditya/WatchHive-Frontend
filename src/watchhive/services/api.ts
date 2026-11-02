@@ -76,6 +76,7 @@ export class ApiClient {
             headers: {
                 'Content-Type': 'application/json',
             },
+            withCredentials: true,
         });
 
         // Load tokens from localStorage
