@@ -119,7 +119,7 @@ jobs:
         # Verifies that no sensitive backend credentials or env variables were leaked into dist/
         run: |
           echo "Auditing client JS/CSS bundles for accidental credential leakage..."
-          if grep -rnEi "(DATABASE_URL|POSTGRES_PASSWORD|AWS_SECRET_ACCESS_KEY|JWT_SECRET)" dist/assets/; then
+          if grep -rnEi "(DATABASE_URL|POSTGRES_PASSWORD|AWS_SECRET_ACCESS_KEY|JWT_SECRET|JWT_REFRESH_SECRET|GOCSPX|CLOUDINARY_API_SECRET|SENDGRID_API_KEY|RESEND_API_KEY|VAPID_PRIVATE_KEY|FIREBASE_SERVICE_ACCOUNT|SMTP_PASS)" dist/assets/; then
             echo "❌ CRITICAL SECURITY ERROR: Private credential variable detected in client bundle!"
             exit 1
           fi
