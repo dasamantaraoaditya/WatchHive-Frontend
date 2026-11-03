@@ -695,9 +695,16 @@ export const SearchUsersPage: React.FC = () => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className="text-xs font-semibold text-[#ffb700] tracking-tight">
-                                                        @{user.username}
-                                                    </p>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <p className="text-xs font-semibold text-[#ffb700] tracking-tight">
+                                                            @{user.username}
+                                                        </p>
+                                                        {user.isFollower && (
+                                                            <span className="px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-[10px] font-black text-amber-800 tracking-wide">
+                                                                Follows you
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     {user.bio && (
                                                         <p className="text-xs text-slate-400 truncate mt-0.5 max-w-sm">
                                                             {user.bio}
@@ -848,6 +855,14 @@ export const SearchUsersPage: React.FC = () => {
                                             <p className="text-[10px] font-semibold text-slate-400 truncate w-full" title={`@${user.username}`}>
                                                 @{user.username.length > 10 ? `${user.username.slice(0, 10)}...` : user.username}
                                             </p>
+                                            {user.suggestionReason && (
+                                                <div className="mt-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/60 text-[9px] font-extrabold text-amber-900 truncate max-w-full inline-flex items-center justify-center gap-1">
+                                                    <span className="material-symbols-outlined text-[10px] text-[#ffb700]">
+                                                        {user.suggestionReason.includes('mutual') ? 'group' : user.suggestionReason.includes('Follows') ? 'person_check' : user.suggestionReason.includes('movie') || user.suggestionReason.includes('taste') ? 'movie' : 'stars'}
+                                                    </span>
+                                                    <span className="truncate">{user.suggestionReason}</span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <button

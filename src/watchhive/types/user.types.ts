@@ -36,6 +36,8 @@ export interface User {
     isRequested?: boolean;
     isIncomingRequest?: boolean;
     incomingRequestId?: string | null;
+    suggestionReason?: string;
+    mutualFriendsCount?: number;
     _count?: {
         followers: number;
         following: number;
