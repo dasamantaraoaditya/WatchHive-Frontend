@@ -8,7 +8,7 @@ import { WatchPreferencesModal } from './components/onboarding/WatchPreferencesM
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage, MovieDetailsPage, WatchHistoryComparePage, SupportPage } from './pages';
+import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage, MovieDetailsPage, WatchHistoryComparePage, SupportPage, VerifyEmailPage } from './pages';
 import { ScrollToTop } from './components/common';
 import './index.css';
 
@@ -138,6 +138,10 @@ const AppRoutes: React.FC = () => {
                     path="/watch-hive/reset-password"
                     element={<ResetPasswordPage />}
                 />
+                <Route
+                    path="/watch-hive/verify-email"
+                    element={<VerifyEmailPage />}
+                />
 
                 {/* Protected Routes */}
                 <Route
@@ -251,6 +255,7 @@ const AppRoutes: React.FC = () => {
                 {/* Clean Root / Deep Link Redirect Aliases */}
                 <Route path="/signup" element={<LegacyUrlRedirect />} />
                 <Route path="/login" element={<LegacyUrlRedirect />} />
+                <Route path="/verify-email" element={<LegacyUrlRedirect />} />
                 <Route path="/privacy" element={<LegacyUrlRedirect />} />
                 <Route path="/support" element={<LegacyUrlRedirect />} />
                 <Route path="/feed" element={<LegacyUrlRedirect />} />

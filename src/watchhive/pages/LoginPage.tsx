@@ -20,6 +20,8 @@ export const LoginPage: React.FC = () => {
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
     // When true, the user has a Google-only account and should use Google Sign-In
     const [isGoogleOnlyAccount, setIsGoogleOnlyAccount] = useState(false);
+    // When populated, the user has not verified their email yet
+    const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -27,8 +29,11 @@ export const LoginPage: React.FC = () => {
         if (errors[name as keyof typeof errors]) {
             setErrors((prev) => ({ ...prev, [name]: undefined }));
         }
-        // Clear the google-only state when user types a different email
-        if (name === 'email') setIsGoogleOnlyAccount(false);
+        // Clear the banners when user types a different email
+        if (name === 'email') {
+            setIsGoogleOnlyAccount(false);
+            setUnverifiedEmail(null);
+        }
     };
 
     const validate = () => {
@@ -51,6 +56,7 @@ export const LoginPage: React.FC = () => {
         setIsLoading(true);
         setErrors({});
         setIsGoogleOnlyAccount(false);
+        setUnverifiedEmail(null);
         try {
             await login(formData);
             navigate('/watch-hive/feed');
@@ -59,6 +65,10 @@ export const LoginPage: React.FC = () => {
             if (data?.code === 'google_only_account') {
                 // Structured error: the account exists but has no password (Google-only)
                 setIsGoogleOnlyAccount(true);
+                setErrors({});
+            } else if (data?.code === 'email_not_verified') {
+                // Structured error: account pending email verification
+                setUnverifiedEmail(data?.email || formData.email);
                 setErrors({});
             } else {
                 let errorMsg = data?.error || data?.message;
@@ -143,6 +153,30 @@ export const LoginPage: React.FC = () => {
                         <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-start gap-3 text-rose-600 text-[14px] font-bold">
                             <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
                             <span>{errors.general}</span>
+                        </div>
+                    )}
+
+                    {/* Email not verified banner */}
+                    {unverifiedEmail && (
+                        <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col gap-3">
+                            <div className="flex items-start gap-3">
+                                <span className="material-symbols-outlined text-amber-600 text-[20px] shrink-0 mt-0.5">mark_email_unread</span>
+                                <div>
+                                    <p className="text-[14px] font-bold text-amber-900">Email Verification Required</p>
+                                    <p className="text-[12px] font-medium text-amber-700/90 mt-0.5">
+                                        Please verify your email address to log in. Check your inbox for the 6-digit verification code.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="ml-8">
+                                <Link
+                                    to={`/watch-hive/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#ffb700] hover:bg-[#e6a500] text-[#2D2926] text-[13px] font-black transition-colors shadow-sm"
+                                >
+                                    <span>Verify Email Now</span>
+                                    <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                                </Link>
+                            </div>
                         </div>
                     )}
 
