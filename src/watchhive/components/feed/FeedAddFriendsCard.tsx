@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { User } from '../../types';
 import { Avatar } from '../common';
 import { useNavigate } from 'react-router-dom';
@@ -15,8 +15,21 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
     onDismiss,
 }) => {
     const navigate = useNavigate();
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({});
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
+
+    const scrollLeft = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({ left: -220, behavior: 'smooth' });
+        }
+    };
+
+    const scrollRight = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({ left: 220, behavior: 'smooth' });
+        }
+    };
 
     const handleFollowClick = async (targetId: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -31,6 +44,11 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
         } finally {
             setLoadingMap(prev => ({ ...prev, [targetId]: false }));
         }
+    };
+
+    const handleProfileClick = (targetId: string) => {
+        if (!targetId) return;
+        navigate(`/watch-hive/profile/${targetId}`);
     };
 
     return (
@@ -58,7 +76,7 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
                     type="button"
                     onClick={onDismiss}
                     aria-label="Dismiss banner"
-                    className="shrink-0 p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors"
+                    className="shrink-0 p-1.5 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors cursor-pointer"
                     title="Dismiss"
                 >
                     <span className="material-symbols-outlined text-[18px]">close</span>
@@ -73,21 +91,47 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
                             <span className="material-symbols-outlined text-[14px] text-amber-600">auto_awesome</span>
                             Suggested Friends to Follow
                         </span>
-                        <span className="text-[11px] text-slate-500 font-medium">
-                            {suggestedUsers.length} cinephiles
-                        </span>
+                        <div className="flex items-center gap-1">
+                            {suggestedUsers.length > 2 && (
+                                <div className="flex items-center gap-0.5 mr-1">
+                                    <button
+                                        type="button"
+                                        onClick={scrollLeft}
+                                        className="p-1 rounded-full hover:bg-amber-100 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+                                        title="Scroll left"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={scrollRight}
+                                        className="p-1 rounded-full hover:bg-amber-100 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+                                        title="Scroll right"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                                    </button>
+                                </div>
+                            )}
+                            <span className="text-[11px] text-slate-500 font-medium">
+                                {suggestedUsers.length} cinephiles
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="flex gap-3 overflow-x-auto pb-2 pt-1 scrollbar-none snap-x snap-mandatory -mx-1 px-1">
+                    <div
+                        ref={scrollContainerRef}
+                        className="flex gap-3 overflow-x-auto pb-2 pt-1 scrollbar-none snap-x snap-mandatory -mx-1 px-1 scroll-smooth"
+                    >
                         {suggestedUsers.map((u) => {
-                            const isFollowing = followingMap[u.id];
-                            const isLoading = loadingMap[u.id];
+                            const isFollowing = followingMap[u.id] ?? (u as any).isFollowing ?? false;
+                            const isLoading = loadingMap[u.id] ?? false;
                             const reason = (u as any).suggestionReason || u.bio || 'Active Cinephile';
 
                             return (
                                 <div
                                     key={u.id}
-                                    onClick={() => navigate(`/watch-hive/users/${u.id}`)}
+                                    onClick={() => handleProfileClick(u.id)}
+                                    title={`View @${u.username}'s profile`}
                                     className="snap-start shrink-0 w-[170px] sm:w-[185px] bg-white rounded-xl p-3 border border-amber-100/80 shadow-xs hover:shadow-md hover:border-amber-300 transition-all cursor-pointer flex flex-col justify-between items-center text-center group"
                                 >
                                     <div className="flex flex-col items-center w-full">
@@ -96,11 +140,11 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
                                                 src={u.profilePictureUrl || null}
                                                 name={u.displayName || u.username}
                                                 size="md"
-                                                className="ring-2 ring-amber-100 group-hover:ring-amber-300 transition-all"
+                                                className="ring-2 ring-amber-100 group-hover:ring-amber-300 transition-all cursor-pointer"
                                             />
                                         </div>
 
-                                        <p className="text-xs font-bold text-slate-800 truncate w-full line-clamp-1">
+                                        <p className="text-xs font-bold text-slate-800 truncate w-full line-clamp-1 group-hover:text-amber-700 transition-colors">
                                             {u.displayName || u.username}
                                         </p>
                                         <p className="text-[11px] text-slate-400 truncate w-full">
@@ -116,7 +160,7 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
                                         type="button"
                                         disabled={isLoading || isFollowing}
                                         onClick={(e) => handleFollowClick(u.id, e)}
-                                        className={`mt-3 w-full py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+                                        className={`mt-3 w-full py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
                                             isFollowing
                                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-default'
                                                 : isLoading
@@ -150,18 +194,18 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
                 <button
                     type="button"
                     onClick={() => navigate('/watch-hive/search')}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-900 bg-amber-100/60 hover:bg-amber-200/60 px-3 py-1.5 rounded-lg border border-amber-300/60 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 hover:text-amber-900 bg-amber-100/60 hover:bg-amber-200/60 px-3 py-1.5 rounded-lg border border-amber-300/60 transition-colors cursor-pointer"
                 >
                     <span className="material-symbols-outlined text-[15px]">person_search</span>
-                    Find More People
+                    Add Friends
                 </button>
 
                 <button
                     type="button"
                     onClick={onDismiss}
-                    className="text-xs font-medium text-slate-500 hover:text-slate-700 px-2 py-1 transition-colors"
+                    className="text-xs font-medium text-slate-500 hover:text-slate-700 px-2 py-1 transition-colors cursor-pointer"
                 >
-                    Maybe Later
+                    Cancel
                 </button>
             </div>
         </div>

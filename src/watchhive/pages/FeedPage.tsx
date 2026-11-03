@@ -194,8 +194,8 @@ export const FeedPage: React.FC = () => {
                         {/* SmartSuggest Hero Spark Card */}
                         <SmartSuggestHeroCard />
 
-                        {/* Diversify Hive Feed & Suggested Friends for new users with 0 followers/following */}
-                        {!isFriendsBannerDismissed && user?.id && (followStats === null || followStats.followingCount === 0 || followStats.followersCount === 0) && suggestedUsers.length > 0 && (
+                        {/* Diversify Hive Feed & Suggested Friends for new users with 0 following */}
+                        {!isFriendsBannerDismissed && user?.id && (followStats === null || followStats.followingCount === 0) && suggestedUsers.length > 0 && (
                             <FeedAddFriendsCard
                                 suggestedUsers={suggestedUsers}
                                 onFollow={handleFollow}
