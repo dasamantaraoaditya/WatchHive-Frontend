@@ -360,18 +360,18 @@ export const ProfilePage: React.FC = () => {
                     </div>
                     
                     {/* Buttons Container */}
-                    <div className="flex flex-row md:flex-col gap-2.5 w-full md:w-auto h-full justify-center md:pt-4">
+                    <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto md:min-w-[190px] shrink-0 justify-center md:pt-4">
                         <button 
                             onClick={() => setIsEditingBio(true)} 
-                            className="flex-1 md:w-44 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-bold py-3 rounded-xl transition-all text-[13px] shadow-md shadow-[#ffb700]/20 flex items-center justify-center gap-2 cursor-pointer"
+                            className="w-full sm:w-auto md:w-44 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-bold py-3 px-4 rounded-xl transition-all text-[13px] shadow-md shadow-[#ffb700]/20 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
                         >
                             <span className="material-symbols-outlined text-[18px]">edit</span>
                             <span>Edit Profile</span>
                         </button>
-                        <div className="flex items-center gap-2 flex-1 md:w-44">
+                        <div className="flex items-center gap-2 w-full sm:w-auto md:w-44">
                             <button 
                                 onClick={() => navigate(`/watch-hive/profile/${user.id}?preview=true`)} 
-                                className="flex-1 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all text-[13px] flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                                className="flex-1 bg-white border border-slate-200 text-slate-700 font-bold py-3 px-3 rounded-xl hover:bg-slate-50 transition-all text-[13px] flex items-center justify-center gap-2 shadow-sm cursor-pointer whitespace-nowrap"
                                 title="View your public profile as others see it"
                             >
                                 <span className="material-symbols-outlined text-[18px]">visibility</span>

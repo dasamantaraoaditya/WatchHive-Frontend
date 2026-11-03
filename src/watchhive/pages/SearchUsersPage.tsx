@@ -712,14 +712,14 @@ export const SearchUsersPage: React.FC = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-3 shrink-0">
                                                 <button
                                                     type="button"
                                                     onClick={(e) => handleFollowToggle(e, user)}
                                                     onMouseEnter={() => setHoveredRequestedUserId(user.id)}
                                                     onMouseLeave={() => setHoveredRequestedUserId(null)}
                                                     disabled={followingLoadingMap[user.id]}
-                                                    className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                                                    className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                                                         user.isFollowing
                                                             ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                                             : user.isRequested
