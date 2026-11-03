@@ -44,9 +44,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const register = async (data: RegisterData) => {
-        const response = await authService.register(data);
+        return authService.register(data);
+    };
+
+    const verifyEmail = async (token: string, email?: string) => {
+        const response = await authService.verifyEmail(token, email);
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
+        return response;
+    };
+
+    const resendVerification = async (email: string) => {
+        return authService.resendVerification(email);
     };
 
     const googleLogin = async (idToken: string) => {
@@ -96,6 +105,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         login,
         register,
+        verifyEmail,
+        resendVerification,
         googleLogin,
         logout,
         updateUser,
