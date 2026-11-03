@@ -65,12 +65,22 @@ export const SignupPage: React.FC = () => {
         setIsLoading(true);
         setErrors({});
         try {
-            await register(formData);
-            navigate('/watch-hive/feed');
-        } catch (error: any) {
-            setErrors({
-                general: error.response?.data?.error || 'Registration failed. Please try again.',
+            const result = await register(formData);
+            navigate(`/watch-hive/verify-email?email=${encodeURIComponent(formData.email)}`, {
+                state: { email: formData.email, message: result?.message }
             });
+        } catch (error: any) {
+            const data = error.response?.data;
+            if (data?.code === 'email_already_registered') {
+                setErrors({
+                    email: data?.error || 'This email is already registered. Please sign in.',
+                    general: data?.error || 'This email is already registered. Please sign in.',
+                });
+            } else {
+                setErrors({
+                    general: data?.error || 'Registration failed. Please try again.',
+                });
+            }
         } finally {
             setIsLoading(false);
         }
@@ -134,9 +144,22 @@ export const SignupPage: React.FC = () => {
                     <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#ffb700] to-transparent opacity-50"></div>
 
                     {errors.general && (
-                        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-start gap-3 text-rose-600 text-[14px] font-bold">
-                            <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
-                            <span>{errors.general}</span>
+                        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex flex-col gap-2 text-rose-600 text-[14px] font-bold">
+                            <div className="flex items-start gap-3">
+                                <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
+                                <span>{errors.general}</span>
+                            </div>
+                            {errors.general.toLowerCase().includes('already registered') && (
+                                <div className="ml-8 pt-1">
+                                    <Link
+                                        to={`/watch-hive/login?email=${encodeURIComponent(formData.email)}`}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 text-white text-[13px] font-bold hover:bg-rose-700 transition-colors shadow-sm"
+                                    >
+                                        <span>Sign in to your account</span>
+                                        <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                                    </Link>
+                                </div>
+                            )}
                         </div>
                     )}
 
