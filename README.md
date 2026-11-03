@@ -12,8 +12,9 @@ WatchHive Frontend is the user-facing web portal for the WatchersHive platform. 
 - **Cinematic Watch Logging**: Log ratings, tags, watch dates, and reviews with live TMDb search integration.
 - **Activity & Social Discovery**: Follow friends, discover trending movies across the community, and interact via likes and comments.
 - **SmartSuggest AI Recommendations**: Hybrid algorithmic recommendation engine balancing friend recommendations, public ratings, user preferences, and diversity nudges.
-- **MindLens 2.0 Behavioral Intelligence**: Interactive telemetry visualizing Shannon Information Entropy ($H(G)$) for taste breadth, Russell's Circumplex Affective State, and Bayesian Recommender Trust. Documented in [MINDLENS_SPECIFICATION.md](docs/MINDLENS_SPECIFICATION.md).
-- **Master Features & Logic Wiki**: Complete architectural documentation of all 14 core features, mathematical models, and edge cases in [FEATURES_AND_LOGIC_WIKI.md](docs/FEATURES_AND_LOGIC_WIKI.md).
+- **Web & PWA Architecture**: Comprehensive component-service architecture, Context API state management, PWA service workers, and interactive diagrams in [ARCHITECTURE.md](docs/ARCHITECTURE.md) (and [Interactive Architecture Viewer](docs/architecture-viewer.html)).
+- **UI/UX Design Standards & Design System**: Definitive specification of WatchersHive warm honey cream palette, CSS variables, fluid typography, WCAG AA contrast rules, and web component blueprints in [UI_UX_DESIGN_STANDARDS.md](docs/UI_UX_DESIGN_STANDARDS.md).
+- **Backend Business Logic & MindLens Specifications**: For complete algorithmic specifications, mathematical formulations ($H(G)$ Shannon Entropy, Bayesian Trust), and database schemas, refer to the [WatchHive Backend Repository](https://github.com/dasamantaraoaditya/WatchHive-Backend).
 - **Offline-First PWA Experience**: Installable as a native desktop/mobile app with offline caching and automatic synchronization when reconnected.
 
 ---
