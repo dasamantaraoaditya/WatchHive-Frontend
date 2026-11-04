@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /watch-hive/
+Allow: /watch-hive/details/
+Allow: /watch-hive/privacy
+Allow: /watch-hive/login
+Allow: /watch-hive/signup
+
+Sitemap: https://www.watchershive.com/sitemap.xml
