@@ -46,8 +46,12 @@ export const authService = {
     },
 
     /** Request a password reset email for the given address */
-    async forgotPassword(email: string): Promise<{ message: string }> {
-        return apiClient.post<{ message: string }>('/auth/forgot-password', { email });
+    async forgotPassword(email: string): Promise<{ message: string; emailSent?: boolean }> {
+        const res = await apiClient.post<{ message: string; emailSent?: boolean }>('/auth/forgot-password', { email });
+        if (res && res.emailSent === false) {
+            throw new Error(res.message || 'Failed to dispatch password reset email. The email service could not deliver the message.');
+        }
+        return res;
     },
 
     /** Complete a password reset using the token from the reset email link */
