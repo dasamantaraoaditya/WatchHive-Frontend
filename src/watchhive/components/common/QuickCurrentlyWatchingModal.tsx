@@ -3,7 +3,8 @@ import { Modal } from './Modal';
 import { BeeLoader, ModalBeeOverlay } from './BeeLoader';
 import apiClient from '../../services/api';
 import { entriesApi } from '../../services/entries.service';
-import { useCustomAlert } from '../../contexts';
+import { useCustomAlert, useAuth } from '../../contexts';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 
 interface TmdbResult {
     id: number;
@@ -35,6 +36,7 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     const { alert } = useCustomAlert();
+    const { user } = useAuth();
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Reset state when modal opens/closes
@@ -94,11 +96,22 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
                 startedAt: new Date().toISOString()
             });
 
-            // Display beautiful success alert
+            // Display beautiful success alert with Share CTA
             await alert(`"${title}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
                 severity: 'success',
-                confirmText: 'Awesome'
+                confirmText: 'Done',
+                actionText: 'Share',
+                actionIcon: 'share',
+                onAction: () => {
+                    shareCompletedWatch({
+                        title,
+                        tmdbId: selectedMovie.id,
+                        mediaType: selectedMovie.media_type || 'movie',
+                        username: user?.username,
+                        isWatching: true,
+                    });
+                },
             });
 
             if (onSuccess) onSuccess();

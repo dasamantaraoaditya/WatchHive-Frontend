@@ -16,7 +16,8 @@ export interface Entry {
     tmdbId: number;
     title: string;
     type: 'MOVIE' | 'TV_SHOW' | 'EPISODE';
-    watchedAt: string;
+    watchedAt?: string | null;
+    unspecifiedDate?: boolean;
     rating: number | null;
     review: string | null;
     tags: string[];
@@ -44,7 +45,8 @@ export interface CreateEntryData {
     tmdbId: number;
     title: string;
     type: 'MOVIE' | 'TV_SHOW' | 'EPISODE';
-    watchedAt?: string;
+    watchedAt?: string | null;
+    unspecifiedDate?: boolean;
     rating?: number;
     review?: string;
     tags?: string[];
@@ -60,7 +62,8 @@ export interface CreateEntryData {
 export interface UpdateEntryData {
     title?: string;
     type?: 'MOVIE' | 'TV_SHOW' | 'EPISODE';
-    watchedAt?: string;
+    watchedAt?: string | null;
+    unspecifiedDate?: boolean;
     rating?: number;
     review?: string;
     tags?: string[];

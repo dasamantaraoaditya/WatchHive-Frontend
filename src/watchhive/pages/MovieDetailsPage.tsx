@@ -10,6 +10,7 @@ import { SuggestUserSelector } from '../components/suggestions/SuggestUserSelect
 import { useUI, useCustomAlert } from '../contexts';
 import { entriesApi, Entry } from '../services/entries.service';
 import { formatUserFriendlyError } from '../utils/errorHandler';
+import { shareCompletedWatch } from '../utils/shareHelper';
 
 interface CastMember {
     id: number;
@@ -284,7 +285,17 @@ export const MovieDetailsPage: React.FC = () => {
             await alert(`"${title}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
                 severity: 'success',
-                confirmText: 'Awesome',
+                confirmText: 'Done',
+                actionText: 'Share',
+                actionIcon: 'share',
+                onAction: () => {
+                    shareCompletedWatch({
+                        title,
+                        tmdbId,
+                        mediaType: mediaType || 'movie',
+                        isWatching: true,
+                    });
+                },
             });
         } catch (err) {
             console.error('Failed to add to currently watching log:', err);
@@ -551,7 +562,7 @@ export const MovieDetailsPage: React.FC = () => {
                                                         {userEntry.isWatching ? 'Currently Watching' : 'Your Watch Entry'}
                                                     </h3>
                                                     <p className="text-xs font-bold text-slate-400">
-                                                        {userEntry.isWatching ? 'In your active watching queue' : `Logged on ${formatDate(userEntry.watchedAt)}`}
+                                                        {userEntry.isWatching ? 'In your active watching queue' : (userEntry.watchedAt ? `Logged on ${formatDate(userEntry.watchedAt)}` : 'Logged to your Hive')}
                                                         {userEntry.rating ? ` • Rated ${userEntry.rating} / 10` : ''}
                                                     </p>
                                                 </div>
