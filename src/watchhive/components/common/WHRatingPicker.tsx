@@ -31,14 +31,6 @@ const CHECKPOINTS: MovieCheckpoint[] = [
     { score: 10.0, label: '10 🏆', sublabel: 'Epic', color: '#BFA034' },
 ];
 
-const PRESETS = [
-    { score: 2.0, emoji: '🗑️', label: 'Flop', color: '#EF4444' },
-    { score: 5.0, emoji: '🍿', label: 'Mid', color: '#EAB308' },
-    { score: 7.0, emoji: '👍', label: 'Good', color: '#84CC16' },
-    { score: 8.5, emoji: '🔥', label: 'Great', color: '#10B981' },
-    { score: 10.0, emoji: '🏆', label: 'Epic', color: '#BFA034' },
-];
-
 export function getMoodInfo(rating?: number): WHRatingMoodInfo {
     if (rating === undefined || rating <= 0) {
         return {
@@ -207,15 +199,6 @@ export const WHRatingPicker: React.FC<WHRatingPickerProps> = ({
             e.preventDefault();
             const nextScore = Math.max(0, Math.min(10, Math.round(((rating ?? 0) + delta) * 10) / 10));
             onRatingChanged(nextScore === 0 ? undefined : nextScore);
-        }
-    };
-
-    const handlePresetClick = (target: number) => {
-        if (!enabled) return;
-        if (rating !== undefined && Math.abs(rating - target) < 0.05) {
-            onRatingChanged(undefined);
-        } else {
-            onRatingChanged(target);
         }
     };
 
@@ -418,73 +401,6 @@ export const WHRatingPicker: React.FC<WHRatingPickerProps> = ({
             >
                 <span className="material-symbols-outlined text-[17px] shrink-0">{mood.icon}</span>
                 <span className="text-xs font-black tracking-wide truncate">{mood.text}</span>
-            </div>
-
-            {/* ── 4. Quick Snap Presets Header & Action Cue ── */}
-            <div className="flex items-center justify-between mb-1.5 px-0.5">
-                <div className="flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-xs text-[#ffb700]">touch_app</span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2D2926]/50 dark:text-white/50">
-                        Quick Snap Presets
-                    </span>
-                </div>
-                <div className="flex items-center gap-1 text-[9.5px] font-bold text-[#2D2926]/40 dark:text-white/40">
-                    <span className="material-symbols-outlined text-[11px] text-[#ffb700]">bolt</span>
-                    <span>Tap to set instantly</span>
-                </div>
-            </div>
-
-            {/* ── Contained In-Box Quick Snap Presets ── */}
-            <div className="grid grid-cols-5 gap-1.5 p-1 bg-[#2D2926]/[0.03] dark:bg-white/[0.04] rounded-2xl border border-[#2D2926]/5 dark:border-white/5">
-                {PRESETS.map((preset) => {
-                    const isSelected = isRated && Math.abs(currentScore - preset.score) < 0.05;
-
-                    return (
-                        <button
-                            key={preset.score}
-                            type="button"
-                            disabled={!enabled}
-                            onClick={() => handlePresetClick(preset.score)}
-                            className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all duration-200 border text-center ${
-                                isSelected
-                                    ? 'shadow-sm scale-[1.02]'
-                                    : 'bg-white dark:bg-[#1a160d] hover:bg-[#FFF9F0] dark:hover:bg-white/10'
-                            }`}
-                            style={{
-                                backgroundColor: isSelected ? `${preset.color}15` : undefined,
-                                borderColor: isSelected ? preset.color : 'rgba(45, 41, 38, 0.08)',
-                                boxShadow: isSelected ? `0 2px 8px ${preset.color}35` : undefined,
-                            }}
-                        >
-                            <div className="flex items-center gap-0.5 leading-none mb-0.5">
-                                {isSelected ? (
-                                    <span
-                                        className="w-2.5 h-2.5 rounded-full flex items-center justify-center text-white"
-                                        style={{ backgroundColor: preset.color }}
-                                    >
-                                        <span className="material-symbols-outlined text-[8px] font-black">check</span>
-                                    </span>
-                                ) : (
-                                    <span className="text-[10px]">{preset.emoji}</span>
-                                )}
-                                <span
-                                    className="text-[10.5px] font-black"
-                                    style={{ color: isSelected ? preset.color : undefined }}
-                                >
-                                    {preset.score.toFixed(1)}
-                                </span>
-                            </div>
-                            <span
-                                className="text-[9px] font-extrabold uppercase tracking-tight leading-none"
-                                style={{
-                                    color: isSelected ? preset.color : 'rgba(45, 41, 38, 0.55)',
-                                }}
-                            >
-                                {preset.label}
-                            </span>
-                        </button>
-                    );
-                })}
             </div>
         </div>
     );
