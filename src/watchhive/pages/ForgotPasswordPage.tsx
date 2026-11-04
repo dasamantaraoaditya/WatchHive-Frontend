@@ -96,22 +96,38 @@ export const ForgotPasswordPage: React.FC = () => {
                                         <span>Send Reset Link</span>
                                     )}
                                 </button>
+
+                                <div className="text-center mt-2">
+                                    <Link
+                                        to="/watch-hive/reset-password"
+                                        className="text-[13px] font-bold text-[#ffb700] hover:underline"
+                                    >
+                                        Already have a code? Enter it directly →
+                                    </Link>
+                                </div>
                             </form>
                         </>
                     ) : (
                         /* Success state */
-                        <div className="flex flex-col items-center gap-5 py-2">
+                        <div className="flex flex-col items-center gap-4 py-2">
                             <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center">
                                 <span className="material-symbols-outlined text-emerald-500 text-[32px]">mark_email_read</span>
                             </div>
                             <div className="text-center">
                                 <p className="text-[16px] font-black text-[#2D2926] mb-1">Check your inbox!</p>
-                                <p className="text-[13px] font-medium text-[#2D2926]/50 leading-relaxed">
-                                    If <span className="font-bold text-[#2D2926]/70">{email}</span> is registered, you'll receive a reset link shortly.
+                                <p className="text-[13px] font-medium text-[#2D2926]/60 leading-relaxed">
+                                    A password reset link and 6-digit code have been dispatched to <span className="font-bold text-[#2D2926]">{email}</span>.
                                 </p>
                             </div>
 
-                            <p className="text-[12px] font-medium text-[#2D2926]/40 text-center">
+                            <Link
+                                to={`/watch-hive/reset-password?email=${encodeURIComponent(email)}`}
+                                className="w-full h-13 bg-[#ffb700] text-[#2D2926] font-black text-[15px] rounded-2xl flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.4)] hover:-translate-y-0.5 transition-all mt-2 py-3.5"
+                            >
+                                <span>Enter 6-Digit Code & Set Password →</span>
+                            </Link>
+
+                            <p className="text-[12px] font-medium text-[#2D2926]/40 text-center mt-2">
                                 Didn't receive it? Check your spam folder, or{' '}
                                 <button
                                     type="button"
