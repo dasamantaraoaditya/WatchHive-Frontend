@@ -8,14 +8,21 @@ export interface ShareWatchParams {
     tmdbId?: number | null;
     mediaType?: string;
     username?: string;
+    isWatching?: boolean;
 }
 
 export const shareCompletedWatch = async (params: ShareWatchParams): Promise<boolean> => {
-    const { title, rating, review, tmdbId, mediaType = 'movie', username } = params;
-    const shareTitle = `WatchersHive: Finished watching ${title}`;
+    const { title, rating, review, tmdbId, mediaType = 'movie', username, isWatching = false } = params;
+    const shareTitle = isWatching
+        ? `WatchersHive: Currently watching ${title}`
+        : `WatchersHive: Finished watching ${title}`;
 
-    const prefix = username ? `${username} finished` : 'Just finished';
-    let text = `🍿 ${prefix} watching "${title}" on WatchersHive! 🐝\n`;
+    const prefix = isWatching
+        ? (username ? `${username} is currently watching` : 'Currently watching')
+        : (username ? `${username} finished` : 'Just finished');
+    let text = isWatching
+        ? `📺 ${prefix} "${title}" on WatchersHive! 🐝\n`
+        : `🍿 ${prefix} watching "${title}" on WatchersHive! 🐝\n`;
 
     if (rating != null && Number(rating) > 0) {
         text += `⭐️ Rating: ${Number(rating).toFixed(1)}/10\n`;

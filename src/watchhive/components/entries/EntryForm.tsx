@@ -6,6 +6,8 @@ import { HiveDatePicker } from '../common/HiveDatePicker';
 import { Avatar } from '../common/Avatar';
 import { BeeLoader, ModalBeeOverlay, WHRatingPicker } from '../common';
 import { useAuth } from '../../contexts/AuthContext';
+import { useCustomAlert } from '../../contexts/CustomAlertContext';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 import { userService } from '../../services/userService';
 import { suggestionsApi } from '../../services/suggestions.service';
 
@@ -271,14 +273,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     }, []);
 
     const { user } = useAuth();
+    const { alert } = useCustomAlert();
 
     // ── Form state ──
+    const [hasWatchDate, setHasWatchDate] = useState<boolean>(() => !entry || !!entry.watchedAt);
     const [formData, setFormData] = useState<CreateEntryData>({
         tmdbId: entry?.tmdbId || prefillData?.tmdbId || 0,
         title: entry?.title || prefillData?.title || '',
         type: entry?.type || prefillData?.type || 'MOVIE',
-        watchedAt: entry?.watchedAt
-            ? toLocalISOString(entry.watchedAt)
+        watchedAt: entry
+            ? (entry.watchedAt ? toLocalISOString(entry.watchedAt) : '')
             : toLocalISOString(new Date()),
         rating: entry?.rating || undefined,
         review: entry?.review || '',
@@ -491,11 +495,14 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         try {
             let savedEntry: Entry;
             const payload = { ...formData };
-            if (payload.watchedAt) {
+            if (hasWatchDate && payload.watchedAt) {
                 const d = new Date(payload.watchedAt);
                 const now = new Date();
                 const safeDate = !isNaN(d.getTime()) && d.getTime() > now.getTime() ? now : d;
                 payload.watchedAt = safeDate.toISOString();
+            } else {
+                payload.watchedAt = null;
+                payload.unspecifiedDate = true;
             }
             // If user has provided a rating or review, or is logging a completed watch, ensure isWatching is set to false
             if (payload.rating !== undefined || (payload.review && payload.review.trim().length > 0)) {
@@ -511,6 +518,31 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
             onSuccess?.(savedEntry);
             if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('watchhive:entry-created', { detail: savedEntry }));
+            }
+            if (!isEditing) {
+                await alert(
+                    payload.isWatching
+                        ? `"${savedEntry.title}" has been added to your Currently Watching log!`
+                        : `"${savedEntry.title}" has been successfully logged to your Hive!`,
+                    {
+                        title: payload.isWatching ? 'Marked as Watching' : 'Watch Logged',
+                        severity: 'success',
+                        confirmText: 'Done',
+                        actionText: 'Share',
+                        actionIcon: 'share',
+                        onAction: () => {
+                            shareCompletedWatch({
+                                title: savedEntry.title,
+                                rating: savedEntry.rating,
+                                review: savedEntry.review,
+                                tmdbId: savedEntry.tmdbId,
+                                mediaType: savedEntry.type === 'TV_SHOW' ? 'tv' : 'movie',
+                                username: user?.username,
+                                isWatching: !!payload.isWatching,
+                            });
+                        },
+                    }
+                );
             }
         } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to save entry');
@@ -709,11 +741,73 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
                             {/* Date Picker & Switches */}
                             <div className="flex flex-col gap-3.5 p-4 sm:p-5 bg-white dark:bg-[#221c13] border border-[#ffb700]/25 rounded-3xl shadow-sm">
-                                <HiveDatePicker
-                                    label="When did you watch this?"
-                                    value={formData.watchedAt}
-                                    onChange={(val: string) => setFormData((prev) => ({ ...prev, watchedAt: val || toLocalISOString(new Date()) }))}
-                                />
+                                <div className="flex items-center justify-between gap-2">
+                                    <label className="text-xs font-black uppercase tracking-wider text-[#2D2926]/70 dark:text-white/70">
+                                        When did you watch this?
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (hasWatchDate) {
+                                                setHasWatchDate(false);
+                                                setFormData((prev) => ({ ...prev, watchedAt: '' }));
+                                            } else {
+                                                setHasWatchDate(true);
+                                                setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
+                                            }
+                                        }}
+                                        className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+                                            !hasWatchDate
+                                                ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                                                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700'
+                                        }`}
+                                    >
+                                        <span className="material-symbols-outlined text-[14px]">
+                                            {!hasWatchDate ? 'calendar_today' : 'history_toggle_off'}
+                                        </span>
+                                        {!hasWatchDate ? 'Set Date' : "Don't know when"}
+                                    </button>
+                                </div>
+
+                                {hasWatchDate ? (
+                                    <HiveDatePicker
+                                        value={formData.watchedAt}
+                                        onChange={(val: string) => {
+                                            if (!val) {
+                                                setHasWatchDate(false);
+                                                setFormData((prev) => ({ ...prev, watchedAt: '' }));
+                                            } else {
+                                                setFormData((prev) => ({ ...prev, watchedAt: val }));
+                                            }
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="flex items-center justify-between p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl animate-fade-in">
+                                        <div className="flex items-center gap-2.5 min-w-0">
+                                            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
+                                                <span className="material-symbols-outlined text-[18px]">history_toggle_off</span>
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="text-xs font-black text-amber-950 dark:text-amber-100">
+                                                    No specific watch date recorded
+                                                </span>
+                                                <span className="text-[11px] font-medium text-amber-800/80 dark:text-amber-300/80 truncate">
+                                                    Logged as past watch without an exact date or screening time
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setHasWatchDate(true);
+                                                setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
+                                            }}
+                                            className="px-3 py-1 bg-[#ffb700] text-stone-900 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 active:scale-95 transition-all cursor-pointer shrink-0 ml-2"
+                                        >
+                                            Set Date
+                                        </button>
+                                    </div>
+                                )}
 
                                 {/* Dividing Line with Title */}
                                 <div className="flex items-center gap-2 pt-1 pb-0.5">

@@ -7,6 +7,7 @@ import { SkeletonCard, Modal, CardDropdownMenu, Avatar } from '../common';
 import { EntryForm } from '../entries/EntryForm';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 
 interface SuggestionCardProps {
@@ -143,7 +144,17 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
             await alert(`"${title}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
                 severity: 'success',
-                confirmText: 'Awesome'
+                confirmText: 'Done',
+                actionText: 'Share',
+                actionIcon: 'share',
+                onAction: () => {
+                    shareCompletedWatch({
+                        title,
+                        tmdbId: group.tmdbId,
+                        mediaType: group.mediaType === 'tv' ? 'tv' : 'movie',
+                        isWatching: true,
+                    });
+                },
             });
             onStatusChange?.();
         } catch (err) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface HiveDatePickerProps {
-    value?: string; // Format: YYYY-MM-DDTHH:mm
+    value?: string | null; // Format: YYYY-MM-DDTHH:mm
     onChange: (newValue: string) => void;
     label?: string;
 }
@@ -11,7 +11,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
     const [isOpen, setIsOpen] = useState(false);
 
     // Parse value to a local Date object, defaulting to current date-time
-    const parseValue = (val?: string): Date => {
+    const parseValue = (val?: string | null): Date => {
         if (!val) return new Date();
         try {
             const [datePart, timePart] = val.split('T');
@@ -50,8 +50,8 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
     }, [value]);
 
     // Format display string for the button, e.g., "Tue, Nov 3, 2026 • 12:19 AM"
-    const formatDisplay = (val?: string) => {
-        if (!val) return 'Select Date and Time';
+    const formatDisplay = (val?: string | null) => {
+        if (!val) return 'No specific date (Watched in past)';
         try {
             const date = parseValue(val);
             const dateFormatted = date.toLocaleDateString(undefined, {
@@ -67,7 +67,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
             });
             return `${dateFormatted} • ${timeFormatted}`;
         } catch {
-            return 'Select Date and Time';
+            return 'No specific date (Watched in past)';
         }
     };
 
@@ -357,6 +357,17 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                             className="px-3 py-1.5 bg-[#FFF9F0] dark:bg-[#251E17] text-[#2D2926] dark:text-[#EAE6DF] hover:bg-[#ffb700] hover:text-[#2D2926] dark:hover:bg-[#ffb700] dark:hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
                                         >
                                             Yesterday
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                onChange('');
+                                                setIsOpen(false);
+                                            }}
+                                            className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer flex items-center gap-1"
+                                        >
+                                            <span className="material-symbols-outlined text-[13px]">history_toggle_off</span>
+                                            Don't know when
                                         </button>
                                     </div>
                                 </div>

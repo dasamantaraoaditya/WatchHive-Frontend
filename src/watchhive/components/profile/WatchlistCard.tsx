@@ -7,6 +7,7 @@ import { entriesApi } from '../../services/entries.service';
 import { EntryForm } from '../entries/EntryForm';
 import './Profile.css';
 import { useCustomAlert } from '../../contexts';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 
 interface WatchlistCardProps {
     tmdbId: number;
@@ -76,11 +77,21 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
             // Remove from watchlist
             await removeFromList(tmdbId);
 
-            // Display beautiful success alert
-            await alert(`"${title}" has been added to your Currently Watching log!`, {
+            // Display beautiful success alert with Share CTA
+            await alert(`"${resolvedTitle}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
                 severity: 'success',
-                confirmText: 'Awesome'
+                confirmText: 'Done',
+                actionText: 'Share',
+                actionIcon: 'share',
+                onAction: () => {
+                    shareCompletedWatch({
+                        title: resolvedTitle,
+                        tmdbId,
+                        mediaType,
+                        isWatching: true,
+                    });
+                },
             });
         } catch (err) {
             console.error('Failed to move item to currently watching', err);
