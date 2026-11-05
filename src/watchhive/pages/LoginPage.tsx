@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts';
 import { GoogleSignInButton } from '../components/auth';
 import { BeeLoader, SigningInOverlay } from '../components/common';
@@ -7,78 +7,82 @@ import whLogo from '../assets/images/watchhive-logo.png';
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
-    const { login, googleLogin } = useAuth();
-    const emailInputRef = useRef<HTMLInputElement>(null);
+    const [searchParams] = useSearchParams();
+    const { googleLogin, requestEmailOtp, verifyEmailOtp } = useAuth();
 
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
+    const [email, setEmail] = useState(searchParams.get('email') || '');
+    const [code, setCode] = useState('');
+    const [step, setStep] = useState<'email' | 'code'>('email');
+    const [isNewUser, setIsNewUser] = useState(false);
 
-    const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+    const [error, setError] = useState<string | null>(null);
+    const [infoMessage, setInfoMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-    // When true, the user has a Google-only account and should use Google Sign-In
-    const [isGoogleOnlyAccount, setIsGoogleOnlyAccount] = useState(false);
-    // When populated, the user has not verified their email yet
-    const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-        if (errors[name as keyof typeof errors]) {
-            setErrors((prev) => ({ ...prev, [name]: undefined }));
-        }
-        // Clear the banners when user types a different email
-        if (name === 'email') {
-            setIsGoogleOnlyAccount(false);
-            setUnverifiedEmail(null);
-        }
-    };
+    // Resend countdown timer
+    const [resendCountdown, setResendCountdown] = useState(0);
 
-    const validate = () => {
-        const newErrors: typeof errors = {};
-        if (!formData.email) {
-            newErrors.email = 'Please enter your email or username';
-        } else if (formData.email.includes('@') && !/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Please enter a valid email address';
-        }
-        if (!formData.password) {
-            newErrors.password = 'Please enter your password';
-        }
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+    const emailInputRef = useRef<HTMLInputElement>(null);
+    const codeInputRef = useRef<HTMLInputElement>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!validate()) return;
+    useEffect(() => {
+        let timer: any;
+        if (resendCountdown > 0) {
+            timer = setTimeout(() => setResendCountdown((c) => c - 1), 1000);
+        }
+        return () => clearTimeout(timer);
+    }, [resendCountdown]);
+
+    useEffect(() => {
+        if (step === 'code' && codeInputRef.current) {
+            codeInputRef.current.focus();
+        } else if (step === 'email' && emailInputRef.current) {
+            emailInputRef.current.focus();
+        }
+    }, [step]);
+
+    const handleSendCode = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        const trimmedEmail = email.trim().toLowerCase();
+        if (!trimmedEmail || !/\S+@\S+\.\S+/.test(trimmedEmail)) {
+            setError('Please enter a valid email address.');
+            return;
+        }
+
         setIsLoading(true);
-        setErrors({});
-        setIsGoogleOnlyAccount(false);
-        setUnverifiedEmail(null);
+        setError(null);
+        setInfoMessage(null);
+
         try {
-            await login(formData);
+            const res = await requestEmailOtp(trimmedEmail);
+            setIsNewUser(Boolean(res.isNewUser));
+            setStep('code');
+            setResendCountdown(30);
+            setInfoMessage(res.message || `A 6-digit sign-in code has been sent to ${trimmedEmail}.`);
+        } catch (err: any) {
+            setError(err.response?.data?.error || err.message || 'Failed to dispatch sign-in code. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleVerifyCode = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        const cleanCode = code.trim().replace(/\D/g, '');
+        if (cleanCode.length !== 6) {
+            setError('Please enter the full 6-digit code received in your email.');
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            await verifyEmailOtp(email.trim().toLowerCase(), cleanCode);
             navigate('/watch-hive/feed');
-        } catch (error: any) {
-            const data = error.response?.data;
-            if (data?.code === 'google_only_account') {
-                // Structured error: the account exists but has no password (Google-only)
-                setIsGoogleOnlyAccount(true);
-                setErrors({});
-            } else if (data?.code === 'email_not_verified') {
-                // Structured error: account pending email verification
-                setUnverifiedEmail(data?.email || formData.email);
-                setErrors({});
-            } else {
-                let errorMsg = data?.error || data?.message;
-                if (!errorMsg || errorMsg.toLowerCase().includes('validation failed')) {
-                    errorMsg = data?.details?.[0]?.message || 'Incorrect email, username, or password. Please verify your details.';
-                }
-                setErrors({
-                    general: errorMsg,
-                });
-            }
+        } catch (err: any) {
+            setError(err.response?.data?.error || err.message || 'Incorrect or expired sign-in code. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -86,225 +90,206 @@ export const LoginPage: React.FC = () => {
 
     const handleGoogleSuccess = async (idToken: string) => {
         setIsGoogleLoading(true);
-        setErrors({});
-        setIsGoogleOnlyAccount(false);
+        setError(null);
         try {
             await googleLogin(idToken);
             navigate('/watch-hive/feed');
         } catch (error: any) {
-            setErrors({
-                general: error.response?.data?.error || 'Google sign-in failed. Please try again.',
-            });
+            setError(error.response?.data?.error || 'Google sign-in failed. Please try again.');
         } finally {
             setIsGoogleLoading(false);
         }
     };
 
-    const handleGoogleError = (error: string) => {
-        setErrors({ general: error });
+    const handleGoogleError = (errorMsg: string) => {
+        setError(errorMsg);
     };
 
-    /** Called when Google Sign-In is blocked — scroll to / focus the email input */
     const handleGoogleFallback = () => {
-        emailInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        emailInputRef.current?.focus();
+        setError('Google Sign-In is unavailable in this browser. Please use your email code below.');
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-[#FFF9F0] p-4 sm:p-6 lg:p-8 font-sans">
-            {(isLoading || isGoogleLoading) && (
-                <SigningInOverlay 
-                    message="Signing you into WatchersHive..." 
-                    submessage={isGoogleLoading ? "Verifying with Google..." : "Authenticating and loading your hive..."} 
-                />
-            )}
-            <div className="w-full max-w-[440px] flex flex-col items-center">
-                {/* Logo & Header */}
-                <div className="mb-8 flex flex-col items-center text-center">
-                    <Link to="/watch-hive" className="block mb-6 group">
-                        <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-[#ffb700]/10 flex items-center justify-center p-3 group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
-                            <img src={whLogo} alt="WatchersHive" className="w-full h-full object-contain" />
-                        </div>
-                    </Link>
-                    <h1 className="text-3xl sm:text-4xl font-black text-[#2D2926] tracking-tight mb-2">Welcome Back</h1>
-                    <p className="text-[15px] font-medium text-[#2D2926]/50 max-w-[280px]">
-                        Sign in to continue tracking your favorite movies and shows
-                    </p>
-                </div>
+        <div className="min-h-screen bg-[#FFF9F0] flex flex-col justify-center py-12 sm:px-6 lg:px-8 selection:bg-[#ffb700]/30 selection:text-[#2D2926]">
+            {isGoogleLoading && <SigningInOverlay message="Signing you into your hive..." />}
 
-                {/* Top Redirection to Sign Up */}
-                <div className="mb-6 flex items-center justify-center gap-1.5 text-[14px] font-medium text-[#2D2926]/60 bg-white/80 backdrop-blur-sm py-2 px-5 rounded-full border border-[#ffb700]/15 shadow-sm">
-                    <span>Don't have an account?</span>
-                    <Link
-                        to="/watch-hive/signup"
-                        className="text-[#d99b00] hover:text-[#b07d00] font-bold transition-colors inline-flex items-center gap-0.5 hover:underline"
-                    >
-                        Sign up <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            <div className="sm:mx-auto sm:w-full sm:max-w-md">
+                <div className="flex justify-center mb-6">
+                    <Link to="/" className="inline-flex items-center gap-3 group transition-transform duration-300 hover:scale-105">
+                        <img src={whLogo} alt="WatchersHive" className="w-12 h-12 object-contain" />
+                        <span className="text-2xl font-black text-[#2D2926] tracking-tight">
+                            Watchers<span className="text-[#ffb700]">Hive</span>
+                        </span>
                     </Link>
                 </div>
 
-                {/* Login Card */}
-                <div className="w-full bg-white rounded-[32px] shadow-sm border border-[#ffb700]/10 p-6 sm:p-8 relative overflow-hidden">
-                    {/* Top Accent Gradient */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#ffb700] to-transparent opacity-50"></div>
+                <div className="bg-white py-10 px-6 sm:px-10 rounded-[32px] border border-[#ffb700]/15 shadow-xl shadow-[#ffb700]/5 backdrop-blur-xl">
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl font-black text-[#2D2926] tracking-tight">
+                            {step === 'email' ? 'Welcome to the Hive' : 'Enter Sign-In Code'}
+                        </h2>
+                        <p className="text-[13px] font-bold text-[#2D2926]/40 mt-1.5">
+                            {step === 'email'
+                                ? 'Passwordless sign-in for film & TV cinephiles'
+                                : `We sent a 6-digit code to ${email}`}
+                        </p>
+                    </div>
 
-                    {/* General error banner */}
-                    {errors.general && (
-                        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-start gap-3 text-rose-600 text-[14px] font-bold">
+                    {/* Error message */}
+                    {error && (
+                        <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-start gap-3 text-rose-600 text-[14px] font-bold animate-[fade-in_0.2s_ease-out]">
                             <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
-                            <span>{errors.general}</span>
+                            <span>{error}</span>
                         </div>
                     )}
 
-                    {/* Email not verified banner */}
-                    {unverifiedEmail && (
-                        <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col gap-3">
-                            <div className="flex items-start gap-3">
-                                <span className="material-symbols-outlined text-amber-600 text-[20px] shrink-0 mt-0.5">mark_email_unread</span>
-                                <div>
-                                    <p className="text-[14px] font-bold text-amber-900">Email Verification Required</p>
-                                    <p className="text-[12px] font-medium text-amber-700/90 mt-0.5">
-                                        Please verify your email address to log in. Check your inbox for the 6-digit verification code.
-                                    </p>
-                                </div>
+                    {/* Info message */}
+                    {infoMessage && step === 'code' && (
+                        <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3 text-amber-900 text-[13px] font-bold animate-[fade-in_0.2s_ease-out]">
+                            <span className="material-symbols-outlined text-amber-600 text-[18px] shrink-0">mark_email_read</span>
+                            <span>{infoMessage}</span>
+                        </div>
+                    )}
+
+                    {step === 'email' ? (
+                        <>
+                            {/* Primary 1-Click: Google Sign-In */}
+                            <div className="w-full mb-6">
+                                <GoogleSignInButton
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={handleGoogleError}
+                                    onFallback={handleGoogleFallback}
+                                    text="continue_with"
+                                    disabled={isLoading || isGoogleLoading}
+                                />
                             </div>
-                            <div className="ml-8">
-                                <Link
-                                    to={`/watch-hive/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
-                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#ffb700] hover:bg-[#e6a500] text-[#2D2926] text-[13px] font-black transition-colors shadow-sm"
+
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="flex-1 h-px bg-[#ffb700]/10"></div>
+                                <span className="text-[11px] font-black uppercase tracking-widest text-[#2D2926]/30">or continue with email</span>
+                                <div className="flex-1 h-px bg-[#ffb700]/10"></div>
+                            </div>
+
+                            <form onSubmit={handleSendCode} className="flex flex-col gap-5">
+                                <div className="flex flex-col gap-1.5">
+                                    <label htmlFor="email" className="text-[13px] font-black text-[#2D2926]/70 ml-1">
+                                        Email Address
+                                    </label>
+                                    <input
+                                        id="email"
+                                        ref={emailInputRef}
+                                        type="email"
+                                        name="email"
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e) => {
+                                            setEmail(e.target.value);
+                                            setError(null);
+                                        }}
+                                        className="w-full bg-[#FFF9F0]/50 border border-[#ffb700]/20 rounded-2xl px-4 py-3.5 text-[15px] font-semibold text-[#2D2926] placeholder:text-[#2D2926]/20 transition-all focus:outline-none focus:bg-white focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10"
+                                        autoComplete="email"
+                                        required
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-4 rounded-2xl bg-[#ffb700] hover:bg-[#e6a500] text-[#2D2926] text-[15px] font-black tracking-wide transition-all shadow-lg shadow-[#ffb700]/25 hover:shadow-xl hover:shadow-[#ffb700]/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 mt-2"
                                 >
-                                    <span>Verify Email Now</span>
-                                    <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-                                </Link>
+                                    {isLoading ? (
+                                        <BeeLoader size="small" message="Sending Code..." />
+                                    ) : (
+                                        <>
+                                            <span>Continue with Email Code</span>
+                                            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        </>
+                    ) : (
+                        /* Step 2: 6-Digit OTP Code Entry */
+                        <form onSubmit={handleVerifyCode} className="flex flex-col gap-5 animate-[fade-in_0.3s_ease-out]">
+                            <div className="flex flex-col items-center gap-3">
+                                <input
+                                    id="otp-code"
+                                    ref={codeInputRef}
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    maxLength={6}
+                                    placeholder="• • • • • •"
+                                    value={code}
+                                    onChange={(e) => {
+                                        const clean = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                        setCode(clean);
+                                        setError(null);
+                                        if (clean.length === 6) {
+                                            // Automatically submit once 6 digits are typed
+                                            setTimeout(() => {
+                                                verifyEmailOtp(email.trim().toLowerCase(), clean)
+                                                    .then(() => navigate('/watch-hive/feed'))
+                                                    .catch((err) => setError(err.response?.data?.error || err.message || 'Incorrect code.'));
+                                            }, 50);
+                                        }
+                                    }}
+                                    className="w-full tracking-[0.5em] text-center font-mono text-3xl font-black bg-[#FFF9F0]/60 border-2 border-[#ffb700]/30 rounded-2xl py-4 text-[#2D2926] placeholder:text-[#2D2926]/15 focus:outline-none focus:bg-white focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/15 transition-all"
+                                    autoComplete="one-time-code"
+                                    required
+                                />
+                                <span className="text-[12px] font-medium text-[#2D2926]/40">
+                                    {isNewUser ? 'New user detected! Verifying will create your account.' : 'Enter the single-use 6-digit passcode'}
+                                </span>
                             </div>
-                        </div>
-                    )}
 
-                    {/* Google-only account recovery banner */}
-                    {isGoogleOnlyAccount && (
-                        <div className="mb-6 p-4 rounded-2xl bg-blue-50 border border-blue-100 flex flex-col gap-3">
-                            <div className="flex items-start gap-3">
-                                <span className="material-symbols-outlined text-blue-500 text-[20px] shrink-0 mt-0.5">info</span>
-                                <div>
-                                    <p className="text-[14px] font-bold text-blue-700">This account uses Google Sign-In</p>
-                                    <p className="text-[12px] font-medium text-blue-600/80 mt-0.5">
-                                        Sign in with Google below, or use "Forgot password?" to set a password as backup.
-                                    </p>
-                                </div>
-                            </div>
-                            <Link
-                                to={`/watch-hive/forgot-password?email=${encodeURIComponent(formData.email)}`}
-                                className="text-[12px] font-bold text-blue-600 hover:text-blue-700 underline underline-offset-2 transition-colors ml-8"
+                            <button
+                                type="submit"
+                                disabled={isLoading || code.trim().length !== 6}
+                                className="w-full py-4 rounded-2xl bg-[#ffb700] hover:bg-[#e6a500] text-[#2D2926] text-[15px] font-black tracking-wide transition-all shadow-lg shadow-[#ffb700]/25 hover:shadow-xl hover:shadow-[#ffb700]/30 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 mt-2"
                             >
-                                Set a password for this account →
-                            </Link>
-                        </div>
+                                {isLoading ? (
+                                    <BeeLoader size="small" message="Verifying..." />
+                                ) : (
+                                    <>
+                                        <span>Verify & Sign In</span>
+                                        <span className="material-symbols-outlined text-[18px]">lock_open</span>
+                                    </>
+                                )}
+                            </button>
+
+                            <div className="flex items-center justify-between pt-3 text-[13px] font-bold text-[#2D2926]/60">
+                                <button
+                                    type="button"
+                                    disabled={resendCountdown > 0 || isLoading}
+                                    onClick={() => handleSendCode()}
+                                    className="hover:text-[#2D2926] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    {resendCountdown > 0 ? `Resend code in ${resendCountdown}s` : 'Resend code'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setStep('email');
+                                        setCode('');
+                                        setError(null);
+                                    }}
+                                    className="hover:text-[#2D2926] transition-colors underline underline-offset-2"
+                                >
+                                    Change email
+                                </button>
+                            </div>
+                        </form>
                     )}
 
-                    {/* Google OAuth */}
-                    <div className="w-full mb-6">
-                        <GoogleSignInButton
-                            onSuccess={handleGoogleSuccess}
-                            onError={handleGoogleError}
-                            onFallback={handleGoogleFallback}
-                            text="signin_with"
-                            disabled={isLoading || isGoogleLoading}
-                        />
+                    <div className="mt-8 pt-6 border-t border-[#ffb700]/10 text-center">
+                        <p className="text-[12px] font-medium text-[#2D2926]/40">
+                            By continuing, you agree to WatchersHive's{' '}
+                            <Link to="/watch-hive/privacy" className="font-bold text-[#2D2926]/70 hover:underline">
+                                Privacy Policy & Non-Commercial Terms
+                            </Link>.
+                        </p>
                     </div>
-
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="flex-1 h-px bg-[#ffb700]/10"></div>
-                        <span className="text-[12px] font-bold uppercase tracking-widest text-[#2D2926]/30">or</span>
-                        <div className="flex-1 h-px bg-[#ffb700]/10"></div>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                        <div className="flex flex-col gap-1.5">
-                            <label htmlFor="email" className="text-[13px] font-bold text-[#2D2926]/80 ml-1">
-                                Email or Username <span className="text-rose-500">*</span>
-                            </label>
-                            <input
-                                id="email"
-                                ref={emailInputRef}
-                                type="text"
-                                name="email"
-                                placeholder="you@example.com or username"
-                                value={formData.email}
-                                onChange={handleChange}
-                                className={`w-full bg-[#FFF9F0]/50 border rounded-2xl px-4 py-3.5 text-[15px] font-semibold text-[#2D2926] placeholder:text-[#2D2926]/20 transition-all focus:outline-none focus:bg-white focus:ring-4 ${errors.email ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-400/10' : 'border-[#ffb700]/20 focus:border-[#ffb700] focus:ring-[#ffb700]/10'}`}
-                                autoComplete="username"
-                                required
-                            />
-                            {errors.email && (
-                                <span className="text-[12px] font-bold text-rose-500 ml-1 mt-1 flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[14px]">info</span> {errors.email}
-                                </span>
-                            )}
-                        </div>
-
-                        <div className="flex flex-col gap-1.5">
-                            <label htmlFor="password" className="text-[13px] font-bold text-[#2D2926]/80 ml-1">
-                                Password <span className="text-rose-500">*</span>
-                            </label>
-                            <input
-                                id="password"
-                                type="password"
-                                name="password"
-                                placeholder="Enter your password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                className={`w-full bg-[#FFF9F0]/50 border rounded-2xl px-4 py-3.5 text-[15px] font-semibold text-[#2D2926] placeholder:text-[#2D2926]/20 transition-all focus:outline-none focus:bg-white focus:ring-4 ${errors.password ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-400/10' : 'border-[#ffb700]/20 focus:border-[#ffb700] focus:ring-[#ffb700]/10'}`}
-                                autoComplete="current-password"
-                                required
-                            />
-                            {errors.password && (
-                                <span className="text-[12px] font-bold text-rose-500 ml-1 mt-1 flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[14px]">info</span> {errors.password}
-                                </span>
-                            )}
-                        </div>
-
-                        <div className="flex items-center justify-between px-1 mt-1 mb-2">
-                            <label className="flex items-center gap-2 cursor-pointer group">
-                                <div className="relative flex items-center justify-center w-5 h-5">
-                                    <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-[#ffb700]/30 rounded-md checked:bg-[#ffb700] checked:border-[#ffb700] transition-colors cursor-pointer" />
-                                    <span className="material-symbols-outlined text-white text-[14px] absolute pointer-events-none opacity-0 peer-checked:opacity-100" style={{ fontVariationSettings: "'wght' 700" }}>check</span>
-                                </div>
-                                <span className="text-[13px] font-bold text-[#2D2926]/60 group-hover:text-[#2D2926] transition-colors">Remember me</span>
-                            </label>
-                            <Link to="/watch-hive/forgot-password" className="text-[13px] font-bold text-[#ffb700] hover:text-[#ffb700]/80 transition-colors">
-                                Forgot password?
-                            </Link>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={isLoading || isGoogleLoading}
-                            className={`w-full h-14 bg-[#ffb700] text-[#2D2926] font-black text-[16px] rounded-2xl shadow-[0_4px_14px_rgba(255,183,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.4)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <BeeLoader size="mini" message="" />
-                                    <span>Signing in...</span>
-                                </>
-                            ) : (
-                                <span>Sign In</span>
-                            )}
-                        </button>
-                    </form>
-                </div>
-
-                {/* Footer Links */}
-                <div className="mt-8 text-center flex flex-col gap-4">
-                    <p className="text-[13px] font-medium text-[#2D2926]/40 flex items-center justify-center gap-2">
-                        <Link to="/watch-hive/privacy" className="hover:text-[#2D2926]/60 transition-colors">
-                            Privacy Policy
-                        </Link>
-                        <span>·</span>
-                        <Link to="/watch-hive/support" className="hover:text-[#ffb700] transition-colors font-bold text-[#b07d00]">
-                            Help & Support
-                        </Link>
-                    </p>
                 </div>
             </div>
         </div>

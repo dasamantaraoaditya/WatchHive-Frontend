@@ -44,5 +44,7 @@ export interface AuthContextType {
     setPassword: (newPassword: string) => Promise<{ message: string }>;
     forgotPassword: (email: string) => Promise<{ message: string }>;
     resetPassword: (token: string, email: string, newPassword: string) => Promise<{ message: string }>;
+    requestEmailOtp: (email: string) => Promise<{ message: string; email: string; isNewUser: boolean }>;
+    verifyEmailOtp: (email: string, code: string) => Promise<AuthResponse & { isNewUser: boolean }>;
 }
 

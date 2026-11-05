@@ -28,6 +28,18 @@ export const authService = {
         return response;
     },
 
+    /** Request a passwordless 6-digit sign-in code sent to email */
+    async requestEmailOtp(email: string): Promise<{ message: string; email: string; isNewUser: boolean }> {
+        return apiClient.post<{ message: string; email: string; isNewUser: boolean }>('/auth/email-code/request', { email });
+    },
+
+    /** Verify 6-digit email sign-in code and log in / register immediately */
+    async verifyEmailOtp(email: string, code: string): Promise<AuthResponse & { isNewUser: boolean }> {
+        const response = await apiClient.post<AuthResponse & { isNewUser: boolean }>('/auth/email-code/verify', { email, code });
+        apiClient.setTokens(response.accessToken, response.refreshToken);
+        return response;
+    },
+
     async logout(): Promise<void> {
         try {
             await apiClient.post('/auth/logout');
