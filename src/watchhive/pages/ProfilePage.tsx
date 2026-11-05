@@ -4,10 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useUI } from '../contexts';
 import { userService, dataService } from '../services';
 import { FollowListModal, AddFriendsModal } from '../components/profile';
-import { ImportPreviewModal } from '../components/profile/ImportPreviewModal';
 import { User, UpdateUserData } from '../types';
 import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
+import { ImportPreviewModal } from '../components/profile/ImportPreviewModal';
 import { ExportFormat, ImportResult, ImportPreviewResult, AI_IMPORT_PROMPT } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
 import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge, BeeSpinner } from '../components/common';
@@ -36,12 +36,13 @@ export const ProfilePage: React.FC = () => {
     const [isAddFriendsModalOpen, setIsAddFriendsModalOpen] = useState(false);
     const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
     const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
+    
     // Danger Zone / Account deletion state
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteAcknowledged, setDeleteAcknowledged] = useState(false);
     const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
-
+    
     // Data export / import state
     const [dataActionTab, setDataActionTab] = useState<'import' | 'export'>('import');
     const [defaultToCurrentYear, setDefaultToCurrentYear] = useState(false);
@@ -141,7 +142,7 @@ export const ProfilePage: React.FC = () => {
     };
 
     const showSuccess = (msg: string) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(null), 4000); };
-    const showError = (msg: string) => { setError(msg); setTimeout(() => setError(null), 5000); };
+    const showError   = (msg: string) => { setError(msg);      setTimeout(() => setError(null),      5000); };
 
     const handleExport = async () => {
         if (!includeEntries && !includeLists) { showError('Select at least one data type to export.'); return; }
@@ -256,7 +257,7 @@ export const ProfilePage: React.FC = () => {
 
             {/* Profile Hero Block */}
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-10 shadow-sm">
-
+                
                 {/* Status Badge */}
                 <div className="absolute hidden md:flex top-0 right-0 p-4">
                     <div className="flex items-center gap-2 bg-[#ffb700]/10 text-[#ffb700] px-4 py-1.5 rounded-full border border-[#ffb700]/20">
@@ -266,10 +267,10 @@ export const ProfilePage: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-8 mt-2 md:mt-0">
-
+                    
                     {/* Avatar */}
-                    <div
-                        className="relative group cursor-pointer shrink-0"
+                    <div 
+                        className="relative group cursor-pointer shrink-0" 
                         onClick={() => setIsAvatarModalOpen(true)}
                         title="Click to view full picture"
                     >
@@ -277,11 +278,11 @@ export const ProfilePage: React.FC = () => {
                         <div className="relative p-1 bg-gradient-to-br from-[#ffb700] via-[#ffaa00] to-transparent rounded-full shadow-lg transition-transform group-hover:scale-105 duration-300">
                             <div className="bg-white rounded-full p-1 w-32 h-32 md:w-40 md:h-40 overflow-hidden relative">
                                 {resolveAvatarUrl(user.profilePictureUrl) && !avatarError ? (
-                                    <img
-                                        className={`w-full h-full object-cover rounded-full ${uploading ? 'opacity-50' : ''}`}
-                                        src={resolveAvatarUrl(user.profilePictureUrl)!}
+                                    <img 
+                                        className={`w-full h-full object-cover rounded-full ${uploading ? 'opacity-50' : ''}`} 
+                                        src={resolveAvatarUrl(user.profilePictureUrl)!} 
                                         alt={user.username}
-                                        onError={() => setAvatarError(true)}
+                                        onError={() => setAvatarError(true)} 
                                     />
                                 ) : (
                                     <div className="w-full h-full rounded-full bg-[#ffb700]/5 flex items-center justify-center text-[#ffb700]">
@@ -295,7 +296,7 @@ export const ProfilePage: React.FC = () => {
                             </div>
                         </div>
                         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-
+                        
                         {/* Camera upload button */}
                         <button
                             type="button"
@@ -337,7 +338,7 @@ export const ProfilePage: React.FC = () => {
                                 </button>
                             </div>
                         </div>
-
+                        
                         {isEditingBio ? (
                             <div className="flex flex-col sm:flex-row gap-2 max-w-lg mx-auto md:mx-0 py-2">
                                 <textarea
@@ -388,7 +389,7 @@ export const ProfilePage: React.FC = () => {
                             </div>
                         </div>
                     </div>
-
+                    
                     {/* Buttons Container */}
                     <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto md:min-w-[190px] shrink-0 justify-center md:pt-4">
                         <button 
@@ -423,8 +424,8 @@ export const ProfilePage: React.FC = () => {
 
             {/* Privacy Settings Block */}
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
-                <div className="flex items-start gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0 mt-0.5">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700]">
                         <span className="material-symbols-outlined">lock</span>
                     </div>
                     <div>
@@ -440,28 +441,28 @@ export const ProfilePage: React.FC = () => {
                             <span className="material-symbols-outlined text-[#ffb700]">visibility</span>
                             Profile Visibility
                         </h3>
-
+                        
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative">
                             {privacyUpdating && <ModalBeeOverlay message="Applying changes..." />}
                             {[
-                                {
-                                    id: 'PUBLIC',
-                                    label: 'Public',
-                                    icon: 'public',
+                                { 
+                                    id: 'PUBLIC', 
+                                    label: 'Public', 
+                                    icon: 'public', 
                                     desc: 'Everyone can see your profile and activity.',
                                     color: 'bg-emerald-50 text-emerald-600'
                                 },
-                                {
-                                    id: 'FOLLOWERS_ONLY',
-                                    label: 'Followers Only',
-                                    icon: 'group',
+                                { 
+                                    id: 'FOLLOWERS_ONLY', 
+                                    label: 'Followers Only', 
+                                    icon: 'group', 
                                     desc: 'Only approved followers can see your watch history.',
                                     color: 'bg-[#ffb700]/10 text-[#ffb700]'
                                 },
-                                {
-                                    id: 'PRIVATE',
-                                    label: 'Strictly Private',
-                                    icon: 'lock',
+                                { 
+                                    id: 'PRIVATE', 
+                                    label: 'Strictly Private', 
+                                    icon: 'lock', 
                                     desc: 'Only you can see your profile details and entries.',
                                     color: 'bg-slate-100 text-slate-600'
                                 }
@@ -473,10 +474,11 @@ export const ProfilePage: React.FC = () => {
                                     <button
                                         key={tier.id}
                                         onClick={() => handleTogglePrivacy('privacyLevel', tier.id)}
-                                        className={`flex flex-col items-center text-center p-5 rounded-2xl border-2 transition-all group ${isActive
-                                            ? 'border-[#ffb700] bg-[#ffb700]/5'
+                                        className={`flex flex-col items-center text-center p-5 rounded-2xl border-2 transition-all group ${
+                                            isActive 
+                                            ? 'border-[#ffb700] bg-[#ffb700]/5' 
                                             : 'border-slate-100 hover:border-[#ffb700]/30 hover:bg-slate-50'
-                                            }`}
+                                        }`}
                                     >
                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-transform group-hover:scale-110 ${tier.color}`}>
                                             <span className="material-symbols-outlined text-2xl">{tier.icon}</span>
@@ -532,8 +534,8 @@ export const ProfilePage: React.FC = () => {
 
             {/* Notification Preferences Block */}
             <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
-                <div className="flex items-start gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0 mt-0.5">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700]">
                         <span className="material-symbols-outlined">notifications</span>
                     </div>
                     <div>
@@ -920,14 +922,14 @@ export const ProfilePage: React.FC = () => {
             {/* Danger Zone: Account Deletion */}
             <div className="relative overflow-hidden rounded-3xl border border-rose-200 bg-white p-6 md:p-8 shadow-sm">
                 <div className="flex items-start justify-between flex-wrap gap-4 mb-4">
-                    <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500 shrink-0 mt-0.5">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-500">
                             <span className="material-symbols-outlined text-xl">warning</span>
                         </div>
                         <div>
-                            <div className="flex items-start gap-2">
+                            <div className="flex items-center gap-2">
                                 <h2 className="text-xl font-black text-rose-600">Danger Zone</h2>
-                                <span className="bg-rose-100 mt-1 text-rose-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-rose-200">
+                                <span className="bg-rose-100 text-rose-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-rose-200">
                                     Irreversible
                                 </span>
                             </div>
@@ -970,9 +972,9 @@ export const ProfilePage: React.FC = () => {
 
             {/* Help & Support Card */}
             <div className="bg-white border border-black/5 rounded-[32px] p-6 sm:p-8 shadow-sm">
-                <div className="flex items-start justify-between flex-wrap gap-4">
-                    <div className="flex items-start gap-3.5">
-                        <div className="w-12 h-12 rounded-2xl bg-[#ffb700]/15 flex items-center justify-center text-[#ffb700] border border-[#ffb700]/25 shrink-0 mt-0.5">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-[#ffb700]/15 flex items-center justify-center text-[#ffb700] border border-[#ffb700]/25">
                             <span className="material-symbols-outlined text-2xl font-bold">support_agent</span>
                         </div>
                         <div>
@@ -1035,6 +1037,7 @@ export const ProfilePage: React.FC = () => {
                 onClose={() => setIsAddFriendsModalOpen(false)}
                 currentUser={user}
             />
+
             <AvatarLightboxModal
                 isOpen={isAvatarModalOpen}
                 onClose={() => setIsAvatarModalOpen(false)}
@@ -1184,7 +1187,6 @@ export const ProfilePage: React.FC = () => {
                 </div>,
                 document.body
             )}
-
 
             <style>{`
                 @keyframes slide-down { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
