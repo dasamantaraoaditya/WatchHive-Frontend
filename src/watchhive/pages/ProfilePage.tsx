@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useUI } from '../contexts';
 import { userService, dataService } from '../services';
-import { FollowListModal, SetPasswordSection, AddFriendsModal } from '../components/profile';
+import { FollowListModal, AddFriendsModal } from '../components/profile';
 import { User, UpdateUserData } from '../types';
 import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
@@ -581,8 +581,6 @@ export const ProfilePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Account Security Block — only shown for Google-only accounts */}
-            <SetPasswordSection />
 
             {/* Data Management Block */}
             <div id="data-management" ref={dataManagementRef} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
