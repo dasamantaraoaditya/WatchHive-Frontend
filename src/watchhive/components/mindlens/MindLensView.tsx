@@ -156,7 +156,7 @@ export const MindLensView: React.FC = () => {
                     onClick={() => setActiveSubTab('highlights')}
                     className={`flex-1 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                         activeSubTab === 'highlights'
-                            ? 'bg-[#ffb700] text-white shadow-sm'
+                            ? 'bg-[#ffb700] text-[#2D2926] shadow-sm'
                             : 'text-[#2D2926]/40 hover:text-[#2D2926]'
                     }`}
                 >
@@ -166,7 +166,7 @@ export const MindLensView: React.FC = () => {
                     onClick={() => setActiveSubTab('analytics')}
                     className={`flex-1 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                         activeSubTab === 'analytics'
-                            ? 'bg-[#ffb700] text-white shadow-sm'
+                            ? 'bg-[#ffb700] text-[#2D2926] shadow-sm'
                             : 'text-[#2D2926]/40 hover:text-[#2D2926]'
                     }`}
                 >
@@ -387,7 +387,7 @@ export const MindLensView: React.FC = () => {
                                             onClick={() => setChartType('line')}
                                             className={`p-1.5 rounded-lg transition-all ${
                                                 chartType === 'line'
-                                                    ? 'bg-[#ffb700] text-white shadow-xs'
+                                                    ? 'bg-[#ffb700] text-[#2D2926] shadow-xs'
                                                      : 'text-[#2D2926]/30 hover:text-[#2D2926]'
                                             }`}
                                             title="Curve view"
@@ -398,7 +398,7 @@ export const MindLensView: React.FC = () => {
                                             onClick={() => setChartType('bar')}
                                             className={`p-1.5 rounded-lg transition-all ${
                                                 chartType === 'bar'
-                                                    ? 'bg-[#ffb700] text-white shadow-xs'
+                                                    ? 'bg-[#ffb700] text-[#2D2926] shadow-xs'
                                                     : 'text-[#2D2926]/30 hover:text-[#2D2926]'
                                             }`}
                                             title="Bar view"
@@ -605,7 +605,7 @@ export const MindLensView: React.FC = () => {
                                         >
                                             <div className="flex items-center justify-between mb-3">
                                                 <div className="flex items-center gap-2.5">
-                                                    <span className={`w-6 h-6 rounded-full font-black text-[11px] flex items-center justify-center ${rank === 0 ? 'bg-[#ffb700] text-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}>
+                                                    <span className={`w-6 h-6 rounded-full font-black text-[11px] flex items-center justify-center ${rank === 0 ? 'bg-[#ffb700] text-[#2D2926] shadow-sm' : 'bg-slate-100 text-slate-600'}`}>
                                                         #{rank + 1}
                                                     </span>
                                                     <Link to={`/watch-hive/profile/${rec.userId}`} className="flex items-center gap-2 group/user min-w-0">

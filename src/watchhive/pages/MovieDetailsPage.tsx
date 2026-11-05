@@ -481,7 +481,7 @@ export const MovieDetailsPage: React.FC = () => {
                                             onClick={handleWatchlistToggle}
                                             className={`px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2 transition-all shadow-xs ${
                                                 inWatchlist
-                                                    ? 'bg-[#ffb700] text-white'
+                                                    ? 'bg-[#ffb700] text-[#2D2926]'
                                                     : 'bg-[#FFF9F0] text-[#2D2926] hover:bg-[#ffb700]/10 border border-[#ffb700]/15'
                                             }`}
                                         >
@@ -763,7 +763,7 @@ export const MovieDetailsPage: React.FC = () => {
                                                     onClick={() => setSelectedSeasonNumber(s.season_number)}
                                                     className={`px-4 py-2.5 rounded-2xl text-xs font-black tracking-wide shrink-0 transition-all cursor-pointer ${
                                                         selectedSeasonNumber === s.season_number
-                                                            ? 'bg-[#ffb700] text-white shadow-md shadow-[#ffb700]/20'
+                                                            ? 'bg-[#ffb700] text-[#2D2926] shadow-md shadow-[#ffb700]/20'
                                                             : 'bg-slate-50 text-[#2D2926]/70 hover:bg-slate-100 border border-black/5'
                                                     }`}
                                                 >

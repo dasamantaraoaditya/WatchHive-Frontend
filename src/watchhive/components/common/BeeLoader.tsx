@@ -99,7 +99,7 @@ export const BeeSpinner: React.FC<{ size?: 'sm' | 'md' | 'lg'; message?: string;
 
 export const ModalBeeOverlay: React.FC<{ message?: string }> = ({ message = 'Saving to your Hive...' }) => {
     return (
-        <div className="absolute inset-0 bg-white/90 dark:bg-stone-900/90 backdrop-blur-xs flex items-center justify-center z-50 animate-[fade-in_0.2s_ease-out] rounded-3xl p-6">
+        <div className="absolute inset-0 bg-white/90 backdrop-blur-xs flex items-center justify-center z-50 animate-[fade-in_0.2s_ease-out] rounded-3xl p-6">
             <BeeLoader size="medium" message={message} />
         </div>
     );

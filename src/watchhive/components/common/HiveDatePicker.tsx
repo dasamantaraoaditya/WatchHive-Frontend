@@ -262,7 +262,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
     return (
         <div className="flex flex-col gap-2 w-full">
             {label && (
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/70 dark:text-white/70">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/70">
                     {label}
                 </label>
             )}
@@ -277,10 +277,10 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                         setViewDate(new Date(parsed.getFullYear(), parsed.getMonth(), 1));
                         setIsOpen(!isOpen);
                     }}
-                    className={`w-full flex items-center justify-between pl-4 pr-3.5 py-3 bg-[#FFF9F0]/60 dark:bg-[#1f1911]/60 border-2 ${
+                    className={`w-full flex items-center justify-between pl-4 pr-3.5 py-3 bg-[#FFF9F0]/60 border-2 ${
                         isOpen
-                            ? 'border-[#ffb700] bg-white dark:bg-[#221c13] ring-4 ring-[#ffb700]/10 shadow-sm'
-                            : 'border-[#ffb700]/25 hover:border-[#ffb700] hover:bg-[#FFF9F0] dark:hover:bg-[#241d14]'
+                            ? 'border-[#ffb700] bg-white ring-4 ring-[#ffb700]/10 shadow-sm'
+                            : 'border-[#ffb700]/25 hover:border-[#ffb700] hover:bg-[#FFF9F0]'
                     } rounded-2xl transition-all duration-200 select-none cursor-pointer outline-none text-left`}
                 >
                     <div className="flex items-center gap-3 min-w-0">
@@ -290,10 +290,10 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                             </span>
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/50 dark:text-white/50">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/50">
                                 {isOpen ? 'Editing Screening Date & Time' : 'Watch Date & Time'}
                             </span>
-                            <span className="text-sm font-black text-[#2D2926] dark:text-white truncate">
+                            <span className="text-sm font-black text-[#2D2926] truncate">
                                 {displayText}
                             </span>
                         </div>
@@ -306,7 +306,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                         }`}>
                             {isOpen ? 'Done' : 'Change'}
                         </span>
-                        <span className={`material-symbols-outlined text-[#2D2926]/60 dark:text-white/60 text-[20px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                        <span className={`material-symbols-outlined text-[#2D2926]/60 text-[20px] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
                             expand_more
                         </span>
                     </div>
@@ -322,10 +322,10 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                             transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
                             className="overflow-hidden w-full pt-2.5"
                         >
-                            <div className="bg-[#FFFDF9] dark:bg-[#1A1612] text-[#2D2926] dark:text-[#EAE6DF] border-2 border-[#ffb700]/25 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-sm">
+                            <div className="bg-[#FFFDF9] text-[#2D2926] border-2 border-[#ffb700]/25 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-sm">
                                 {/* Quick Presets Bar */}
                                 <div className="flex flex-col gap-1.5">
-                                    <div className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/60 dark:text-white/60 flex items-center gap-1.5">
+                                    <div className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/60 flex items-center gap-1.5">
                                         <span className="material-symbols-outlined text-[13px] font-bold text-[#ffb700]">bolt</span>
                                         Quick Select
                                     </div>
@@ -333,28 +333,28 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                         <button
                                             type="button"
                                             onClick={selectNow}
-                                            className="px-3 py-1.5 bg-[#FFF9F0] dark:bg-[#251E17] text-[#2D2926] dark:text-[#EAE6DF] hover:bg-[#ffb700] hover:text-[#2D2926] dark:hover:bg-[#ffb700] dark:hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
+                                            className="px-3 py-1.5 bg-[#FFF9F0] text-[#2D2926] hover:bg-[#ffb700] hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
                                         >
                                             Now
                                         </button>
                                         <button
                                             type="button"
                                             onClick={selectOneHourAgo}
-                                            className="px-3 py-1.5 bg-[#FFF9F0] dark:bg-[#251E17] text-[#2D2926] dark:text-[#EAE6DF] hover:bg-[#ffb700] hover:text-[#2D2926] dark:hover:bg-[#ffb700] dark:hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
+                                            className="px-3 py-1.5 bg-[#FFF9F0] text-[#2D2926] hover:bg-[#ffb700] hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
                                         >
                                             1h Ago
                                         </button>
                                         <button
                                             type="button"
                                             onClick={selectToday}
-                                            className="px-3 py-1.5 bg-[#FFF9F0] dark:bg-[#251E17] text-[#2D2926] dark:text-[#EAE6DF] hover:bg-[#ffb700] hover:text-[#2D2926] dark:hover:bg-[#ffb700] dark:hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
+                                            className="px-3 py-1.5 bg-[#FFF9F0] text-[#2D2926] hover:bg-[#ffb700] hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
                                         >
                                             Today
                                         </button>
                                         <button
                                             type="button"
                                             onClick={selectYesterday}
-                                            className="px-3 py-1.5 bg-[#FFF9F0] dark:bg-[#251E17] text-[#2D2926] dark:text-[#EAE6DF] hover:bg-[#ffb700] hover:text-[#2D2926] dark:hover:bg-[#ffb700] dark:hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
+                                            className="px-3 py-1.5 bg-[#FFF9F0] text-[#2D2926] hover:bg-[#ffb700] hover:text-[#2D2926] border border-[#ffb700]/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer"
                                         >
                                             Yesterday
                                         </button>
@@ -364,7 +364,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                                 onChange('');
                                                 setIsOpen(false);
                                             }}
-                                            className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer flex items-center gap-1"
+                                            className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 border border-amber-500/30 rounded-xl text-xs font-black transition-all active:scale-[0.94] shadow-xs cursor-pointer flex items-center gap-1"
                                         >
                                             <span className="material-symbols-outlined text-[13px]">history_toggle_off</span>
                                             Don't know when
@@ -380,12 +380,12 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                         type="button"
                                         onClick={prevMonth}
                                         aria-label="Previous month"
-                                        className="w-8 h-8 flex items-center justify-center rounded-xl bg-[#FFF9F0] dark:bg-[#251E17] border border-[#ffb700]/25 text-[#2D2926] dark:text-[#EAE6DF] hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors cursor-pointer"
+                                        className="w-8 h-8 flex items-center justify-center rounded-xl bg-[#FFF9F0] border border-[#ffb700]/25 text-[#2D2926] hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors cursor-pointer"
                                     >
                                         <span className="material-symbols-outlined text-[18px] font-bold">chevron_left</span>
                                     </button>
 
-                                    <span className="text-sm font-black text-[#2D2926] dark:text-white">
+                                    <span className="text-sm font-black text-[#2D2926]">
                                         {monthNames[viewDate.getMonth()]} {viewDate.getFullYear()}
                                     </span>
 
@@ -393,7 +393,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                         type="button"
                                         onClick={nextMonth}
                                         aria-label="Next month"
-                                        className="w-8 h-8 flex items-center justify-center rounded-xl bg-[#FFF9F0] dark:bg-[#251E17] border border-[#ffb700]/25 text-[#2D2926] dark:text-[#EAE6DF] hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors cursor-pointer"
+                                        className="w-8 h-8 flex items-center justify-center rounded-xl bg-[#FFF9F0] border border-[#ffb700]/25 text-[#2D2926] hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors cursor-pointer"
                                     >
                                         <span className="material-symbols-outlined text-[18px] font-bold">chevron_right</span>
                                     </button>
@@ -404,7 +404,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                     {/* Weekdays */}
                                     <div className="grid grid-cols-7 text-center">
                                         {weekDays.map((day) => (
-                                            <span key={day} className="text-[10px] font-black uppercase text-[#2D2926]/50 dark:text-white/50 py-1">
+                                             <span key={day} className="text-[10px] font-black uppercase text-[#2D2926]/50 py-1">
                                                 {day}
                                             </span>
                                         ))}
@@ -422,13 +422,13 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                                     onClick={() => handleDateSelect(cell.date)}
                                                     className={`
                                                         aspect-square flex items-center justify-center rounded-xl text-xs font-bold transition-all relative
-                                                        ${cell.isFuture ? 'text-[#2D2926]/20 dark:text-white/20 cursor-not-allowed opacity-40' : 'cursor-pointer'}
-                                                        ${!cell.isCurrentMonth && !cell.isFuture ? 'text-[#2D2926]/35 dark:text-white/35' : ''}
-                                                        ${cell.isCurrentMonth && !cell.isFuture ? 'text-[#2D2926] dark:text-[#EAE6DF]' : ''}
+                                                        ${cell.isFuture ? 'text-[#2D2926]/20 cursor-not-allowed opacity-40' : 'cursor-pointer'}
+                                                        ${!cell.isCurrentMonth && !cell.isFuture ? 'text-[#2D2926]/35' : ''}
+                                                        ${cell.isCurrentMonth && !cell.isFuture ? 'text-[#2D2926]' : ''}
                                                         ${isSelected
                                                             ? 'bg-[#ffb700] text-[#2D2926] font-black shadow-md shadow-[#ffb700]/30 scale-105 z-10 border border-[#2D2926]/10'
                                                             : cell.isToday
-                                                                ? 'bg-[#FFF9F0] dark:bg-[#282119] text-[#2D2926] dark:text-[#ffb700] border-2 border-[#ffb700] font-black'
+                                                                ? 'bg-[#FFF9F0] text-[#2D2926] border-2 border-[#ffb700] font-black'
                                                                 : !cell.isFuture ? 'hover:bg-[#ffb700]/20 hover:text-[#2D2926]' : ''
                                                         }
                                                     `}
@@ -444,7 +444,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
 
                                 {/* Time Selection */}
                                 <div className="flex flex-col gap-2.5">
-                                    <div className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/60 dark:text-white/60 flex items-center gap-1.5">
+                                    <div className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/60 flex items-center gap-1.5">
                                         <span className="material-symbols-outlined text-[14px] font-bold text-[#ffb700]">schedule</span>
                                         Time Selection
                                     </div>
@@ -453,7 +453,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                         {/* Hours & Minutes Pickers */}
                                         <div className="flex items-center gap-2">
                                             <div className="flex flex-col gap-1">
-                                                <label className="text-[9px] font-black uppercase text-[#2D2926]/40 dark:text-white/40">Hour</label>
+                                                <label className="text-[9px] font-black uppercase text-[#2D2926]/40">Hour</label>
                                                 <select
                                                     value={currentHour12}
                                                     onChange={handleHourChange}
@@ -468,10 +468,10 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                                 </select>
                                             </div>
 
-                                            <span className="text-base font-black text-[#2D2926] dark:text-white mt-4">:</span>
+                                            <span className="text-base font-black text-[#2D2926] mt-4">:</span>
 
                                             <div className="flex flex-col gap-1">
-                                                <label className="text-[9px] font-black uppercase text-[#2D2926]/40 dark:text-white/40">Minute</label>
+                                                <label className="text-[9px] font-black uppercase text-[#2D2926]/40">Minute</label>
                                                 <select
                                                     value={currentMinutes}
                                                     onChange={handleMinuteChange}
@@ -489,15 +489,15 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
 
                                         {/* AM / PM Segmented Control */}
                                         <div className="flex flex-col gap-1">
-                                            <label className="text-[9px] font-black uppercase text-[#2D2926]/40 dark:text-white/40">Period</label>
-                                            <div className="flex bg-[#FFF9F0] dark:bg-[#251E17] border-2 border-[#ffb700]/25 rounded-xl p-0.5">
+                                            <label className="text-[9px] font-black uppercase text-[#2D2926]/40">Period</label>
+                                            <div className="flex bg-[#FFF9F0] border-2 border-[#ffb700]/25 rounded-xl p-0.5">
                                                 <button
                                                     type="button"
                                                     onClick={() => handleAMPMChange('AM')}
                                                     className={`px-3 py-1 rounded-[10px] text-xs font-black transition-all cursor-pointer ${
                                                         currentAMPM === 'AM'
                                                             ? 'bg-[#ffb700] text-[#2D2926] shadow-xs font-black'
-                                                            : 'text-[#2D2926]/60 dark:text-white/60 hover:text-[#2D2926]'
+                                                            : 'text-[#2D2926]/60 hover:text-[#2D2926]'
                                                     }`}
                                                 >
                                                     AM
@@ -508,7 +508,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                                     className={`px-3 py-1 rounded-[10px] text-xs font-black transition-all cursor-pointer ${
                                                         currentAMPM === 'PM'
                                                             ? 'bg-[#ffb700] text-[#2D2926] shadow-xs font-black'
-                                                            : 'text-[#2D2926]/60 dark:text-white/60 hover:text-[#2D2926]'
+                                                            : 'text-[#2D2926]/60 hover:text-[#2D2926]'
                                                     }`}
                                                 >
                                                     PM
@@ -519,7 +519,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
 
                                     {/* Quick Popular Watch Times */}
                                     <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                                        <span className="text-[9px] font-black uppercase text-[#2D2926]/40 dark:text-white/40 mr-1">Jump to:</span>
+                                        <span className="text-[9px] font-black uppercase text-[#2D2926]/40 mr-1">Jump to:</span>
                                         {[
                                             { label: '2:00 PM', h: 14, m: 0 },
                                             { label: '6:30 PM', h: 18, m: 30 },
@@ -530,7 +530,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                                 key={t.label}
                                                 type="button"
                                                 onClick={() => setQuickTime(t.h, t.m)}
-                                                className="px-2.5 py-1 rounded-lg text-[10px] font-black bg-[#FFF9F0] dark:bg-[#251E17] border border-[#ffb700]/25 text-[#2D2926]/80 dark:text-[#EAE6DF] hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors cursor-pointer"
+                                                className="px-2.5 py-1 rounded-lg text-[10px] font-black bg-[#FFF9F0] border border-[#ffb700]/25 text-[#2D2926]/80 hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors cursor-pointer"
                                             >
                                                 {t.label}
                                             </button>
@@ -543,7 +543,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                                     <button
                                         type="button"
                                         onClick={selectNow}
-                                        className="py-2.5 px-4 bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-[#2D2926] dark:text-[#EAE6DF] font-black rounded-xl text-xs transition-colors active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
+                                        className="py-2.5 px-4 bg-neutral-100 hover:bg-neutral-200 text-[#2D2926] font-black rounded-xl text-xs transition-colors active:scale-[0.98] cursor-pointer flex items-center gap-1.5"
                                     >
                                         <span className="material-symbols-outlined text-[15px]">history</span>
                                         Reset to Current

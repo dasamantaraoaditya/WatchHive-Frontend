@@ -617,7 +617,7 @@ export const ProfilePage: React.FC = () => {
                                 
                                 <div className={`relative w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 ${
                                     item.checked 
-                                        ? 'bg-[#ffb700] text-white' 
+                                        ? 'bg-[#ffb700] text-[#2D2926]' 
                                         : 'bg-slate-50 text-slate-400'
                                 }`}>
                                     <span className="material-symbols-outlined text-2xl">{item.icon}</span>
@@ -653,7 +653,7 @@ export const ProfilePage: React.FC = () => {
                                     <span
                                         key={fmt}
                                         className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${
-                                            exportFormat === fmt ? 'bg-[#ffb700] text-white shadow-md' : 'text-slate-400'
+                                            exportFormat === fmt ? 'bg-[#ffb700] text-[#2D2926] shadow-md' : 'text-slate-400'
                                         }`}
                                     >
                                         {fmt}
@@ -898,7 +898,7 @@ export const ProfilePage: React.FC = () => {
                                     setIsDeleteModalOpen(false);
                                     scrollToDataManagement();
                                 }}
-                                className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-black text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
+                                className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-[#2D2926] font-black text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
                             >
                                 <span className="material-symbols-outlined text-sm">download</span>
                                 <span>Cancel & Export My Data First (Recommended)</span>

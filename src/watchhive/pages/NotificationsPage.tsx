@@ -247,7 +247,7 @@ const NotificationsPage: React.FC = () => {
                                             if (!n.isRead) markAsRead(n.id);
                                         }}
                                     >
-                                        <div className={`flex items-center justify-center w-12 h-12 rounded-2xl shrink-0 transition-all duration-300 ${n.isRead ? 'bg-slate-50 text-slate-400' : 'bg-[#ffb700] text-white shadow-lg shadow-[#ffb700]/20'}`}>
+                                        <div className={`flex items-center justify-center w-12 h-12 rounded-2xl shrink-0 transition-all duration-300 ${n.isRead ? 'bg-slate-50 text-slate-400' : 'bg-[#ffb700] text-[#2D2926] shadow-lg shadow-[#ffb700]/20'}`}>
                                             {getNotificationIcon(n.type)}
                                         </div>
                                         
