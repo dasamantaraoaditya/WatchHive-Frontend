@@ -467,7 +467,7 @@ export const LandingPage: React.FC = () => {
                                         <span className="text-[10px] font-black text-emerald-300 bg-emerald-400/10 px-2 py-0.5 rounded border border-emerald-400/20">Google Play Beta</span>
                                     </div>
                                     <p className="text-xs text-stone-300 leading-relaxed">
-                                        Material design, predictive back navigation, Google Play Services auth, and instant background sync.
+                                        Material design, predictive back navigation, 1-tap Google & Apple sign-in, and instant background sync.
                                     </p>
                                 </div>
                             </div>

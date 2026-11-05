@@ -41,7 +41,7 @@ const CATEGORIES: CategoryOption[] = [
         label: 'Account & Login',
         icon: 'manage_accounts',
         badgeColor: 'text-blue-600 bg-blue-50 border-blue-200 hover:border-blue-400',
-        placeholder: 'Describe your login, Google OAuth, password reset, or profile issue...',
+        placeholder: 'Describe your login, Google OAuth, email verification code, or profile issue...',
     },
     {
         id: 'other',
@@ -156,7 +156,7 @@ App Diagnostics:
         },
         {
             q: 'Trouble signing in with Google or Origin Mismatch?',
-            a: 'If you encounter an OAuth origin error or popup blocker, ensure you are accessing https://www.watchershive.com. You can also sign in via email or set an account password using the "Forgot Password" link.',
+            a: 'If you encounter an OAuth origin error or popup blocker, ensure you are accessing https://www.watchershive.com. You can also sign in via email with an instant 6-digit verification code with zero passwords needed.',
         },
         {
             q: 'Where does imported watch history go?',
