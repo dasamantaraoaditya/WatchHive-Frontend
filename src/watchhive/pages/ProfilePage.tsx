@@ -661,18 +661,16 @@ export const ProfilePage: React.FC = () => {
                 {dataActionTab === 'import' ? (
                     /* ─── IMPORT VIEW (Compact & AI First) ─────────────────── */
                     <div className="space-y-4 animate-[fade-in_0.2s_ease-out]">
-                        {/* 1. Format Your Watch History with AI (Shifted Above) */}
-                        <div className="p-4 sm:p-5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
-                            <div className="flex items-start sm:items-center gap-3 min-w-0">
-                                <div className="w-10 h-10 rounded-xl bg-[#ffb700] text-white flex items-center justify-center shadow-md shadow-[#ffb700]/25 shrink-0">
-                                    <span className="material-symbols-outlined text-xl">auto_fix_high</span>
+                        {/* 1. Format Your Watch History with AI (Compact space-efficient bar) */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-50/80 via-white to-amber-50/50 border border-amber-200/70 shadow-2xs">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-7 h-7 rounded-lg bg-[#ffb700]/15 text-[#ffb700] flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined text-base">auto_fix_high</span>
                                 </div>
                                 <div className="min-w-0">
-                                    <h4 className="text-sm font-black text-slate-800">
-                                        Format Your Watch History with AI
-                                    </h4>
-                                    <p className="text-xs text-slate-500 font-medium mt-0.5 leading-relaxed">
-                                        Have unformatted notes or a list? Copy our prompt into ChatGPT, Claude, or Gemini to instantly convert your history into importable JSON.
+                                    <p className="text-xs font-bold text-slate-800 truncate">
+                                        Format Watch History with AI
+                                        <span className="hidden md:inline font-normal text-slate-500 ml-1.5">— Turn raw lists into JSON via ChatGPT or Claude</span>
                                     </p>
                                 </div>
                             </div>
@@ -680,36 +678,14 @@ export const ProfilePage: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={handleCopyAiPrompt}
-                                className="px-4 py-2.5 rounded-xl bg-[#ffb700] hover:bg-[#ffaa00] text-white text-[10px] font-black uppercase tracking-wider shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
+                                className="px-3 py-1.5 rounded-xl bg-[#ffb700] hover:bg-[#ffaa00] text-white text-[10px] font-black uppercase tracking-wider shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 active:scale-95 self-end sm:self-auto"
+                                title="Copy AI prompt to format unstructured notes into JSON"
                             >
                                 <span className="material-symbols-outlined text-sm">
                                     {copiedPrompt ? 'check' : 'content_copy'}
                                 </span>
-                                <span>{copiedPrompt ? 'Prompt Copied!' : 'Copy AI Prompt'}</span>
+                                <span>{copiedPrompt ? 'Copied Prompt!' : 'Copy AI Prompt'}</span>
                             </button>
-                        </div>
-
-                        {/* 2. Date Preference Toggle */}
-                        <div className="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
-                            <div className="flex items-center gap-3 min-w-0 pr-2">
-                                <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
-                                    <span className="material-symbols-outlined text-lg">calendar_today</span>
-                                </div>
-                                <div className="flex flex-col min-w-0">
-                                    <span className="text-xs sm:text-sm font-bold text-slate-800">
-                                        Default to current year if no date provided
-                                    </span>
-                                    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">
-                                        {defaultToCurrentYear
-                                            ? `Items without a watch date will be logged under ${new Date().getFullYear()}`
-                                            : 'Off by default — no watch date will be recorded for items missing dates'}
-                                    </span>
-                                </div>
-                            </div>
-                            <Toggle
-                                checked={defaultToCurrentYear}
-                                onChange={setDefaultToCurrentYear}
-                            />
                         </div>
 
                         {/* 3. Compact Dropzone */}
