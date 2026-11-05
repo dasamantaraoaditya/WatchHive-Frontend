@@ -6,8 +6,10 @@ interface ImportPreviewModalProps {
     isOpen: boolean;
     onClose: () => void;
     previewData: ImportPreviewResult | null;
-    onConfirm: (payload: { entries: any[]; lists?: any[] }) => Promise<void>;
+    onConfirm: (payload: { entries: any[]; lists?: any[]; defaultToCurrentYear?: boolean }) => Promise<void>;
     isImporting: boolean;
+    defaultToCurrentYear: boolean;
+    onToggleDefaultToCurrentYear: (val: boolean) => void;
 }
 
 export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
@@ -16,14 +18,19 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
     previewData,
     onConfirm,
     isImporting,
+    defaultToCurrentYear,
+    onToggleDefaultToCurrentYear,
 }) => {
     const [entries, setEntries] = useState<PreviewEntry[]>([]);
     const [activeFilter, setActiveFilter] = useState<'all' | 'unmatched' | 'matched'>('all');
+    const [showDuplicates, setShowDuplicates] = useState(false);
     const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [searching, setSearching] = useState(false);
     const { registerModal } = useUI();
+
+    const currentYear = new Date().getFullYear();
 
     useEffect(() => {
         if (!isOpen) return;
@@ -38,25 +45,28 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
         }
     }, [previewData]);
 
-    const { matchedCount, unmatchedCount, duplicateCount } = useMemo(() => {
-        let matched = 0, unmatched = 0, duplicates = 0;
+    const { matchedCount, unmatchedCount, duplicateCount, missingDateCount } = useMemo(() => {
+        let matched = 0, unmatched = 0, duplicates = 0, noDate = 0;
         for (const e of entries) {
             if (e.matchStatus === 'MATCHED') matched++;
             if (e.matchStatus === 'UNMATCHED') unmatched++;
             if (e.isDuplicate) duplicates++;
+            if (!e.watchedAt) noDate++;
         }
-        return { matchedCount: matched, unmatchedCount: unmatched, duplicateCount: duplicates };
+        return { matchedCount: matched, unmatchedCount: unmatched, duplicateCount: duplicates, missingDateCount: noDate };
     }, [entries]);
 
     const filteredEntries = useMemo(() => {
         return entries
             .map((entry, originalIndex) => ({ entry, originalIndex }))
             .filter(({ entry }) => {
+                // Skip duplicates by default! Only show them if user selects duplicates
+                if (!showDuplicates && entry.isDuplicate) return false;
                 if (activeFilter === 'unmatched') return entry.matchStatus === 'UNMATCHED';
                 if (activeFilter === 'matched') return entry.matchStatus === 'MATCHED';
                 return true;
             });
-    }, [entries, activeFilter]);
+    }, [entries, activeFilter, showDuplicates]);
 
     if (!isOpen || !previewData) return null;
 
@@ -111,8 +121,18 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
     };
 
     const handleConfirm = () => {
-        if (unmatchedCount > 0 || entries.length === 0) return;
-        onConfirm({ entries, lists: previewData.lists });
+        const importableEntries = showDuplicates
+            ? entries
+            : entries.filter(e => !e.isDuplicate);
+
+        const pendingUnmatched = importableEntries.filter(e => e.matchStatus === 'UNMATCHED');
+        if (pendingUnmatched.length > 0 || importableEntries.length === 0) return;
+
+        onConfirm({
+            entries: importableEntries,
+            lists: previewData.lists,
+            defaultToCurrentYear,
+        });
     };
 
     return (
@@ -129,7 +149,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                 Review & Match Entries
                             </h2>
                             <p className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-wider truncate">
-                                {entries.length} items parsed · All items must be matched
+                                {showDuplicates ? entries.length : entries.length - duplicateCount} items to import · {unmatchedCount > 0 ? `${unmatchedCount} require matching` : 'All items matched'}
                             </p>
                         </div>
                     </div>
@@ -145,11 +165,11 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
 
                 {/* Status & Filter Bar */}
                 <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
-                    {/* Status badges — horizontally scrollable without breaking on small phones */}
+                    {/* Status badges & Controls */}
                     <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 shrink-0 max-w-full">
                         <span className="px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs shrink-0">
                             <span className="material-symbols-outlined text-xs">check_circle</span>
-                            {matchedCount} Matched
+                            {showDuplicates ? matchedCount : entries.filter(e => e.matchStatus === 'MATCHED' && !e.isDuplicate).length} Ready
                         </span>
                         {unmatchedCount > 0 ? (
                             <span className="px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs shrink-0">
@@ -162,14 +182,44 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                             </span>
                         )}
                         {duplicateCount > 0 && (
-                            <span className="px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs shrink-0">
+                            <button
+                                type="button"
+                                onClick={() => setShowDuplicates(prev => !prev)}
+                                className={`px-2.5 py-1 rounded-xl border text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer ${
+                                    showDuplicates
+                                        ? 'bg-amber-100/90 border-amber-300 text-amber-900 ring-1 ring-amber-400'
+                                        : 'bg-slate-100 hover:bg-slate-200/80 border-slate-200 text-slate-600'
+                                }`}
+                                title={showDuplicates ? "Duplicates are currently shown in All. Click to skip them." : "Duplicates are skipped by default. Click to show them in All."}
+                            >
+                                <span className="material-symbols-outlined text-xs">
+                                    {showDuplicates ? 'check_box' : 'check_box_outline_blank'}
+                                </span>
                                 <span className="material-symbols-outlined text-xs">content_copy</span>
-                                {duplicateCount} Duplicate{duplicateCount > 1 ? 's' : ''} (Skip)
-                            </span>
+                                <span>{duplicateCount} Duplicate{duplicateCount > 1 ? 's' : ''} ({showDuplicates ? 'Shown' : 'Skipped by default'})</span>
+                            </button>
+                        )}
+                        {missingDateCount > 0 && (
+                            <button
+                                type="button"
+                                onClick={() => onToggleDefaultToCurrentYear(!defaultToCurrentYear)}
+                                className={`px-2.5 py-1 rounded-xl border text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer ${
+                                    defaultToCurrentYear
+                                        ? 'bg-amber-100/90 border-amber-300 text-amber-900 ring-1 ring-amber-400'
+                                        : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-600'
+                                }`}
+                                title={defaultToCurrentYear ? `Undated entries default to current year (${currentYear}). Click to record no date instead.` : "Undated entries record no date. Click to default to current year."}
+                            >
+                                <span className="material-symbols-outlined text-xs">
+                                    {defaultToCurrentYear ? 'check_box' : 'check_box_outline_blank'}
+                                </span>
+                                <span className="material-symbols-outlined text-xs">calendar_today</span>
+                                <span>{missingDateCount} No Date ({defaultToCurrentYear ? currentYear : 'None'})</span>
+                            </button>
                         )}
                     </div>
 
-                    {/* Filter tabs — equal 3-column segmented button on mobile, inline on desktop */}
+                    {/* Filter tabs */}
                     <div className="grid grid-cols-3 sm:flex items-center gap-1 bg-white border border-slate-200/80 rounded-xl p-0.5 shadow-sm w-full sm:w-auto">
                         <button
                             onClick={() => setActiveFilter('all')}
@@ -177,7 +227,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                 activeFilter === 'all' ? 'bg-[#ffb700] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
                             }`}
                         >
-                            All ({entries.length})
+                            All ({showDuplicates ? entries.length : entries.length - duplicateCount})
                         </button>
                         <button
                             onClick={() => setActiveFilter('unmatched')}
@@ -193,7 +243,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                 activeFilter === 'matched' ? 'bg-[#ffb700] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
                             }`}
                         >
-                            Matched ({matchedCount})
+                            Matched ({showDuplicates ? matchedCount : entries.filter(e => e.matchStatus === 'MATCHED' && !e.isDuplicate).length})
                         </button>
                     </div>
                 </div>
@@ -293,10 +343,15 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                                                 ) : null}
                                                             </span>
                                                         </span>
-                                                    ) : (
-                                                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                                    ) : defaultToCurrentYear ? (
+                                                        <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md inline-flex items-center gap-1" title={`No watch date in file — will default to current year (${currentYear})`}>
                                                             <span>📅</span>
-                                                            <span>No date</span>
+                                                            <span>No date (defaults to {currentYear})</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md inline-flex items-center gap-1" title="No watch date in file — no date watched will be recorded">
+                                                            <span>📅</span>
+                                                            <span>No date recorded</span>
                                                         </span>
                                                     )}
 
@@ -451,7 +506,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
 
                 {/* Footer Controls */}
                 <div className="p-4 sm:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-slate-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-3 sticky bottom-0 z-10">
-                    <p className="text-xs text-slate-400 font-medium">
+                    <div className="text-xs text-slate-400 font-medium flex items-center gap-2 flex-wrap">
                         {unmatchedCount > 0 ? (
                             <span className="text-amber-600 font-bold flex items-center gap-1">
                                 <span className="material-symbols-outlined text-sm">lock</span>
@@ -463,7 +518,12 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                 All items verified and ready
                             </span>
                         )}
-                    </p>
+                        {!showDuplicates && duplicateCount > 0 && (
+                            <span className="text-slate-400 font-medium">
+                                · ({duplicateCount} duplicate{duplicateCount > 1 ? 's' : ''} skipped)
+                            </span>
+                        )}
+                    </div>
 
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button
@@ -477,7 +537,11 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                         <button
                             type="button"
                             onClick={handleConfirm}
-                            disabled={unmatchedCount > 0 || entries.length === 0 || isImporting}
+                            disabled={
+                                (showDuplicates ? entries : entries.filter(e => !e.isDuplicate)).filter(e => e.matchStatus === 'UNMATCHED').length > 0 ||
+                                (showDuplicates ? entries.length : entries.filter(e => !e.isDuplicate).length) === 0 ||
+                                isImporting
+                            }
                             className="flex-1 sm:flex-none px-6 py-3 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-xs uppercase tracking-wider rounded-2xl transition-all shadow-xl shadow-[#ffb700]/25 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {isImporting ? (
@@ -488,7 +552,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                             ) : (
                                 <>
                                     <span className="material-symbols-outlined text-base">download_done</span>
-                                    Import {matchedCount} Entries
+                                    Import {showDuplicates ? matchedCount : entries.filter(e => e.matchStatus === 'MATCHED' && !e.isDuplicate).length} Entries
                                 </>
                             )}
                         </button>

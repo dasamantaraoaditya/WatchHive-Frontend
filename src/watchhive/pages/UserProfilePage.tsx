@@ -48,6 +48,7 @@ export const UserProfilePage: React.FC = () => {
 
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isHoveredRequested, setIsHoveredRequested] = useState(false);
+    const [isHoveredFollowing, setIsHoveredFollowing] = useState(false);
 
     // Dynamic data for tabs
     const [watchlistItems, setWatchlistItems] = useState<ListItem[] | null>(null);
@@ -342,21 +343,34 @@ export const UserProfilePage: React.FC = () => {
                                 <div className="flex flex-row gap-2 w-full">
                                     <button 
                                         onClick={handleFollowToggle} 
-                                        onMouseEnter={() => setIsHoveredRequested(true)}
-                                        onMouseLeave={() => setIsHoveredRequested(false)}
+                                        onMouseEnter={() => {
+                                            if (profileUser.isFollowing) setIsHoveredFollowing(true);
+                                            if (profileUser.isRequested) setIsHoveredRequested(true);
+                                        }}
+                                        onMouseLeave={() => {
+                                            setIsHoveredFollowing(false);
+                                            setIsHoveredRequested(false);
+                                        }}
                                         className={`flex-1 font-black py-2.5 px-4 rounded-xl transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-md shadow-black/5 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
                                             profileUser.isFollowing 
-                                            ? 'bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-100 border border-transparent' 
+                                            ? 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-slate-200' 
                                             : profileUser.isRequested
-                                            ? 'bg-amber-50 text-amber-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 border border-amber-200 shadow-amber-100/50'
-                                            : 'bg-[#ffb700] text-white hover:brightness-105 shadow-[#ffb700]/15'
+                                            ? 'bg-amber-50 text-amber-600 hover:bg-rose-50 hover:text-rose-600 border border-amber-200 shadow-amber-100/50'
+                                            : 'bg-[#ffb700] text-black shadow-md shadow-[#ffb700]/20 hover:brightness-105'
                                         }`}
                                     >
                                         {profileUser.isFollowing ? (
-                                            <>
-                                                <span className="material-symbols-outlined text-[14px]">person_remove</span>
-                                                Unfollow
-                                            </>
+                                            isHoveredFollowing ? (
+                                                <>
+                                                    <span className="material-symbols-outlined text-[14px]">person_remove</span>
+                                                    Unfollow
+                                                </>
+                                            ) : (
+                                                 <>
+                                                    <span className="material-symbols-outlined text-[14px]">check</span>
+                                                    Following
+                                                </>
+                                            )
                                         ) : profileUser.isRequested ? (
                                             isHoveredRequested ? (
                                                 <>

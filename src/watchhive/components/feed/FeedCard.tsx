@@ -92,16 +92,18 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
 
-    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM" or "Jan 1, 2025" for date-only
+    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM" or "Jan 1, 2025" for date-only, guarding against future skew
     const displayTimestamp = entryData?.watchedAt || item.timestamp || entryData?.updatedAt || entryData?.createdAt;
     const timestamp = !isSuggestion && displayTimestamp
         ? (() => {
-            const d = new Date(displayTimestamp);
-            if (isNaN(d.getTime())) return 'Just Now';
-            const isMidnight = d.getHours() === 0 && d.getMinutes() === 0;
+            const now = new Date();
+            const rawDate = new Date(displayTimestamp);
+            if (isNaN(rawDate.getTime())) return 'Just Now';
+            const effectiveDate = rawDate.getTime() > now.getTime() ? now : rawDate;
+            const isMidnight = effectiveDate.getHours() === 0 && effectiveDate.getMinutes() === 0;
             return isMidnight
-                ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-                : d.toLocaleString(undefined, {
+                ? effectiveDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                : effectiveDate.toLocaleString(undefined, {
                     month: 'short', day: 'numeric', year: 'numeric',
                     hour: 'numeric', minute: '2-digit'
                 }).replace(',', ' at');

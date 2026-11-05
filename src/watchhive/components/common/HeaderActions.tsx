@@ -100,7 +100,7 @@ export const HeaderActions: React.FC = () => {
                     </span>
                 )}
             </Link>
-            
+
             <div className="relative" ref={profileRef}>
                 <button
                     className="w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-[#ffb700] transition-colors focus:outline-none focus:ring-4 focus:ring-[#ffb700]/10 flex items-center justify-center bg-black/5"
@@ -136,7 +136,7 @@ export const HeaderActions: React.FC = () => {
                                 <span className="material-symbols-outlined text-[20px] text-[#ffb700]">auto_awesome</span>
                                 Guided Tour
                             </button>
-                            <button 
+                            <button
                                 onClick={() => {
                                     setProfileOpen(false);
                                     setPendingModalOpen(true);
@@ -181,7 +181,7 @@ export const HeaderActions: React.FC = () => {
                                             <span className="material-symbols-outlined text-[20px] text-[#ffb700]">download</span>
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="font-black uppercase tracking-widest">Install App</span>
-                                                <span className="text-[9px] text-[#b07d00]/75 font-bold tracking-tight">⚡ Fast &nbsp;·&nbsp; 📶 Offline &nbsp;·&nbsp; 🔔 Alerts</span>
+                                                <span className="text-[9px] text-[#b07d00]/75 font-bold tracking-tight">⚡ Fast &nbsp;·&nbsp; Offline &nbsp;·&nbsp; 🔔 Alerts</span>
                                             </div>
                                         </div>
                                         {isInstallReady ? (
@@ -198,10 +198,10 @@ export const HeaderActions: React.FC = () => {
                                             <div className="flex flex-col gap-1.5">
                                                 <p className="text-[9px] font-black uppercase tracking-widest text-[#b07d00] m-0">Why install?</p>
                                                 <div className="flex flex-wrap gap-1">
-                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">⚡ Opens instantly</span>
-                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">📶 Works offline</span>
-                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">🔔 Push alerts</span>
-                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">🖥️ No browser bars</span>
+                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">Opens instantly</span>
+                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">Works offline</span>
+                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">Push alerts</span>
+                                                    <span className="text-[9px] font-bold text-[#92660a] bg-[#ffb700]/15 rounded px-1.5 py-0.5">No browser bars</span>
                                                 </div>
                                             </div>
                                             <div className="flex flex-col gap-1.5">
@@ -235,10 +235,10 @@ export const HeaderActions: React.FC = () => {
                     </div>
                 )}
             </div>
-            <PendingRequestsModal 
-                isOpen={pendingModalOpen} 
-                onClose={() => setPendingModalOpen(false)} 
-                onRequestsUpdated={fetchPendingCount} 
+            <PendingRequestsModal
+                isOpen={pendingModalOpen}
+                onClose={() => setPendingModalOpen(false)}
+                onRequestsUpdated={fetchPendingCount}
             />
         </div>
     );

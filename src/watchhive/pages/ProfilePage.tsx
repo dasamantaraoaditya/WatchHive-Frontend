@@ -36,7 +36,8 @@ export const ProfilePage: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
 
     // Data export / import state
-    const [dataActionTab, setDataActionTab] = useState<'export' | 'import'>('export');
+    const [dataActionTab, setDataActionTab] = useState<'import' | 'export'>('import');
+    const [defaultToCurrentYear, setDefaultToCurrentYear] = useState(false);
     const [exportFormat, setExportFormat] = useState<ExportFormat>('json');
     const [includeEntries, setIncludeEntries] = useState(true);
     const [includeLists, setIncludeLists] = useState(true);
@@ -165,7 +166,7 @@ export const ProfilePage: React.FC = () => {
         setDataLoading(true);
         setImportResult(null);
         try {
-            const preview = await dataService.previewImport(file);
+            const preview = await dataService.previewImport(file, { defaultToCurrentYear });
             setPreviewData(preview);
             setIsPreviewOpen(true);
         } catch (err: any) {
@@ -176,10 +177,13 @@ export const ProfilePage: React.FC = () => {
         }
     };
 
-    const handleConfirmImport = async (payload: { entries: any[]; lists?: any[] }) => {
+    const handleConfirmImport = async (payload: { entries: any[]; lists?: any[]; defaultToCurrentYear?: boolean }) => {
         setIsCommittingImport(true);
         try {
-            const result = await dataService.commitImport(payload);
+            const result = await dataService.commitImport({
+                ...payload,
+                defaultToCurrentYear: payload.defaultToCurrentYear ?? defaultToCurrentYear,
+            });
             setImportResult(result);
             setIsPreviewOpen(false);
             setPreviewData(null);
@@ -543,26 +547,18 @@ export const ProfilePage: React.FC = () => {
                 <div className="flex items-start justify-between gap-3 sm:gap-4 mb-6">
                     <div className="flex items-start gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0 mt-0.5">
-                            <span className="material-symbols-outlined">{dataActionTab === 'export' ? 'file_download' : 'file_upload'}</span>
+                            <span className="material-symbols-outlined">{dataActionTab === 'import' ? 'file_upload' : 'file_download'}</span>
                         </div>
                         <div className="min-w-0">
                             <h2 className="text-lg sm:text-xl font-black text-slate-800 truncate">Data Management</h2>
                             <p className="text-[10px] sm:text-[11px] text-slate-500 font-bold uppercase tracking-wider truncate">
-                                {dataActionTab === 'export' ? 'Export your hive data' : 'Import your watch history'}
+                                {dataActionTab === 'import' ? 'Import your watch history' : 'Export your hive data'}
                             </p>
                         </div>
                     </div>
 
-                    {/* Mode Toggle Switch: Export / Import */}
+                    {/* Mode Toggle Switch: Import / Export */}
                     <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 rounded-2xl p-1 shadow-sm shrink-0">
-                        <button
-                            type="button"
-                            onClick={() => { setDataActionTab('export'); setImportResult(null); }}
-                            className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${dataActionTab === 'export' ? 'bg-[#ffb700] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
-                                }`}
-                        >
-                            Export
-                        </button>
                         <button
                             type="button"
                             onClick={() => { setDataActionTab('import'); setImportResult(null); }}
@@ -571,10 +567,203 @@ export const ProfilePage: React.FC = () => {
                         >
                             Import
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => { setDataActionTab('export'); setImportResult(null); }}
+                            className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${dataActionTab === 'export' ? 'bg-[#ffb700] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                                }`}
+                        >
+                            Export
+                        </button>
                     </div>
                 </div>
 
-                {dataActionTab === 'export' ? (
+                {dataActionTab === 'import' ? (
+                    /* ─── IMPORT VIEW (Compact & AI First) ─────────────────── */
+                    <div className="space-y-4 animate-[fade-in_0.2s_ease-out]">
+                        {/* 1. Format Your Watch History with AI (Shifted Above) */}
+                        <div className="p-4 sm:p-5 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+                            <div className="flex items-start sm:items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-xl bg-[#ffb700] text-white flex items-center justify-center shadow-md shadow-[#ffb700]/25 shrink-0">
+                                    <span className="material-symbols-outlined text-xl">auto_fix_high</span>
+                                </div>
+                                <div className="min-w-0">
+                                    <h4 className="text-sm font-black text-slate-800">
+                                        Format Your Watch History with AI
+                                    </h4>
+                                    <p className="text-xs text-slate-500 font-medium mt-0.5 leading-relaxed">
+                                        Have unformatted notes or a list? Copy our prompt into ChatGPT, Claude, or Gemini to instantly convert your history into importable JSON.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={handleCopyAiPrompt}
+                                className="px-4 py-2.5 rounded-xl bg-[#ffb700] hover:bg-[#ffaa00] text-white text-[10px] font-black uppercase tracking-wider shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
+                            >
+                                <span className="material-symbols-outlined text-sm">
+                                    {copiedPrompt ? 'check' : 'content_copy'}
+                                </span>
+                                <span>{copiedPrompt ? 'Prompt Copied!' : 'Copy AI Prompt'}</span>
+                            </button>
+                        </div>
+
+                        {/* 2. Date Preference Toggle */}
+                        <div className="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div className="flex items-center gap-3 min-w-0 pr-2">
+                                <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 shrink-0">
+                                    <span className="material-symbols-outlined text-lg">calendar_today</span>
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-xs sm:text-sm font-bold text-slate-800">
+                                        Default to current year if no date provided
+                                    </span>
+                                    <span className="text-[10px] sm:text-[11px] text-slate-500 font-medium">
+                                        {defaultToCurrentYear
+                                            ? `Items without a watch date will be logged under ${new Date().getFullYear()}`
+                                            : 'Off by default — no watch date will be recorded for items missing dates'}
+                                    </span>
+                                </div>
+                            </div>
+                            <Toggle
+                                checked={defaultToCurrentYear}
+                                onChange={setDefaultToCurrentYear}
+                            />
+                        </div>
+
+                        {/* 3. Compact Dropzone */}
+                        <div
+                            onClick={() => !dataLoading && importFileRef.current?.click()}
+                            className={`border-2 border-dashed rounded-2xl p-6 sm:p-7 text-center cursor-pointer transition-all ${dataLoading
+                                ? 'border-[#ffb700]/50 bg-[#ffb700]/5 pointer-events-none'
+                                : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-[#ffb700]/60'
+                                }`}
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-[#ffb700]/10 text-[#ffb700] flex items-center justify-center mx-auto mb-3">
+                                <span className="material-symbols-outlined text-2xl">upload_file</span>
+                            </div>
+
+                            <h3 className="text-sm sm:text-base font-black text-slate-800">
+                                {dataLoading ? 'Analyzing file...' : 'Choose or Drop File to Import'}
+                            </h3>
+                            <p className="text-xs text-slate-500 font-medium max-w-md mx-auto mt-1 leading-relaxed">
+                                Upload a <strong className="text-slate-700">Letterboxd, IMDb, Trakt, Notion CSV</strong> or a <strong className="text-slate-700">WatchersHive backup</strong>.
+                            </p>
+
+                            {/* Format chips */}
+                            <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+                                <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-2xs">
+                                    🟩 Letterboxd
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-2xs">
+                                    🟨 IMDb
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-2xs">
+                                    🟥 Trakt
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-2xs">
+                                    📄 Notion CSV / JSON
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shadow-2xs flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-xs">auto_awesome</span> Auto TMDb Match
+                                </span>
+                            </div>
+
+                            <div className="mt-4 max-w-xs mx-auto">
+                                <button
+                                    type="button"
+                                    disabled={dataLoading}
+                                    onClick={(e) => { e.stopPropagation(); importFileRef.current?.click(); }}
+                                    className="flex items-center justify-center gap-2 py-3 px-5 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-[10px] uppercase tracking-[0.15em] rounded-xl transition-all shadow-md shadow-[#ffb700]/20 disabled:opacity-40 w-full"
+                                >
+                                    {dataLoading ? (
+                                        <Skeleton variant="circle" width={14} height={14} />
+                                    ) : (
+                                        <span className="material-symbols-outlined text-base">cloud_upload</span>
+                                    )}
+                                    {dataLoading ? 'Processing...' : 'Select File'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 4. Compact Collapsible Migration Tips */}
+                        <details className="group rounded-2xl border border-slate-200/80 bg-white p-3.5 text-xs text-slate-600 transition-all [&_summary::-webkit-details-marker]:hidden">
+                            <summary className="flex items-center justify-between cursor-pointer font-bold text-slate-700 select-none">
+                                <div className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-amber-500 text-base">help_outline</span>
+                                    <span>Migration tips for Letterboxd, IMDb & Trakt</span>
+                                </div>
+                                <span className="material-symbols-outlined text-sm text-slate-400 transition-transform group-open:rotate-180">expand_more</span>
+                            </summary>
+                            <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] leading-snug">
+                                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div className="font-bold text-slate-800 mb-0.5">🟩 Letterboxd</div>
+                                    Export from <em>Settings &gt; Data &gt; Export</em>. Drop <strong className="text-slate-700">diary.csv</strong> or <strong className="text-slate-700">ratings.csv</strong>. Ratings scale 2x automatically.
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div className="font-bold text-slate-800 mb-0.5">🟨 IMDb</div>
+                                    Go to <em>Your Ratings &gt; Export</em>. Drop <strong className="text-slate-700">ratings.csv</strong>. Const IDs ensure instant TMDb matches.
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div className="font-bold text-slate-800 mb-0.5">🟥 Trakt / Notion</div>
+                                    Export watched history CSV. Dates, rewatches, and ratings are automatically mapped.
+                                </div>
+                            </div>
+                        </details>
+
+                        {/* Import Result Notification */}
+                        {importResult && (
+                            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 animate-[slide-down_0.2s_ease-out]">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                        <span className="material-symbols-outlined text-lg">check</span>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-black text-emerald-800">
+                                            {importResult.message || 'Import completed successfully'}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2 mt-2.5">
+                                            {importResult.entriesImported !== undefined && (
+                                                <span className="px-3 py-1 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider shadow-xs">
+                                                    ✓ {importResult.entriesImported} entries imported
+                                                </span>
+                                            )}
+                                            {(importResult.entriesSkipped ?? 0) > 0 && (
+                                                <span className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-wider shadow-xs">
+                                                    {importResult.entriesSkipped} skipped (duplicate/unmatched)
+                                                </span>
+                                            )}
+                                            {importResult.listsImported !== undefined && importResult.listsImported > 0 && (
+                                                <span className="px-3 py-1 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider shadow-xs">
+                                                    ✓ {importResult.listsImported} lists · {importResult.itemsImported ?? 0} items
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {importResult.entriesErrors && importResult.entriesErrors.length > 0 && (
+                                            <div className="mt-3 pt-2.5 border-t border-emerald-200/60">
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                                                    Skipped Details:
+                                                </p>
+                                                <ul className="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                                                    {importResult.entriesErrors.slice(0, 5).map((err, i) => (
+                                                        <li key={i} className="truncate">{err}</li>
+                                                    ))}
+                                                    {importResult.entriesErrors.length > 5 && (
+                                                        <li className="text-slate-400 italic">
+                                                            ...and {importResult.entriesErrors.length - 5} more
+                                                        </li>
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
                     /* ─── EXPORT VIEW ─────────────────────────────────────── */
                     <div className="space-y-6 animate-[fade-in_0.2s_ease-out]">
                         {/* Checkboxes — only for export data selection */}
@@ -646,154 +835,6 @@ export const ProfilePage: React.FC = () => {
                                 Export Data
                             </button>
                         </div>
-                    </div>
-                ) : (
-                    /* ─── IMPORT VIEW ─────────────────────────────────────── */
-                    <div className="space-y-6 animate-[fade-in_0.2s_ease-out]">
-                        {/* Tips for Best Results */}
-                        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-300/70 text-slate-800 space-y-1.5">
-                            <div className="flex items-start gap-2">
-                                <span className="material-symbols-outlined text-amber-600 text-lg sm:text-xl shrink-0">tips_and_updates</span>
-                                <h4 className="text-xs sm:text-sm font-black text-amber-950 uppercase tracking-wider">
-                                    Tips for Best Import Results
-                                </h4>
-                            </div>
-                            <p className="text-xs text-slate-700 leading-relaxed">
-                                For your diary timeline, calendar, and statistics to accurately reflect your viewing journey, include the title and watch date for each item whenever possible. Ratings, written reviews, tags, and watch location will also be automatically preserved.
-                            </p>
-                        </div>
-                        <div
-                            onClick={() => !dataLoading && importFileRef.current?.click()}
-                            className={`border-2 border-dashed rounded-[32px] p-8 sm:p-10 text-center cursor-pointer transition-all ${dataLoading
-                                ? 'border-[#ffb700]/50 bg-[#ffb700]/5 pointer-events-none'
-                                : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-[#ffb700]/60'
-                                }`}
-                        >
-                            <div className="w-16 h-16 rounded-3xl bg-[#ffb700]/10 text-[#ffb700] flex items-center justify-center mx-auto mb-4 transition-transform group-hover:scale-105">
-                                <span className="material-symbols-outlined text-3xl">upload_file</span>
-                            </div>
-
-                            <h3 className="text-base font-black text-slate-800">
-                                {dataLoading ? 'Importing your data...' : 'Choose or Drop File to Import'}
-                            </h3>
-                            <p className="text-xs text-slate-500 font-medium max-w-md mx-auto mt-2 leading-relaxed">
-                                Upload a <strong className="text-slate-700">JSON/CSV export</strong> or a <strong className="text-slate-700">WatchersHive</strong> backup. Media titles and ratings are automatically mapped and matched.
-                            </p>
-
-                            {/* Format chips */}
-                            <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-                                <span className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-sm">
-                                    📄 JSON / CSV
-                                </span>
-                                <span className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-sm">
-                                    <img src="/src/watchhive/assets/images/watchhive-logo.png" alt="WatchersHive" className="w-4 h-4 mr-1 inline" /> WatchersHive Backup
-                                </span>
-                                <span className="px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shadow-sm flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-xs">auto_awesome</span> Auto TMDb Match
-                                </span>
-                            </div>
-
-                            <div className="mt-6 max-w-xs mx-auto">
-                                <button
-                                    type="button"
-                                    disabled={dataLoading}
-                                    onClick={(e) => { e.stopPropagation(); importFileRef.current?.click(); }}
-                                    className="flex items-center justify-center gap-2 py-4 px-6 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-[#ffb700]/20 disabled:opacity-40 w-full"
-                                >
-                                    {dataLoading ? (
-                                        <Skeleton variant="circle" width={16} height={16} />
-                                    ) : (
-                                        <span className="material-symbols-outlined text-base">cloud_upload</span>
-                                    )}
-                                    {dataLoading ? 'Processing...' : 'Select File'}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-[11px] text-amber-900 leading-relaxed">
-                            <span className="material-symbols-outlined text-base text-amber-600 shrink-0 mt-0.5">psychology</span>
-                            <p>
-                                <strong>MindLens Optimization:</strong> Having complete details like <strong>title</strong>, <strong>watch date</strong>, and <strong>watch time</strong> ensures accurate diary timelines and deep, personalized MindLens insights into your viewing habits.
-                            </p>
-                        </div>
-
-                        {/* AI Formatting Helper — Clean & Jargon-free */}
-                        <div className="p-5 sm:p-6 rounded-[28px] border border-amber-200/80 bg-gradient-to-br from-amber-50/60 via-white to-amber-50/30 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                                <div className="w-11 h-11 rounded-2xl bg-[#ffb700] text-white flex items-center justify-center shadow-md shadow-[#ffb700]/30 shrink-0">
-                                    <span className="material-symbols-outlined text-2xl">auto_fix_high</span>
-                                </div>
-                                <div className="min-w-0">
-                                    <h4 className="text-sm sm:text-base font-black text-slate-800">
-                                        Format Your Watch History with AI
-                                    </h4>
-                                    <p className="text-xs text-slate-500 font-medium mt-0.5 leading-relaxed">
-                                        Have a list or export from Notion, Letterboxd, or your Notes app? Copy our prompt, paste it into ChatGPT, Claude, or Gemini with your list, and get a file ready to upload in seconds.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={handleCopyAiPrompt}
-                                className="px-4 py-3 rounded-2xl bg-[#ffb700] hover:bg-[#ffaa00] text-white text-[11px] font-black uppercase tracking-wider shadow-md shadow-[#ffb700]/20 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 active:scale-95"
-                            >
-                                <span className="material-symbols-outlined text-base">
-                                    {copiedPrompt ? 'check' : 'content_copy'}
-                                </span>
-                                <span>{copiedPrompt ? 'Prompt Copied to Clipboard!' : 'Copy AI Formatting Prompt'}</span>
-                            </button>
-                        </div>
-
-                        {importResult && (
-                            <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 animate-[slide-down_0.2s_ease-out]">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-                                        <span className="material-symbols-outlined text-lg">check</span>
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-black text-emerald-800">
-                                            {importResult.message || 'Import completed successfully'}
-                                        </p>
-                                        <div className="flex flex-wrap gap-2 mt-3">
-                                            {importResult.entriesImported !== undefined && (
-                                                <span className="px-3 py-1 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider shadow-sm">
-                                                    ✓ {importResult.entriesImported} entries imported
-                                                </span>
-                                            )}
-                                            {(importResult.entriesSkipped ?? 0) > 0 && (
-                                                <span className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-wider shadow-sm">
-                                                    {importResult.entriesSkipped} skipped (duplicate/unmatched)
-                                                </span>
-                                            )}
-                                            {importResult.listsImported !== undefined && importResult.listsImported > 0 && (
-                                                <span className="px-3 py-1 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider shadow-sm">
-                                                    ✓ {importResult.listsImported} lists · {importResult.itemsImported ?? 0} items
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        {importResult.entriesErrors && importResult.entriesErrors.length > 0 && (
-                                            <div className="mt-4 pt-3 border-t border-emerald-200/60">
-                                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                                                    Skipped Details:
-                                                </p>
-                                                <ul className="text-xs text-slate-600 space-y-1 list-disc list-inside">
-                                                    {importResult.entriesErrors.slice(0, 5).map((err, i) => (
-                                                        <li key={i} className="truncate">{err}</li>
-                                                    ))}
-                                                    {importResult.entriesErrors.length > 5 && (
-                                                        <li className="text-slate-400 italic">
-                                                            ...and {importResult.entriesErrors.length - 5} more
-                                                        </li>
-                                                    )}
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )}
             </div>
@@ -884,6 +925,8 @@ export const ProfilePage: React.FC = () => {
                 previewData={previewData}
                 onConfirm={handleConfirmImport}
                 isImporting={isCommittingImport}
+                defaultToCurrentYear={defaultToCurrentYear}
+                onToggleDefaultToCurrentYear={setDefaultToCurrentYear}
             />
             <AvatarLightboxModal
                 isOpen={isAvatarModalOpen}

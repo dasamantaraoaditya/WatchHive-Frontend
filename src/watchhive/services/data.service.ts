@@ -131,8 +131,8 @@ export function isWatchDateHeader(raw: string): boolean {
     if (isReleaseDateHeader(raw)) return false;
     const s = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-    // Explicit watch/logged date variations
-    if (/(?:watch(?:ed)?(?:date|at|time|year|day)?|date(?:watched|seen|logged|finished|completed|added|viewed)|(?:logged|finished|completed|seen|viewed)(?:date|at|time)?)/i.test(s)) {
+    // Explicit watch/logged/rated date variations (IMDb "Date Rated", Letterboxd "Watched Date", Trakt "Watched At" / "Rated At")
+    if (/(?:watch(?:ed)?(?:date|at|time|year|day)?|date(?:watched|seen|logged|finished|completed|added|viewed|rated)|(?:logged|finished|completed|seen|viewed|rated)(?:date|at|time)?)/i.test(s)) {
         return true;
     }
 
@@ -162,7 +162,7 @@ export function isTitleHeader(raw: string): boolean {
         return false;
     }
     // Exact or strong matches
-    if (/^(?:title|name|movie|film|show|series|item|entry|moviename|filmtitle|movietitle|showname|seriestitle)$/i.test(s)) {
+    if (/^(?:title|name|movie|film|show|series|item|entry|moviename|filmtitle|movietitle|showname|seriestitle|originaltitle|primarytitle|mediatitle)$/i.test(s)) {
         return true;
     }
     // Substring match e.g. "Movie / Show", "Film / Series"
@@ -177,12 +177,12 @@ export function isTitleHeader(raw: string): boolean {
  */
 export function isRatingHeader(raw: string): boolean {
     const s = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
-    // Exclude aggregate / external rating sources
-    if (/(?:imdb|tmdb|metacritic|rottentomatoes|community|average|avg)/i.test(s)) {
+    // Exclude aggregate / external rating sources (unless it's the user's personal rating)
+    if (/^(?:imdbrating|tmdb(?:rating|vote)?|metacritic|rottentomatoes|community|average|avg|numvotes)$/i.test(s)) {
         return false;
     }
-    return /^(?:rating|score|myrating|myscore|personalrating|stars?|grade|rate|userrating)$/i.test(s) ||
-        /(?:my_?rating|user_?rating|score|stars?)/i.test(s);
+    return /^(?:rating|score|myrating|myscore|personalrating|stars?|grade|rate|userrating|yourrating)$/i.test(s) ||
+        /(?:my_?rating|user_?rating|your_?rating|score|stars?)/i.test(s);
 }
 
 /**
@@ -196,7 +196,7 @@ export function isReleaseYearHeader(raw: string): boolean {
 
 export function isTypeHeader(raw: string): boolean {
     const s = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return /^(?:type|mediatype|format|category|kind)$/i.test(s);
+    return /^(?:type|mediatype|format|category|kind|titletype)$/i.test(s);
 }
 
 export function isStatusHeader(raw: string): boolean {
@@ -216,7 +216,7 @@ export function isTagsHeader(raw: string): boolean {
 
 export function isRewatchHeader(raw: string): boolean {
     const s = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return /^(?:rewatch|isrewatch|rewatched|repeat)$/i.test(s);
+    return /^(?:rewatch|isrewatch|rewatched|repeat|plays)$/i.test(s);
 }
 
 export function isLocationHeader(raw: string): boolean {
@@ -231,7 +231,7 @@ export function isTmdbHeader(raw: string): boolean {
 
 export function isImdbHeader(raw: string): boolean {
     const s = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return /^(?:imdbid|imdb|imdblink|imdburl)$/i.test(s);
+    return /^(?:imdbid|imdb|imdblink|imdburl|const)$/i.test(s);
 }
 
 export function isUrlHeader(raw: string): boolean {
@@ -240,12 +240,13 @@ export function isUrlHeader(raw: string): boolean {
 }
 
 /**
- * Parses rating from various Notion and external formats:
+ * Parses rating from various external formats (Letterboxd, IMDb, Notion, Trakt):
  * - Star emojis: ⭐⭐⭐⭐ (4 stars out of 5 -> 8/10, or out of 10)
  * - Fractions: "4/5", "8.5/10", "4.5 / 5"
+ * - 5-star scale (when isFiveStarScale = true, e.g. Letterboxd): 4.5 -> 9.0
  * - Standard numbers: "8.5", "9"
  */
-function parseRating(raw: string): string | null {
+function parseRating(raw: string, isFiveStarScale: boolean = false): string | null {
     if (!raw || !raw.trim()) return null;
     const s = raw.trim();
 
@@ -273,7 +274,8 @@ function parseRating(raw: string): string | null {
     // Direct number
     const num = parseFloat(s);
     if (!isNaN(num)) {
-        return Math.min(10, Math.max(0, num)).toFixed(1);
+        const finalNum = isFiveStarScale && num <= 5 ? num * 2 : num;
+        return Math.min(10, Math.max(0, finalNum)).toFixed(1);
     }
 
     return null;
@@ -483,7 +485,7 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
         return { entries, lists };
     }
 
-    // Otherwise, parse as Notion database CSV or general third-party CSV
+    // Otherwise, parse as Notion database CSV or general third-party CSV (Letterboxd, IMDb, Trakt, etc.)
     const rows = parseCsv(text);
     if (rows.length < 2) {
         throw new Error('CSV file contains no data rows.');
@@ -491,9 +493,23 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
 
     const rawHeaders = rows[0];
 
+    // Detect platform origins
+    const isLetterboxd = rawHeaders.some(h => /letterboxd/i.test(h));
+    const isImdb = rawHeaders.some(h => /const/i.test(h)) || rawHeaders.some(h => /imdbrating/i.test(h));
+    const isWatchlistExport = rawHeaders.some(h => /^position$/i.test(h.trim())) && isImdb;
+
     // Find column indices with precision regex classifiers
     const titleIdx = rawHeaders.findIndex(isTitleHeader);
-    const watchDateIdx = rawHeaders.findIndex(isWatchDateHeader);
+
+    // Prefer explicit viewing/watch date over generic creation/log date (crucial for Letterboxd where "Date" is log date and "Watched Date" is viewing date)
+    let watchDateIdx = rawHeaders.findIndex(h => {
+        const s = h.toLowerCase().replace(/[^a-z0-9]/g, '');
+        return /(?:watch(?:ed)?(?:date|at)|datewatched|viewed(?:date|at)|seen(?:date|at))/i.test(s);
+    });
+    if (watchDateIdx === -1) {
+        watchDateIdx = rawHeaders.findIndex(isWatchDateHeader);
+    }
+
     const watchTimeIdx = rawHeaders.findIndex(isWatchTimeHeader);
     const releaseYearIdx = rawHeaders.findIndex(isReleaseYearHeader);
     const ratingIdx = rawHeaders.findIndex(isRatingHeader);
@@ -534,6 +550,16 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
             if (parsed.imdbId) imdbId = parsed.imdbId;
         }
 
+        // If IMDb ID wasn't in a dedicated header, check if any cell contains tt\d{7,10} (e.g. IMDb Const column)
+        if (!imdbId) {
+            for (const cell of row) {
+                if (/^tt\d{7,10}$/i.test(cell?.trim())) {
+                    imdbId = cell.trim();
+                    break;
+                }
+            }
+        }
+
         if (urlIdx !== -1 && row[urlIdx]) {
             const parsed = parseLinksAndIds(row[urlIdx]);
             if (parsed.tmdbId && !tmdbId) tmdbId = parsed.tmdbId;
@@ -545,14 +571,14 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
         const typeRaw = typeIdx !== -1 ? row[typeIdx] : '';
         const type = detectedType || (typeRaw ? parseMediaType(typeRaw) : 'MOVIE');
 
-        // Rating
+        // Rating (Letterboxd 5-star ratings are automatically scaled 2x to 10-point scale)
         const ratingRaw = ratingIdx !== -1 ? row[ratingIdx] : '';
-        const rating = ratingRaw ? parseRating(ratingRaw) : null;
+        const rating = ratingRaw ? parseRating(ratingRaw, isLetterboxd) : null;
 
-        // Status
+        // Status & Watchlist detection
         const statusRaw = (statusIdx !== -1 ? row[statusIdx] : '').toLowerCase();
         const isWatching = statusRaw.includes('watching') || statusRaw.includes('in progress') || statusRaw.includes('current');
-        const isWatchlist = statusRaw.includes('plan') || statusRaw.includes('to watch') || statusRaw.includes('want to watch') || statusRaw.includes('watchlist') || statusRaw.includes('queue') || statusRaw.includes('backlog');
+        const isWatchlist = isWatchlistExport || statusRaw.includes('plan') || statusRaw.includes('to watch') || statusRaw.includes('want to watch') || statusRaw.includes('watchlist') || statusRaw.includes('queue') || statusRaw.includes('backlog');
 
         // Watch date & time: date is required, time falls back to 12:00:00
         const dateRaw = watchDateIdx !== -1 ? row[watchDateIdx] : '';
@@ -572,11 +598,12 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
             tags = row[tagsIdx].split(/[,|;]/).map(t => t.trim()).filter(Boolean);
         }
 
-        // Rewatch
+        // Rewatch (Letterboxd "Yes", Trakt plays > 1, or boolean)
         let isRewatch = false;
         if (rewatchIdx !== -1 && row[rewatchIdx]) {
             const rw = row[rewatchIdx].toLowerCase().trim();
-            isRewatch = rw === 'yes' || rw === 'true' || rw === '1' || rw === 'checked';
+            const playCount = parseInt(rw, 10);
+            isRewatch = rw === 'yes' || rw === 'true' || rw === '1' || rw === 'checked' || (!isNaN(playCount) && playCount > 1);
         }
 
         // Location
@@ -594,9 +621,10 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
             isWatching,
             watchLocation,
             year: releaseYear,
-            watchedAt: dateInfo?.watchedAt || (isWatchlist ? null : null),
+            watchedAt: dateInfo?.watchedAt || null,
             startedAt: dateInfo?.startedAt || null,
             completedAt: dateInfo?.completedAt || null,
+            inWatchlist: isWatchlist,
         };
 
         entries.push(entry);
@@ -615,12 +643,294 @@ export function parseCsvContent(text: string): { entries?: any[]; lists?: any[] 
         lists.push({
             name: 'Watchlist',
             type: 'WATCHLIST',
-            description: 'Imported from Notion',
+            description: isImdb ? 'Imported from IMDb' : (isLetterboxd ? 'Imported from Letterboxd' : 'Imported Watchlist'),
             items: watchlistItems,
         });
     }
 
     return { entries, lists: lists.length > 0 ? lists : undefined };
+}
+
+// ─── NESTED JSON METADATA EXTRACTOR ──────────────────────────────────────────
+
+const VALID_TITLE_KEYS = [
+    'title', 'name', 'movietitle', 'filmtitle', 'showname', 'showtitle',
+    'seriestitle', 'mediatitle', 'entrytitle', 'originaltitle', 'primarytitle', 'headline'
+];
+
+const ENTITY_CONTAINER_KEYS = [
+    'movie', 'show', 'tv', 'series', 'film', 'episode', 'media', 'item', 'details', 'metadata', 'content', 'info', 'data'
+];
+
+const cleanKey = (k: string) => k.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+/**
+ * Searches an arbitrary JSON payload (array, object with entries/movies/items/data, etc.)
+ * to locate the primary list of entry items.
+ */
+export function findEntryListInJson(payload: any): any[] {
+    if (Array.isArray(payload)) return payload;
+    if (!payload || typeof payload !== 'object') return [];
+
+    const priorityKeys = [
+        'entries', 'movies', 'films', 'shows', 'history', 'watched',
+        'items', 'data', 'results', 'watchlist', 'list', 'records'
+    ];
+    for (const key of priorityKeys) {
+        if (Array.isArray(payload[key]) && payload[key].length > 0) {
+            return payload[key];
+        }
+    }
+
+    // Check all object keys for arrays of objects
+    for (const key of Object.keys(payload)) {
+        if (Array.isArray(payload[key]) && payload[key].length > 0 && typeof payload[key][0] === 'object') {
+            return payload[key];
+        }
+    }
+
+    // Check one level deeper (e.g. payload.data.items, payload.user.history)
+    for (const key of Object.keys(payload)) {
+        const sub = payload[key];
+        if (sub && typeof sub === 'object' && !Array.isArray(sub)) {
+            for (const subKey of priorityKeys) {
+                if (Array.isArray(sub[subKey]) && sub[subKey].length > 0) {
+                    return sub[subKey];
+                }
+            }
+        }
+    }
+
+    return [];
+}
+
+/**
+ * Robust parser utility that inspects arbitrary, flat, or deeply nested JSON objects
+ * (e.g. Trakt, Letterboxd, Simkl, Plex, Notion) to extract all required WatchHive entry metadata.
+ */
+export function extractEntryMetadata(rawItem: any): {
+    title: string;
+    type: 'MOVIE' | 'TV_SHOW' | 'EPISODE';
+    year?: string;
+    tmdbId?: number;
+    imdbId?: string;
+    watchedAt?: string | null;
+    startedAt?: string | null;
+    completedAt?: string | null;
+    rating?: string | null;
+    review?: string | null;
+    tags?: string[];
+    watchLocation?: string | null;
+    isRewatch?: boolean;
+    isWatching?: boolean;
+    posterPath?: string | null;
+} | null {
+    if (!rawItem || typeof rawItem !== 'object') return null;
+
+    // 1. EXTRACT TITLE
+    let title = '';
+
+    // Check top-level properties first
+    for (const [k, v] of Object.entries(rawItem)) {
+        if (typeof v === 'string' && v.trim() && VALID_TITLE_KEYS.includes(cleanKey(k))) {
+            title = v.trim();
+            break;
+        }
+    }
+
+    // Check entity container objects (e.g. item.movie, item.show, item.media, item.item)
+    let matchedContainer: Record<string, any> | null = null;
+    if (!title) {
+        for (const containerKey of ENTITY_CONTAINER_KEYS) {
+            const container = (rawItem as any)[containerKey];
+            if (container && typeof container === 'object' && !Array.isArray(container)) {
+                matchedContainer = container;
+                for (const [k, v] of Object.entries(container)) {
+                    if (typeof v === 'string' && v.trim() && VALID_TITLE_KEYS.includes(cleanKey(k))) {
+                        title = v.trim();
+                        break;
+                    }
+                }
+                if (title) break;
+            }
+        }
+    }
+
+    // Fallback: search any nested object property
+    if (!title) {
+        for (const [, propVal] of Object.entries(rawItem)) {
+            if (propVal && typeof propVal === 'object' && !Array.isArray(propVal)) {
+                for (const [k, v] of Object.entries(propVal)) {
+                    if (typeof v === 'string' && v.trim() && VALID_TITLE_KEYS.includes(cleanKey(k))) {
+                        title = v.trim();
+                        matchedContainer = propVal as Record<string, any>;
+                        break;
+                    }
+                }
+                if (title) break;
+            }
+        }
+    }
+
+    if (!title) return null;
+
+    // Helper to search root, matched container, and entity containers for a list of candidate keys
+    const findValue = (keys: string[]): any => {
+        const cleanedKeys = keys.map(cleanKey);
+        // Check root
+        for (const [k, v] of Object.entries(rawItem)) {
+            if (v !== undefined && v !== null && cleanedKeys.includes(cleanKey(k))) {
+                return v;
+            }
+        }
+        // Check matched container
+        if (matchedContainer) {
+            for (const [k, v] of Object.entries(matchedContainer)) {
+                if (v !== undefined && v !== null && cleanedKeys.includes(cleanKey(k))) {
+                    return v;
+                }
+            }
+        }
+        // Check all other entity containers
+        for (const containerKey of ENTITY_CONTAINER_KEYS) {
+            const container = (rawItem as any)[containerKey];
+            if (container && typeof container === 'object' && !Array.isArray(container)) {
+                for (const [k, v] of Object.entries(container)) {
+                    if (v !== undefined && v !== null && cleanedKeys.includes(cleanKey(k))) {
+                        return v;
+                    }
+                }
+            }
+        }
+        return undefined;
+    };
+
+    // 2. EXTRACT TMDB ID
+    let tmdbId: number | undefined;
+    const rawTmdb = findValue(['tmdbid', 'tmdb', 'tmdb_id', 'id_tmdb']);
+    if (rawTmdb != null) {
+        const parsed = parseInt(String(rawTmdb), 10);
+        if (!isNaN(parsed) && parsed > 0) tmdbId = parsed;
+    }
+    // Check nested IDs objects: item.ids?.tmdb, item.movie?.ids?.tmdb, item.show?.ids?.tmdb
+    if (!tmdbId) {
+        const idsObj = rawItem.ids || matchedContainer?.ids || rawItem.movie?.ids || rawItem.show?.ids || rawItem.episode?.ids;
+        if (idsObj && typeof idsObj === 'object') {
+            const idVal = idsObj.tmdb || idsObj.tmdb_id || idsObj.tmdbId;
+            if (idVal) {
+                const parsed = parseInt(String(idVal), 10);
+                if (!isNaN(parsed) && parsed > 0) tmdbId = parsed;
+            }
+        }
+    }
+
+    // 3. EXTRACT IMDB ID
+    let imdbId: string | undefined;
+    const rawImdb = findValue(['imdbid', 'imdb', 'imdb_id', 'id_imdb', 'const', 'imdb_const']);
+    if (rawImdb && typeof rawImdb === 'string') {
+        const match = rawImdb.match(/(tt\d{7,10})/i);
+        if (match) imdbId = match[1];
+    }
+    if (!imdbId) {
+        const idsObj = rawItem.ids || matchedContainer?.ids || rawItem.movie?.ids || rawItem.show?.ids || rawItem.episode?.ids;
+        if (idsObj && typeof idsObj === 'object') {
+            const idVal = idsObj.imdb || idsObj.imdb_id || idsObj.imdbId;
+            if (idVal && typeof idVal === 'string') {
+                const match = idVal.match(/(tt\d{7,10})/i);
+                if (match) imdbId = match[1];
+            }
+        }
+    }
+
+    // 4. EXTRACT YEAR
+    let year: string | undefined;
+    const rawYear = findValue(['year', 'releaseyear', 'release_year', 'released', 'releasedate', 'release_date', 'firstairdate', 'first_air_date', 'airdate']);
+    if (rawYear != null) {
+        const match = String(rawYear).match(/\b(19\d\d|20\d\d)\b/);
+        if (match) year = match[1];
+    }
+
+    // 5. EXTRACT MEDIA TYPE
+    const rawType = findValue(['type', 'mediatype', 'media_type', 'kind', 'content_type']);
+    let type: 'MOVIE' | 'TV_SHOW' | 'EPISODE' = 'MOVIE';
+    if (rawType) {
+        type = parseMediaType(String(rawType));
+    } else if (rawItem.episode || matchedContainer === rawItem.episode) {
+        type = 'EPISODE';
+    } else if (rawItem.show || rawItem.tv || rawItem.series || matchedContainer === rawItem.show) {
+        type = 'TV_SHOW';
+    } else if (rawItem.movie || rawItem.film || matchedContainer === rawItem.movie) {
+        type = 'MOVIE';
+    }
+
+    // 6. EXTRACT WATCH DATE
+    const rawDate = findValue([
+        'watchedat', 'watched_at', 'watcheddate', 'watchdate', 'watch_date',
+        'date', 'viewedat', 'viewed_at', 'lastwatchedat', 'last_watched_at',
+        'listedat', 'listed_at', 'loggedat', 'logged_at', 'actiondate', 'action_date',
+        'ratedat', 'rated_at', 'timestamp', 'createdat', 'created_at'
+    ]);
+    const rawTime = findValue(['time', 'watchtime', 'watch_time', 'watchedtime']);
+    const dateInfo = rawDate ? parseDateString(String(rawDate), rawTime ? String(rawTime) : undefined) : null;
+    const watchedAt = dateInfo ? dateInfo.watchedAt : null;
+
+    // 7. EXTRACT RATING
+    const rawRating = findValue([
+        'myrating', 'my_rating', 'rating', 'userrating', 'user_rating',
+        'score', 'userscore', 'user_score', 'rate', 'stars', 'grade'
+    ]);
+    const rating = rawRating != null ? parseRating(String(rawRating)) : null;
+
+    // 8. EXTRACT REVIEW / NOTES
+    const rawReview = findValue(['review', 'notes', 'comment', 'comments', 'note', 'text', 'body', 'content']);
+    const review = rawReview && typeof rawReview === 'string' && rawReview.trim() ? rawReview.trim() : null;
+
+    // 9. EXTRACT TAGS / GENRES
+    const rawTags = findValue(['tags', 'genres', 'genre', 'categories', 'keywords', 'labels']);
+    let tags: string[] = [];
+    if (Array.isArray(rawTags)) {
+        tags = rawTags.map(String).filter(Boolean);
+    } else if (typeof rawTags === 'string' && rawTags.trim()) {
+        tags = rawTags.split(/[,|;]/).map(t => t.trim()).filter(Boolean);
+    }
+
+    // 10. EXTRACT LOCATION
+    const rawLocation = findValue(['watchlocation', 'watch_location', 'location', 'platform', 'service', 'venue', 'theater', 'cinema']);
+    const watchLocation = rawLocation && typeof rawLocation === 'string' && rawLocation.trim() ? rawLocation.trim() : null;
+
+    // 11. REWATCH / CURRENTLY WATCHING
+    const rawRewatch = findValue(['isrewatch', 'is_rewatch', 'rewatch', 're_watch', 'plays']);
+    let isRewatch = false;
+    if (rawRewatch != null) {
+        const s = String(rawRewatch).toLowerCase().trim();
+        const p = parseInt(s, 10);
+        isRewatch = s === 'true' || s === 'yes' || s === '1' || (!isNaN(p) && p > 1);
+    }
+
+    const rawWatching = findValue(['iswatching', 'is_watching', 'watching']);
+    const isWatching = rawWatching === true || rawWatching === 'true' || rawWatching === 1;
+
+    // 12. POSTER PATH
+    const rawPoster = findValue(['posterpath', 'poster_path', 'poster', 'image', 'banner', 'cover']);
+    const posterPath = rawPoster && typeof rawPoster === 'string' ? rawPoster.trim() : null;
+
+    return {
+        title,
+        type,
+        year,
+        tmdbId,
+        imdbId,
+        watchedAt,
+        startedAt: dateInfo?.startedAt || null,
+        completedAt: dateInfo?.completedAt || null,
+        rating,
+        review,
+        tags,
+        watchLocation,
+        isRewatch,
+        isWatching,
+        posterPath,
+    };
 }
 
 /**
@@ -639,55 +949,19 @@ export function parseImportFileContent(text: string, isCsvFileName: boolean): { 
             const payload = JSON.parse(text);
             parsedJson = true;
 
-            let rawList: any[] = [];
-            if (Array.isArray(payload.entries)) rawList = payload.entries;
-            else if (Array.isArray(payload)) rawList = payload;
-            else if (Array.isArray(payload.movies)) rawList = payload.movies;
-            else if (Array.isArray(payload.items)) rawList = payload.items;
+            const rawList = findEntryListInJson(payload);
 
             if (rawList.length > 0) {
-                body.entries = rawList.map(item => {
-                    const title = item.title || item.name || item.movie || item.film || '';
-                    const typeRaw = item.type || item.mediaType || item.media_type || (item.season || item.episode ? 'TV_SHOW' : 'MOVIE');
-                    const type = parseMediaType(String(typeRaw || 'MOVIE'));
-
-                    const rawDate = item.watchedAt || item.date || item.watched_at || item.watchDate || item.watchedDate || null;
-                    const rawTime = item.time || item.watchTime || item.watchedTime || null;
-                    const dateInfo = rawDate ? parseDateString(String(rawDate), rawTime ? String(rawTime) : undefined) : null;
-                    const watchedAt = dateInfo ? dateInfo.watchedAt : null;
-
-                    const rating = item.rating != null ? parseRating(String(item.rating)) : (item.score != null ? parseRating(String(item.score)) : null);
-                    const review = item.review || item.notes || item.comment || null;
-
-                    let tags: string[] = [];
-                    if (Array.isArray(item.tags)) tags = item.tags.map(String).filter(Boolean);
-                    else if (Array.isArray(item.genres)) tags = item.genres.map(String).filter(Boolean);
-                    else if (typeof item.tags === 'string') tags = item.tags.split(/[,|;]/).map((t: string) => t.trim()).filter(Boolean);
-
-                    const watchLocation = item.watchLocation || item.location || item.platform || item.theater || null;
-                    const isRewatch = Boolean(item.isRewatch || item.rewatch);
-                    const isWatching = Boolean(item.isWatching || item.watching);
-                    const tmdbId = item.tmdbId || item.tmdb_id || undefined;
-                    const imdbId = item.imdbId || item.imdb_id || undefined;
-                    const year = item.year || item.releaseYear || item.release_year || undefined;
-
-                    return {
-                        title: String(title).trim(),
-                        type,
-                        watchedAt,
-                        startedAt: dateInfo?.startedAt || item.startedAt || null,
-                        completedAt: dateInfo?.completedAt || item.completedAt || null,
-                        rating,
-                        review: review ? String(review) : null,
-                        tags,
-                        watchLocation: watchLocation ? String(watchLocation) : null,
-                        isRewatch,
-                        isWatching,
-                        tmdbId: tmdbId ? Number(tmdbId) : undefined,
-                        imdbId: imdbId ? String(imdbId) : undefined,
-                        year: year ? String(year) : undefined,
-                    };
-                });
+                const extractedEntries: any[] = [];
+                for (const item of rawList) {
+                    const parsed = extractEntryMetadata(item);
+                    if (parsed) {
+                        extractedEntries.push(parsed);
+                    }
+                }
+                if (extractedEntries.length > 0) {
+                    body.entries = extractedEntries;
+                }
             }
 
             if (Array.isArray(payload.lists)) body.lists = payload.lists;
@@ -747,7 +1021,10 @@ export async function exportData(options: ExportOptions): Promise<void> {
 /**
  * Parses file and calls /data/import/preview to match TMDb IDs and return a preview result
  */
-export async function previewImport(file: File): Promise<ImportPreviewResult> {
+export async function previewImport(
+    file: File,
+    options?: { defaultToCurrentYear?: boolean }
+): Promise<ImportPreviewResult> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
@@ -757,7 +1034,10 @@ export async function previewImport(file: File): Promise<ImportPreviewResult> {
                 const isCsvFile = file.name.toLowerCase().endsWith('.csv') || file.type.includes('csv');
                 const parsedBody = parseImportFileContent(text, isCsvFile);
 
-                const result = await apiClient.post<ImportPreviewResult>('/data/import/preview', parsedBody);
+                const result = await apiClient.post<ImportPreviewResult>('/data/import/preview', {
+                    ...parsedBody,
+                    defaultToCurrentYear: options?.defaultToCurrentYear ?? false,
+                });
                 resolve(result);
             } catch (err: any) {
                 reject(err);
@@ -772,7 +1052,11 @@ export async function previewImport(file: File): Promise<ImportPreviewResult> {
 /**
  * Commits the verified and matched import payload to the backend
  */
-export async function commitImport(payload: { entries: any[]; lists?: any[] }): Promise<ImportResult> {
+export async function commitImport(payload: {
+    entries: any[];
+    lists?: any[];
+    defaultToCurrentYear?: boolean;
+}): Promise<ImportResult> {
     return apiClient.post<ImportResult>('/data/import', payload);
 }
 
@@ -890,6 +1174,8 @@ export const dataService = {
     importData,
     importEntries,
     importLists,
+    extractEntryMetadata,
+    findEntryListInJson,
     SAMPLE_IMPORT_JSON,
     AI_IMPORT_PROMPT,
 };

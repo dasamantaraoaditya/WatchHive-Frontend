@@ -14,8 +14,10 @@ export interface TmdbDetails {
     watch_providers?: any;
 }
 
-export const formatDate = (dateString: string) => {
+export const formatDate = (dateString?: string | null) => {
+    if (!dateString) return 'No date watched';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'No date watched';
     return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',

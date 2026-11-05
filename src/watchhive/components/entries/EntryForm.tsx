@@ -581,6 +581,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         try {
             let savedEntry: Entry;
             const payload = { ...formData };
+            if (payload.watchedAt) {
+                const d = new Date(payload.watchedAt);
+                const now = new Date();
+                const safeDate = !isNaN(d.getTime()) && d.getTime() > now.getTime() ? now : d;
+                payload.watchedAt = safeDate.toISOString();
+            }
             // If user has provided a rating or review, or is logging a completed watch, ensure isWatching is set to false
             if (payload.rating !== undefined || (payload.review && payload.review.trim().length > 0)) {
                 payload.isWatching = false;
