@@ -9,7 +9,7 @@ import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
 import { ExportFormat, ImportResult } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge } from '../components/common';
+import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge, BeeSpinner } from '../components/common';
 import { LegalDisclaimerModal } from '../components/legal/LegalDisclaimerModal';
 import { WatchPreferencesModal } from '../components/onboarding/WatchPreferencesModal';
 
@@ -952,7 +952,7 @@ export const ProfilePage: React.FC = () => {
                                 className="w-full sm:w-1/2 py-3 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-rose-600/20 transition-all flex items-center justify-center gap-2"
                             >
                                 {isDeleting ? (
-                                    <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                                    <BeeSpinner size="sm" />
                                 ) : (
                                     <span className="material-symbols-outlined text-sm">delete_forever</span>
                                 )}

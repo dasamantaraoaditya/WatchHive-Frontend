@@ -9,7 +9,7 @@ import searchService, {
     TRENDING_FILTERS,
 } from '../services/search.service';
 import { TrendingItem } from '../services/feed.service';
-import { Avatar, ErrorState, EmptyState } from '../components/common';
+import { Avatar, ErrorState, EmptyState, BeeSpinner, BeeLoader } from '../components/common';
 import { calculateFuzzyScore } from '../components/entries/EntryForm';
 import { useUI } from '../contexts';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
@@ -434,7 +434,7 @@ export const SearchUsersPage: React.FC = () => {
                     )}
                     {isSearching && (
                         <div className="absolute inset-y-0 right-12 flex items-center pr-2">
-                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#ffb700] border-t-transparent"></div>
+                            <BeeSpinner size="sm" />
                         </div>
                     )}
                 </div>
@@ -762,7 +762,7 @@ export const SearchUsersPage: React.FC = () => {
                                                     }`}
                                                 >
                                                     {followingLoadingMap[user.id] ? (
-                                                        <span className="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                                                        <BeeSpinner size="sm" />
                                                     ) : user.isFollowing ? (
                                                         'Following'
                                                     ) : user.isRequested ? (
@@ -786,7 +786,7 @@ export const SearchUsersPage: React.FC = () => {
                     <div ref={observerTarget} className="h-14 w-full" />
                     {isSearching && (movieResults.length > 0 || userResults.length > 0) && (
                         <div className="flex justify-center py-4">
-                            <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#ffb700] border-t-transparent"></div>
+                            <BeeLoader size="small" message="Buzzing for more..." />
                         </div>
                     )}
                 </div>
@@ -951,7 +951,7 @@ export const SearchUsersPage: React.FC = () => {
                                             }`}
                                         >
                                             {followingLoadingMap[user.id] ? (
-                                                <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                                                <BeeSpinner size="sm" />
                                             ) : user.isFollowing ? (
                                                 'Following'
                                             ) : (
