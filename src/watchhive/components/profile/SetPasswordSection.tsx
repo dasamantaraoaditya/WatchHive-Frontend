@@ -188,7 +188,7 @@ export const SetPasswordSection: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className={`flex-1 h-11 bg-[#ffb700] text-white font-bold text-[14px] rounded-xl shadow-[0_4px_14px_rgba(255,183,0,0.25)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.35)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5 ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
+                                className={`flex-1 h-11 bg-[#ffb700] text-[#2D2926] font-black text-[14px] rounded-xl shadow-[0_4px_14px_rgba(255,183,0,0.25)] hover:shadow-[0_6px_20px_rgba(255,183,0,0.35)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5 ${isLoading ? 'opacity-70 pointer-events-none' : ''}`}
                             >
                                 {isLoading ? (
                                     <>

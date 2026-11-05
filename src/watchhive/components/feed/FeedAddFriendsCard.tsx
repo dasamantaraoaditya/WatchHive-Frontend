@@ -18,16 +18,81 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [followingMap, setFollowingMap] = useState<Record<string, boolean>>({});
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+
+    // Mouse drag scrolling state
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollStartPos, setScrollStartPos] = useState(0);
+    const [dragMoved, setDragMoved] = useState(false);
+
+    const updateScrollBounds = () => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        setCanScrollLeft(el.scrollLeft > 5);
+        setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 5);
+    };
+
+    React.useEffect(() => {
+        updateScrollBounds();
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        el.addEventListener('scroll', updateScrollBounds, { passive: true });
+        window.addEventListener('resize', updateScrollBounds);
+        return () => {
+            el.removeEventListener('scroll', updateScrollBounds);
+            window.removeEventListener('resize', updateScrollBounds);
+        };
+    }, [suggestedUsers]);
+
+    // Handle mouse wheel scrolling horizontally
+    const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            el.scrollLeft += e.deltaY;
+            updateScrollBounds();
+        }
+    };
+
+    // Drag-to-scroll handlers for desktop
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+        setIsDragging(true);
+        setDragMoved(false);
+        setStartX(e.pageX - el.offsetLeft);
+        setScrollStartPos(el.scrollLeft);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!isDragging || !scrollContainerRef.current) return;
+        const el = scrollContainerRef.current;
+        const x = e.pageX - el.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        if (Math.abs(walk) > 4) {
+            setDragMoved(true);
+        }
+        el.scrollLeft = scrollStartPos - walk;
+        updateScrollBounds();
+    };
+
+    const handleMouseUpOrLeave = () => {
+        setIsDragging(false);
+    };
 
     const scrollLeft = () => {
         if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollBy({ left: -220, behavior: 'smooth' });
+            const amount = Math.max(260, scrollContainerRef.current.clientWidth * 0.75);
+            scrollContainerRef.current.scrollBy({ left: -amount, behavior: 'smooth' });
         }
     };
 
     const scrollRight = () => {
         if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollBy({ left: 220, behavior: 'smooth' });
+            const amount = Math.max(260, scrollContainerRef.current.clientWidth * 0.75);
+            scrollContainerRef.current.scrollBy({ left: amount, behavior: 'smooth' });
         }
     };
 
@@ -47,6 +112,7 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
     };
 
     const handleProfileClick = (targetId: string) => {
+        if (dragMoved) return; // Prevent navigation if user was dragging
         if (!targetId) return;
         navigate(`/watch-hive/profile/${targetId}`);
     };
@@ -93,11 +159,16 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
                         </span>
                         <div className="flex items-center gap-1">
                             {suggestedUsers.length > 2 && (
-                                <div className="flex items-center gap-0.5 mr-1">
+                                <div className="flex items-center gap-1 mr-1">
                                     <button
                                         type="button"
                                         onClick={scrollLeft}
-                                        className="p-1 rounded-full hover:bg-amber-100 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+                                        disabled={!canScrollLeft}
+                                        className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                                            canScrollLeft 
+                                                ? 'bg-amber-100 hover:bg-amber-200 text-slate-700 shadow-xs' 
+                                                : 'text-slate-300 opacity-40 cursor-not-allowed'
+                                        }`}
                                         title="Scroll left"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">chevron_left</span>
@@ -105,14 +176,19 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
                                     <button
                                         type="button"
                                         onClick={scrollRight}
-                                        className="p-1 rounded-full hover:bg-amber-100 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
+                                        disabled={!canScrollRight}
+                                        className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                                            canScrollRight 
+                                                ? 'bg-amber-100 hover:bg-amber-200 text-slate-700 shadow-xs' 
+                                                : 'text-slate-300 opacity-40 cursor-not-allowed'
+                                        }`}
                                         title="Scroll right"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                                     </button>
                                 </div>
                             )}
-                            <span className="text-[11px] text-slate-500 font-medium">
+                            <span className="text-[11px] text-slate-500 font-semibold bg-white/70 px-2 py-0.5 rounded-full border border-amber-200/50">
                                 {suggestedUsers.length} cinephiles
                             </span>
                         </div>
@@ -120,7 +196,18 @@ export const FeedAddFriendsCard: React.FC<FeedAddFriendsCardProps> = ({
 
                     <div
                         ref={scrollContainerRef}
-                        className="flex gap-3 overflow-x-auto pb-2 pt-1 scrollbar-none snap-x snap-mandatory -mx-1 px-1 scroll-smooth"
+                        onWheel={handleWheel}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUpOrLeave}
+                        onMouseLeave={handleMouseUpOrLeave}
+                        className={`flex gap-3 overflow-x-auto pb-3 pt-1 scroll-smooth select-none -mx-1 px-1 snap-x snap-proximity overscroll-x-contain ${
+                            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+                        }`}
+                        style={{
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: 'rgba(255, 183, 0, 0.4) transparent',
+                        }}
                     >
                         {suggestedUsers.map((u) => {
                             const isFollowing = followingMap[u.id] ?? (u as any).isFollowing ?? false;

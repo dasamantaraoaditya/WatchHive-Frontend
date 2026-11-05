@@ -10,7 +10,7 @@ import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
 import { ExportFormat, ImportResult, ImportPreviewResult, AI_IMPORT_PROMPT } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge } from '../components/common';
+import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge, BeeSpinner } from '../components/common';
 import { LegalDisclaimerModal } from '../components/legal/LegalDisclaimerModal';
 import { WatchPreferencesModal } from '../components/onboarding/WatchPreferencesModal';
 
@@ -1119,7 +1119,7 @@ export const ProfilePage: React.FC = () => {
                                     setIsDeleteModalOpen(false);
                                     scrollToDataManagement();
                                 }}
-                                className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white font-black text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
+                                className="w-full py-2 bg-amber-400 hover:bg-amber-500 text-[#2D2926] font-black text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
                             >
                                 <span className="material-symbols-outlined text-sm">download</span>
                                 <span>Cancel & Export My Data First (Recommended)</span>
@@ -1173,7 +1173,7 @@ export const ProfilePage: React.FC = () => {
                                 className="w-full sm:w-1/2 py-3 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-rose-600/20 transition-all flex items-center justify-center gap-2"
                             >
                                 {isDeleting ? (
-                                    <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                                    <BeeSpinner size="sm" />
                                 ) : (
                                     <span className="material-symbols-outlined text-sm">delete_forever</span>
                                 )}

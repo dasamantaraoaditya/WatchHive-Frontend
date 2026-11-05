@@ -9,7 +9,7 @@ import searchService, {
     TRENDING_FILTERS,
 } from '../services/search.service';
 import { TrendingItem } from '../services/feed.service';
-import { Avatar, ErrorState, EmptyState } from '../components/common';
+import { Avatar, ErrorState, EmptyState, BeeSpinner, BeeLoader } from '../components/common';
 import { calculateFuzzyScore } from '../components/entries/EntryForm';
 import { useUI } from '../contexts';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
@@ -79,6 +79,40 @@ export const SearchUsersPage: React.FC = () => {
     const [communityBuzz, setCommunityBuzz] = useState<TrendingItem[]>([]);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [followingLoadingMap, setFollowingLoadingMap] = useState<Record<string, boolean>>({});
+
+    const suggestedScrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollSuggestedLeft, setCanScrollSuggestedLeft] = useState(false);
+    const [canScrollSuggestedRight, setCanScrollSuggestedRight] = useState(true);
+
+    const updateSuggestedScrollBounds = useCallback(() => {
+        const el = suggestedScrollRef.current;
+        if (!el) return;
+        setCanScrollSuggestedLeft(el.scrollLeft > 5);
+        setCanScrollSuggestedRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 5);
+    }, []);
+
+    const handleSuggestedWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+        const el = suggestedScrollRef.current;
+        if (!el) return;
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            el.scrollLeft += e.deltaY;
+            updateSuggestedScrollBounds();
+        }
+    };
+
+    const scrollSuggestedLeft = () => {
+        if (suggestedScrollRef.current) {
+            const amount = Math.max(260, suggestedScrollRef.current.clientWidth * 0.75);
+            suggestedScrollRef.current.scrollBy({ left: -amount, behavior: 'smooth' });
+        }
+    };
+
+    const scrollSuggestedRight = () => {
+        if (suggestedScrollRef.current) {
+            const amount = Math.max(260, suggestedScrollRef.current.clientWidth * 0.75);
+            suggestedScrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+    };
 
     // Deep Search Filters (Available in Media search tab)
     const [isDeepSearch, setIsDeepSearch] = useState(initialDeep);
@@ -400,7 +434,7 @@ export const SearchUsersPage: React.FC = () => {
                     )}
                     {isSearching && (
                         <div className="absolute inset-y-0 right-12 flex items-center pr-2">
-                            <div className="animate-spin rounded-full h-5 w-5 border-2 border-[#ffb700] border-t-transparent"></div>
+                            <BeeSpinner size="sm" />
                         </div>
                     )}
                 </div>
@@ -412,7 +446,7 @@ export const SearchUsersPage: React.FC = () => {
                             type="button"
                             onClick={() => setActiveTab('media')}
                             className={`relative px-3.5 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 ${
-                                activeTab === 'media' ? 'text-black' : 'text-slate-400 hover:text-slate-700'
+                                activeTab === 'media' ? 'text-[#2D2926]' : 'text-slate-500 hover:text-slate-800'
                             }`}
                         >
                             {activeTab === 'media' && (
@@ -427,11 +461,11 @@ export const SearchUsersPage: React.FC = () => {
                             type="button"
                             onClick={() => setActiveTab('people')}
                             className={`relative px-3.5 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 ${
-                                activeTab === 'people' ? 'text-white' : 'text-slate-400 hover:text-slate-700'
+                                activeTab === 'people' ? 'text-[#2D2926]' : 'text-slate-500 hover:text-slate-800'
                             }`}
                         >
                             {activeTab === 'people' && (
-                                <motion.div layoutId="searchTabBg" className="absolute inset-0 bg-slate-800 rounded-full shadow-md shadow-black/20" />
+                                <motion.div layoutId="searchTabBg" className="absolute inset-0 bg-[#ffb700] rounded-full shadow-md shadow-[#ffb700]/20" />
                             )}
                             <span className="relative z-10 flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-base">group</span>
@@ -728,7 +762,7 @@ export const SearchUsersPage: React.FC = () => {
                                                     }`}
                                                 >
                                                     {followingLoadingMap[user.id] ? (
-                                                        <span className="inline-block w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                                                        <BeeSpinner size="sm" />
                                                     ) : user.isFollowing ? (
                                                         'Following'
                                                     ) : user.isRequested ? (
@@ -752,7 +786,7 @@ export const SearchUsersPage: React.FC = () => {
                     <div ref={observerTarget} className="h-14 w-full" />
                     {isSearching && (movieResults.length > 0 || userResults.length > 0) && (
                         <div className="flex justify-center py-4">
-                            <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#ffb700] border-t-transparent"></div>
+                            <BeeLoader size="small" message="Buzzing for more..." />
                         </div>
                     )}
                 </div>
@@ -809,16 +843,48 @@ export const SearchUsersPage: React.FC = () => {
                                     Suggested Friends 🐝
                                 </h2>
                             </div>
-                            {suggestedUsers.length > 0 && (
-                                <button
-                                    type="button"
-                                    onClick={loadSuggestedUsers}
-                                    className="text-xs font-bold text-slate-400 hover:text-[#ffb700] transition-colors flex items-center gap-1"
-                                >
-                                    <span className="material-symbols-outlined text-sm">refresh</span>
-                                    Refresh
-                                </button>
-                            )}
+                            <div className="flex items-center gap-2">
+                                {suggestedUsers.length > 2 && (
+                                    <div className="flex items-center gap-1 mr-1">
+                                        <button
+                                            type="button"
+                                            onClick={scrollSuggestedLeft}
+                                            disabled={!canScrollSuggestedLeft}
+                                            className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                                                canScrollSuggestedLeft 
+                                                    ? 'bg-amber-100 hover:bg-amber-200 text-slate-700 shadow-xs' 
+                                                    : 'text-slate-300 opacity-40 cursor-not-allowed'
+                                            }`}
+                                            title="Scroll left"
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={scrollSuggestedRight}
+                                            disabled={!canScrollSuggestedRight}
+                                            className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                                                canScrollSuggestedRight 
+                                                    ? 'bg-amber-100 hover:bg-amber-200 text-slate-700 shadow-xs' 
+                                                    : 'text-slate-300 opacity-40 cursor-not-allowed'
+                                            }`}
+                                            title="Scroll right"
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                                        </button>
+                                    </div>
+                                )}
+                                {suggestedUsers.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={loadSuggestedUsers}
+                                        className="text-xs font-bold text-slate-400 hover:text-[#ffb700] transition-colors flex items-center gap-1"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">refresh</span>
+                                        Refresh
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {isSuggestedLoading ? (
@@ -836,7 +902,16 @@ export const SearchUsersPage: React.FC = () => {
                                 ))}
                             </div>
                         ) : suggestedUsers.length === 0 ? null : (
-                            <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+                            <div 
+                                ref={suggestedScrollRef}
+                                onWheel={handleSuggestedWheel}
+                                onScroll={updateSuggestedScrollBounds}
+                                className="flex items-center gap-3 overflow-x-auto pb-3 pt-1 scroll-smooth select-none overscroll-x-contain"
+                                style={{
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: 'rgba(255, 183, 0, 0.4) transparent',
+                                }}
+                            >
                                 {suggestedUsers.map((user) => (
                                     <div
                                         key={user.id}
@@ -876,7 +951,7 @@ export const SearchUsersPage: React.FC = () => {
                                             }`}
                                         >
                                             {followingLoadingMap[user.id] ? (
-                                                <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                                                <BeeSpinner size="sm" />
                                             ) : user.isFollowing ? (
                                                 'Following'
                                             ) : (

@@ -103,14 +103,13 @@ const AppRoutes: React.FC = () => {
     };
 
     return (
-        <div className="app-layout">
+        <div className="min-h-screen flex flex-col bg-[#FFF9F0]">
             <OpenInAppBanner />
-            <OfflineBanner />
-            <InstallPromptBanner />
-            {isAuthenticated && <Sidebar />}
-            {/* Main content area needs to be pushed to the right to accommodate the 256px wide fixed sidebar */}
-            <main className={`app-main ${isAuthenticated ? 'app-main--with-sidebar' : ''}`}>
-                {isAuthenticated && <TopBar />}
+            <div className="app-layout flex-1">
+                {isAuthenticated && <Sidebar />}
+                {/* Main content area needs to be pushed to the right to accommodate the 256px wide fixed sidebar */}
+                <main className={`app-main ${isAuthenticated ? 'app-main--with-sidebar' : ''}`}>
+                    {isAuthenticated && <TopBar />}
                 <Routes>
                 {/* Public Routes */}
                 <Route
@@ -335,6 +334,9 @@ const AppRoutes: React.FC = () => {
 
                 <DonationButton />
             </main>
+            </div>
+            <OfflineBanner />
+            <InstallPromptBanner />
         </div>
     );
 };

@@ -41,6 +41,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const response = await authService.login(credentials);
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
+        try {
+            const freshUser = await userService.getMe();
+            setUser(freshUser);
+            localStorage.setItem('user', JSON.stringify(freshUser));
+        } catch (_) {}
     };
 
     const register = async (data: RegisterData) => {
@@ -51,6 +56,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const response = await authService.verifyEmail(token, email);
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
+        try {
+            const freshUser = await userService.getMe();
+            setUser(freshUser);
+            localStorage.setItem('user', JSON.stringify(freshUser));
+        } catch (_) {}
         return response;
     };
 
@@ -62,6 +72,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const response = await authService.googleLogin(idToken);
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
+        try {
+            const freshUser = await userService.getMe();
+            setUser(freshUser);
+            localStorage.setItem('user', JSON.stringify(freshUser));
+        } catch (_) {}
     };
 
     const logout = () => {
@@ -109,6 +124,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const response = await authService.verifyEmailOtp(email, code);
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
+        try {
+            const freshUser = await userService.getMe();
+            setUser(freshUser);
+            localStorage.setItem('user', JSON.stringify(freshUser));
+        } catch (_) {}
         return response;
     };
 

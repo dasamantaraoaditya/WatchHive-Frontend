@@ -93,7 +93,7 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                             <Link
                                 to="/watch-hive/search?tab=people"
                                 onClick={onClose}
-                                className="mt-2 px-5 py-2.5 bg-[#ffb700] hover:bg-[#e5a600] text-white text-xs font-black rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                                className="mt-2 px-5 py-2.5 bg-[#ffb700] hover:bg-[#e5a600] text-[#2D2926] text-xs font-black rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                             >
                                 <span className="material-symbols-outlined text-base">person_search</span>
                                 <span>Find Friends to Follow</span>

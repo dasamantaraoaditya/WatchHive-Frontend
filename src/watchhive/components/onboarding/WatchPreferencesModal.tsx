@@ -139,7 +139,7 @@ export const WatchPreferencesModal: React.FC<WatchPreferencesModalProps> = ({
                 alert(
                     isEditing
                         ? 'Your watch preferences have been updated!'
-                        : 'Your hive feed has been personalized with curated recommendations!',
+                        : 'Your watch preferences have been saved and your feed is personalized!',
                     { title: 'Preferences Saved', severity: 'success' }
                 );
             }
@@ -203,10 +203,10 @@ export const WatchPreferencesModal: React.FC<WatchPreferencesModalProps> = ({
                         </div>
                         <div>
                             <h3 className="text-lg font-black text-[#2D2926] leading-snug">
-                                {isEditing ? 'Watch Preferences' : 'Personalize Your Feed'}
+                                Watch Preferences
                             </h3>
                             <p className="text-[11px] font-black text-[#ffb700] uppercase tracking-wider">
-                                Question {currentStep + 1} of 3
+                                Personalize Your Feed • Question {currentStep + 1} of 3
                             </p>
                         </div>
                     </div>

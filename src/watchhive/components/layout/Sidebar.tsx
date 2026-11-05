@@ -32,7 +32,7 @@ export const Sidebar: React.FC = () => {
                             <span className="font-semibold">Home</span>
                         </Link>
                         <Link to="/watch-hive/mindlens" className={`wh-sidebar__link ${isActive('/watch-hive/mindlens') ? 'wh-sidebar__link--active' : ''}`}>
-                            <span className="material-symbols-outlined">psychology</span>
+                            <span className={`material-symbols-outlined ${isActive('/watch-hive/mindlens') ? 'fill-1' : ''}`}>psychology</span>
                             <span className="font-semibold">MindLens</span>
                         </Link>
                         <Link to="/watch-hive/search" className={`wh-sidebar__link ${isActive('/watch-hive/search') ? 'wh-sidebar__link--active' : ''}`}>
@@ -40,7 +40,7 @@ export const Sidebar: React.FC = () => {
                             <span className="font-semibold">Search</span>
                         </Link>
                         <Link to="/watch-hive/entries" className={`wh-sidebar__link ${isActive('/watch-hive/entries') ? 'wh-sidebar__link--active' : ''}`}>
-                            <span className="material-symbols-outlined">add_reaction</span>
+                            <span className={`material-symbols-outlined ${isActive('/watch-hive/entries') ? 'fill-1' : ''}`}>movie</span>
                             <span className="font-semibold">Entries</span>
                         </Link>
                         <Link to="/watch-hive/rankings" className={`wh-sidebar__link ${isActive('/watch-hive/rankings') ? 'wh-sidebar__link--active' : ''}`}>

@@ -86,7 +86,7 @@ export const ProfileStats: React.FC = () => {
                             <button 
                                 key={tf.value}
                                 onClick={() => setDays(tf.value)}
-                                className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === tf.value ? 'bg-[#ffb700] text-white shadow-md' : 'bg-[#FFF9F0] text-[#2D2926]/40 hover:text-[#2D2926]'}`}
+                                className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === tf.value ? 'bg-[#ffb700] text-[#2D2926] shadow-md' : 'bg-[#FFF9F0] text-[#2D2926]/40 hover:text-[#2D2926]'}`}
                             >
                                 {tf.label}
                             </button>
@@ -177,7 +177,7 @@ export const ProfileStats: React.FC = () => {
                         <button 
                             key={tf.value}
                             onClick={() => setDays(tf.value)}
-                            className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === tf.value ? 'bg-[#ffb700] text-white shadow-md' : 'bg-[#FFF9F0] text-[#2D2926]/40 hover:text-[#2D2926]'}`}
+                            className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === tf.value ? 'bg-[#ffb700] text-[#2D2926] shadow-md' : 'bg-[#FFF9F0] text-[#2D2926]/40 hover:text-[#2D2926]'}`}
                         >
                             {tf.label}
                         </button>

@@ -192,7 +192,7 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                                     </div>
 
                                     <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${
-                                        isSelected ? 'bg-[#ffb700] text-white' : 'border border-slate-300 bg-slate-50'
+                                        isSelected ? 'bg-[#ffb700] text-[#2D2926]' : 'border border-slate-300 bg-slate-50'
                                     }`}>
                                         {isSelected && (
                                             <span className="material-symbols-outlined text-xs font-black">check</span>

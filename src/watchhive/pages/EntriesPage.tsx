@@ -211,7 +211,14 @@ export const EntriesPage: React.FC = () => {
 
                     
                     {/* Navigation Tabs */}
-                    <div className="flex border-b border-black/5 gap-0 md:gap-8 mt-4 overflow-x-auto no-scrollbar scroll-strip" style={{ scrollSnapType: 'x mandatory' }}>
+                    <div 
+                        className="flex border-b border-black/5 gap-0 md:gap-8 mt-4 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain"
+                        onWheel={(e) => {
+                            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                                e.currentTarget.scrollLeft += e.deltaY;
+                            }
+                        }}
+                    >
                         <button 
                             onClick={() => handleTabSwitch('watching')}
                             className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'watching' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}

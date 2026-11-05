@@ -153,7 +153,7 @@ App Diagnostics:
                                     onClick={() => setSelectedCategory(cat.id)}
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                                         isSelected
-                                            ? 'bg-[#ffb700] text-white shadow-sm'
+                                            ? 'bg-[#ffb700] text-[#2D2926] shadow-sm'
                                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                     }`}
                                 >
