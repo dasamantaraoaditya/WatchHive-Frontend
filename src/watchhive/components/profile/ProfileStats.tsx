@@ -136,14 +136,14 @@ export const ProfileStats: React.FC = () => {
                         {days !== 0 && (
                             <button 
                                 onClick={() => setDays(0)}
-                                className="px-5 py-2.5 bg-[#ffb700] text-white text-[10px] font-black rounded-xl uppercase tracking-widest shadow-md hover:bg-[#2D2926] transition-colors"
+                                className="px-5 py-2.5 bg-[#ffb700] text-[#2D2926] text-[10px] font-black rounded-xl uppercase tracking-widest shadow-md hover:bg-[#2D2926] transition-colors"
                             >
                                 View All-Time Analytics
                             </button>
                         )}
                         <button 
                             onClick={() => { setType(''); setGenre(''); setMinRating(0); setDays(0); }}
-                            className="px-5 py-2.5 bg-[#FFF9F0] border border-[#ffb700]/30 text-[#ffb700] text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-[#ffb700] hover:text-white transition-colors"
+                            className="px-5 py-2.5 bg-[#FFF9F0] border border-[#ffb700]/30 text-[#ffb700] text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors"
                         >
                             Clear All Filters
                         </button>

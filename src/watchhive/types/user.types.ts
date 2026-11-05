@@ -17,6 +17,15 @@ export interface User {
     xp: number;
     level: number;
     badges: Badge[];
+    preferences?: {
+        languages?: string[];
+        genres?: string[];
+        genreIds?: number[];
+        streamingPlatforms?: string[];
+    };
+    hasCompletedOnboarding?: boolean;
+    watchStreak?: number;
+    lastWatchDate?: string;
     createdAt: string;
     updatedAt: string;
     // Auth capability flags — set by the backend, never expose raw googleId/passwordHash
@@ -27,6 +36,8 @@ export interface User {
     isRequested?: boolean;
     isIncomingRequest?: boolean;
     incomingRequestId?: string | null;
+    suggestionReason?: string;
+    mutualFriendsCount?: number;
     _count?: {
         followers: number;
         following: number;
@@ -39,7 +50,9 @@ export interface Badge {
     name: string;
     description: string;
     icon: string;
-    unlockedAt: string;
+    emoji?: string;
+    category?: string;
+    unlockedAt?: string;
 }
 
 export interface UserStats {

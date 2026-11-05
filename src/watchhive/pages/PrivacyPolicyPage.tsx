@@ -131,6 +131,22 @@ export const PrivacyPolicyPage: React.FC = () => {
                         </p>
                     </section>
 
+                    <section className="p-6 rounded-3xl bg-amber-50 border border-amber-200/60 text-slate-700">
+                        <h2 className="text-xl font-black mb-3 flex items-center gap-3 text-slate-900">
+                            <span className="material-symbols-outlined text-[#ffb700]">gavel</span>
+                            Non-Commercial Notice & TMDb Attribution
+                        </h2>
+                        <p className="text-[13px] font-medium leading-relaxed mb-3">
+                            <strong>Strict Non-Commercial Purpose:</strong> WatchersHive is an independent, non-commercial, fan-made social movie and TV tracking community application built strictly for educational, personal cataloging, and entertainment purposes. We generate zero revenue, display no advertisements, and charge no fees or subscriptions.
+                        </p>
+                        <p className="text-[13px] font-medium leading-relaxed mb-3">
+                            <strong>TMDb API Attribution:</strong> This product uses the TMDB API but is not endorsed or certified by TMDB. All movie/TV metadata, titles, and promotional posters are queried via TMDb under standard developer terms.
+                        </p>
+                        <p className="text-[13px] font-medium leading-relaxed text-slate-500">
+                            <strong>Intellectual Property:</strong> All trademarks, poster art, character names, and still imagery belong to their respective copyright holders under fair use and fair dealing doctrines.
+                        </p>
+                    </section>
+
                     <section className="pt-8 border-t border-slate-100">
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                             <div>

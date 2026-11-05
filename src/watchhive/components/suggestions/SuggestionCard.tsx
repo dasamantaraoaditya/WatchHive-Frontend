@@ -7,6 +7,7 @@ import { SkeletonCard, Modal, CardDropdownMenu, Avatar } from '../common';
 import { EntryForm } from '../entries/EntryForm';
 import '../profile/Profile.css';
 import { useCustomAlert } from '../../contexts';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 
 interface SuggestionCardProps {
@@ -143,7 +144,17 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
             await alert(`"${title}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
                 severity: 'success',
-                confirmText: 'Awesome'
+                confirmText: 'Done',
+                actionText: 'Share',
+                actionIcon: 'share',
+                onAction: () => {
+                    shareCompletedWatch({
+                        title,
+                        tmdbId: group.tmdbId,
+                        mediaType: group.mediaType === 'tv' ? 'tv' : 'movie',
+                        isWatching: true,
+                    });
+                },
             });
             onStatusChange?.();
         } catch (err) {
@@ -266,7 +277,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
 
                     {/* Badge Overlay */}
                     <div className="absolute top-2 left-2 flex flex-col gap-2 z-10">
-                        <span className="bg-[#ffb700] text-white text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider opacity-90">
+                        <span className="bg-[#ffb700] text-[#2D2926] text-[10px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-wider opacity-90">
                             {isSent
                                 ? (group.suggestions.length > 1 ? `Sent to ${group.suggestions.length}` : 'Suggested')
                                 : (group.suggestions.length > 1 ? `${group.suggestions.length} Suggestions` : 'Suggested')

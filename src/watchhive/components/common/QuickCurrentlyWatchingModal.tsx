@@ -3,7 +3,8 @@ import { Modal } from './Modal';
 import { BeeLoader, ModalBeeOverlay } from './BeeLoader';
 import apiClient from '../../services/api';
 import { entriesApi } from '../../services/entries.service';
-import { useCustomAlert } from '../../contexts';
+import { useCustomAlert, useAuth } from '../../contexts';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 
 interface TmdbResult {
     id: number;
@@ -35,6 +36,7 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     const { alert } = useCustomAlert();
+    const { user } = useAuth();
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Reset state when modal opens/closes
@@ -94,11 +96,22 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
                 startedAt: new Date().toISOString()
             });
 
-            // Display beautiful success alert
+            // Display beautiful success alert with Share CTA
             await alert(`"${title}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
                 severity: 'success',
-                confirmText: 'Awesome'
+                confirmText: 'Done',
+                actionText: 'Share',
+                actionIcon: 'share',
+                onAction: () => {
+                    shareCompletedWatch({
+                        title,
+                        tmdbId: selectedMovie.id,
+                        mediaType: selectedMovie.media_type || 'movie',
+                        username: user?.username,
+                        isWatching: true,
+                    });
+                },
             });
 
             if (onSuccess) onSuccess();
@@ -218,7 +231,7 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
                                 type="button"
                                 onClick={handleConfirmStartWatching}
                                 disabled={isSubmitting}
-                                className="flex items-center justify-center gap-1.5 px-6 py-3 bg-[#ffb700] text-white font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 cursor-pointer active:scale-97"
+                                className="flex items-center justify-center gap-1.5 px-6 py-3 bg-[#ffb700] text-[#2D2926] font-black text-[10px] uppercase tracking-widest rounded-2xl hover:brightness-105 shadow-md shadow-[#ffb700]/15 transition-all disabled:opacity-50 cursor-pointer active:scale-97"
                             >
                                 {isSubmitting ? (
                                     <>

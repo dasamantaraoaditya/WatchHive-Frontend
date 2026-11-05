@@ -9,12 +9,15 @@ import './FeedPage.css';
 import '../components/feed/Feed.css';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
-import { useUI } from '../contexts';
+import { useUI, useAuth } from '../contexts';
 import { PageLayout } from '../components/layout';
+import { SmartSuggestHeroCard } from '../components/suggestions';
+import { FeedAddFriendsCard } from '../components/feed/FeedAddFriendsCard';
 
 export const FeedPage: React.FC = () => {
     const isOnline = useOnlineStatus();
     const { setPageTitle, setPageIcon } = useUI();
+    const { user } = useAuth();
 
     useEffect(() => {
         setPageTitle('The Hive Feed');
@@ -32,6 +35,31 @@ export const FeedPage: React.FC = () => {
     const [loadingSuggestions, setLoadingSuggestions] = useState(true);
     const [trendingItems, setTrendingItems] = useState<any[]>([]);
     const [loadingTrending, setLoadingTrending] = useState(true);
+    const [followStats, setFollowStats] = useState<{ followersCount: number; followingCount: number } | null>(null);
+    const [isFriendsBannerDismissed, setIsFriendsBannerDismissed] = useState<boolean>(() => {
+        if (!user?.id) return false;
+        try {
+            return localStorage.getItem(`wh_dismissed_feed_add_friends_banner_${user.id}`) === 'true';
+        } catch {
+            return false;
+        }
+    });
+
+    useEffect(() => {
+        if (!user?.id || !isOnline) return;
+        userService.getFollowStats(user.id)
+            .then(stats => setFollowStats(stats))
+            .catch(() => {});
+    }, [user?.id, isOnline]);
+
+    const handleDismissFriendsBanner = () => {
+        setIsFriendsBannerDismissed(true);
+        if (user?.id) {
+            try {
+                localStorage.setItem(`wh_dismissed_feed_add_friends_banner_${user.id}`, 'true');
+            } catch {}
+        }
+    };
 
     useEffect(() => {
         const fetchSuggestions = async () => {
@@ -72,9 +100,12 @@ export const FeedPage: React.FC = () => {
     const handleFollow = async (userId: string) => {
         try {
             await userService.followUser(userId);
-            setSuggestedUsers(prev => prev.filter(u => u.id !== userId));
+            setFollowStats(prev => prev ? { ...prev, followingCount: prev.followingCount + 1 } : { followersCount: 0, followingCount: 1 });
+            // Soft-refresh feed in background so new friend's watches appear
+            fetchFeed(1);
         } catch (err) {
             console.error('Failed to follow user', err);
+            throw err;
         }
     };
 
@@ -155,11 +186,23 @@ export const FeedPage: React.FC = () => {
     }
 
     return (
-        <PageLayout maxWidth="none" className="w-full px-4 md:px-12">
+        <PageLayout maxWidth="none" className="w-full px-0 sm:px-4 md:px-12">
             <div className="feed-page-layout flex flex-row gap-8 items-start justify-between w-full">
                 {/* Main Feed Content Area - Centered in the remaining space */}
                 <div className="flex-1 flex justify-center min-w-0">
                     <div className="w-full max-w-[680px] flex flex-col gap-6">
+                        {/* SmartSuggest Hero Spark Card */}
+                        <SmartSuggestHeroCard />
+
+                        {/* Diversify Hive Feed & Suggested Friends for new users with 0 following */}
+                        {!isFriendsBannerDismissed && user?.id && (followStats === null || followStats.followingCount === 0) && suggestedUsers.length > 0 && (
+                            <FeedAddFriendsCard
+                                suggestedUsers={suggestedUsers}
+                                onFollow={handleFollow}
+                                onDismiss={handleDismissFriendsBanner}
+                            />
+                        )}
+
                         {/* Error State */}
                         {error && (
                             <ErrorState
@@ -175,11 +218,13 @@ export const FeedPage: React.FC = () => {
                             ))
                         ) : !loading && !initialLoading && !error ? (
                             <EmptyState
-                                title="Your feed is empty"
-                                message="Follow users or rate movies to see activity here!"
-                                icon={<span className="material-symbols-outlined text-4xl text-primary">feed</span>}
-                                actionLabel="Discover People"
-                                onAction={() => window.location.href = '/watch-hive/search'}
+                                title="Start Your Watch Journey"
+                                message="Your feed is quiet right now. Log your first movie or show to begin tracking your taste, or discover friends to build your swarm!"
+                                icon={<span className="material-symbols-outlined text-4xl text-primary">movie</span>}
+                                actionLabel="Log Your First Watch 🎬"
+                                onAction={() => window.dispatchEvent(new CustomEvent('watchhive:open-quick-add', { detail: { action: 'log' } }))}
+                                secondaryActionLabel="Discover People"
+                                onSecondaryAction={() => window.location.href = '/watch-hive/search'}
                             />
                         ) : null}
 

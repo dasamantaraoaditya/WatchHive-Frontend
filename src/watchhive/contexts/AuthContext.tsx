@@ -44,9 +44,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     const register = async (data: RegisterData) => {
-        const response = await authService.register(data);
+        return authService.register(data);
+    };
+
+    const verifyEmail = async (token: string, email?: string) => {
+        const response = await authService.verifyEmail(token, email);
         setUser(response.user);
         localStorage.setItem('user', JSON.stringify(response.user));
+        return response;
+    };
+
+    const resendVerification = async (email: string) => {
+        return authService.resendVerification(email);
     };
 
     const googleLogin = async (idToken: string) => {
@@ -90,18 +99,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return authService.resetPassword(token, email, newPassword);
     };
 
+    /** Request a passwordless 6-digit sign-in code */
+    const requestEmailOtp = async (email: string) => {
+        return authService.requestEmailOtp(email);
+    };
+
+    /** Verify passwordless 6-digit code and authenticate */
+    const verifyEmailOtp = async (email: string, code: string) => {
+        const response = await authService.verifyEmailOtp(email, code);
+        setUser(response.user);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        return response;
+    };
+
     const value: AuthContextType = {
         user,
         isAuthenticated: !!user,
         isLoading,
         login,
         register,
+        verifyEmail,
+        resendVerification,
         googleLogin,
         logout,
         updateUser,
         setPassword,
         forgotPassword,
         resetPassword,
+        requestEmailOtp,
+        verifyEmailOtp,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

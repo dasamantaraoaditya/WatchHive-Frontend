@@ -16,18 +16,10 @@ export interface ExpandedCardProps {
     actions?: (ctx: { entry: Entry; onClose: () => void }) => React.ReactNode;
 }
 
+import { getDirectProviderLink } from '../../utils/providerLinks';
+
 const getDirectLink = (providerName: string, fallbackLink: string, title: string) => {
-    const name = providerName.toLowerCase();
-    const query = encodeURIComponent(title);
-    if (name.includes('netflix')) return `https://www.netflix.com/search?q=${query}`;
-    if (name.includes('amazon') || name.includes('prime')) return `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${query}`;
-    if (name.includes('hotstar') || name.includes('disney')) return `https://www.hotstar.com/in/explore?searchQuery=${query}`;
-    if (name.includes('zee5')) return `https://www.zee5.com/search?q=${query}`;
-    if (name.includes('sonyliv')) return `https://www.sonyliv.com/search?query=${query}`;
-    if (name.includes('jiocinema')) return `https://www.jiocinema.com/search?q=${query}`;
-    if (name.includes('apple')) return `https://tv.apple.com/in/search?q=${query}`;
-    if (name.includes('youtube')) return `https://www.youtube.com/results?search_query=${query}+movie`;
-    return fallbackLink;
+    return getDirectProviderLink(providerName, fallbackLink, title);
 };
 
 export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onClose, actions }) => {
@@ -139,7 +131,7 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5, ease: 'easeOut' }}
-                className="px-6 md:px-10 pb-24 pt-4 flex flex-col gap-10 w-full relative z-10"
+                className="px-6 md:px-10 pb-40 md:pb-24 pt-4 flex flex-col gap-10 w-full relative z-10"
             >
                 {/* Synopsis */}
                 <div className="flex flex-col gap-4">
@@ -156,7 +148,7 @@ export const ExpandedCard: React.FC<ExpandedCardProps> = ({ entry, details, onCl
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Your Rating</span>
-                        <span className="text-[#2D2926] text-2xl font-black">{entry.rating ? `⭐ ${entry.rating}` : '-'}</span>
+                        <span className="text-[#2D2926] text-2xl font-black">{entry.rating ? `⭐ ${Number(entry.rating).toFixed(1)}` : '-'}</span>
                     </div>
                     <div className="flex flex-col gap-1 p-5 rounded-3xl bg-white border border-[#ffb700]/20 shadow-sm hover:shadow-md transition-shadow">
                         <span className="text-[#2D2926]/50 text-[10px] font-bold uppercase tracking-widest">Watched On</span>

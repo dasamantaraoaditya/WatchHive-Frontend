@@ -94,7 +94,7 @@ export const MindLensView: React.FC = () => {
                 <p className="text-[10px] font-black text-[#2D2926]/40 uppercase tracking-widest mb-8">
                     Log at least 3 titles to initialize your Taste Entropy and Affective State models
                 </p>
-                <Link to="/watch-hive/feed" className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#ffb700] text-white font-black text-[11px] uppercase tracking-widest rounded-2xl shadow-lg shadow-[#ffb700]/25 hover:-translate-y-0.5 transition-all">
+                <Link to="/watch-hive/feed" className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#ffb700] text-[#2D2926] font-black text-[11px] uppercase tracking-widest rounded-2xl shadow-lg shadow-[#ffb700]/25 hover:-translate-y-0.5 transition-all">
                     <span className="material-symbols-outlined text-lg">movie</span>
                     Log Watches Now
                 </Link>

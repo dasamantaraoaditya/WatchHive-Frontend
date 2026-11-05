@@ -147,7 +147,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                         {!searchQuery && !readOnly && (
                             <button
                                 onClick={() => setShowAddModal(true)}
-                                className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
+                                className="bg-[#ffb700] hover:brightness-105 text-[#2D2926] font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
                             >
                                 <span className="material-symbols-outlined text-base font-bold">bookmark_add</span>
                                 Add to Watchlist

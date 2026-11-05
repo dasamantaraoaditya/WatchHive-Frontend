@@ -53,6 +53,36 @@
     margin-top: 2px;
 }
 
+.wh-badge-modal__streak-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-6);
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+    border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.wh-badge-modal__streak-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.wh-badge-modal__streak-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.wh-badge-modal__streak-text strong {
+    font-size: var(--text-sm);
+    color: #92400e;
+    font-weight: 800;
+}
+
+.wh-badge-modal__streak-text span {
+    font-size: 0.72rem;
+    color: #b45309;
+}
+
 .wh-badge-modal__close {
     width: 2rem;
     height: 2rem;
@@ -164,6 +194,19 @@
 
 .wh-badge-item__description--locked {
     color: var(--text-tertiary);
+}
+
+.wh-badge-item__emoji {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.wh-badge-item__date {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+    margin-top: 3px;
+    font-weight: 500;
 }
 
 .wh-badge-modal__footer {

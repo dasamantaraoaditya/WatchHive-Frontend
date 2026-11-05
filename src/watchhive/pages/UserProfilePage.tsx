@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
 import { formatUserFriendlyError } from '../utils/errorHandler';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal, BeeLoader } from '../components/common';
+import { AvatarLightboxModal, BeeLoader, BadgeModal, StreakBadge } from '../components/common';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -47,6 +47,7 @@ export const UserProfilePage: React.FC = () => {
     }, [tabFromUrl]);
 
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
+    const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
     const [isHoveredRequested, setIsHoveredRequested] = useState(false);
     const [isHoveredFollowing, setIsHoveredFollowing] = useState(false);
 
@@ -62,7 +63,8 @@ export const UserProfilePage: React.FC = () => {
     useEffect(() => {
         setAvatarError(false);
         if (!id) return;
-        if (currentUser && id === currentUser.id) {
+        const isPreview = searchParams.get('preview') === 'true' || searchParams.get('view') === 'public';
+        if (currentUser && id === currentUser.id && !isPreview) {
             navigate('/watch-hive/profile');
             return;
         }
@@ -241,16 +243,16 @@ export const UserProfilePage: React.FC = () => {
         <PageLayout maxWidth="5xl">
             <div className="flex flex-col gap-8 pb-12">
                 {/* Profile Hero */}
-                <div className="relative overflow-hidden rounded-[32px] border border-black/5 bg-white shadow-sm p-6 md:p-10 animate-slide-up">
-                    <div className="absolute top-0 right-0 p-4">
-                        <div className="flex items-center gap-2 bg-[#ffb700]/10 text-[#ffb700] px-4 py-1.5 rounded-full border border-[#ffb700]/30 hidden sm:flex">
+                <div className="relative rounded-[32px] border border-black/5 bg-white shadow-sm p-6 md:p-8 lg:p-10 animate-slide-up">
+                    <div className="absolute top-0 right-0 p-4 sm:p-6">
+                        <div className="flex items-center gap-2 bg-[#ffb700]/10 text-[#ffb700] px-4 py-1.5 rounded-full border border-[#ffb700]/30 hidden sm:flex shadow-2xs">
                             <span className="material-symbols-outlined text-sm font-black text-[#ffb700]">stars</span>
                             <span className="text-[10px] font-black uppercase tracking-widest">Soul Persona</span>
                         </div>
                     </div>
-                    <div className="flex flex-col md:flex-row items-center gap-8">
+                    <div className="flex flex-col md:flex-row items-center md:items-start lg:items-center justify-between gap-6 lg:gap-8 pt-2 sm:pt-4 md:pt-2">
                         <div 
-                            className="relative group cursor-pointer"
+                            className="relative group cursor-pointer shrink-0"
                             onClick={() => setIsAvatarModalOpen(true)}
                             title="Click to view full picture"
                         >
@@ -277,12 +279,30 @@ export const UserProfilePage: React.FC = () => {
                             </div>
                         </div>
                         
-                        <div className="flex-1 text-center md:text-left space-y-4">
+                        <div className="flex-1 min-w-0 text-center md:text-left space-y-4">
                             <div>
                                 <h1 className="text-3xl font-black text-[#2D2926] tracking-tighter leading-none mb-1">
                                     {profileUser.displayName || profileUser.username}
                                 </h1>
-                                <p className="text-[#ffb700] font-black text-sm uppercase tracking-widest">@{profileUser.username}</p>
+                                <div className="flex items-center gap-2 mt-1.5 flex-wrap justify-center md:justify-start">
+                                    <p className="text-[#ffb700] font-black text-sm uppercase tracking-widest">@{profileUser.username}</p>
+                                    <span className="text-slate-300">•</span>
+                                    <span className="text-[11px] font-black bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
+                                        LVL {profileUser.level || 1} · {profileUser.xp || 0} XP
+                                    </span>
+                                    {profileUser.watchStreak && profileUser.watchStreak > 0 ? (
+                                        <StreakBadge streak={profileUser.watchStreak} onClick={() => setIsBadgeModalOpen(true)} />
+                                    ) : null}
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setIsBadgeModalOpen(true)}
+                                        className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#ffb700]/15 hover:bg-[#ffb700]/25 text-[#92400e] px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                                        title="View Honey Level Badges"
+                                    >
+                                        <span className="material-symbols-outlined text-[13px]">military_tech</span>
+                                        <span>{(profileUser.badges || []).length} Badges</span>
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-slate-500 font-medium max-w-lg leading-relaxed">
                                 {profileUser.bio || "Building a hive of visual experiences. Passionate about storytelling and cinema."}
@@ -308,39 +328,67 @@ export const UserProfilePage: React.FC = () => {
                             )}
                         </div>
                         
-                        <div className="flex flex-col gap-2.5 w-full md:w-64">
-                            {profileUser.isIncomingRequest ? (
+                        <div className="flex flex-col gap-2.5 w-full md:w-auto md:min-w-[240px] lg:min-w-[280px] shrink-0 mt-4 md:mt-0">
+                            {isOwner ? (
                                 <div className="flex flex-col gap-2 w-full">
-                                    <p className="text-[9px] font-black text-center uppercase tracking-[0.15em] text-[#ffb700] bg-[#ffb700]/5 border border-[#ffb700]/15 py-2 rounded-xl">
+                                    <div className="text-[10px] font-black text-center uppercase tracking-wider text-amber-700 bg-amber-500/10 border border-amber-500/20 py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap">
+                                        <span className="material-symbols-outlined text-sm text-amber-600">visibility</span>
+                                        <span>Your Public View</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => navigate('/watch-hive/profile')}
+                                        className="w-full font-bold py-2.5 px-4 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer whitespace-nowrap"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">edit</span>
+                                        <span>Back to Edit Profile</span>
+                                    </button>
+                                </div>
+                            ) : profileUser.isIncomingRequest ? (
+                                <div className="flex flex-col gap-2 w-full">
+                                    <p className="text-[10px] font-black text-center uppercase tracking-[0.15em] text-[#ffb700] bg-[#ffb700]/5 border border-[#ffb700]/15 py-2 px-3 rounded-xl">
                                         Wants to Follow You
                                     </p>
-                                    <div className="flex flex-row gap-2 w-full">
+                                    <div className="grid grid-cols-2 gap-2 w-full">
                                         <button 
                                             onClick={handleAcceptRequest} 
-                                            className="flex-1 font-black py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] uppercase tracking-[0.12em] shadow-md shadow-emerald-500/10 active:scale-95 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer"
+                                            className="w-full font-black py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] uppercase tracking-[0.12em] shadow-md shadow-emerald-500/10 active:scale-95 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap"
                                         >
-                                            <span className="material-symbols-outlined text-[14px] font-bold">check</span>
-                                            Accept
+                                            <span className="material-symbols-outlined text-[15px] font-bold">check</span>
+                                            <span>Accept</span>
                                         </button>
                                         <button 
                                             onClick={handleRejectRequest} 
-                                            className="flex-1 font-black py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-500 hover:text-white border border-rose-100 hover:border-rose-500 text-rose-500 text-[9px] uppercase tracking-[0.12em] active:scale-95 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer"
+                                            className="w-full font-black py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-500 hover:text-white border border-rose-100 hover:border-rose-500 text-rose-500 text-[10px] uppercase tracking-[0.12em] active:scale-95 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap"
                                         >
-                                            <span className="material-symbols-outlined text-[14px] font-bold">close</span>
-                                            Decline
+                                            <span className="material-symbols-outlined text-[15px] font-bold">close</span>
+                                            <span>Decline</span>
                                         </button>
+                                    </div>
+                                    <div className={`grid ${!isOwner && canViewEntries ? 'grid-cols-2' : 'grid-cols-1'} gap-2 w-full`}>
                                         <button 
                                             onClick={() => setIsSuggestModalOpen(true)}
                                             title={profileUser.isFollower === false ? `@${profileUser.username} must follow you to receive suggestions` : 'Suggest a title to this user'}
-                                            className="flex-1 font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/5 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-md shadow-black/5 flex items-center justify-center gap-1 cursor-pointer"
+                                            className="w-full font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[10px] uppercase tracking-[0.12em] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                                         >
-                                            <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
-                                            Suggest
+                                            <span className="material-symbols-outlined text-[15px] text-[#ffb700]">auto_awesome</span>
+                                            <span>Suggest</span>
                                         </button>
+                                        {!isOwner && canViewEntries && (
+                                            <button
+                                                onClick={() => navigate(`/watch-hive/compare/${profileUser.id}`, {
+                                                    state: { from: location.pathname + location.search }
+                                                })}
+                                                className="w-full font-black py-2.5 px-3 rounded-xl bg-white border border-[#ffb700]/40 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700] hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[10px] uppercase tracking-[0.12em] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                                                title="Compare Watch Histories"
+                                            >
+                                                <span className="material-symbols-outlined text-[15px] text-[#ffb700]">compare_arrows</span>
+                                                <span>Compare</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex flex-row gap-2 w-full">
+                                <div className="flex flex-col gap-2 w-full">
                                     <button 
                                         onClick={handleFollowToggle} 
                                         onMouseEnter={() => {
@@ -351,65 +399,68 @@ export const UserProfilePage: React.FC = () => {
                                             setIsHoveredFollowing(false);
                                             setIsHoveredRequested(false);
                                         }}
-                                        className={`flex-1 font-black py-2.5 px-4 rounded-xl transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-md shadow-black/5 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
+                                        className={`w-full font-black py-3 px-4 rounded-xl transition-all duration-200 text-[10px] uppercase tracking-[0.14em] shadow-sm hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
                                             profileUser.isFollowing 
                                             ? 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-slate-200' 
                                             : profileUser.isRequested
                                             ? 'bg-amber-50 text-amber-600 hover:bg-rose-50 hover:text-rose-600 border border-amber-200 shadow-amber-100/50'
-                                            : 'bg-[#ffb700] text-black shadow-md shadow-[#ffb700]/20 hover:brightness-105'
+                                            : 'bg-[#ffb700] text-[#2D2926] shadow-md shadow-[#ffb700]/20 hover:brightness-105'
                                         }`}
                                     >
                                         {profileUser.isFollowing ? (
                                             isHoveredFollowing ? (
                                                 <>
-                                                    <span className="material-symbols-outlined text-[14px]">person_remove</span>
-                                                    Unfollow
+                                                    <span className="material-symbols-outlined text-[16px]">person_remove</span>
+                                                    <span>Unfollow</span>
                                                 </>
                                             ) : (
-                                                 <>
-                                                    <span className="material-symbols-outlined text-[14px]">check</span>
-                                                    Following
+                                                <>
+                                                    <span className="material-symbols-outlined text-[16px] text-emerald-600">check</span>
+                                                    <span>Following</span>
                                                 </>
                                             )
                                         ) : profileUser.isRequested ? (
                                             isHoveredRequested ? (
                                                 <>
-                                                    <span className="material-symbols-outlined text-[14px]">cancel</span>
-                                                    Cancel
+                                                    <span className="material-symbols-outlined text-[16px]">cancel</span>
+                                                    <span>Cancel Request</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <span className="material-symbols-outlined text-[14px]">lock</span>
-                                                    Requested
+                                                    <span className="material-symbols-outlined text-[16px]">lock</span>
+                                                    <span>Requested</span>
                                                 </>
                                             )
                                         ) : (
                                             <>
-                                                <span className="material-symbols-outlined text-[14px]">person_add</span>
-                                                Follow
+                                                <span className="material-symbols-outlined text-[16px]">person_add</span>
+                                                <span>Follow</span>
                                             </>
                                         )}
                                     </button>
-                                    <button 
-                                        onClick={() => setIsSuggestModalOpen(true)}
-                                        title={profileUser.isFollower === false ? `@${profileUser.username} must follow you to receive suggestions` : 'Suggest a title to this user'}
-                                        className="flex-1 font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/5 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-sm flex items-center justify-center gap-1 cursor-pointer"
-                                    >
-                                        <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
-                                        Suggest
-                                    </button>
-                                    {!isOwner && canViewEntries && (
-                                        <button
-                                            onClick={() => navigate(`/watch-hive/compare/${profileUser.id}`, {
-                                                state: { from: location.pathname + location.search }
-                                            })}
-                                            className="flex-1 font-black py-2.5 px-3 rounded-xl bg-white border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700] hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[9px] uppercase tracking-[0.12em] shadow-sm flex items-center justify-center gap-1 cursor-pointer"
-                                            title="Compare Watch Histories"
+
+                                    <div className={`grid ${!isOwner && canViewEntries ? 'grid-cols-2' : 'grid-cols-1'} gap-2 w-full`}>
+                                        <button 
+                                            onClick={() => setIsSuggestModalOpen(true)}
+                                            title={profileUser.isFollower === false ? `@${profileUser.username} must follow you to receive suggestions` : 'Suggest a title to this user'}
+                                            className="w-full font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[10px] uppercase tracking-[0.12em] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                                         >
-                                            <span className="material-symbols-outlined text-[14px] text-[#ffb700]">compare_arrows</span>
-                                            Compare
+                                            <span className="material-symbols-outlined text-[15px] text-[#ffb700]">auto_awesome</span>
+                                            <span>Suggest</span>
                                         </button>
-                                    )}
+                                        {!isOwner && canViewEntries && (
+                                            <button
+                                                onClick={() => navigate(`/watch-hive/compare/${profileUser.id}`, {
+                                                    state: { from: location.pathname + location.search }
+                                                })}
+                                                className="w-full font-black py-2.5 px-3 rounded-xl bg-white border border-[#ffb700]/40 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700] hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[10px] uppercase tracking-[0.12em] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                                                title="Compare Watch Histories"
+                                            >
+                                                <span className="material-symbols-outlined text-[15px] text-[#ffb700]">compare_arrows</span>
+                                                <span>Compare</span>
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -532,12 +583,12 @@ export const UserProfilePage: React.FC = () => {
                                                                     <div className="flex items-center gap-3.5 min-w-0">
                                                                         <span className={`w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 shadow-xs ${
                                                                             idx === 0 
-                                                                                ? 'bg-[#ffb700] text-white ring-2 ring-[#ffb700]/30' 
+                                                                                ? 'bg-[#ffb700] text-[#2D2926] ring-2 ring-[#ffb700]/30' 
                                                                                 : idx === 1 
-                                                                                ? 'bg-slate-300 text-slate-800' 
+                                                                                ? 'bg-slate-200 text-[#2D2926] ring-1 ring-slate-300' 
                                                                                 : idx === 2 
-                                                                                ? 'bg-amber-700 text-white' 
-                                                                                : 'bg-slate-200 text-slate-600'
+                                                                                ? 'bg-amber-600 text-white ring-1 ring-amber-700/30' 
+                                                                                : 'bg-white text-[#2D2926] border border-black/10 shadow-2xs'
                                                                         }`}>
                                                                             #{idx + 1}
                                                                         </span>
@@ -621,6 +672,15 @@ export const UserProfilePage: React.FC = () => {
                         src={resolveAvatarUrl(profileUser.profilePictureUrl)}
                         name={profileUser.displayName || profileUser.username}
                         username={profileUser.username}
+                    />
+                )}
+                {profileUser && (
+                    <BadgeModal
+                        isOpen={isBadgeModalOpen}
+                        onClose={() => setIsBadgeModalOpen(false)}
+                        userBadges={profileUser.badges || []}
+                        watchStreak={profileUser.watchStreak || 0}
+                        userName={profileUser.displayName || profileUser.username}
                     />
                 )}
                 {profileUser && isSuggestModalOpen && (

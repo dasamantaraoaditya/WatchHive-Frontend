@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import followsService from '../../services/follows.service';
 import { Avatar, BeeLoader } from '../common';
-import { useCustomAlert, useUI } from '../../contexts';
+import { useCustomAlert } from '../../contexts';
 
 interface PendingRequestsModalProps {
     isOpen: boolean;
@@ -28,22 +28,25 @@ interface PendingRequest {
 }
 
 export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOpen, onClose, onRequestsUpdated }) => {
-    const { registerModal } = useUI();
     const [requests, setRequests] = useState<PendingRequest[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasHadRequests, setHasHadRequests] = useState(false);
     const { alert } = useCustomAlert();
 
     useEffect(() => {
-        if (!isOpen) return;
-        return registerModal();
-    }, [isOpen, registerModal]);
-
-    useEffect(() => {
         if (isOpen) {
             setHasHadRequests(false);
             fetchRequests();
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
         }
+        return () => { 
+            document.body.style.overflow = 'unset'; 
+            document.body.removeAttribute('data-modal-open');
+        };
     }, [isOpen]);
 
     // Auto-close modal 1.5s after user finishes resolving all pending requests
@@ -125,7 +128,12 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
 
     return createPortal(
         <AnimatePresence>
-            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+            <div 
+                role="dialog"
+                aria-modal="true"
+                data-modal-open="true"
+                className="fixed inset-0 z-[3500] flex items-center justify-center p-4"
+            >
                 {/* Backdrop */}
                 <motion.div
                     initial={{ opacity: 0 }}

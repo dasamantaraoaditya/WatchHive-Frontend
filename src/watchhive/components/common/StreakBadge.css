@@ -1,0 +1,43 @@
+/* ============================================
+   WatchHive Streak Badge (Minimal, Compact Chip)
+   ============================================ */
+
+.wh-streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    border-radius: var(--radius-full, 9999px);
+    color: #b45309;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.wh-streak-badge:hover {
+    background: rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.45);
+    transform: translateY(-1px);
+}
+
+.wh-streak-badge__icon {
+    font-size: 0.8rem;
+    line-height: 1;
+}
+
+.wh-streak-badge__count {
+    font-weight: 800;
+    color: #92400e;
+}
+
+.wh-streak-badge__label {
+    font-size: 0.68rem;
+    color: #b45309;
+    font-weight: 600;
+}

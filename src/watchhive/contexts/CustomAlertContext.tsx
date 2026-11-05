@@ -8,6 +8,9 @@ export interface AlertOptions {
     confirmText?: string;
     cancelText?: string;
     severity?: 'info' | 'success' | 'warning' | 'error' | 'primary' | 'danger';
+    actionText?: string;
+    actionIcon?: string;
+    onAction?: () => void;
 }
 
 interface AlertState extends AlertOptions {
@@ -44,8 +47,11 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
                 message: displayMessage,
                 type: 'alert',
                 title: options?.title || (isErrorSeverity ? 'Notice' : 'Alert'),
-                confirmText: options?.confirmText || 'Got it',
+                confirmText: options?.confirmText || (options?.actionText ? 'Close' : 'Got it'),
                 severity: options?.severity || 'primary',
+                actionText: options?.actionText,
+                actionIcon: options?.actionIcon,
+                onAction: options?.onAction,
                 resolve,
             });
         });
@@ -98,10 +104,15 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
     useEffect(() => {
         if (state.isOpen) {
             document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
         } else {
             document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
         }
-        return () => { document.body.style.overflow = 'unset'; };
+        return () => { 
+            document.body.style.overflow = 'unset'; 
+            document.body.removeAttribute('data-modal-open');
+        };
     }, [state.isOpen]);
 
     // Severity specific colors and icons
@@ -130,7 +141,7 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
                     bg: 'bg-amber-50 border-amber-500/10',
                     iconBg: 'bg-amber-500/10',
                     iconColor: 'text-amber-500',
-                    btnColor: 'bg-[#ffb700] hover:bg-[#e59700] shadow-[#ffb700]/20 text-white',
+                    btnColor: 'bg-[#ffb700] hover:bg-[#e59700] shadow-[#ffb700]/20 text-[#2D2926]',
                 };
             case 'info':
                 return {
@@ -147,7 +158,7 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
                     bg: 'bg-[#fffbea] border-[#ffb700]/10',
                     iconBg: 'bg-[#ffb700]/10',
                     iconColor: 'text-[#ffb700]',
-                    btnColor: 'bg-[#ffb700] hover:bg-[#e59700] shadow-[#ffb700]/20 text-white',
+                    btnColor: 'bg-[#ffb700] hover:bg-[#e59700] shadow-[#ffb700]/20 text-[#2D2926]',
                 };
         }
     };
@@ -160,7 +171,12 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
             <AnimatePresence>
                 {state.isOpen && (
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+                    <div 
+                        role="dialog"
+                        aria-modal="true"
+                        data-modal-open="true"
+                        className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-hidden"
+                    >
                         {/* Backdrop with elegant blur */}
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -186,6 +202,16 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
                                 rounded-[32px] sm:rounded-[40px] shadow-2xl p-6 sm:p-8 flex flex-col items-center text-center
                             `}
                         >
+                            {/* Close Icon in corner */}
+                            <button
+                                type="button"
+                                onClick={handleCancel}
+                                aria-label="Close dialog"
+                                className="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-lg">close</span>
+                            </button>
+
                             {/* Accent indicator icon */}
                             <div className={`w-16 h-16 rounded-[24px] ${styles.iconBg} flex items-center justify-center mb-5 ${styles.iconColor}`}>
                                 <span className="material-symbols-outlined text-[32px] font-bold">
@@ -216,10 +242,24 @@ export const CustomAlertProvider: React.FC<{ children: React.ReactNode }> = ({ c
                                         {state.cancelText}
                                     </button>
                                 )}
+                                {state.actionText && state.onAction && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            state.onAction?.();
+                                        }}
+                                        className="flex-1 py-3 px-5 text-sm font-extrabold rounded-2xl bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] shadow-lg shadow-[#ffb700]/20 active:scale-98 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <span className="material-symbols-outlined text-lg">
+                                            {state.actionIcon || 'share'}
+                                        </span>
+                                        {state.actionText}
+                                    </button>
+                                )}
                                 <button
                                     type="button"
                                     onClick={handleConfirm}
-                                    className={`flex-1 py-3 px-5 text-sm font-semibold rounded-2xl shadow-lg active:scale-98 transition-all ${styles.btnColor}`}
+                                    className={`${state.actionText ? 'flex-none px-6' : 'flex-1'} py-3 px-5 text-sm font-semibold rounded-2xl ${state.actionText ? 'border border-neutral-200 text-neutral-600 hover:bg-neutral-50' : `shadow-lg ${styles.btnColor}`} active:scale-98 transition-all`}
                                 >
                                     {state.confirmText}
                                 </button>

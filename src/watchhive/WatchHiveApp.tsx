@@ -2,12 +2,13 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, useCustomAlert, TourProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
-import { DonationButton, OfflineBanner, Modal, BeeLoader, InstallPromptBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
+import { DonationButton, OfflineBanner, Modal, AppLoadingScreen, InstallPromptBanner, OpenInAppBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
 import { SuggestMovieModal } from './components/suggestions/SuggestMovieModal';
+import { WatchPreferencesModal } from './components/onboarding/WatchPreferencesModal';
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage, MovieDetailsPage, WatchHistoryComparePage, SupportPage } from './pages';
+import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage, MovieDetailsPage, WatchHistoryComparePage, SupportPage, VerifyEmailPage } from './pages';
 import { ScrollToTop } from './components/common';
 import './index.css';
 
@@ -16,11 +17,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
-        return (
-            <div className="loading-screen">
-                <BeeLoader size="large" message="Loading your hive..." />
-            </div>
-        );
+        return <AppLoadingScreen message="Loading your hive..." submessage="Connecting to WatchersHive" />;
     }
 
     return isAuthenticated ? <>{children}</> : <Navigate to="/watch-hive/login" replace />;
@@ -31,11 +28,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
 
     if (isLoading) {
-        return (
-            <div className="loading-screen">
-                <BeeLoader size="large" message="Loading your hive..." />
-            </div>
-        );
+        return <AppLoadingScreen message="Loading your hive..." submessage="Connecting to WatchersHive" />;
     }
 
     return !isAuthenticated ? <>{children}</> : <Navigate to="/watch-hive/feed" replace />;
@@ -56,10 +49,47 @@ const WatchersHiveRedirect: React.FC = () => {
 
 // App Routes Component
 const AppRoutes: React.FC = () => {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const { alert } = useCustomAlert();
     const { promptAddToWatchlist } = useWatchlist();
     const [activeAction, setActiveAction] = React.useState<'log' | 'watching' | 'watchlist' | 'suggest' | null>(null);
+    const [showPreferencesModal, setShowPreferencesModal] = React.useState(false);
+
+    // Auto-prompt onboarding preferences if user is authenticated but has not completed onboarding
+    React.useEffect(() => {
+        if (isAuthenticated && user) {
+            const hasCompleted = user.hasCompletedOnboarding;
+            const prefs = user.preferences;
+            const hasPrefs = prefs && (
+                (prefs.languages && prefs.languages.length > 0) ||
+                (prefs.genres && prefs.genres.length > 0) ||
+                (prefs.streamingPlatforms && prefs.streamingPlatforms.length > 0)
+            );
+            const promptedSession = sessionStorage.getItem(`watchhive_pref_prompted_${user.id}`);
+            if (!hasCompleted && !hasPrefs && !promptedSession) {
+                setShowPreferencesModal(true);
+                sessionStorage.setItem(`watchhive_pref_prompted_${user.id}`, 'true');
+            }
+        }
+    }, [isAuthenticated, user]);
+
+    // Global event listener to open preferences from anywhere (e.g. ProfilePage)
+    React.useEffect(() => {
+        const handleOpenPrefs = () => setShowPreferencesModal(true);
+        window.addEventListener('watchhive:open-preferences', handleOpenPrefs);
+        return () => window.removeEventListener('watchhive:open-preferences', handleOpenPrefs);
+    }, []);
+
+    React.useEffect(() => {
+        const handleOpenQuickAdd = (e: Event) => {
+            const customEvent = e as CustomEvent<{ action: 'log' | 'watching' | 'watchlist' | 'suggest' }>;
+            if (customEvent.detail?.action) {
+                setActiveAction(customEvent.detail.action);
+            }
+        };
+        window.addEventListener('watchhive:open-quick-add', handleOpenQuickAdd);
+        return () => window.removeEventListener('watchhive:open-quick-add', handleOpenQuickAdd);
+    }, []);
 
     const closeAll = () => {
         setActiveAction(null);
@@ -74,6 +104,7 @@ const AppRoutes: React.FC = () => {
 
     return (
         <div className="app-layout">
+            <OpenInAppBanner />
             <OfflineBanner />
             <InstallPromptBanner />
             {isAuthenticated && <Sidebar />}
@@ -106,6 +137,10 @@ const AppRoutes: React.FC = () => {
                 <Route
                     path="/watch-hive/reset-password"
                     element={<ResetPasswordPage />}
+                />
+                <Route
+                    path="/watch-hive/verify-email"
+                    element={<VerifyEmailPage />}
                 />
 
                 {/* Protected Routes */}
@@ -220,6 +255,7 @@ const AppRoutes: React.FC = () => {
                 {/* Clean Root / Deep Link Redirect Aliases */}
                 <Route path="/signup" element={<LegacyUrlRedirect />} />
                 <Route path="/login" element={<LegacyUrlRedirect />} />
+                <Route path="/verify-email" element={<LegacyUrlRedirect />} />
                 <Route path="/privacy" element={<LegacyUrlRedirect />} />
                 <Route path="/support" element={<LegacyUrlRedirect />} />
                 <Route path="/feed" element={<LegacyUrlRedirect />} />
@@ -284,6 +320,13 @@ const AppRoutes: React.FC = () => {
                                     severity: 'success',
                                 });
                             }}
+                        />
+
+                        {/* Watch Preferences Onboarding / Customization Modal */}
+                        <WatchPreferencesModal
+                            isOpen={showPreferencesModal}
+                            onClose={() => setShowPreferencesModal(false)}
+                            isEditing={Boolean(user?.hasCompletedOnboarding || (user?.preferences && Object.keys(user.preferences).length > 0))}
                         />
                     </>
                 )}

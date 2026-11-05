@@ -9,6 +9,7 @@ import { SuggestMovieModal } from '../suggestions/SuggestMovieModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 import whLogo from '../../assets/images/watchhive-logo.png';
 import './Feed.css';
 
@@ -93,7 +94,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
 
     // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM" or "Jan 1, 2025" for date-only, guarding against future skew
-    const displayTimestamp = entryData?.watchedAt || item.timestamp || entryData?.updatedAt || entryData?.createdAt;
+    const isCompletedWatching = !entryData?.isWatching && entryData?.completedAt && (entryData?.startedAt || (entryData?.createdAt && new Date(entryData.completedAt).getTime() - new Date(entryData.createdAt).getTime() > 2000));
+    const displayTimestamp = entryData?.watchedAt || item.timestamp || (isCompletedWatching ? entryData?.completedAt : entryData?.createdAt);
     const timestamp = !isSuggestion && displayTimestamp
         ? (() => {
             const now = new Date();
@@ -135,6 +137,22 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     };
 
     const handleShare = async () => {
+        if (!isSuggestion && entryData && !entryData.isWatching) {
+            const success = await shareCompletedWatch({
+                title,
+                rating: rating ? Number(rating) : null,
+                review: review || null,
+                tmdbId: targetTmdbId,
+                mediaType: (item.data as any)?.type === 'TV_SHOW' ? 'tv' : 'movie',
+                username: displayName || username,
+            });
+            if (success) {
+                setShowShareFeedback(true);
+                setTimeout(() => setShowShareFeedback(false), 2000);
+            }
+            return;
+        }
+
         const shareTitle = 'WatchersHive';
         const shareText = isSuggestion
             ? `Check out this recommendation for "${title}" on WatchersHive! ✨`
@@ -338,8 +356,8 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
 
                 {/* Actions Bar */}
-                <div className="feed-card-actions-bar">
-                    <div className="flex gap-6">
+                <div className="feed-card-actions-bar flex flex-wrap items-center justify-between gap-y-3 gap-x-2">
+                    <div className="flex gap-4 sm:gap-6 items-center">
                         {!isSuggestion && (
                             <>
                                 <button
@@ -367,7 +385,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     </div>
 
                     {/* Quick Actions (Watchlist, Log Watch, Suggest, Share) */}
-                    <div className="flex items-center gap-2 sm:gap-2.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
                         {/* 1. Quick Add to Watchlist */}
                         {targetTmdbId && (
                             <div className="relative group/btn" title="Save to Watchlist">

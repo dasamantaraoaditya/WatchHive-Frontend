@@ -72,7 +72,8 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, 
         : null;
 
     const year = details?.release_date?.slice(0, 4) || details?.first_air_date?.slice(0, 4);
-    const rating = item.localRating || (details?.vote_average ? details.vote_average.toFixed(1) : null);
+    const rawRating = item.localRating ?? (item as any).rating ?? item.voteAverage ?? details?.vote_average;
+    const rating = rawRating != null && Number(rawRating) > 0 ? Number(rawRating).toFixed(1) : null;
 
     return (
         <motion.div
@@ -82,7 +83,15 @@ export const RankedItem: React.FC<RankedItemProps> = ({ item, rank, totalItems, 
             className="ranked-item-card group flex w-full"
         >
             {/* Rank Indicator */}
-            <div className="ranked-item__rank">
+            <div className={`ranked-item__rank ${
+                rank === 1
+                    ? 'ranked-item__rank--1'
+                    : rank === 2
+                    ? 'ranked-item__rank--2'
+                    : rank === 3
+                    ? 'ranked-item__rank--3'
+                    : 'ranked-item__rank--default'
+            }`}>
                 {rank}
             </div>
 

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { suggestionsApi } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import userService from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
-import { useUI } from '../../contexts';
 import { BeeLoader, ModalBeeOverlay } from '../common';
 import { User } from '../../types';
 
@@ -44,7 +45,9 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
     onClose,
     onSuccess
 }) => {
-    const { registerModal } = useUI();
+    if (!isOpen) return null;
+
+    const navigate = useNavigate();
     const { user: currentUser } = useAuth();
 
     // Movie Search State
@@ -96,13 +99,6 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    useEffect(() => {
-        if (!isOpen) return;
-        return registerModal();
-    }, [isOpen, registerModal]);
-
-    if (!isOpen) return null;
-
     // Helper to format avatar URL
     const getAvatarUrl = (url: string | null | undefined, seed: string) => {
         if (!url) {
@@ -115,6 +111,19 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
         const baseUrl = backendUrl.replace(/\/api\/v1\/?$/, '');
         return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     };
+
+    // Body scroll lock
+    useEffect(() => {
+        if (isOpen) {
+            const originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+            return () => {
+                document.body.style.overflow = originalOverflow;
+                document.body.removeAttribute('data-modal-open');
+            };
+        }
+    }, [isOpen]);
 
     // Load followers on mount
     useEffect(() => {
@@ -229,8 +238,12 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
         );
     });
 
-    return (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display">
+    return createPortal(
+        <div 
+            className="fixed inset-0 z-[3500] flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display"
+            role="dialog"
+            aria-modal="true"
+        >
             <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-[#ffb700]/20 max-h-[90vh] relative">
                 {isSending && <ModalBeeOverlay message="Delivering your recommendation to friends..." />}
                 {/* Header */}
@@ -398,8 +411,31 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                         <BeeLoader size="small" message="Loading followers..." />
                                     </div>
                                 ) : friends.length === 0 ? (
+                                    <div className="p-4 text-center bg-amber-50/60 rounded-2xl border border-amber-200/70 flex flex-col items-center gap-2">
+                                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-[#ffb700]">
+                                            <span className="material-symbols-outlined text-lg">group_add</span>
+                                        </div>
+                                        <div>
+                                            <h5 className="text-xs font-black text-[#2D2926]">No friends in your hive yet</h5>
+                                            <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                                                Find friends to follow and start sharing movie suggestions!
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                onClose();
+                                                navigate('/watch-hive/search?tab=people');
+                                            }}
+                                            className="mt-1 px-3.5 py-1.5 bg-[#ffb700] hover:bg-[#e5a600] text-white text-xs font-black rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            <span className="material-symbols-outlined text-sm">person_search</span>
+                                            <span>Find Friends to Follow</span>
+                                        </button>
+                                    </div>
+                                ) : filteredFriends.length === 0 ? (
                                     <div className="p-4 text-center text-xs font-bold text-slate-400 bg-slate-50 rounded-2xl border border-slate-200">
-                                        No followers yet. When cinephiles follow you, you can suggest movies to them!
+                                        No followers found matching "{friendSearch}"
                                     </div>
                                 ) : (
                                     <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-1">
@@ -409,10 +445,11 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                                 <div
                                                     key={friend.id}
                                                     onClick={() => toggleUserSelection(friend.id)}
-                                                    className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer ${isSelected
-                                                        ? 'bg-[#FFF9F0] border-[#ffb700]/40 shadow-2xs'
-                                                        : 'bg-white border-slate-100 hover:border-slate-200'
-                                                        }`}
+                                                    className={`flex items-center justify-between p-2.5 rounded-2xl border transition-all cursor-pointer ${
+                                                        isSelected
+                                                            ? 'bg-[#FFF9F0] border-[#ffb700]/40 shadow-2xs'
+                                                            : 'bg-white border-slate-100 hover:border-slate-200'
+                                                    }`}
                                                 >
                                                     <div className="flex items-center gap-2.5 min-w-0">
                                                         <img
@@ -433,8 +470,9 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                                         </div>
                                                     </div>
 
-                                                    <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${isSelected ? 'bg-[#ffb700] text-white' : 'border border-slate-300 bg-slate-50'
-                                                        }`}>
+                                                    <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${
+                                                        isSelected ? 'bg-[#ffb700] text-white' : 'border border-slate-300 bg-slate-50'
+                                                    }`}>
                                                         {isSelected && (
                                                             <span className="material-symbols-outlined text-xs font-black">check</span>
                                                         )}
@@ -473,7 +511,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                     <button
                         disabled={!selectedMovie || selectedUserIds.size === 0 || isSending || isSingleRecipientNotFollower}
                         onClick={handleSendSuggestion}
-                        className="w-full py-3.5 bg-[#ffb700] text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale cursor-pointer"
+                        className="w-full py-3.5 bg-[#ffb700] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale cursor-pointer"
                     >
                         {isSending ? (
                             <>
@@ -487,15 +525,16 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                     {selectedUserIds.size > 1
                                         ? `Send Suggestion to ${selectedUserIds.size} Friends`
                                         : selectedUserIds.size === 1
-                                            ? 'Send Suggestion'
-                                            : 'Select Recipients to Send'}
+                                        ? 'Send Suggestion'
+                                        : 'Select Recipients to Send'}
                                 </span>
                             </>
                         )}
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { pushNotificationService } from '../../services/pushNotification.service';
 import { useAuth } from '../../contexts/AuthContext';
-import { useUI } from '../../contexts';
 
 export const PushPromptModal: React.FC = () => {
     const { user } = useAuth();
-    const { registerModal } = useUI();
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!isOpen) return;
-        return registerModal();
-    }, [isOpen, registerModal]);
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
+    }, [isOpen]);
 
     useEffect(() => {
         if (!user) return;
@@ -46,9 +54,14 @@ export const PushPromptModal: React.FC = () => {
         setIsOpen(false);
     };
 
-    return (
+    return createPortal(
         <AnimatePresence>
-            <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs font-display">
+            <div 
+                role="dialog"
+                aria-modal="true"
+                data-modal-open="true"
+                className="fixed inset-0 z-[3500] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs font-display"
+            >
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 15 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -79,7 +92,7 @@ export const PushPromptModal: React.FC = () => {
                         <button
                             onClick={handleEnable}
                             disabled={loading}
-                            className="w-full py-3.5 px-4 bg-[#ffb700] hover:brightness-105 active:scale-98 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-md shadow-[#ffb700]/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+                            className="w-full py-3.5 px-4 bg-[#ffb700] hover:brightness-105 active:scale-98 text-[#2D2926] font-black text-xs uppercase tracking-widest rounded-2xl shadow-md shadow-[#ffb700]/25 transition-all cursor-pointer flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <span>Enabling...</span>
@@ -100,7 +113,8 @@ export const PushPromptModal: React.FC = () => {
                     </div>
                 </motion.div>
             </div>
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 };
 

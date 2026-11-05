@@ -12,16 +12,45 @@
     gap: 0.5rem;
 }
 
-.bee-loader-small .bee-emoji {
-    font-size: 1.5rem;
+.bee-loader-small .bee-logo-container {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.35rem;
+    border-radius: 0.75rem;
 }
 
-.bee-loader-medium .bee-emoji {
-    font-size: 3rem;
+.bee-loader-medium .bee-logo-container {
+    width: 4.5rem;
+    height: 4.5rem;
+    padding: 0.65rem;
+    border-radius: 1.25rem;
 }
 
-.bee-loader-large .bee-emoji {
-    font-size: 5rem;
+.bee-loader-large .bee-logo-container {
+    width: 6.5rem;
+    height: 6.5rem;
+    padding: 0.95rem;
+    border-radius: 1.75rem;
+}
+
+.bee-logo-container {
+    position: relative;
+    z-index: 10;
+    background: #ffffff;
+    border: 1.5px solid rgba(255, 183, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(255, 183, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.bee-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
 }
 
 .bee-animation-wrapper {
@@ -29,7 +58,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    animation: float 2s ease-in-out infinite;
+    animation: whLogoFloat 2s ease-in-out infinite;
 }
 
 .bee-emoji {
@@ -41,27 +70,29 @@
 
 .bee-message {
     color: #ffb700;
-    font-weight: bold;
-    font-size: 0.875rem;
-    letter-spacing: 0.05em;
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
     animation: pulse-text 2s ease-in-out infinite;
+    text-align: center;
+    margin: 0;
 }
 
-@keyframes float {
-    0% { transform: translateY(0px) rotate(-5deg); }
-    50% { transform: translateY(-15px) rotate(5deg); }
-    100% { transform: translateY(0px) rotate(-5deg); }
+@keyframes whLogoFloat {
+    0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 4px 12px rgba(255, 183, 0, 0.2)); }
+    50% { transform: translateY(-8px) scale(1.04); filter: drop-shadow(0 14px 28px rgba(255, 183, 0, 0.4)); }
+    100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 4px 12px rgba(255, 183, 0, 0.2)); }
 }
 
 @keyframes pulse-text {
-    0% { opacity: 0.6; }
+    0% { opacity: 0.65; }
     50% { opacity: 1; }
-    100% { opacity: 0.6; }
+    100% { opacity: 0.65; }
 }
 
 .bee-loader-mini {
     padding: 0;
-    gap: 0.25rem;
+    gap: 0.35rem;
     display: inline-flex;
     align-items: center;
     vertical-align: middle;
@@ -75,8 +106,43 @@
 }
 
 @keyframes float-mini {
-    0% { transform: translateY(0px) rotate(-6deg) scale(0.95); }
-    50% { transform: translateY(-2.5px) rotate(6deg) scale(1.05); }
-    100% { transform: translateY(0px) rotate(-6deg) scale(0.95); }
+    0% { transform: translateY(0px) scale(0.95); }
+    50% { transform: translateY(-2px) scale(1.05); }
+    100% { transform: translateY(0px) scale(0.95); }
+}
+
+/* Full screen App Loading & Signing in styles */
+.wh-app-loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #FFF9F0;
+    padding: 1.5rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    user-select: none;
+}
+
+.wh-signing-in-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 249, 240, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 1.5rem;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 

@@ -16,6 +16,13 @@ export interface GoogleLoginData {
     idToken: string;
 }
 
+export interface RegisterResult {
+    requiresVerification: boolean;
+    email: string;
+    username: string;
+    message: string;
+}
+
 export interface AuthResponse {
     user: User;
     accessToken: string;
@@ -28,12 +35,16 @@ export interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (credentials: LoginCredentials) => Promise<void>;
-    register: (data: RegisterData) => Promise<void>;
+    register: (data: RegisterData) => Promise<RegisterResult>;
+    verifyEmail: (token: string, email?: string) => Promise<AuthResponse>;
+    resendVerification: (email: string) => Promise<{ message: string }>;
     googleLogin: (idToken: string) => Promise<void>;
     logout: () => void;
     updateUser: (user: User) => void;
     setPassword: (newPassword: string) => Promise<{ message: string }>;
-    forgotPassword: (email: string) => Promise<{ message: string; devToken?: string }>;
+    forgotPassword: (email: string) => Promise<{ message: string }>;
     resetPassword: (token: string, email: string, newPassword: string) => Promise<{ message: string }>;
+    requestEmailOtp: (email: string) => Promise<{ message: string; email: string; isNewUser: boolean }>;
+    verifyEmailOtp: (email: string, code: string) => Promise<AuthResponse & { isNewUser: boolean }>;
 }
 

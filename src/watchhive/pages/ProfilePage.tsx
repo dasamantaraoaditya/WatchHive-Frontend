@@ -1,19 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { createPortal } from 'react-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useUI } from '../contexts';
 import { userService, dataService } from '../services';
-import { FollowListModal, SetPasswordSection } from '../components/profile';
+import { FollowListModal, AddFriendsModal } from '../components/profile';
 import { ImportPreviewModal } from '../components/profile/ImportPreviewModal';
 import { User, UpdateUserData } from '../types';
 import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
 import { ExportFormat, ImportResult, ImportPreviewResult, AI_IMPORT_PROMPT } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal, ModalBeeOverlay } from '../components/common';
+import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge } from '../components/common';
+import { LegalDisclaimerModal } from '../components/legal/LegalDisclaimerModal';
+import { WatchPreferencesModal } from '../components/onboarding/WatchPreferencesModal';
 
 export const ProfilePage: React.FC = () => {
     const { user, updateUser, logout } = useAuth();
     const { setPageTitle, setPageIcon } = useUI();
+    const navigate = useNavigate();
 
     useEffect(() => {
         setPageTitle('My Profile');
@@ -29,6 +33,9 @@ export const ProfilePage: React.FC = () => {
     const [stats, setStats] = useState<{ followersCount: number; followingCount: number } | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
     const [privacyUpdating, setPrivacyUpdating] = useState(false);
+    const [isAddFriendsModalOpen, setIsAddFriendsModalOpen] = useState(false);
+    const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+    const [isPreferencesModalOpen, setIsPreferencesModalOpen] = useState(false);
     // Danger Zone / Account deletion state
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteAcknowledged, setDeleteAcknowledged] = useState(false);
@@ -69,6 +76,21 @@ export const ProfilePage: React.FC = () => {
     }, [user?.bio]);
 
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+    const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+
+    useEffect(() => {
+        if (isDeleteModalOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
+    }, [isDeleteModalOpen]);
 
     if (!user) return <ProfileSkeleton />;
 
@@ -115,32 +137,6 @@ export const ProfilePage: React.FC = () => {
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
-        }
-    };
-
-    const handleInvite = async () => {
-        const inviteUrl = `${window.location.origin}/signup?ref=${user.username}`;
-        const inviteText = `Join me on WatchersHive! Check out my cinematic journey and let's build our movie hive together. 🐝🎥`;
-
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'WatchersHive Invite',
-                    text: inviteText,
-                    url: inviteUrl,
-                });
-            } catch (err) {
-                console.log('Share failed or canceled', err);
-            }
-        } else {
-            try {
-                await navigator.clipboard.writeText(`${inviteText} ${inviteUrl}`);
-                setSuccessMsg('Invite link copied to clipboard!');
-                setTimeout(() => setSuccessMsg(null), 3000);
-            } catch (err) {
-                console.error('Failed to copy link', err);
-                setError('Failed to copy link');
-            }
         }
     };
 
@@ -321,7 +317,25 @@ export const ProfilePage: React.FC = () => {
                     <div className="flex-1 text-center md:text-left space-y-4">
                         <div>
                             <h1 className="text-3xl font-black tracking-tight text-slate-900">{user.displayName || user.username}</h1>
-                            <p className="text-[#ffb700] font-bold text-sm uppercase tracking-widest mt-1">@{user.username}</p>
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap justify-center md:justify-start">
+                                <p className="text-[#ffb700] font-bold text-sm uppercase tracking-widest">@{user.username}</p>
+                                <span className="text-slate-300">•</span>
+                                <span className="text-[11px] font-black bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
+                                    LVL {user.level || 1} · {user.xp || 0} XP
+                                </span>
+                                {user.watchStreak && user.watchStreak > 0 ? (
+                                    <StreakBadge streak={user.watchStreak} onClick={() => setIsBadgeModalOpen(true)} />
+                                ) : null}
+                                <button 
+                                    type="button" 
+                                    onClick={() => setIsBadgeModalOpen(true)}
+                                    className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#ffb700]/15 hover:bg-[#ffb700]/25 text-[#92400e] px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                                    title="View Honey Level Badges"
+                                >
+                                    <span className="material-symbols-outlined text-[13px]">military_tech</span>
+                                    <span>{(user.badges || []).length} Badges</span>
+                                </button>
+                            </div>
                         </div>
 
                         {isEditingBio ? (
@@ -335,7 +349,7 @@ export const ProfilePage: React.FC = () => {
                                     placeholder="Write your cinematic bio..."
                                 />
                                 <div className="flex flex-row sm:flex-col gap-1 shrink-0 justify-center">
-                                    <button onClick={handleSaveBio} className="px-4 py-2 bg-[#ffb700] hover:bg-[#ffaa00] text-white text-xs font-black uppercase rounded-lg transition-colors shadow-sm">Save</button>
+                                    <button onClick={handleSaveBio} className="px-4 py-2 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] text-xs font-black uppercase rounded-lg transition-colors shadow-sm">Save</button>
                                     <button onClick={() => setIsEditingBio(false)} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-600 text-xs font-black uppercase rounded-lg transition-colors">Cancel</button>
                                 </div>
                             </div>
@@ -345,13 +359,13 @@ export const ProfilePage: React.FC = () => {
                             </p>
                         )}
 
-                        <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 pt-2">
-                            <div className="bg-[#ffb700]/5 border border-[#ffb700]/10 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] hover:shadow-sm transition-shadow">
+                        <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 pt-2 w-full max-w-sm sm:max-w-none">
+                            <div className="bg-[#ffb700]/5 border border-[#ffb700]/10 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-center flex-1 sm:flex-initial min-w-[74px] sm:min-w-[90px] md:min-w-[100px] hover:shadow-sm transition-shadow">
                                 <p className="text-xl md:text-2xl font-black text-[#ffb700]">{user._count?.entries || 0}</p>
                                 <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Watches</p>
                             </div>
-                            <div
-                                className="bg-slate-50 border border-slate-100 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
+                            <div 
+                                className="bg-slate-50 border border-slate-100 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-center flex-1 sm:flex-initial min-w-[74px] sm:min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
                                 onClick={() => stats && setModalConfig({ isOpen: true, type: 'followers' })}
                             >
                                 {stats ? (
@@ -361,8 +375,8 @@ export const ProfilePage: React.FC = () => {
                                 )}
                                 <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Followers</p>
                             </div>
-                            <div
-                                className="bg-slate-50 border border-slate-100 px-4 md:px-5 py-2.5 rounded-lg text-center min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
+                            <div 
+                                className="bg-slate-50 border border-slate-100 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-center flex-1 sm:flex-initial min-w-[74px] sm:min-w-[90px] md:min-w-[100px] cursor-pointer hover:bg-slate-100 hover:shadow-sm transition-all flex flex-col items-center gap-1"
                                 onClick={() => stats && setModalConfig({ isOpen: true, type: 'following' })}
                             >
                                 {stats ? (
@@ -376,15 +390,32 @@ export const ProfilePage: React.FC = () => {
                     </div>
 
                     {/* Buttons Container */}
-                    <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto h-full justify-center md:pt-4">
-                        <button onClick={() => setIsEditingBio(true)} className="flex-1 md:w-40 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-bold py-3 rounded-xl transition-all text-[13px] shadow-md shadow-[#ffb700]/20 flex items-center justify-center gap-2">
+                    <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto md:min-w-[190px] shrink-0 justify-center md:pt-4">
+                        <button 
+                            onClick={() => setIsEditingBio(true)} 
+                            className="w-full sm:w-auto md:w-44 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-bold py-3 px-4 rounded-xl transition-all text-[13px] shadow-md shadow-[#ffb700]/20 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+                        >
                             <span className="material-symbols-outlined text-[18px]">edit</span>
-                            Edit Profile
+                            <span>Edit Profile</span>
                         </button>
-                        <button onClick={handleInvite} className="flex-1 md:w-40 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 transition-all text-[13px] flex items-center justify-center gap-2 shadow-sm">
-                            <span className="material-symbols-outlined text-[18px]">person_add</span>
-                            Invite Friends
-                        </button>
+                        <div className="flex items-center gap-2 w-full sm:w-auto md:w-44">
+                            <button 
+                                onClick={() => navigate(`/watch-hive/profile/${user.id}?preview=true`)} 
+                                className="flex-1 bg-white border border-slate-200 text-slate-700 font-bold py-3 px-3 rounded-xl hover:bg-slate-50 transition-all text-[13px] flex items-center justify-center gap-2 shadow-sm cursor-pointer whitespace-nowrap"
+                                title="View your public profile as others see it"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">visibility</span>
+                                <span>Public View</span>
+                            </button>
+                            <button 
+                                onClick={() => setIsAddFriendsModalOpen(true)} 
+                                className="w-12 h-12 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 border border-amber-500/30 font-bold rounded-xl transition-all flex items-center justify-center shadow-sm shrink-0 cursor-pointer"
+                                title="Add Friends to your Hive"
+                                aria-label="Add Friends"
+                            >
+                                <span className="material-symbols-outlined text-[20px]">person_add</span>
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -530,8 +561,55 @@ export const ProfilePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Account Security Block — only shown for Google-only accounts */}
-            <SetPasswordSection />
+            {/* Watch Preferences Block */}
+            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0">
+                            <span className="material-symbols-outlined">tune</span>
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-slate-800">Watch Preferences</h2>
+                            <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Languages, genres & streaming services</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setIsPreferencesModalOpen(true)}
+                        className="px-4 py-2.5 bg-[#ffb700] hover:bg-[#ffa700] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                    >
+                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                        <span>Customize</span>
+                    </button>
+                </div>
+
+                {/* Summary chips */}
+                <div className="flex flex-wrap gap-2 pt-2">
+                    {(user.preferences?.languages || []).map(lang => (
+                        <span key={lang} className="text-xs font-bold px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200/60 rounded-full flex items-center gap-1">
+                            <span>🌐</span> {lang.toUpperCase()}
+                        </span>
+                    ))}
+                    {(user.preferences?.genres || []).map(genre => (
+                        <span key={genre} className="text-xs font-bold px-3 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-full flex items-center gap-1">
+                            <span>🎭</span> {genre}
+                        </span>
+                    ))}
+                    {(user.preferences?.streamingPlatforms || []).map(plat => (
+                        <span key={plat} className="text-xs font-bold px-3 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-full flex items-center gap-1">
+                            <span>📺</span> {plat}
+                        </span>
+                    ))}
+                    {(!user.preferences || (
+                        (!user.preferences.languages || user.preferences.languages.length === 0) &&
+                        (!user.preferences.genres || user.preferences.genres.length === 0) &&
+                        (!user.preferences.streamingPlatforms || user.preferences.streamingPlatforms.length === 0)
+                    )) && (
+                        <p className="text-xs text-slate-400 font-medium">No preferences set yet. Tap Customize to personalize your feed & recommendations.</p>
+                    )}
+                </div>
+            </div>
+
 
             {/* Data Management Block */}
             <div id="data-management" ref={dataManagementRef} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
@@ -829,7 +907,7 @@ export const ProfilePage: React.FC = () => {
                             <button
                                 onClick={handleExport}
                                 disabled={dataLoading || (!includeEntries && !includeLists)}
-                                className="flex items-center justify-center gap-2 py-5 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-[#ffb700]/20 disabled:opacity-40 w-full"
+                                className="flex items-center justify-center gap-2 py-5 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-[#ffb700]/20 disabled:opacity-40 w-full"
                             >
                                 {dataLoading ? <Skeleton variant="circle" width={16} height={16} /> : <span className="material-symbols-outlined text-lg">download</span>}
                                 Export Data
@@ -912,6 +990,29 @@ export const ProfilePage: React.FC = () => {
                 </div>
             </div>
 
+            {/* Legal & Non-Commercial Disclaimer Card */}
+            <div className="bg-white border border-black/5 rounded-[32px] p-6 sm:p-8 shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500/15 flex items-center justify-center text-amber-700 border border-amber-500/25">
+                            <span className="material-symbols-outlined text-2xl font-bold">gavel</span>
+                        </div>
+                        <div>
+                            <h3 className="text-base font-black text-[#2D2926]">Legal & Non-Commercial Notice</h3>
+                            <p className="text-xs text-slate-400 font-bold">Non-profit status, TMDb API attribution & copyright protection</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setIsLegalModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/30 hover:border-[#ffb700] text-xs font-black uppercase tracking-wider text-slate-800 transition-all hover:shadow-sm cursor-pointer"
+                    >
+                        <span>View Disclaimer</span>
+                        <span className="material-symbols-outlined text-sm font-bold text-[#ffb700]">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+
             <FollowListModal
                 isOpen={modalConfig.isOpen}
                 onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
@@ -928,6 +1029,12 @@ export const ProfilePage: React.FC = () => {
                 defaultToCurrentYear={defaultToCurrentYear}
                 onToggleDefaultToCurrentYear={setDefaultToCurrentYear}
             />
+
+            <AddFriendsModal
+                isOpen={isAddFriendsModalOpen}
+                onClose={() => setIsAddFriendsModalOpen(false)}
+                currentUser={user}
+            />
             <AvatarLightboxModal
                 isOpen={isAvatarModalOpen}
                 onClose={() => setIsAvatarModalOpen(false)}
@@ -936,9 +1043,33 @@ export const ProfilePage: React.FC = () => {
                 username={user.username}
             />
 
+            <BadgeModal
+                isOpen={isBadgeModalOpen}
+                onClose={() => setIsBadgeModalOpen(false)}
+                userBadges={user.badges || []}
+                watchStreak={user.watchStreak || 0}
+                userName={user.displayName || user.username}
+            />
+
+            <LegalDisclaimerModal
+                isOpen={isLegalModalOpen}
+                onClose={() => setIsLegalModalOpen(false)}
+            />
+
+            <WatchPreferencesModal
+                isOpen={isPreferencesModalOpen}
+                onClose={() => setIsPreferencesModalOpen(false)}
+                isEditing={true}
+            />
+
             {/* Account Deletion Safety Modal */}
-            {isDeleteModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-[fade-in_0.2s_ease-out]">
+            {isDeleteModalOpen && createPortal(
+                <div 
+                    role="dialog"
+                    aria-modal="true"
+                    data-modal-open="true"
+                    className="fixed inset-0 z-[3500] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-[fade-in_0.2s_ease-out]"
+                >
                     <div className="bg-white rounded-[32px] border border-rose-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden text-left">
                         <div className="flex items-center gap-3.5 mb-5">
                             <div className="w-12 h-12 rounded-2xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0">
@@ -1050,7 +1181,8 @@ export const ProfilePage: React.FC = () => {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
 

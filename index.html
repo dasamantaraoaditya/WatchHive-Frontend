@@ -8,12 +8,31 @@
   <meta name="description" content="WatchersHive — Track every movie, anime, K-drama, and TV series you watch. Rate, review, and discover with a community of fellow watchers." />
   <meta name="theme-color" content="#ffb700" />
   <title>WatchersHive — Track Movies, Anime, K-Drama & Series</title>
+  <link rel="canonical" href="https://www.watchershive.com/" />
+
+  <!-- OpenGraph / Facebook / WhatsApp / iMessage -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.watchershive.com/" />
+  <meta property="og:title" content="WatchersHive — Track Movies, Anime, K-Drama & Series" />
+  <meta property="og:description" content="Track every movie, anime, K-drama, and TV series you watch. Rate, review, and discover with a community of fellow watchers." />
+  <meta property="og:image" content="https://www.watchershive.com/icons/icon-512x512.png" />
+  <meta property="og:site_name" content="WatchersHive" />
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://www.watchershive.com/" />
+  <meta name="twitter:title" content="WatchersHive — Track Movies, Anime, K-Drama & Series" />
+  <meta name="twitter:description" content="Track every movie, anime, K-drama, and TV series you watch. Rate, review, and discover with a community of fellow watchers." />
+  <meta name="twitter:image" content="https://www.watchershive.com/icons/icon-512x512.png" />
+
   <link rel="manifest" href="/manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="referrer" content="no-referrer-when-downgrade" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 
   <meta name="apple-mobile-web-app-title" content="WatchersHive" />
+  <meta name="apple-itunes-app" content="app-id=6748434771, app-argument=https://watchershive.com/" />
   <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,7 +63,25 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div style="min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #FFF9F0; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+      <div style="width: 84px; height: 84px; background: #ffffff; border-radius: 26px; box-shadow: 0 12px 30px rgba(255, 183, 0, 0.25); border: 1.5px solid rgba(255, 183, 0, 0.3); display: flex; align-items: center; justify-content: center; padding: 14px; animation: whInitialPulse 1.6s ease-in-out infinite;">
+        <img src="/icons/icon-192x192.png" alt="WatchersHive" style="width: 100%; height: 100%; object-fit: contain;" />
+      </div>
+      <div style="margin-top: 20px; font-weight: 900; font-size: 17px; color: #2D2926; letter-spacing: -0.3px;">
+        Watchers<span style="color: #ffb700;">Hive</span>
+      </div>
+      <div style="margin-top: 6px; font-weight: 600; font-size: 12px; color: rgba(45, 41, 38, 0.45); letter-spacing: 0.2px;">
+        Loading your hive...
+      </div>
+      <style>
+        @keyframes whInitialPulse {
+          0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 4px 10px rgba(255, 183, 0, 0.2)); }
+          50% { transform: scale(1.05) translateY(-4px); filter: drop-shadow(0 12px 24px rgba(255, 183, 0, 0.4)); }
+        }
+      </style>
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

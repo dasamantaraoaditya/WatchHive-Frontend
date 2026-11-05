@@ -213,7 +213,7 @@ export const WatchHistoryComparePage: React.FC = () => {
                     <div className="flex items-center gap-3 min-w-0">
                         <button
                             onClick={handleBack}
-                            className="w-10 h-10 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/20 hover:bg-[#ffb700] hover:text-white flex items-center justify-center text-[#2D2926] transition-all cursor-pointer shadow-2xs shrink-0 active:scale-95"
+                            className="w-10 h-10 rounded-2xl bg-[#FFF9F0] border border-[#ffb700]/20 hover:bg-[#ffb700] hover:text-[#2D2926] flex items-center justify-center text-[#2D2926] transition-all cursor-pointer shadow-2xs shrink-0 active:scale-95"
                             title="Back to User Profile"
                         >
                             <span className="material-symbols-outlined text-[18px]">arrow_back_ios_new</span>
@@ -255,7 +255,7 @@ export const WatchHistoryComparePage: React.FC = () => {
                         </p>
                         <button
                             onClick={handleBack}
-                            className="px-5 py-2.5 bg-[#ffb700] hover:brightness-105 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-md shadow-[#ffb700]/20 transition-all cursor-pointer"
+                            className="px-5 py-2.5 bg-[#ffb700] hover:brightness-105 text-[#2D2926] font-black text-xs uppercase tracking-widest rounded-xl shadow-md shadow-[#ffb700]/20 transition-all cursor-pointer"
                         >
                             Return to Profile
                         </button>
@@ -271,7 +271,7 @@ export const WatchHistoryComparePage: React.FC = () => {
                         </p>
                         <button
                             onClick={() => window.location.reload()}
-                            className="px-5 py-2.5 bg-[#ffb700] text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-md shadow-[#ffb700]/20 hover:brightness-105 transition-all cursor-pointer"
+                            className="px-5 py-2.5 bg-[#ffb700] text-[#2D2926] font-black text-xs uppercase tracking-widest rounded-xl shadow-md shadow-[#ffb700]/20 hover:brightness-105 transition-all cursor-pointer"
                         >
                             Retry Comparison
                         </button>

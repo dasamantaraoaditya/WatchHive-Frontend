@@ -4,11 +4,13 @@ import { motion } from 'framer-motion';
 import { BeeLoader, ErrorState, Avatar } from '../components/common';
 import apiClient from '../services/api';
 import { useWatchlist } from '../contexts/WatchlistContext';
+import { useAuth } from '../contexts/AuthContext';
 import { EntryForm } from '../components/entries/EntryForm';
 import { SuggestUserSelector } from '../components/suggestions/SuggestUserSelector';
 import { useUI, useCustomAlert } from '../contexts';
 import { entriesApi, Entry } from '../services/entries.service';
 import { formatUserFriendlyError } from '../utils/errorHandler';
+import { shareCompletedWatch } from '../utils/shareHelper';
 
 interface CastMember {
     id: number;
@@ -112,18 +114,10 @@ const getFormatCategory = (details: MovieDetails, mediaType: 'movie' | 'tv') => 
     return { label: 'Feature Film', icon: '🎬', color: 'bg-amber-400/10 text-amber-700 border-amber-400/30' };
 };
 
+import { getDirectProviderLink } from '../utils/providerLinks';
+
 const getDirectLink = (providerName: string, fallbackLink: string, title: string) => {
-    const name = providerName.toLowerCase();
-    const query = encodeURIComponent(title);
-    if (name.includes('netflix')) return `https://www.netflix.com/search?q=${query}`;
-    if (name.includes('amazon') || name.includes('prime')) return `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${query}`;
-    if (name.includes('hotstar') || name.includes('disney')) return `https://www.hotstar.com/in/explore?searchQuery=${query}`;
-    if (name.includes('zee5')) return `https://www.zee5.com/search?q=${query}`;
-    if (name.includes('sonyliv')) return `https://www.sonyliv.com/search?query=${query}`;
-    if (name.includes('jiocinema')) return `https://www.jiocinema.com/search?q=${query}`;
-    if (name.includes('apple')) return `https://tv.apple.com/in/search?q=${query}`;
-    if (name.includes('youtube')) return `https://www.youtube.com/results?search_query=${query}+movie`;
-    return fallbackLink;
+    return getDirectProviderLink(providerName, fallbackLink, title);
 };
 
 export const MovieDetailsPage: React.FC = () => {
@@ -134,6 +128,7 @@ export const MovieDetailsPage: React.FC = () => {
     const { setPageTitle, setPageIcon } = useUI();
     const { alert, confirm } = useCustomAlert();
     const { watchlist, promptAddToWatchlist, removeFromList, isInWatchlist } = useWatchlist();
+    const { user } = useAuth();
 
     const mediaType = (paramMediaType === 'tv' ? 'tv' : 'movie') as 'movie' | 'tv';
     const tmdbId = paramTmdbId ? parseInt(paramTmdbId, 10) : null;
@@ -250,8 +245,11 @@ export const MovieDetailsPage: React.FC = () => {
     const primaryGenre = details?.genres?.[0]?.name;
     const inWatchlist = tmdbId ? isInWatchlist(tmdbId) : false;
     const watchlistItem = tmdbId ? watchlist?.items?.find((item) => Number(item.tmdbId) === Number(tmdbId)) : undefined;
-    const resolvedSuggestedByUser = location.state?.suggestedByUser || watchlistItem?.suggestedByUser || null;
-    const resolvedSuggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || watchlistItem?.suggestedByUserId || watchlistItem?.suggestedByUser?.id || null;
+    const querySuggestedByUserId = searchParams.get('suggestedByUserId') || searchParams.get('suggestedBy') || searchParams.get('ref');
+    const querySuggestedByUsername = searchParams.get('suggestedByUsername') || searchParams.get('refUsername');
+
+    const resolvedSuggestedByUser = location.state?.suggestedByUser || watchlistItem?.suggestedByUser || (querySuggestedByUsername ? { id: querySuggestedByUserId || '', username: querySuggestedByUsername } : null);
+    const resolvedSuggestedByUserId = location.state?.suggestedByUserId || location.state?.suggestedByUser?.id || watchlistItem?.suggestedByUserId || watchlistItem?.suggestedByUser?.id || querySuggestedByUserId || null;
 
     const posterUrl = details?.poster_path
         ? `https://image.tmdb.org/t/p/original${details.poster_path}`
@@ -287,7 +285,17 @@ export const MovieDetailsPage: React.FC = () => {
             await alert(`"${title}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
                 severity: 'success',
-                confirmText: 'Awesome',
+                confirmText: 'Done',
+                actionText: 'Share',
+                actionIcon: 'share',
+                onAction: () => {
+                    shareCompletedWatch({
+                        title,
+                        tmdbId,
+                        mediaType: mediaType || 'movie',
+                        isWatching: true,
+                    });
+                },
             });
         } catch (err) {
             console.error('Failed to add to currently watching log:', err);
@@ -324,17 +332,25 @@ export const MovieDetailsPage: React.FC = () => {
 
     const handleShare = async () => {
         if (!details) return;
+        const shareUrl = new URL(window.location.href);
+        if (user?.id) {
+            shareUrl.searchParams.set('suggestedByUserId', user.id);
+            if (user.username) {
+                shareUrl.searchParams.set('suggestedByUsername', user.username);
+            }
+        }
+        const finalUrl = shareUrl.toString();
         const shareData = {
             title,
             text: `Check out ${title} on WatchersHive!`,
-            url: window.location.href,
+            url: finalUrl,
         };
 
         try {
             if (navigator.share) {
                 await navigator.share(shareData);
             } else {
-                await navigator.clipboard.writeText(window.location.href);
+                await navigator.clipboard.writeText(finalUrl);
                 await alert('Link copied to clipboard!', { title: 'Link Copied', severity: 'success' });
             }
         } catch (err) {
@@ -366,7 +382,7 @@ export const MovieDetailsPage: React.FC = () => {
             animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] } }}
             exit={{ opacity: 0, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } }}
             onScroll={handleScroll}
-            className="fixed inset-y-0 right-0 left-0 md:left-[256px] z-[100] flex flex-col bg-[#FFF9F0] overflow-y-auto no-scrollbar font-display pb-32 md:pb-24"
+            className="fixed inset-y-0 right-0 left-0 md:left-[256px] z-[100] flex flex-col bg-[#FFF9F0] overflow-y-auto no-scrollbar font-display pb-40 md:pb-24"
         >
             {/* Sticky Navigation Bar — with round arrow_back_ios button */}
             <div
@@ -457,7 +473,7 @@ export const MovieDetailsPage: React.FC = () => {
                             </div>
 
                             {/* Content Body */}
-                            <div className="px-6 md:px-10 pb-24 pt-4 flex flex-col gap-10 w-full relative z-10">
+                            <div className="px-4 sm:px-6 md:px-10 pb-36 md:pb-24 pt-4 flex flex-col gap-8 md:gap-10 w-full relative z-10">
                                 {/* Interactive Action Bar */}
                                 <div className="flex flex-wrap items-center justify-between gap-4 p-5 bg-white rounded-3xl border border-[#ffb700]/20 shadow-sm">
                                     <div className="flex flex-wrap items-center gap-3 md:gap-4">
@@ -516,7 +532,7 @@ export const MovieDetailsPage: React.FC = () => {
                                                     setIsCompletingWatch(false);
                                                     setView('log');
                                                 }}
-                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#ffb700] text-white hover:brightness-105 flex items-center gap-2 transition-all shadow-md shadow-[#ffb700]/20 cursor-pointer"
+                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#ffb700] text-[#2D2926] hover:brightness-105 flex items-center gap-2 transition-all shadow-md shadow-[#ffb700]/20 cursor-pointer"
                                             >
                                                 <span className="material-symbols-outlined text-[18px]">edit_note</span>
                                                 Log Watch
@@ -546,7 +562,7 @@ export const MovieDetailsPage: React.FC = () => {
                                                         {userEntry.isWatching ? 'Currently Watching' : 'Your Watch Entry'}
                                                     </h3>
                                                     <p className="text-xs font-bold text-slate-400">
-                                                        {userEntry.isWatching ? 'In your active watching queue' : `Logged on ${formatDate(userEntry.watchedAt)}`}
+                                                        {userEntry.isWatching ? 'In your active watching queue' : (userEntry.watchedAt ? `Logged on ${formatDate(userEntry.watchedAt)}` : 'Logged to your Hive')}
                                                         {userEntry.rating ? ` • Rated ${userEntry.rating} / 10` : ''}
                                                     </p>
                                                 </div>

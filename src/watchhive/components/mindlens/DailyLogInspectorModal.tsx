@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { useUI } from '../../contexts';
 
 export interface InspectionItem {
     id: string;
@@ -27,12 +27,19 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
     count,
     items,
 }) => {
-    const { registerModal } = useUI();
-
     useEffect(() => {
-        if (!isOpen || !dateStr) return;
-        return registerModal();
-    }, [isOpen, dateStr, registerModal]);
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
+    }, [isOpen]);
 
     if (!isOpen || !dateStr) return null;
 
@@ -43,9 +50,12 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
         day: 'numeric',
     });
 
-    return (
+    return createPortal(
         <div
-            className="fixed inset-0 z-[2000] flex items-center justify-center bg-[#2D2926]/50 backdrop-blur-md p-4 animate-[fade-in_0.2s_ease-out]"
+            role="dialog"
+            aria-modal="true"
+            data-modal-open="true"
+            className="fixed inset-0 z-[3500] flex items-center justify-center bg-[#2D2926]/50 backdrop-blur-md p-4 animate-[fade-in_0.2s_ease-out]"
             onClick={onClose}
         >
             <div
@@ -136,7 +146,7 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
                                             <Link
                                                 to={`/watch-hive/movie/${item.tmdbId}`}
                                                 onClick={onClose}
-                                                className="px-3.5 py-1.5 rounded-xl bg-[#ffb700] text-white text-[11px] font-black uppercase tracking-widest hover:bg-[#2D2926] transition-colors shadow-xs"
+                                                className="px-3.5 py-1.5 rounded-xl bg-[#ffb700] text-[#2D2926] text-[11px] font-black uppercase tracking-widest hover:bg-[#2D2926] transition-colors shadow-xs"
                                             >
                                                 View
                                             </Link>
@@ -144,7 +154,7 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
                                             <Link
                                                 to="/watch-hive/entries"
                                                 onClick={onClose}
-                                                className="px-3 py-1.5 rounded-xl bg-[#FFF9F0] border border-[#ffb700]/30 text-[#ffb700] text-[11px] font-black hover:bg-[#ffb700] hover:text-white transition-colors"
+                                                className="px-3 py-1.5 rounded-xl bg-[#FFF9F0] border border-[#ffb700]/30 text-[#ffb700] text-[11px] font-black hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors"
                                             >
                                                 Details
                                             </Link>
@@ -161,7 +171,7 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
                     <span>WatchersHive Inspection Log</span>
                     <button
                         onClick={onClose}
-                        className="px-5 py-2 rounded-xl bg-[#2D2926] text-white text-[10px] uppercase font-black tracking-widest hover:bg-[#ffb700] transition-colors"
+                        className="px-5 py-2 rounded-xl bg-[#2D2926] text-white text-[10px] uppercase font-black tracking-widest hover:bg-[#ffb700] hover:text-[#2D2926] transition-colors"
                     >
                         Close
                     </button>
@@ -172,7 +182,8 @@ export const DailyLogInspectorModal: React.FC<DailyLogInspectorModalProps> = ({
                 @keyframes slide-up { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
                 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 };
 

@@ -26,10 +26,12 @@ export const AvatarLightboxModal: React.FC<AvatarLightboxModalProps> = ({
         };
 
         document.body.style.overflow = 'hidden';
+        document.body.setAttribute('data-modal-open', 'true');
         window.addEventListener('keydown', handleKeyDown);
 
         return () => {
             document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, [isOpen, onClose]);
@@ -39,7 +41,12 @@ export const AvatarLightboxModal: React.FC<AvatarLightboxModalProps> = ({
     return createPortal(
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[2500] flex items-center justify-center p-4 overflow-hidden select-none">
+                <div 
+                    role="dialog"
+                    aria-modal="true"
+                    data-modal-open="true"
+                    className="fixed inset-0 z-[3500] flex items-center justify-center p-4 overflow-hidden select-none"
+                >
                     {/* Dark Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}

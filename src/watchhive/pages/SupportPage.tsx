@@ -41,7 +41,7 @@ const CATEGORIES: CategoryOption[] = [
         label: 'Account & Login',
         icon: 'manage_accounts',
         badgeColor: 'text-blue-600 bg-blue-50 border-blue-200 hover:border-blue-400',
-        placeholder: 'Describe your login, Google OAuth, password reset, or profile issue...',
+        placeholder: 'Describe your login, Google OAuth, email verification code, or profile issue...',
     },
     {
         id: 'other',
@@ -156,7 +156,7 @@ App Diagnostics:
         },
         {
             q: 'Trouble signing in with Google or Origin Mismatch?',
-            a: 'If you encounter an OAuth origin error or popup blocker, ensure you are accessing https://www.watchershive.com. You can also sign in via email or set an account password using the "Forgot Password" link.',
+            a: 'If you encounter an OAuth origin error or popup blocker, ensure you are accessing https://www.watchershive.com. You can also sign in via email with an instant 6-digit verification code with zero passwords needed.',
         },
         {
             q: 'Where does imported watch history go?',
@@ -332,7 +332,7 @@ App Diagnostics:
                 <div className="flex flex-col sm:flex-row gap-3 mb-12">
                     <button
                         onClick={handleSendMailto}
-                        className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-[#ffb700]/25 cursor-pointer active:scale-[0.99]"
+                        className="flex-1 flex items-center justify-center gap-2.5 py-4 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-black text-xs uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-[#ffb700]/25 cursor-pointer active:scale-[0.99]"
                     >
                         <span className="material-symbols-outlined text-lg">outgoing_mail</span>
                         <span>Send via Email Client</span>

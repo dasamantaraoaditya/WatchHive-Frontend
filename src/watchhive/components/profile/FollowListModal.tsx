@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { User } from '../../types/user.types';
 import userService from '../../services/userService';
 import { Avatar, BeeLoader } from '../common';
 import { Link } from 'react-router-dom';
-import { useUI } from '../../contexts';
 
 interface FollowListModalProps {
     isOpen: boolean;
@@ -13,19 +13,22 @@ interface FollowListModalProps {
 }
 
 export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClose, userId, type }) => {
-    const { registerModal } = useUI();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!isOpen) return;
-        return registerModal();
-    }, [isOpen, registerModal]);
-
-    useEffect(() => {
         if (isOpen) {
             fetchUsers();
+            document.body.style.overflow = 'hidden';
+            document.body.setAttribute('data-modal-open', 'true');
+        } else {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
         }
+        return () => {
+            document.body.style.overflow = 'unset';
+            document.body.removeAttribute('data-modal-open');
+        };
     }, [isOpen, userId, type]);
 
     const fetchUsers = async () => {
@@ -44,8 +47,13 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-4 animate-[fade-in_0.2s_ease-out]" onClick={onClose}>
+    return createPortal(
+        <div 
+            className="fixed inset-0 z-[3500] flex items-center justify-center bg-[#2D2926]/40 backdrop-blur-sm p-4 animate-[fade-in_0.2s_ease-out]" 
+            onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+        >
             <div 
                 className="bg-[#FFF9F0] w-full max-w-md max-h-[85vh] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-[#ffb700]/10 animate-[slide-up_0.3s_cubic-bezier(0.16,1,0.3,1)]" 
                 onClick={e => e.stopPropagation()}
@@ -79,9 +87,17 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                             <h4 className="text-lg font-bold text-[#2D2926]">
                                 {type === 'followers' ? 'No followers yet' : 'Not following anyone'}
                             </h4>
-                            <p className="text-sm font-medium text-[#2D2926]/50">
-                                {type === 'followers' ? 'Share your profile to build your hive.' : 'Find users to see their cinematic journey.'}
+                            <p className="text-sm font-medium text-[#2D2926]/50 max-w-xs">
+                                {type === 'followers' ? 'Share your profile or find friends to follow to build your hive.' : 'Find users to see their cinematic journey and exchange recommendations.'}
                             </p>
+                            <Link
+                                to="/watch-hive/search?tab=people"
+                                onClick={onClose}
+                                className="mt-2 px-5 py-2.5 bg-[#ffb700] hover:bg-[#e5a600] text-white text-xs font-black rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                            >
+                                <span className="material-symbols-outlined text-base">person_search</span>
+                                <span>Find Friends to Follow</span>
+                            </Link>
                         </div>
                     ) : (
                         <div className="flex flex-col gap-1 p-2">
@@ -108,7 +124,7 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                                         </div>
                                     </div>
                                     {/* Light Mode "View" Button Outline */}
-                                    <div className="px-4 py-1.5 rounded-full border border-[#ffb700]/30 text-[#ffb700] text-[12px] font-bold bg-[#ffb700]/5 group-hover:bg-[#ffb700] group-hover:text-white transition-colors">
+                                    <div className="px-4 py-1.5 rounded-full border border-[#ffb700]/30 text-[#ffb700] text-[12px] font-bold bg-[#ffb700]/5 group-hover:bg-[#ffb700] group-hover:text-[#2D2926] transition-colors">
                                         View
                                     </div>
                                 </Link>
@@ -122,6 +138,7 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                 @keyframes slide-up { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
                 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 };

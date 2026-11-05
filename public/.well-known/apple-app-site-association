@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "CXTRS96UX8.com.watchhive.watchhiveMobile",
+        "paths": [
+          "/watch-hive/*",
+          "/details/*",
+          "/profile/*",
+          "/user/*",
+          "*"
+        ]
+      }
+    ]
+  }
+}

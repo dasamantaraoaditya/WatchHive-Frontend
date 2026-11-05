@@ -52,13 +52,23 @@ export const SearchUsersPage: React.FC = () => {
         setPageIcon('explore');
     }, [setPageTitle, setPageIcon]);
 
-    const initialMode = searchParams.get('mode') === 'movies' || searchParams.get('tab') === 'media' ? 'media' : 'media';
+    const paramTab = searchParams.get('tab') || searchParams.get('mode');
+    const initialMode: ActiveSearchTab = (paramTab === 'people' || paramTab === 'users' || paramTab === 'friends') ? 'people' : 'media';
     const initialQuery = searchParams.get('q') || '';
     const initialDeep = searchParams.get('deep') === 'true';
 
     // State
     const [query, setQuery] = useState(initialQuery);
     const [activeTab, setActiveTab] = useState<ActiveSearchTab>(initialMode);
+
+    useEffect(() => {
+        const currentParamTab = searchParams.get('tab') || searchParams.get('mode');
+        if (currentParamTab === 'people' || currentParamTab === 'users' || currentParamTab === 'friends') {
+            setActiveTab('people');
+        } else if (currentParamTab === 'media' || currentParamTab === 'movies') {
+            setActiveTab('media');
+        }
+    }, [searchParams]);
 
     // Discovery State
     const [selectedFilter, setSelectedFilter] = useState<TrendingFilterOption>(TRENDING_FILTERS[0]);
@@ -373,7 +383,7 @@ export const SearchUsersPage: React.FC = () => {
                                 handleSelectTerm(query.trim());
                             }
                         }}
-                        placeholder="Search movies, TV shows, cinephiles..."
+                        placeholder="Search movies, TV shows, friends & people..."
                         className="w-full py-4 pl-14 pr-12 text-base md:text-lg bg-white border-2 border-black/5 rounded-full shadow-lg shadow-black/5 text-[#2D2926] font-bold outline-none focus:border-[#ffb700] focus:ring-4 focus:ring-[#ffb700]/10 transition-all placeholder:text-slate-300 placeholder:font-bold"
                     />
                     {query.trim().length > 0 && (
@@ -397,11 +407,11 @@ export const SearchUsersPage: React.FC = () => {
 
                 {/* Active Search Tabs (when searching query >= 2 chars) */}
                 {showSearchResults && (
-                    <div className="bg-[#2D2926]/5 p-1.5 rounded-full flex items-center gap-1 mt-4 border border-black/5 shadow-inner">
+                    <div className="bg-[#2D2926]/5 p-1 sm:p-1.5 rounded-full flex items-center gap-1 mt-4 border border-black/5 shadow-inner max-w-full overflow-x-auto no-scrollbar">
                         <button
                             type="button"
                             onClick={() => setActiveTab('media')}
-                            className={`relative px-6 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
+                            className={`relative px-3.5 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 ${
                                 activeTab === 'media' ? 'text-black' : 'text-slate-400 hover:text-slate-700'
                             }`}
                         >
@@ -410,13 +420,13 @@ export const SearchUsersPage: React.FC = () => {
                             )}
                             <span className="relative z-10 flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-base">movie</span>
-                                Media ({movieResults.length})
+                                Movies &amp; Shows ({movieResults.length})
                             </span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('people')}
-                            className={`relative px-6 py-2 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
+                            className={`relative px-3.5 sm:px-6 py-2 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 ${
                                 activeTab === 'people' ? 'text-white' : 'text-slate-400 hover:text-slate-700'
                             }`}
                         >
@@ -425,7 +435,7 @@ export const SearchUsersPage: React.FC = () => {
                             )}
                             <span className="relative z-10 flex items-center gap-1.5">
                                 <span className="material-symbols-outlined text-base">group</span>
-                                People ({userResults.length})
+                                Friends &amp; People ({userResults.length})
                             </span>
                         </button>
                     </div>
@@ -655,7 +665,7 @@ export const SearchUsersPage: React.FC = () => {
                             ) : userResults.length === 0 ? (
                                 <div className="py-16 text-center">
                                     <EmptyState
-                                        title="No users found"
+                                        title="No friends or people found"
                                         message={`Try searching with another username or name.`}
                                         icon={<span className="material-symbols-outlined text-5xl text-slate-300">person_search</span>}
                                     />
@@ -685,9 +695,16 @@ export const SearchUsersPage: React.FC = () => {
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <p className="text-xs font-semibold text-[#ffb700] tracking-tight">
-                                                        @{user.username}
-                                                    </p>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <p className="text-xs font-semibold text-[#ffb700] tracking-tight">
+                                                            @{user.username}
+                                                        </p>
+                                                        {user.isFollower && (
+                                                            <span className="px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-[10px] font-black text-amber-800 tracking-wide">
+                                                                Follows you
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     {user.bio && (
                                                         <p className="text-xs text-slate-400 truncate mt-0.5 max-w-sm">
                                                             {user.bio}
@@ -695,14 +712,14 @@ export const SearchUsersPage: React.FC = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-3 shrink-0">
                                                 <button
                                                     type="button"
                                                     onClick={(e) => handleFollowToggle(e, user)}
                                                     onMouseEnter={() => setHoveredRequestedUserId(user.id)}
                                                     onMouseLeave={() => setHoveredRequestedUserId(null)}
                                                     disabled={followingLoadingMap[user.id]}
-                                                    className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                                                    className={`px-5 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shrink-0 whitespace-nowrap ${
                                                         user.isFollowing
                                                             ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                                             : user.isRequested
@@ -783,13 +800,13 @@ export const SearchUsersPage: React.FC = () => {
                         </section>
                     )}
 
-                    {/* 2. Suggested Cinephiles Section */}
+                    {/* 2. Suggested Friends Section */}
                     <section className="flex flex-col gap-3">
                         <div className="flex items-center justify-between px-1">
                             <div className="flex items-center gap-2">
                                 <span className="material-symbols-outlined text-xl text-[#ffb700]">stars</span>
                                 <h2 className="text-lg font-black text-[#2D2926] tracking-tight">
-                                    Suggested Cinephiles 🐝
+                                    Suggested Friends 🐝
                                 </h2>
                             </div>
                             {suggestedUsers.length > 0 && (
@@ -838,6 +855,14 @@ export const SearchUsersPage: React.FC = () => {
                                             <p className="text-[10px] font-semibold text-slate-400 truncate w-full" title={`@${user.username}`}>
                                                 @{user.username.length > 10 ? `${user.username.slice(0, 10)}...` : user.username}
                                             </p>
+                                            {user.suggestionReason && (
+                                                <div className="mt-1.5 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200/60 text-[9px] font-extrabold text-amber-900 truncate max-w-full inline-flex items-center justify-center gap-1">
+                                                    <span className="material-symbols-outlined text-[10px] text-[#ffb700]">
+                                                        {user.suggestionReason.includes('mutual') ? 'group' : user.suggestionReason.includes('Follows') ? 'person_check' : user.suggestionReason.includes('movie') || user.suggestionReason.includes('taste') ? 'movie' : 'stars'}
+                                                    </span>
+                                                    <span className="truncate">{user.suggestionReason}</span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <button

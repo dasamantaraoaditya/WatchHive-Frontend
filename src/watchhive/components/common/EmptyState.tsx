@@ -8,6 +8,8 @@ interface EmptyStateProps {
     icon?: React.ReactNode;
     actionLabel?: string;
     onAction?: () => void;
+    secondaryActionLabel?: string;
+    onSecondaryAction?: () => void;
     className?: string;
 }
 
@@ -17,6 +19,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
     icon = "🔍",
     actionLabel,
     onAction,
+    secondaryActionLabel,
+    onSecondaryAction,
     className = ""
 }) => {
     return (
@@ -24,11 +28,18 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             <div className="empty-icon">{icon}</div>
             <h3 className="empty-title">{title}</h3>
             <p className="empty-message">{message}</p>
-            {actionLabel && onAction && (
-                <Button variant="primary" onClick={onAction}>
-                    {actionLabel}
-                </Button>
-            )}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-3">
+                {actionLabel && onAction && (
+                    <Button variant="primary" onClick={onAction}>
+                        {actionLabel}
+                    </Button>
+                )}
+                {secondaryActionLabel && onSecondaryAction && (
+                    <Button variant="secondary" onClick={onSecondaryAction}>
+                        {secondaryActionLabel}
+                    </Button>
+                )}
+            </div>
         </div>
     );
 };

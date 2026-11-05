@@ -12,6 +12,7 @@ export { CinematicStacksPage } from './CinematicStacksPage';
 export { PrivacyPolicyPage } from './PrivacyPolicyPage';
 export { ForgotPasswordPage } from './ForgotPasswordPage';
 export { ResetPasswordPage } from './ResetPasswordPage';
+export { VerifyEmailPage } from './VerifyEmailPage';
 export { MovieDetailsPage } from './MovieDetailsPage';
 export { WatchHistoryComparePage } from './WatchHistoryComparePage';
 export { SupportPage } from './SupportPage';

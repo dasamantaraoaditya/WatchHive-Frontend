@@ -15,9 +15,9 @@ export interface TmdbDetails {
 }
 
 export const formatDate = (dateString?: string | null) => {
-    if (!dateString) return 'No date watched';
+    if (!dateString) return 'Watched';
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'No date watched';
+    if (isNaN(date.getTime())) return 'Watched';
     return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Modal, Avatar, BeeLoader, ModalBeeOverlay } from '../common';
 import { userService } from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -32,6 +33,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
     initialSuggestedByUser,
     onConfirm,
 }) => {
+    const navigate = useNavigate();
     const { user: currentUser } = useAuth();
     const [selectedUser, setSelectedUser] = useState<{
         id: string;
@@ -250,8 +252,23 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                                             <span>Searching followers...</span>
                                         </div>
                                     ) : searchResults.length === 0 ? (
-                                        <div className="p-3 text-center text-xs text-slate-400 font-bold">
-                                            {searchQuery ? `No followers found for "${searchQuery}"` : "No followers found"}
+                                        <div className="p-3 text-center flex flex-col items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-slate-400 text-lg">group_off</span>
+                                            <p className="text-xs text-slate-500 font-bold">
+                                                {searchQuery ? `No followers matching "${searchQuery}"` : "No friends in your hive yet"}
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowUserDropdown(false);
+                                                    onClose();
+                                                    navigate('/watch-hive/search?tab=people');
+                                                }}
+                                                className="text-[11px] font-black text-[#ffb700] hover:underline flex items-center gap-1 cursor-pointer"
+                                            >
+                                                <span className="material-symbols-outlined text-xs">person_search</span>
+                                                Find friends to follow
+                                            </button>
                                         </div>
                                     ) : (
                                         searchResults.map((u) => (
@@ -300,7 +317,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                         type="button"
                         onClick={handleAdd}
                         disabled={isSubmitting}
-                        className="px-5 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        className="px-5 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
                     >
                         {isSubmitting ? (
                             <>

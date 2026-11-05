@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TmdbDetails, formatDate } from './types';
 import { ExpandedCard } from './ExpandedCard';
 import { useCustomAlert } from '../../contexts';
+import { shareCompletedWatch } from '../../utils/shareHelper';
 
 interface EntryListProps {
     onEdit?: (entry: Entry) => void;
@@ -191,7 +192,7 @@ export const EntryCard: React.FC<{
                                 <span className="absolute inline-flex h-full w-full rounded-full bg-[#ffb700] opacity-75 animate-ping" />
                                 
                                 {/* Animated Watching Badge */}
-                                <span className="relative inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#ffb700] text-white shadow-md border border-white/30 backdrop-blur-sm transition-transform duration-300 group-hover/watching:scale-110">
+                                <span className="relative inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#ffb700] text-[#2D2926] shadow-md border border-white/30 backdrop-blur-sm transition-transform duration-300 group-hover/watching:scale-110">
                                     <span className="material-symbols-outlined text-[13px] font-black animate-pulse">play_arrow</span>
                                 </span>
 
@@ -225,7 +226,11 @@ export const EntryCard: React.FC<{
                     )}
                     <div className="watchlist-card__meta text-[11px] font-bold mt-auto text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
                         <span className="truncate flex-1">{metadataString || '-'}</span>
-                        {entry.rating && <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {entry.rating}</span>}
+                        {entry.rating != null && Number(entry.rating) > 0 && (
+                            <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">
+                                ⭐ {Number(entry.rating).toFixed(1)}
+                            </span>
+                        )}
                     </div>
                 </motion.div>
             </motion.div>
@@ -416,13 +421,41 @@ export const EntryList: React.FC<EntryListProps> = ({
         onClose: () => void;
     }> = ({ entry, onClose: closeCard }) => {
         const [menuOpen, setMenuOpen] = useState(false);
+        const [sharedFeedback, setSharedFeedback] = useState(false);
         const hasActions = onEdit || !readOnly;
         if (!hasActions) return null;
+
+        const handleShare = async () => {
+            const success = await shareCompletedWatch({
+                title: entry.title,
+                rating: entry.rating,
+                review: entry.review,
+                tmdbId: entry.tmdbId,
+                mediaType: entry.type === 'TV_SHOW' ? 'tv' : 'movie',
+            });
+            if (success) {
+                setSharedFeedback(true);
+                setTimeout(() => setSharedFeedback(false), 2000);
+            }
+        };
 
         return (
             <div className="relative flex items-center gap-2">
                 {/* Desktop: full buttons */}
                 <div className="hidden md:flex items-center gap-2">
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                        onClick={handleShare}
+                        className={`px-4 py-2 rounded-full bg-white/20 flex items-center gap-2 font-bold text-sm hover:bg-white/30 transition-all cursor-pointer ${sharedFeedback ? 'text-green-500!' : 'text-[#ffb700]'}`}
+                        title={sharedFeedback ? 'Shared!' : 'Share Watch'}
+                    >
+                        <span className="material-symbols-outlined text-[18px]">
+                            {sharedFeedback ? 'check_circle' : 'share'}
+                        </span>
+                        {sharedFeedback ? 'Shared!' : 'Share'}
+                    </motion.button>
                     {onEdit && (
                         <motion.button
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -470,6 +503,13 @@ export const EntryList: React.FC<EntryListProps> = ({
                             transition={{ duration: 0.15 }}
                             className="absolute top-12 right-0 z-[200] flex flex-col gap-1 bg-white/20 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-xl overflow-hidden min-w-[160px] p-1"
                         >
+                            <button
+                                onClick={() => { setMenuOpen(false); handleShare(); }}
+                                className="flex items-center gap-3 px-4 py-3 text-[#2D2926]/90 font-bold text-sm hover:bg-white/30 active:bg-white/40 transition-all rounded-xl"
+                            >
+                                <span className="material-symbols-outlined text-[18px] text-[#ffb700]">share</span>
+                                Share Watch
+                            </button>
                             {onEdit && (
                                 <button
                                     onClick={() => { setMenuOpen(false); closeCard(); onEdit(entry); }}
@@ -551,7 +591,7 @@ export const EntryList: React.FC<EntryListProps> = ({
                     {!hasSearch && onAddNew && (
                         <button
                             onClick={onAddNew}
-                            className="bg-[#ffb700] hover:brightness-105 text-white font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
+                            className="bg-[#ffb700] hover:brightness-105 text-[#2D2926] font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
                         >
                             <span className="material-symbols-outlined text-base font-bold">add</span>
                             Log a Watch

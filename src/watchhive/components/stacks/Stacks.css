@@ -94,6 +94,28 @@
     border: 2px solid white;
 }
 
+.ranked-item__rank--1 {
+    background: #ffb700;
+    color: #2D2926;
+    box-shadow: 0 4px 12px rgba(255, 183, 0, 0.35);
+}
+
+.ranked-item__rank--2 {
+    background: #E2E8F0;
+    color: #2D2926;
+}
+
+.ranked-item__rank--3 {
+    background: #D97706;
+    color: #FFFFFF;
+}
+
+.ranked-item__rank--default {
+    background: #FFFFFF;
+    color: #2D2926;
+    border: 2px solid rgba(45, 41, 38, 0.12);
+}
+
 .ranked-item__poster-wrap {
     width: 64px;
     height: 96px;

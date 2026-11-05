@@ -12,19 +12,10 @@ export interface TmdbExpandedCardProps {
     isWatched?: boolean;
 }
 
+import { getDirectProviderLink } from '../../utils/providerLinks';
+
 const getDirectLink = (providerName: string, fallbackLink: string, title: string) => {
-    if (!providerName) return fallbackLink;
-    const name = providerName.toLowerCase();
-    const query = encodeURIComponent(title);
-    if (name.includes('netflix')) return `https://www.netflix.com/search?q=${query}`;
-    if (name.includes('amazon') || name.includes('prime')) return `https://www.primevideo.com/search/ref=atv_sr_sug_1?phrase=${query}`;
-    if (name.includes('hotstar') || name.includes('disney')) return `https://www.hotstar.com/in/explore?searchQuery=${query}`;
-    if (name.includes('zee5')) return `https://www.zee5.com/search?q=${query}`;
-    if (name.includes('sonyliv')) return `https://www.sonyliv.com/search?query=${query}`;
-    if (name.includes('jiocinema')) return `https://www.jiocinema.com/search?q=${query}`;
-    if (name.includes('apple')) return `https://tv.apple.com/in/search?q=${query}`;
-    if (name.includes('youtube')) return `https://www.youtube.com/results?search_query=${query}+movie`;
-    return fallbackLink;
+    return getDirectProviderLink(providerName, fallbackLink, title);
 };
 
 export const TmdbExpandedCard: React.FC<TmdbExpandedCardProps> = ({ tmdbId, mediaType, details, fallbackData, title, onClose, isWatched }) => {
@@ -98,7 +89,7 @@ export const TmdbExpandedCard: React.FC<TmdbExpandedCardProps> = ({ tmdbId, medi
 
                 <div className="flex items-center gap-2 pointer-events-auto">
                     {isWatched ? (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ffb700] text-white font-bold text-sm shadow-md whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ffb700] text-[#2D2926] font-bold text-sm shadow-md whitespace-nowrap">
                             <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
                             Watched
                         </div>
@@ -151,7 +142,7 @@ export const TmdbExpandedCard: React.FC<TmdbExpandedCardProps> = ({ tmdbId, medi
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.5, ease: 'easeOut' }}
-                className="px-6 md:px-10 pb-24 pt-4 flex flex-col gap-10 w-full relative z-10"
+                className="px-6 md:px-10 pb-40 md:pb-24 pt-4 flex flex-col gap-10 w-full relative z-10"
             >
                 <div className="flex flex-col gap-4">
                     <h3 className="text-[#ffb700] text-xs font-bold uppercase tracking-[0.3em] flex items-center gap-3">

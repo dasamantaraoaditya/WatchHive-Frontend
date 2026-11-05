@@ -5,6 +5,27 @@ export const InstallPromptBanner: React.FC = () => {
     const [isInstallReady, setIsInstallReady] = useState(false);
     const [isInstalled, setIsInstalled] = useState(false);
     const [isDismissed, setIsDismissed] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        const checkModal = () => {
+            const hasDialog =
+                document.querySelector('[role="dialog"]') !== null ||
+                document.querySelector('[data-modal-open="true"]') !== null ||
+                document.body.getAttribute('data-modal-open') === 'true' ||
+                document.body.style.overflow === 'hidden';
+            setIsModalOpen(hasDialog);
+        };
+        checkModal();
+        const obs = new MutationObserver(checkModal);
+        obs.observe(document.body, {
+            attributes: true,
+            childList: true,
+            subtree: true,
+            attributeFilter: ['style', 'data-modal-open'],
+        });
+        return () => obs.disconnect();
+    }, []);
 
     useEffect(() => {
         // Check if install prompt is ready
@@ -44,7 +65,7 @@ export const InstallPromptBanner: React.FC = () => {
     // Check if running locally or in developer mode
     const isRunningAsApp = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
 
-    if (isInstalled || isRunningAsApp || !isInstallReady || isDismissed) {
+    if (isInstalled || isRunningAsApp || !isInstallReady || isDismissed || isModalOpen) {
         return null;
     }
 
@@ -54,24 +75,10 @@ export const InstallPromptBanner: React.FC = () => {
     };
 
     return (
-        <div style={{
-            position: 'fixed',
-            bottom: '80px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 9999,
-            backgroundColor: 'var(--card-bg, #1a1a1a)',
-            border: '1px solid var(--border-color, #333)',
-            borderRadius: '12px',
-            padding: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            width: '90%',
-            maxWidth: '400px',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-            color: 'var(--text-primary, #fff)'
-        }}>
+        <aside
+            className="fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] md:bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[1200] bg-[#1a160d]/95 backdrop-blur-xl border border-[#ffb700]/30 rounded-2xl p-4 flex flex-col gap-3 w-[92%] max-w-[390px] shadow-2xl text-white animate-slide-up"
+            aria-label="Install WatchersHive"
+        >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                     <h3 style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: 600, color: 'var(--brand-color, #f5c518)' }}>
@@ -114,6 +121,6 @@ export const InstallPromptBanner: React.FC = () => {
             >
                 Install Now
             </button>
-        </div>
+        </aside>
     );
 };
