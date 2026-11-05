@@ -427,7 +427,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                                 onClose();
                                                 navigate('/watch-hive/search?tab=people');
                                             }}
-                                            className="mt-1 px-3.5 py-1.5 bg-[#ffb700] hover:bg-[#e5a600] text-white text-xs font-black rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                                            className="mt-1 px-3.5 py-1.5 bg-[#ffb700] hover:bg-[#e5a600] text-[#2D2926] text-xs font-black rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                                         >
                                             <span className="material-symbols-outlined text-sm">person_search</span>
                                             <span>Find Friends to Follow</span>
@@ -471,7 +471,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
                                                     </div>
 
                                                     <div className={`w-5 h-5 rounded-lg flex items-center justify-center transition-all ${
-                                                        isSelected ? 'bg-[#ffb700] text-white' : 'border border-slate-300 bg-slate-50'
+                                                        isSelected ? 'bg-[#ffb700] text-[#2D2926]' : 'border border-slate-300 bg-slate-50'
                                                     }`}>
                                                         {isSelected && (
                                                             <span className="material-symbols-outlined text-xs font-black">check</span>

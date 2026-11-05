@@ -131,7 +131,7 @@ export const CardDropdownMenu: React.FC<CardDropdownMenuProps> = ({
                             ref={menuRef}
                             role="menu"
                             aria-label={title}
-                            className="fixed z-[9999] bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl py-1.5 min-w-[175px] max-w-[260px] flex flex-col animate-fade-in overflow-hidden"
+                            className="fixed z-[9999] bg-white/95 backdrop-blur-xl border border-black/10 rounded-2xl shadow-2xl py-1.5 min-w-[175px] max-w-[260px] flex flex-col animate-fade-in overflow-hidden"
                             style={{
                                 top: coords.top !== undefined ? `${coords.top}px` : undefined,
                                 bottom: coords.bottom !== undefined ? `${coords.bottom}px` : undefined,
@@ -153,8 +153,8 @@ export const CardDropdownMenu: React.FC<CardDropdownMenuProps> = ({
                                     }}
                                     className={`flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-bold transition-colors text-left w-full disabled:opacity-50 disabled:pointer-events-none ${
                                         item.danger
-                                            ? 'text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40'
-                                            : 'text-slate-700 hover:bg-slate-100 dark:text-stone-200 dark:hover:bg-stone-800'
+                                            ? 'text-rose-600 hover:bg-rose-50'
+                                            : 'text-slate-700 hover:bg-slate-100'
                                     } ${item.className || ''}`}
                                 >
                                     {item.icon && (

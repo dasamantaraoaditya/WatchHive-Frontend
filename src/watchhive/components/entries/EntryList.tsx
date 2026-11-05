@@ -210,7 +210,7 @@ export const EntryCard: React.FC<{
                     <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={entry.title}>
                         {entry.title}
                     </motion.h4>
-                    <div className="text-[10px] text-[#2D2926]/40 dark:text-stone-400 font-bold mb-1.5 flex items-center justify-between">
+                    <div className="text-[10px] text-[#2D2926]/40 font-bold mb-1.5 flex items-center justify-between">
                         <span>{formatDate(entry.watchedAt)}</span>
                         {entry.watchLocation && (
                             <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md font-black uppercase text-[8px] tracking-wider select-none shrink-0 ml-2" title={entry.watchLocation}>
@@ -220,11 +220,11 @@ export const EntryCard: React.FC<{
                         )}
                     </div>
                     {details?.overview && (
-                        <p className="text-[11px] text-[#2D2926]/60 dark:text-stone-500 line-clamp-2 leading-relaxed mb-2 mt-0.5">
+                        <p className="text-[11px] text-[#2D2926]/60 line-clamp-2 leading-relaxed mb-2 mt-0.5">
                             {details.overview}
                         </p>
                     )}
-                    <div className="watchlist-card__meta text-[11px] font-bold mt-auto text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
+                    <div className="watchlist-card__meta text-[11px] font-bold mt-auto text-[#2D2926]/60 flex items-center justify-between w-full">
                         <span className="truncate flex-1">{metadataString || '-'}</span>
                         {entry.rating != null && Number(entry.rating) > 0 && (
                             <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">

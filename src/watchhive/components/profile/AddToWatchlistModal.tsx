@@ -151,7 +151,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
             <div className="flex flex-col gap-5 pt-2 relative">
                 {isSubmitting && <ModalBeeOverlay message="Adding to your Watchlist..." />}
                 {/* Media Preview Header */}
-                <div className="flex items-center gap-3.5 p-3.5 bg-black/5 dark:bg-white/5 rounded-2xl border border-black/5">
+                <div className="flex items-center gap-3.5 p-3.5 bg-black/5 rounded-2xl border border-black/5">
                     {posterPath ? (
                         <img
                             src={posterPath.startsWith('http') ? posterPath : `https://image.tmdb.org/t/p/w200${posterPath}`}
@@ -170,7 +170,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                         <span className="text-[10px] font-black uppercase tracking-wider text-[#ffb700]">
                             {mediaType === 'tv' ? '📺 TV Series' : '🎬 Movie'}
                         </span>
-                        <h4 className="text-sm font-black text-[#2D2926] dark:text-white truncate">
+                        <h4 className="text-sm font-black text-[#2D2926] truncate">
                             {title}
                         </h4>
                         <p className="text-xs text-slate-500 font-medium">
@@ -181,7 +181,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
 
                 {/* Suggested By Section */}
                 <div className="flex flex-col gap-2">
-                    <label className="text-xs font-black uppercase tracking-wider text-[#2D2926]/70 dark:text-stone-300 flex items-center justify-between">
+                    <label className="text-xs font-black uppercase tracking-wider text-[#2D2926]/70 flex items-center justify-between">
                         <span className="flex items-center gap-1.5">
                             <span>💡 Suggested By</span>
                             <span className="text-[10px] text-slate-400 font-bold lowercase">(optional)</span>
@@ -190,7 +190,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                     </label>
 
                     {selectedUser ? (
-                        <div className="flex items-center justify-between p-3 bg-amber-50/90 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl shadow-xs">
+                        <div className="flex items-center justify-between p-3 bg-amber-50/90 border border-amber-200 rounded-2xl shadow-xs">
                             <div className="flex items-center gap-3 min-w-0">
                                 <Avatar
                                     src={selectedUser.profilePictureUrl || undefined}
@@ -198,10 +198,10 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                                     size="sm"
                                 />
                                 <div className="flex flex-col min-w-0">
-                                    <span className="text-xs font-black text-[#2D2926] dark:text-white truncate">
+                                    <span className="text-xs font-black text-[#2D2926] truncate">
                                         {selectedUser.displayName || selectedUser.username}
                                     </span>
-                                    <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 truncate">
+                                    <span className="text-[10px] font-bold text-amber-700 truncate">
                                         @{selectedUser.username}
                                     </span>
                                 </div>
@@ -227,7 +227,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                                     onChange={handleSearchChange}
                                     onFocus={handleInputFocus}
                                     placeholder="Search follower who suggested this..."
-                                    className="w-full pl-9 pr-8 py-2.5 bg-black/5 dark:bg-white/5 border border-transparent focus:border-[#ffb700] rounded-xl text-xs font-medium text-[#2D2926] dark:text-white outline-none transition-all placeholder:text-slate-400"
+                                    className="w-full pl-9 pr-8 py-2.5 bg-black/5 border border-transparent focus:border-[#ffb700] rounded-xl text-xs font-medium text-[#2D2926] outline-none transition-all placeholder:text-slate-400"
                                 />
                                 {searchQuery && (
                                     <button
@@ -245,7 +245,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
 
                             {/* Dropdown Results */}
                             {showUserDropdown && (
-                                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-stone-900 border border-slate-200 dark:border-stone-800 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
+                                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
                                     {isLoadingUsers ? (
                                         <div className="p-3 text-center text-xs text-slate-400 font-bold flex items-center justify-center gap-2">
                                             <BeeLoader size="mini" message="" />
@@ -284,7 +284,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                                                     size="xs"
                                                 />
                                                 <div className="flex flex-col min-w-0 flex-1">
-                                                    <span className="text-xs font-bold text-[#2D2926] dark:text-white truncate">
+                                                    <span className="text-xs font-bold text-[#2D2926] truncate">
                                                         {u.displayName || u.username}
                                                     </span>
                                                     <span className="text-[10px] text-slate-400 font-bold truncate">
@@ -304,12 +304,12 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/5 dark:border-white/5">
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/5">
                     <button
                         type="button"
                         onClick={onClose}
                         disabled={isSubmitting}
-                        className="px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer"
+                        className="px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                     >
                         Cancel
                     </button>

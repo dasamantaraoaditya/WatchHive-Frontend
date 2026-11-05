@@ -234,7 +234,7 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                         </span>
                     </div>
                 )}
-                <div className="watchlist-card__meta text-[11px] font-bold mt-1 text-[#2D2926]/60 dark:text-stone-400 flex items-center justify-between w-full">
+                <div className="watchlist-card__meta text-[11px] font-bold mt-1 text-[#2D2926]/60 flex items-center justify-between w-full">
                     <span>{year || 'Coming Soon'}</span>
                     {rating && (
                         <span className="watchlist-card__rating text-[#ffb700] flex items-center gap-1 shrink-0 ml-2">⭐ {rating}</span>

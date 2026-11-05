@@ -730,7 +730,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
                             {/* Movie Checkpoint Slider Rating */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50 dark:text-white/50 px-1">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50 px-1">
                                     Rate this Cinematic Experience
                                 </label>
                                 <WHRatingPicker
@@ -740,9 +740,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                             </div>
 
                             {/* Date Picker & Switches */}
-                            <div className="flex flex-col gap-3.5 p-4 sm:p-5 bg-white dark:bg-[#221c13] border border-[#ffb700]/25 rounded-3xl shadow-sm">
+                            <div className="flex flex-col gap-3.5 p-4 sm:p-5 bg-white border border-[#ffb700]/25 rounded-3xl shadow-sm">
                                 <div className="flex items-center justify-between gap-2">
-                                    <label className="text-xs font-black uppercase tracking-wider text-[#2D2926]/70 dark:text-white/70">
+                                    <label className="text-xs font-black uppercase tracking-wider text-[#2D2926]/70">
                                         When did you watch this?
                                     </label>
                                     <button
@@ -758,8 +758,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         }}
                                         className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
                                             !hasWatchDate
-                                                ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30'
-                                                : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-700'
+                                                ? 'bg-amber-500/20 text-amber-700 border border-amber-500/30'
+                                                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                                         }`}
                                     >
                                         <span className="material-symbols-outlined text-[14px]">
@@ -784,14 +784,14 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 ) : (
                                     <div className="flex items-center justify-between p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl animate-fade-in">
                                         <div className="flex items-center gap-2.5 min-w-0">
-                                            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
+                                            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
                                                 <span className="material-symbols-outlined text-[18px]">history_toggle_off</span>
                                             </div>
                                             <div className="flex flex-col min-w-0">
-                                                <span className="text-xs font-black text-amber-950 dark:text-amber-100">
+                                                <span className="text-xs font-black text-amber-950">
                                                     No specific watch date recorded
                                                 </span>
-                                                <span className="text-[11px] font-medium text-amber-800/80 dark:text-amber-300/80 truncate">
+                                                <span className="text-[11px] font-medium text-amber-800/80 truncate">
                                                     Logged as past watch without an exact date or screening time
                                                 </span>
                                             </div>
@@ -812,7 +812,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 {/* Dividing Line with Title */}
                                 <div className="flex items-center gap-2 pt-1 pb-0.5">
                                     <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#ffb700]/30 to-transparent" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2D2926]/50 dark:text-white/50 whitespace-nowrap">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2D2926]/50 whitespace-nowrap">
                                         Watch Options & Status
                                     </span>
                                     <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#ffb700]/30 to-transparent" />
@@ -823,19 +823,19 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                     {hasWatchedBefore && (
                                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex flex-col gap-2.5 animate-fade-in shadow-xs">
                                             <div className="flex items-start gap-2.5">
-                                                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                                                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
                                                     <span className="material-symbols-outlined text-[20px]">history</span>
                                                 </div>
                                                 <div className="flex flex-col gap-0.5 min-w-0">
                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                        <h4 className="text-xs font-black text-amber-950 dark:text-amber-200 uppercase tracking-wide">
+                                                        <h4 className="text-xs font-black text-amber-950 uppercase tracking-wide">
                                                             You already watched this title!
                                                         </h4>
-                                                        <span className="bg-amber-500/25 text-amber-800 dark:text-amber-300 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
+                                                        <span className="bg-amber-500/25 text-amber-800 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
                                                             Rewatch Required
                                                         </span>
                                                     </div>
-                                                    <p className="text-[11px] font-bold text-amber-900/80 dark:text-amber-200/80 leading-relaxed">
+                                                    <p className="text-[11px] font-bold text-amber-900/80 leading-relaxed">
                                                         Rewatch is enabled by default to record this viewing, creating another entry in your Hive history.
                                                     </p>
                                                 </div>
@@ -843,19 +843,19 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
                                             {/* Previous Logged Item Card */}
                                             {previousEntry && (
-                                                <div className="bg-white/95 dark:bg-[#1a1510] border border-amber-200/60 dark:border-amber-500/20 rounded-xl p-3 flex flex-col gap-2 shadow-xs">
-                                                    <div className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40 dark:text-white/40">
+                                                <div className="bg-white/95 border border-amber-200/60 rounded-xl p-3 flex flex-col gap-2 shadow-xs">
+                                                    <div className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40">
                                                         Previously Logged Watch
                                                     </div>
-                                                    <div className="flex items-center justify-between border-b border-amber-100 dark:border-white/5 pb-2">
-                                                        <div className="flex items-center gap-1.5 text-amber-900 dark:text-amber-300 text-[11px] font-extrabold">
+                                                    <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+                                                        <div className="flex items-center gap-1.5 text-amber-900 text-[11px] font-extrabold">
                                                             <span className="material-symbols-outlined text-[15px]">calendar_today</span>
                                                             <span>
                                                                 Watched on {previousEntry.watchedAt ? new Date(previousEntry.watchedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Previous session'}
                                                             </span>
                                                         </div>
                                                         {previousEntry.rating ? (
-                                                            <div className="flex items-center gap-1 bg-amber-100/80 dark:bg-amber-500/20 text-amber-950 dark:text-amber-200 px-2 py-0.5 rounded-md text-[11px] font-black">
+                                                            <div className="flex items-center gap-1 bg-amber-100/80 text-amber-950 px-2 py-0.5 rounded-md text-[11px] font-black">
                                                                 <span className="material-symbols-outlined text-amber-500 text-[13px]">star</span>
                                                                 <span>{previousEntry.rating}/10</span>
                                                             </div>
@@ -865,14 +865,14 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     </div>
 
                                                     {previousEntry.watchLocation && (
-                                                        <div className="flex items-center gap-1.5 text-stone-600 dark:text-stone-300 text-[11px] font-semibold">
+                                                        <div className="flex items-center gap-1.5 text-stone-600 text-[11px] font-semibold">
                                                             <span className="material-symbols-outlined text-[13px] text-amber-600">location_on</span>
                                                             <span>Watched at <strong>{previousEntry.watchLocation}</strong></span>
                                                         </div>
                                                     )}
 
                                                     {previousEntry.review && (
-                                                        <div className="text-[11px] font-medium text-stone-700 dark:text-stone-300 italic bg-amber-50/50 dark:bg-white/[0.02] rounded-lg p-2 border-l-2 border-amber-400">
+                                                        <div className="text-[11px] font-medium text-stone-700 italic bg-amber-50/50 rounded-lg p-2 border-l-2 border-amber-400">
                                                             "{previousEntry.review}"
                                                         </div>
                                                     )}
@@ -886,7 +886,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
                                             formData.isRewatch
                                                 ? 'bg-amber-500/[0.07] border-[#ffb700] shadow-sm'
-                                                : 'bg-white/80 dark:bg-white/[0.03] border-[#2D2926]/12 dark:border-white/10 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
+                                                : 'bg-white/80 border-[#2D2926]/12 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -894,16 +894,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                                                     formData.isRewatch
                                                         ? 'bg-[#ffb700] text-black font-black'
-                                                        : 'bg-[#2D2926]/5 dark:bg-white/10 text-[#2D2926]/50 dark:text-white/50 group-hover:text-[#ffb700]'
+                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#ffb700]'
                                                 }`}
                                             >
                                                 <span className="material-symbols-outlined text-[18px]">replay</span>
                                             </div>
                                             <div className="flex flex-col min-w-0">
-                                                <span className="font-extrabold text-[#2D2926] dark:text-white text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
+                                                <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
                                                     Rewatch
                                                 </span>
-                                                <span className="text-[10px] font-medium text-[#2D2926]/50 dark:text-white/50 truncate">
+                                                <span className="text-[10px] font-medium text-[#2D2926]/50 truncate">
                                                     {hasWatchedBefore
                                                         ? 'Rewatch enabled for title already in Hive'
                                                         : 'Repeat viewing of this movie or show'}
@@ -916,7 +916,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
                                                     formData.isRewatch
                                                         ? 'bg-[#ffb700] text-black font-extrabold border-[#ffb700] shadow-xs'
-                                                        : 'bg-[#2D2926]/5 dark:bg-white/5 text-[#2D2926]/40 dark:text-white/40 border-[#2D2926]/10 dark:border-white/10'
+                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/40 border-[#2D2926]/10'
                                                 }`}
                                             >
                                                 {formData.isRewatch ? 'YES' : 'NO'}
@@ -939,7 +939,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
                                                         formData.isRewatch
                                                             ? 'bg-[#ffb700] border-[#ffb700]'
-                                                            : 'bg-[#2D2926]/15 dark:bg-white/20 border-[#2D2926]/20 dark:border-white/25'
+                                                            : 'bg-[#2D2926]/15 border-[#2D2926]/20'
                                                     }`}
                                                 />
                                                 <div
@@ -956,7 +956,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
                                             formData.isWatching
                                                 ? 'bg-emerald-500/[0.08] border-emerald-500 shadow-sm'
-                                                : 'bg-white/80 dark:bg-white/[0.03] border-[#2D2926]/12 dark:border-white/10 hover:border-emerald-500/40 hover:bg-emerald-50/20'
+                                                : 'bg-white/80 border-[#2D2926]/12 hover:border-emerald-500/40 hover:bg-emerald-50/20'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -964,16 +964,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                                                     formData.isWatching
                                                         ? 'bg-[#22c55e] text-white font-black'
-                                                        : 'bg-[#2D2926]/5 dark:bg-white/10 text-[#2D2926]/50 dark:text-white/50 group-hover:text-[#22c55e]'
+                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#22c55e]'
                                                 }`}
                                             >
                                                 <span className="material-symbols-outlined text-[18px]">play_circle</span>
                                             </div>
                                             <div className="flex flex-col min-w-0">
-                                                <span className="font-extrabold text-[#2D2926] dark:text-white text-xs uppercase tracking-wider group-hover:text-[#22c55e] transition-colors">
+                                                <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#22c55e] transition-colors">
                                                     Currently Watching
                                                 </span>
-                                                <span className="text-[10px] font-medium text-[#2D2926]/50 dark:text-white/50 truncate">
+                                                <span className="text-[10px] font-medium text-[#2D2926]/50 truncate">
                                                     Keep in your active queue to track progress
                                                 </span>
                                             </div>
@@ -984,7 +984,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
                                                     formData.isWatching
                                                         ? 'bg-[#22c55e] text-white font-extrabold border-[#22c55e] shadow-xs'
-                                                        : 'bg-[#2D2926]/5 dark:bg-white/5 text-[#2D2926]/40 dark:text-white/40 border-[#2D2926]/10 dark:border-white/10'
+                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/40 border-[#2D2926]/10'
                                                 }`}
                                             >
                                                 {formData.isWatching ? 'YES' : 'NO'}
@@ -1000,7 +1000,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
                                                         formData.isWatching
                                                             ? 'bg-[#22c55e] border-[#22c55e]'
-                                                            : 'bg-[#2D2926]/15 dark:bg-white/20 border-[#2D2926]/20 dark:border-white/25'
+                                                            : 'bg-[#2D2926]/15 border-[#2D2926]/20'
                                                     }`}
                                                 />
                                                 <div
@@ -1017,7 +1017,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
                                             formData.postToFeed
                                                 ? 'bg-amber-500/[0.07] border-[#ffb700] shadow-sm'
-                                                : 'bg-white/80 dark:bg-white/[0.03] border-[#2D2926]/12 dark:border-white/10 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
+                                                : 'bg-white/80 border-[#2D2926]/12 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
                                         }`}
                                     >
                                         <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -1025,16 +1025,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                                                     formData.postToFeed
                                                         ? 'bg-[#ffb700] text-black font-black'
-                                                        : 'bg-[#2D2926]/5 dark:bg-white/10 text-[#2D2926]/50 dark:text-white/50 group-hover:text-[#ffb700]'
+                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#ffb700]'
                                                 }`}
                                             >
                                                 <span className="material-symbols-outlined text-[18px]">campaign</span>
                                             </div>
                                             <div className="flex flex-col min-w-0">
-                                                <span className="font-extrabold text-[#2D2926] dark:text-white text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
+                                                <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
                                                     Post to Feed
                                                 </span>
-                                                <span className="text-[10px] font-medium text-[#2D2926]/50 dark:text-white/50 truncate">
+                                                <span className="text-[10px] font-medium text-[#2D2926]/50 truncate">
                                                     Share this watch log to your community feed
                                                 </span>
                                             </div>
@@ -1045,7 +1045,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
                                                     formData.postToFeed
                                                         ? 'bg-[#ffb700] text-black font-extrabold border-[#ffb700] shadow-xs'
-                                                        : 'bg-[#2D2926]/5 dark:bg-white/5 text-[#2D2926]/40 dark:text-white/40 border-[#2D2926]/10 dark:border-white/10'
+                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/40 border-[#2D2926]/10'
                                                 }`}
                                             >
                                                 {formData.postToFeed ? 'YES' : 'NO'}
@@ -1061,7 +1061,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
                                                         formData.postToFeed
                                                             ? 'bg-[#ffb700] border-[#ffb700]'
-                                                            : 'bg-[#2D2926]/15 dark:bg-white/20 border-[#2D2926]/20 dark:border-white/25'
+                                                            : 'bg-[#2D2926]/15 border-[#2D2926]/20'
                                                     }`}
                                                 />
                                                 <div

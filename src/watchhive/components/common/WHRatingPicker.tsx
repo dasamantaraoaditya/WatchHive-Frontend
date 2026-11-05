@@ -206,7 +206,7 @@ export const WHRatingPicker: React.FC<WHRatingPickerProps> = ({
 
     return (
         <div
-            className={`w-full select-none rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 relative overflow-hidden bg-white/95 dark:bg-[#221c13]/95 border ${
+            className={`w-full select-none rounded-2xl sm:rounded-3xl p-4 sm:p-5 transition-all duration-300 relative overflow-hidden bg-white/95 border ${
                 isRated ? 'shadow-lg' : 'shadow-sm'
             } ${className}`}
             style={{
@@ -243,7 +243,7 @@ export const WHRatingPicker: React.FC<WHRatingPickerProps> = ({
                         >
                             {isRated ? currentScore.toFixed(1) : '—.—'}
                         </span>
-                        <span className="text-xs sm:text-sm font-bold text-[#2D2926]/40 dark:text-white/40">
+                        <span className="text-xs sm:text-sm font-bold text-[#2D2926]/40">
                             / 10
                         </span>
                     </div>
@@ -321,7 +321,7 @@ export const WHRatingPicker: React.FC<WHRatingPickerProps> = ({
                     }`}
                 >
                     {/* Inactive Track Groove */}
-                    <div className="absolute inset-x-0 h-2 rounded-full bg-[#2D2926]/10 dark:bg-white/10 transition-colors" />
+                    <div className="absolute inset-x-0 h-2 rounded-full bg-[#2D2926]/10 transition-colors" />
 
                     {/* Active Progress Bar with Dynamic Gradient & Glow */}
                     {isRated && (
