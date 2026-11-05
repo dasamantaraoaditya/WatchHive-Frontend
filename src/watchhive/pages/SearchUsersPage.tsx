@@ -80,6 +80,40 @@ export const SearchUsersPage: React.FC = () => {
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [followingLoadingMap, setFollowingLoadingMap] = useState<Record<string, boolean>>({});
 
+    const suggestedScrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollSuggestedLeft, setCanScrollSuggestedLeft] = useState(false);
+    const [canScrollSuggestedRight, setCanScrollSuggestedRight] = useState(true);
+
+    const updateSuggestedScrollBounds = useCallback(() => {
+        const el = suggestedScrollRef.current;
+        if (!el) return;
+        setCanScrollSuggestedLeft(el.scrollLeft > 5);
+        setCanScrollSuggestedRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 5);
+    }, []);
+
+    const handleSuggestedWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+        const el = suggestedScrollRef.current;
+        if (!el) return;
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            el.scrollLeft += e.deltaY;
+            updateSuggestedScrollBounds();
+        }
+    };
+
+    const scrollSuggestedLeft = () => {
+        if (suggestedScrollRef.current) {
+            const amount = Math.max(260, suggestedScrollRef.current.clientWidth * 0.75);
+            suggestedScrollRef.current.scrollBy({ left: -amount, behavior: 'smooth' });
+        }
+    };
+
+    const scrollSuggestedRight = () => {
+        if (suggestedScrollRef.current) {
+            const amount = Math.max(260, suggestedScrollRef.current.clientWidth * 0.75);
+            suggestedScrollRef.current.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+    };
+
     // Deep Search Filters (Available in Media search tab)
     const [isDeepSearch, setIsDeepSearch] = useState(initialDeep);
     const [selectedYear, setSelectedYear] = useState<string>('');
@@ -809,16 +843,48 @@ export const SearchUsersPage: React.FC = () => {
                                     Suggested Friends 🐝
                                 </h2>
                             </div>
-                            {suggestedUsers.length > 0 && (
-                                <button
-                                    type="button"
-                                    onClick={loadSuggestedUsers}
-                                    className="text-xs font-bold text-slate-400 hover:text-[#ffb700] transition-colors flex items-center gap-1"
-                                >
-                                    <span className="material-symbols-outlined text-sm">refresh</span>
-                                    Refresh
-                                </button>
-                            )}
+                            <div className="flex items-center gap-2">
+                                {suggestedUsers.length > 2 && (
+                                    <div className="flex items-center gap-1 mr-1">
+                                        <button
+                                            type="button"
+                                            onClick={scrollSuggestedLeft}
+                                            disabled={!canScrollSuggestedLeft}
+                                            className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                                                canScrollSuggestedLeft 
+                                                    ? 'bg-amber-100 hover:bg-amber-200 text-slate-700 shadow-xs' 
+                                                    : 'text-slate-300 opacity-40 cursor-not-allowed'
+                                            }`}
+                                            title="Scroll left"
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={scrollSuggestedRight}
+                                            disabled={!canScrollSuggestedRight}
+                                            className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                                                canScrollSuggestedRight 
+                                                    ? 'bg-amber-100 hover:bg-amber-200 text-slate-700 shadow-xs' 
+                                                    : 'text-slate-300 opacity-40 cursor-not-allowed'
+                                            }`}
+                                            title="Scroll right"
+                                        >
+                                            <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                                        </button>
+                                    </div>
+                                )}
+                                {suggestedUsers.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={loadSuggestedUsers}
+                                        className="text-xs font-bold text-slate-400 hover:text-[#ffb700] transition-colors flex items-center gap-1"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">refresh</span>
+                                        Refresh
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         {isSuggestedLoading ? (
@@ -836,7 +902,16 @@ export const SearchUsersPage: React.FC = () => {
                                 ))}
                             </div>
                         ) : suggestedUsers.length === 0 ? null : (
-                            <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+                            <div 
+                                ref={suggestedScrollRef}
+                                onWheel={handleSuggestedWheel}
+                                onScroll={updateSuggestedScrollBounds}
+                                className="flex items-center gap-3 overflow-x-auto pb-3 pt-1 scroll-smooth select-none overscroll-x-contain"
+                                style={{
+                                    scrollbarWidth: 'thin',
+                                    scrollbarColor: 'rgba(255, 183, 0, 0.4) transparent',
+                                }}
+                            >
                                 {suggestedUsers.map((user) => (
                                     <div
                                         key={user.id}

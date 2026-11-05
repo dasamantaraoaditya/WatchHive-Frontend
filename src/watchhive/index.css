@@ -846,6 +846,27 @@ select:focus-visible {
     }
 }
 
+/* Elegant responsive desktop scrollbars */
+@media (min-width: 769px) {
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(45, 41, 38, 0.15);
+        border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 183, 0, 0.5);
+    }
+}
+
 /* Pull-to-refresh container */
 .pull-to-refresh {
     position: relative;
@@ -868,7 +889,9 @@ select:focus-visible {
     overflow-x: auto;
     gap: var(--space-3);
     padding-bottom: var(--space-2);
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x proximity;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
 }
 
