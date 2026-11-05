@@ -358,7 +358,14 @@ export const WatchHistoryComparePage: React.FC = () => {
                         </div>
 
                         {/* Segmented Filter Tabs (Mobile Responsive Scrollable) */}
-                        <div className="flex gap-1.5 p-1 bg-slate-100/80 rounded-2xl border border-black/5 overflow-x-auto no-scrollbar">
+                        <div 
+                            className="flex gap-1.5 p-1 bg-slate-100/80 rounded-2xl border border-black/5 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain"
+                            onWheel={(e) => {
+                                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                                    e.currentTarget.scrollLeft += e.deltaY;
+                                }
+                            }}
+                        >
                             <button
                                 onClick={() => setActiveTab('common')}
                                 className={`flex-1 min-w-[95px] py-2.5 px-3 rounded-xl text-xs font-black tracking-wide transition-all cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${

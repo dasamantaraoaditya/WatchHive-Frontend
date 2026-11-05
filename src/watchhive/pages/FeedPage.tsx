@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 
 import { feedApi, FeedItem } from '../services/feed.service';
 import { userService } from '../services/userService';
@@ -243,7 +244,7 @@ export const FeedPage: React.FC = () => {
 
                 {/* Right Sidebar Widgets */}
                 <aside className="feed-right-sidebar">
-                    <div className="flex flex-col gap-8 sticky top-[100px] w-[320px]">
+                    <div className="flex flex-col gap-6 sticky top-[90px] w-[320px] max-h-[calc(100vh-110px)] overflow-y-auto no-scrollbar pr-1 overscroll-contain">
                         {/* Trending Section */}
                         <section className="widget-section">
                             <div className="widget-header">
@@ -277,7 +278,7 @@ export const FeedPage: React.FC = () => {
                                     Who to Follow
                                 </h3>
                             </div>
-                            <div className="widget-content">
+                            <div className="widget-content widget-content--scrollable">
                                 {loadingSuggestions ? (
                                     <SuggestionWidgetSkeleton />
                                 ) : suggestedUsers.length > 0 ? (
@@ -295,6 +296,15 @@ export const FeedPage: React.FC = () => {
                                     <p className="text-sm text-[#2D2926]/50">No suggestions right now.</p>
                                 )}
                             </div>
+                            {suggestedUsers.length > 0 && (
+                                <Link 
+                                    to="/watch-hive/search?tab=people"
+                                    className="text-xs font-bold text-[#ffb700] hover:text-amber-600 flex items-center justify-center gap-1 pt-3 mt-2 border-t border-amber-500/10 transition-colors"
+                                >
+                                    <span>Discover more cinephiles</span>
+                                    <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                                </Link>
+                            )}
                         </section>
                     </div>
                 </aside>
