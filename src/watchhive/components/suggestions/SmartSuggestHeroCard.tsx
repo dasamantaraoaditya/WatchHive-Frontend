@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { suggestionsApi, SmartSuggestItem, SmartSuggestResponse } from '../../services/suggestions.service';
 import { SmartSuggestDeckModal } from './SmartSuggestDeckModal';
-import { WatchlistButton } from '../common';
+import { WatchlistButton, BeeSpinner } from '../common';
 
 export const SmartSuggestHeroCard: React.FC = () => {
     const navigate = useNavigate();
@@ -118,9 +118,8 @@ export const SmartSuggestHeroCard: React.FC = () => {
 
                 {/* Content Body */}
                 {loading ? (
-                    <div className="py-6 flex items-center justify-center gap-3">
-                        <div className="w-5 h-5 border-2 border-[#ffb700] border-t-transparent rounded-full animate-spin" />
-                        <span className="text-xs font-bold text-[#2D2926]/60">Analyzing your hive taste...</span>
+                    <div className="py-6 flex items-center justify-center">
+                        <BeeSpinner size="md" message="Analyzing your hive taste..." />
                     </div>
                 ) : currentItem ? (
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
