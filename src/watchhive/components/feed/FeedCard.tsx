@@ -93,17 +93,23 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const rating = isSuggestion ? item.data.vote_average : entryData?.rating;
     const review = !isSuggestion ? entryData?.review : (item.data.overview ? item.data.overview.slice(0, 150) + '...' : '');
 
-    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM", guarding against future skew
+    // Format timestamp cleanly: "Mar 20, 2026 at 2:30 PM" or "Jan 1, 2025" for date-only, guarding against future skew
     const isCompletedWatching = !entryData?.isWatching && entryData?.completedAt && (entryData?.startedAt || (entryData?.createdAt && new Date(entryData.completedAt).getTime() - new Date(entryData.createdAt).getTime() > 2000));
-    const displayTimestamp = item.timestamp || (isCompletedWatching ? entryData?.completedAt : entryData?.createdAt);
-    const now = new Date();
-    const rawDate = displayTimestamp ? new Date(displayTimestamp) : now;
-    const effectiveDate = !isNaN(rawDate.getTime()) && rawDate.getTime() > now.getTime() ? now : rawDate;
+    const displayTimestamp = entryData?.watchedAt || item.timestamp || (isCompletedWatching ? entryData?.completedAt : entryData?.createdAt);
     const timestamp = !isSuggestion && displayTimestamp
-        ? effectiveDate.toLocaleString(undefined, {
-            month: 'short', day: 'numeric', year: 'numeric',
-            hour: 'numeric', minute: '2-digit'
-        }).replace(',', ' at')
+        ? (() => {
+            const now = new Date();
+            const rawDate = new Date(displayTimestamp);
+            if (isNaN(rawDate.getTime())) return 'Just Now';
+            const effectiveDate = rawDate.getTime() > now.getTime() ? now : rawDate;
+            const isMidnight = effectiveDate.getHours() === 0 && effectiveDate.getMinutes() === 0;
+            return isMidnight
+                ? effectiveDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                : effectiveDate.toLocaleString(undefined, {
+                    month: 'short', day: 'numeric', year: 'numeric',
+                    hour: 'numeric', minute: '2-digit'
+                }).replace(',', ' at');
+        })()
         : 'Just Now';
 
     const handleLike = async () => {
@@ -182,7 +188,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
 
     const actionText = (() => {
         if (isSuggestion) return 'recommends';
-        if (!entryData) return 'just watched';
+        if (!entryData) return 'watched';
 
         if (entryData.isWatching) {
             return 'started watching';
@@ -192,7 +198,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
             return 'completed watching';
         }
 
-        return entryData.review ? 'reviewed' : 'just watched';
+        return entryData.review ? 'reviewed' : 'watched';
     })();
 
     const releaseYear = (details?.release_date || details?.first_air_date || (item.data as any)?.release_date || (item.data as any)?.first_air_date || '').substring(0, 4);

@@ -7,7 +7,8 @@ import { FollowListModal, AddFriendsModal } from '../components/profile';
 import { User, UpdateUserData } from '../types';
 import { ProfileSkeleton, Skeleton } from '../components/common/Skeleton';
 import { PageLayout } from '../components/layout';
-import { ExportFormat, ImportResult } from '../services/data.service';
+import { ImportPreviewModal } from '../components/profile/ImportPreviewModal';
+import { ExportFormat, ImportResult, ImportPreviewResult, AI_IMPORT_PROMPT } from '../services/data.service';
 import { resolveAvatarUrl } from '../components/common/Avatar';
 import { AvatarLightboxModal, ModalBeeOverlay, BadgeModal, StreakBadge, BeeSpinner } from '../components/common';
 import { LegalDisclaimerModal } from '../components/legal/LegalDisclaimerModal';
@@ -43,12 +44,24 @@ export const ProfilePage: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     
     // Data export / import state
+    const [dataActionTab, setDataActionTab] = useState<'import' | 'export'>('import');
+    const [defaultToCurrentYear, setDefaultToCurrentYear] = useState(false);
     const [exportFormat, setExportFormat] = useState<ExportFormat>('json');
     const [includeEntries, setIncludeEntries] = useState(true);
     const [includeLists, setIncludeLists] = useState(true);
     const [dataLoading, setDataLoading] = useState(false);
     const [importResult, setImportResult] = useState<ImportResult | null>(null);
+    const [previewData, setPreviewData] = useState<ImportPreviewResult | null>(null);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [isCommittingImport, setIsCommittingImport] = useState(false);
+    const [copiedPrompt, setCopiedPrompt] = useState(false);
     const importFileRef = useRef<HTMLInputElement>(null);
+
+    const handleCopyAiPrompt = () => {
+        navigator.clipboard.writeText(AI_IMPORT_PROMPT);
+        setCopiedPrompt(true);
+        setTimeout(() => setCopiedPrompt(false), 2000);
+    };
 
     useEffect(() => {
         if (user) {
@@ -150,14 +163,32 @@ export const ProfilePage: React.FC = () => {
         setDataLoading(true);
         setImportResult(null);
         try {
-            const result = await dataService.importData(file);
+            const preview = await dataService.previewImport(file, { defaultToCurrentYear });
+            setPreviewData(preview);
+            setIsPreviewOpen(true);
+        } catch (err: any) {
+            showError(err?.response?.data?.error || err.message || 'Failed to analyze file');
+        } finally {
+            setDataLoading(false);
+            if (importFileRef.current) importFileRef.current.value = '';
+        }
+    };
+
+    const handleConfirmImport = async (payload: { entries: any[]; lists?: any[]; defaultToCurrentYear?: boolean }) => {
+        setIsCommittingImport(true);
+        try {
+            const result = await dataService.commitImport({
+                ...payload,
+                defaultToCurrentYear: payload.defaultToCurrentYear ?? defaultToCurrentYear,
+            });
             setImportResult(result);
+            setIsPreviewOpen(false);
+            setPreviewData(null);
             showSuccess('Import complete!');
         } catch (err: any) {
             showError(err?.response?.data?.error || err.message || 'Import failed');
         } finally {
-            setDataLoading(false);
-            if (importFileRef.current) importFileRef.current.value = '';
+            setIsCommittingImport(false);
         }
     };
 
@@ -584,85 +615,273 @@ export const ProfilePage: React.FC = () => {
 
             {/* Data Management Block */}
             <div id="data-management" ref={dataManagementRef} className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
-                {/* Hidden file input */}
-                <input ref={importFileRef} type="file" accept=".json,.csv" className="hidden" onChange={e => handleImportFile(e.target.files?.[0])} />
+                {/* Hidden file input supporting JSON and CSV */}
+                <input
+                    ref={importFileRef}
+                    type="file"
+                    accept=".json,.csv,text/csv,application/json"
+                    className="hidden"
+                    onChange={e => handleImportFile(e.target.files?.[0])}
+                />
 
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700]">
-                        <span className="material-symbols-outlined">sync_alt</span>
+                <div className="flex items-start justify-between gap-3 sm:gap-4 mb-6">
+                    <div className="flex items-start gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-full bg-[#ffb700]/10 flex items-center justify-center text-[#ffb700] shrink-0 mt-0.5">
+                            <span className="material-symbols-outlined">{dataActionTab === 'import' ? 'file_upload' : 'file_download'}</span>
+                        </div>
+                        <div className="min-w-0">
+                            <h2 className="text-lg sm:text-xl font-black text-slate-800 truncate">Data Management</h2>
+                            <p className="text-[10px] sm:text-[11px] text-slate-500 font-bold uppercase tracking-wider truncate">
+                                {dataActionTab === 'import' ? 'Import your watch history' : 'Export your hive data'}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 className="text-xl font-black text-slate-800">Data Management</h2>
-                        <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Export or import your hive data</p>
+
+                    {/* Mode Toggle Switch: Import / Export */}
+                    <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 rounded-2xl p-1 shadow-sm shrink-0">
+                        <button
+                            type="button"
+                            onClick={() => { setDataActionTab('import'); setImportResult(null); }}
+                            className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${dataActionTab === 'import' ? 'bg-[#ffb700] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                                }`}
+                        >
+                            Import
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setDataActionTab('export'); setImportResult(null); }}
+                            className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${dataActionTab === 'export' ? 'bg-[#ffb700] text-white shadow-md' : 'text-slate-500 hover:text-slate-800'
+                                }`}
+                        >
+                            Export
+                        </button>
                     </div>
                 </div>
 
-                <div className="space-y-6">
-                    {/* Checkboxes — side-by-side */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {[
-                            { id: 'cb-entries', label: 'Watch Entries', icon: 'history',  desc: 'Ratings & reviews', checked: includeEntries, onChange: setIncludeEntries },
-                            { id: 'cb-lists',   label: 'Watch Lists',   icon: 'list_alt', desc: 'Saved collections',  checked: includeLists,  onChange: setIncludeLists  },
-                        ].map(item => (
-                            <label
-                                key={item.id}
-                                htmlFor={item.id}
-                                className={`relative flex items-center gap-4 p-4 rounded-[28px] border-2 cursor-pointer transition-all duration-300 select-none overflow-hidden group active:scale-[0.98] ${
-                                    item.checked
-                                        ? 'border-[#ffb700] bg-[#ffb700]/5 shadow-sm'
-                                        : 'border-slate-100 bg-white hover:border-[#ffb700]/30 hover:shadow-sm'
-                                }`}
-                            >
-                                <input id={item.id} type="checkbox" checked={item.checked} onChange={e => item.onChange(e.target.checked)} className="sr-only" />
-                                
-                                <div className={`relative w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                                    item.checked 
-                                        ? 'bg-[#ffb700] text-[#2D2926]' 
-                                        : 'bg-slate-50 text-slate-400'
-                                }`}>
-                                    <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+                {dataActionTab === 'import' ? (
+                    /* ─── IMPORT VIEW (Compact & AI First) ─────────────────── */
+                    <div className="space-y-4 animate-[fade-in_0.2s_ease-out]">
+                        {/* 1. Format Your Watch History with AI (Compact space-efficient bar) */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-50/80 via-white to-amber-50/50 border border-amber-200/70 shadow-2xs">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-7 h-7 rounded-lg bg-[#ffb700]/15 text-[#ffb700] flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined text-base">auto_fix_high</span>
                                 </div>
-
-                                <div className="min-w-0 pr-2">
-                                    <p className={`text-sm font-black tracking-tight leading-tight ${item.checked ? 'text-slate-800' : 'text-slate-600'}`}>{item.label}</p>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{item.desc}</p>
+                                <div className="min-w-0">
+                                    <p className="text-xs font-bold text-slate-800 truncate">
+                                        Format Watch History with AI
+                                        <span className="hidden md:inline font-normal text-slate-500 ml-1.5">— Turn raw lists into JSON via ChatGPT or Claude</span>
+                                    </p>
                                 </div>
-                                {item.checked && (
-                                    <div className="ml-auto w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100">
-                                        <span className="material-symbols-outlined text-emerald-500 text-sm font-black">check</span>
-                                    </div>
-                                )}
-                            </label>
-                        ))}
-                    </div>
-
-                    {/* Format toggle and Actions */}
-                    <div className="bg-slate-50 rounded-[32px] p-6 space-y-6 border border-black/5">
-                        <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                                <p className="text-sm font-black text-slate-700">Export format</p>
-                                <p className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1 truncate">
-                                    {exportFormat === 'json' ? 'JSON' : 'CSV'}
-                                </p>
                             </div>
+
                             <button
-                                onClick={() => setExportFormat(f => f === 'json' ? 'csv' : 'json')}
-                                className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl p-1 sm:p-1.5 transition-all shadow-sm shrink-0"
+                                type="button"
+                                onClick={handleCopyAiPrompt}
+                                className="px-3 py-1.5 rounded-xl bg-[#ffb700] hover:bg-[#ffaa00] text-white text-[10px] font-black uppercase tracking-wider shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 active:scale-95 self-end sm:self-auto"
+                                title="Copy AI prompt to format unstructured notes into JSON"
                             >
-                                {(['json', 'csv'] as ExportFormat[]).map(fmt => (
-                                    <span
-                                        key={fmt}
-                                        className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${
-                                            exportFormat === fmt ? 'bg-[#ffb700] text-[#2D2926] shadow-md' : 'text-slate-400'
-                                        }`}
-                                    >
-                                        {fmt}
-                                    </span>
-                                ))}
+                                <span className="material-symbols-outlined text-sm">
+                                    {copiedPrompt ? 'check' : 'content_copy'}
+                                </span>
+                                <span>{copiedPrompt ? 'Copied Prompt!' : 'Copy AI Prompt'}</span>
                             </button>
                         </div>
 
-                        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-4">
+                        {/* 3. Compact Dropzone */}
+                        <div
+                            onClick={() => !dataLoading && importFileRef.current?.click()}
+                            className={`border-2 border-dashed rounded-2xl p-6 sm:p-7 text-center cursor-pointer transition-all ${dataLoading
+                                ? 'border-[#ffb700]/50 bg-[#ffb700]/5 pointer-events-none'
+                                : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-[#ffb700]/60'
+                                }`}
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-[#ffb700]/10 text-[#ffb700] flex items-center justify-center mx-auto mb-3">
+                                <span className="material-symbols-outlined text-2xl">upload_file</span>
+                            </div>
+
+                            <h3 className="text-sm sm:text-base font-black text-slate-800">
+                                {dataLoading ? 'Analyzing file...' : 'Choose or Drop File to Import'}
+                            </h3>
+                            <p className="text-xs text-slate-500 font-medium max-w-md mx-auto mt-1 leading-relaxed">
+                                Upload a <strong className="text-slate-700">Letterboxd, IMDb, Trakt, Notion CSV</strong> or a <strong className="text-slate-700">WatchersHive backup</strong>.
+                            </p>
+
+                            {/* Format chips */}
+                            <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3">
+                                <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-2xs">
+                                    🟩 Letterboxd
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-2xs">
+                                    🟨 IMDb
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-2xs">
+                                    🟥 Trakt
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600 shadow-2xs">
+                                    📄 Notion CSV / JSON
+                                </span>
+                                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shadow-2xs flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-xs">auto_awesome</span> Auto TMDb Match
+                                </span>
+                            </div>
+
+                            <div className="mt-4 max-w-xs mx-auto">
+                                <button
+                                    type="button"
+                                    disabled={dataLoading}
+                                    onClick={(e) => { e.stopPropagation(); importFileRef.current?.click(); }}
+                                    className="flex items-center justify-center gap-2 py-3 px-5 bg-[#ffb700] hover:bg-[#ffaa00] text-white font-black text-[10px] uppercase tracking-[0.15em] rounded-xl transition-all shadow-md shadow-[#ffb700]/20 disabled:opacity-40 w-full"
+                                >
+                                    {dataLoading ? (
+                                        <Skeleton variant="circle" width={14} height={14} />
+                                    ) : (
+                                        <span className="material-symbols-outlined text-base">cloud_upload</span>
+                                    )}
+                                    {dataLoading ? 'Processing...' : 'Select File'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 4. Compact Collapsible Migration Tips */}
+                        <details className="group rounded-2xl border border-slate-200/80 bg-white p-3.5 text-xs text-slate-600 transition-all [&_summary::-webkit-details-marker]:hidden">
+                            <summary className="flex items-center justify-between cursor-pointer font-bold text-slate-700 select-none">
+                                <div className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-amber-500 text-base">help_outline</span>
+                                    <span>Migration tips for Letterboxd, IMDb & Trakt</span>
+                                </div>
+                                <span className="material-symbols-outlined text-sm text-slate-400 transition-transform group-open:rotate-180">expand_more</span>
+                            </summary>
+                            <div className="mt-3 pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] leading-snug">
+                                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div className="font-bold text-slate-800 mb-0.5">🟩 Letterboxd</div>
+                                    Export from <em>Settings &gt; Data &gt; Export</em>. Drop <strong className="text-slate-700">diary.csv</strong> or <strong className="text-slate-700">ratings.csv</strong>. Ratings scale 2x automatically.
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div className="font-bold text-slate-800 mb-0.5">🟨 IMDb</div>
+                                    Go to <em>Your Ratings &gt; Export</em>. Drop <strong className="text-slate-700">ratings.csv</strong>. Const IDs ensure instant TMDb matches.
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                                    <div className="font-bold text-slate-800 mb-0.5">🟥 Trakt / Notion</div>
+                                    Export watched history CSV. Dates, rewatches, and ratings are automatically mapped.
+                                </div>
+                            </div>
+                        </details>
+
+                        {/* Import Result Notification */}
+                        {importResult && (
+                            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 animate-[slide-down_0.2s_ease-out]">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                                        <span className="material-symbols-outlined text-lg">check</span>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-black text-emerald-800">
+                                            {importResult.message || 'Import completed successfully'}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2 mt-2.5">
+                                            {importResult.entriesImported !== undefined && (
+                                                <span className="px-3 py-1 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider shadow-xs">
+                                                    ✓ {importResult.entriesImported} entries imported
+                                                </span>
+                                            )}
+                                            {(importResult.entriesSkipped ?? 0) > 0 && (
+                                                <span className="px-3 py-1 rounded-xl bg-white border border-slate-200 text-slate-500 text-[10px] font-black uppercase tracking-wider shadow-xs">
+                                                    {importResult.entriesSkipped} skipped (duplicate/unmatched)
+                                                </span>
+                                            )}
+                                            {importResult.listsImported !== undefined && importResult.listsImported > 0 && (
+                                                <span className="px-3 py-1 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider shadow-xs">
+                                                    ✓ {importResult.listsImported} lists · {importResult.itemsImported ?? 0} items
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {importResult.entriesErrors && importResult.entriesErrors.length > 0 && (
+                                            <div className="mt-3 pt-2.5 border-t border-emerald-200/60">
+                                                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                                                    Skipped Details:
+                                                </p>
+                                                <ul className="text-xs text-slate-600 space-y-1 list-disc list-inside">
+                                                    {importResult.entriesErrors.slice(0, 5).map((err, i) => (
+                                                        <li key={i} className="truncate">{err}</li>
+                                                    ))}
+                                                    {importResult.entriesErrors.length > 5 && (
+                                                        <li className="text-slate-400 italic">
+                                                            ...and {importResult.entriesErrors.length - 5} more
+                                                        </li>
+                                                    )}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    /* ─── EXPORT VIEW ─────────────────────────────────────── */
+                    <div className="space-y-6 animate-[fade-in_0.2s_ease-out]">
+                        {/* Checkboxes — only for export data selection */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {[
+                                { id: 'cb-entries', label: 'Watch Entries', icon: 'history', desc: 'Ratings & reviews', checked: includeEntries, onChange: setIncludeEntries },
+                                { id: 'cb-lists', label: 'Watch Lists', icon: 'list_alt', desc: 'Saved collections', checked: includeLists, onChange: setIncludeLists },
+                            ].map(item => (
+                                <label
+                                    key={item.id}
+                                    htmlFor={item.id}
+                                    className={`relative flex items-center gap-4 p-4 rounded-[28px] border-2 cursor-pointer transition-all duration-300 select-none overflow-hidden group active:scale-[0.98] ${item.checked
+                                        ? 'border-[#ffb700] bg-[#ffb700]/5 shadow-sm'
+                                        : 'border-slate-100 bg-white hover:border-[#ffb700]/30 hover:shadow-sm'
+                                        }`}
+                                >
+                                    <input id={item.id} type="checkbox" checked={item.checked} onChange={e => item.onChange(e.target.checked)} className="sr-only" />
+
+                                    <div className={`relative w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 ${item.checked
+                                        ? 'bg-[#ffb700] text-white'
+                                        : 'bg-slate-50 text-slate-400'
+                                        }`}>
+                                        <span className="material-symbols-outlined text-2xl">{item.icon}</span>
+                                    </div>
+
+                                    <div className="min-w-0 pr-2">
+                                        <p className={`text-sm font-black tracking-tight leading-tight ${item.checked ? 'text-slate-800' : 'text-slate-600'}`}>{item.label}</p>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{item.desc}</p>
+                                    </div>
+                                    {item.checked && (
+                                        <div className="ml-auto w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100">
+                                            <span className="material-symbols-outlined text-emerald-500 text-sm font-black">check</span>
+                                        </div>
+                                    )}
+                                </label>
+                            ))}
+                        </div>
+
+                        {/* Format toggle and Export Action */}
+                        <div className="bg-slate-50 rounded-[32px] p-6 space-y-6 border border-black/5">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="text-sm font-black text-slate-700">Export format</p>
+                                    <p className="text-[10px] sm:text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1 truncate">
+                                        {exportFormat === 'json' ? 'JSON' : 'CSV'}
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-2xl p-1 sm:p-1.5 transition-all shadow-sm shrink-0">
+                                    {(['json', 'csv'] as ExportFormat[]).map(fmt => (
+                                        <button
+                                            key={fmt}
+                                            type="button"
+                                            onClick={() => setExportFormat(fmt)}
+                                            className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all ${exportFormat === fmt ? 'bg-[#ffb700] text-white shadow-md' : 'text-slate-400 hover:text-slate-600'
+                                                }`}
+                                        >
+                                            {fmt}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <button
                                 onClick={handleExport}
                                 disabled={dataLoading || (!includeEntries && !includeLists)}
@@ -671,38 +890,9 @@ export const ProfilePage: React.FC = () => {
                                 {dataLoading ? <Skeleton variant="circle" width={16} height={16} /> : <span className="material-symbols-outlined text-lg">download</span>}
                                 Export Data
                             </button>
-                            <button
-                                onClick={() => importFileRef.current?.click()}
-                                disabled={dataLoading}
-                                className="flex items-center justify-center gap-2 py-5 bg-white border-2 border-slate-100 text-slate-700 font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-50 transition-all disabled:opacity-40 w-full"
-                            >
-                                {dataLoading ? <Skeleton variant="circle" width={16} height={16} /> : <span className="material-symbols-outlined text-lg">upload</span>}
-                                Import Data
-                            </button>
                         </div>
-
-                        <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-[11px] text-amber-900 leading-relaxed">
-                            <span className="material-symbols-outlined text-base text-amber-600 shrink-0 mt-0.5">info</span>
-                            <p>
-                                <strong>Feed Protection:</strong> Imported watch history and entries are saved to your personal library & stats only and will not flood your followers' community feeds.
-                            </p>
-                        </div>
-
-                        {importResult && (
-                            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-4 animate-[slide-down_0.2s_ease-out]">
-                                <p className="text-xs font-black text-emerald-700 flex items-center gap-2 mb-2">
-                                    <span className="material-symbols-outlined text-lg">check_circle</span>
-                                    {importResult.message}
-                                </p>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-bold uppercase tracking-widest">
-                                    {importResult.entriesImported !== undefined && <span className="text-emerald-600">{importResult.entriesImported} entries added</span>}
-                                    {(importResult.entriesSkipped ?? 0) > 0 && <span className="text-slate-400">{importResult.entriesSkipped} skipped</span>}
-                                    {importResult.listsImported !== undefined && <span className="text-emerald-600">{importResult.listsImported} lists · {importResult.itemsImported} items added</span>}
-                                </div>
-                            </div>
-                        )}
                     </div>
-                </div>
+                )}
             </div>
 
             {/* Danger Zone: Account Deletion */}
@@ -806,6 +996,16 @@ export const ProfilePage: React.FC = () => {
                 onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
                 userId={user.id}
                 type={modalConfig.type}
+            />
+
+            <ImportPreviewModal
+                isOpen={isPreviewOpen}
+                onClose={() => { setIsPreviewOpen(false); setPreviewData(null); }}
+                previewData={previewData}
+                onConfirm={handleConfirmImport}
+                isImporting={isCommittingImport}
+                defaultToCurrentYear={defaultToCurrentYear}
+                onToggleDefaultToCurrentYear={setDefaultToCurrentYear}
             />
 
             <AddFriendsModal

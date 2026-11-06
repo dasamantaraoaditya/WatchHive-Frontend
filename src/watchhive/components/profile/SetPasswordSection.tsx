@@ -79,10 +79,10 @@ export const SetPasswordSection: React.FC = () => {
             <button
                 type="button"
                 onClick={() => setIsExpanded((p) => !p)}
-                className="w-full flex items-center justify-between p-4 hover:bg-[#FFF9F0] transition-colors text-left"
+                className="w-full flex items-start justify-between p-4 hover:bg-[#FFF9F0] transition-colors text-left"
             >
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-[#ffb700]/10 rounded-xl flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 bg-[#ffb700]/10 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
                         <span className="material-symbols-outlined text-[#ffb700] text-[18px]">lock_add</span>
                     </div>
                     <div>
@@ -92,7 +92,7 @@ export const SetPasswordSection: React.FC = () => {
                         </p>
                     </div>
                 </div>
-                <span className={`material-symbols-outlined text-[#2D2926]/30 text-[20px] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                <span className={`material-symbols-outlined text-[#2D2926]/30 text-[20px] transition-transform mt-1 ${isExpanded ? 'rotate-180' : ''}`}>
                     expand_more
                 </span>
             </button>

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Avatar, BeeLoader } from '../common';
 import { interactionService, Comment } from '../../services/interaction.service';
-import { useAuth, useCustomAlert } from '../../contexts';
+import { useAuth, useCustomAlert, useUI } from '../../contexts';
 
 interface CommentsModalProps {
     isOpen: boolean;
@@ -41,7 +41,13 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
 }) => {
     const { user } = useAuth();
     const { confirm, alert } = useCustomAlert();
+    const { registerModal } = useUI();
     const [comments, setComments] = useState<Comment[]>([]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        return registerModal();
+    }, [isOpen, registerModal]);
     const [newComment, setNewComment] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
