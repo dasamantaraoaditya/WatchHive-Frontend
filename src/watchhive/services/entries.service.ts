@@ -25,6 +25,10 @@ export interface Entry {
     isWatching?: boolean;
     startedAt?: string;
     completedAt?: string;
+    currentSeason?: number | null;
+    currentEpisode?: number | null;
+    totalEpisodesWatched?: number;
+    totalEpisodesCount?: number | null;
     watchLocation: string | null;
     postToFeed?: boolean;
     createdAt: string;

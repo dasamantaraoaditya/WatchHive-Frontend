@@ -4,6 +4,7 @@ import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { entriesApi, Entry } from '../services/entries.service';
 import { EntryForm } from '../components/entries/EntryForm';
 import { EntryList, EntryCard } from '../components/entries/EntryList';
+import { ContinueWatchingTray } from '../components/entries/ContinueWatchingTray';
 import { useAuth, useUI, useCustomAlert } from '../contexts';
 import { WatchlistGrid } from '../components/profile';
 import { 
@@ -247,6 +248,8 @@ export const EntriesPage: React.FC = () => {
 
                     {activeTab === 'watching' && (
                         <section className="flex flex-col gap-6 animate-fade-in mt-6">
+                            <ContinueWatchingTray onProgressUpdated={() => fetchWatching(0)} />
+
                             <FilterBar 
                                 search={searchQueries.watching}
                                 onSearchChange={(val) => setSearchQueries(prev => ({ ...prev, watching: val }))}

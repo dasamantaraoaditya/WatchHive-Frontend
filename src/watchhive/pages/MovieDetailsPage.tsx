@@ -11,6 +11,7 @@ import { useUI, useCustomAlert } from '../contexts';
 import { entriesApi, Entry } from '../services/entries.service';
 import { formatUserFriendlyError } from '../utils/errorHandler';
 import { shareCompletedWatch } from '../utils/shareHelper';
+import { episodesApi, ShowProgress, FriendShowProgress } from '../services/episodes.service';
 
 interface CastMember {
     id: number;
@@ -141,6 +142,70 @@ export const MovieDetailsPage: React.FC = () => {
     const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
     const [seasonDetails, setSeasonDetails] = useState<{ episodes: EpisodeItem[]; overview?: string; name?: string } | null>(null);
     const [isSeasonLoading, setIsSeasonLoading] = useState(false);
+    const [userProgress, setUserProgress] = useState<ShowProgress | null>(null);
+    const [friendsProgress, setFriendsProgress] = useState<FriendShowProgress[]>([]);
+    const [togglingEpisode, setTogglingEpisode] = useState<string | null>(null);
+
+    const handleToggleEpisode = async (seasonNum: number, epNum: number, epId?: number, epName?: string) => {
+        if (!tmdbId || togglingEpisode) return;
+        const key = `${seasonNum}-${epNum}`;
+        setTogglingEpisode(key);
+
+        const isCurrentlyWatched = userProgress?.watchedEpisodes.some(
+            w => w.seasonNumber === seasonNum && w.episodeNumber === epNum
+        );
+
+        try {
+            const res = await episodesApi.toggleEpisodeWatch(tmdbId, {
+                seasonNumber: seasonNum,
+                episodeNumber: epNum,
+                episodeId: epId,
+                episodeName: epName,
+                isWatched: !isCurrentlyWatched,
+            });
+            setUserProgress(res.progress);
+        } catch (e) {
+            console.error('Failed to toggle episode watch:', e);
+            alert('Failed to update episode watch state.', {
+                title: 'Error',
+                severity: 'error',
+            });
+        } finally {
+            setTogglingEpisode(null);
+        }
+    };
+
+    const handleCatchUpToEpisode = async (seasonNum: number, epNum: number) => {
+        if (!tmdbId) return;
+        const confirmed = await confirm(
+            `This will mark all episodes from Season 1 Episode 1 up to S${seasonNum} E${epNum} as watched.`,
+            {
+                title: `Catch Up to Season ${seasonNum}, Episode ${epNum}?`,
+                confirmText: 'Mark All Watched',
+                cancelText: 'Cancel',
+            }
+        );
+
+        if (confirmed) {
+            try {
+                const res = await episodesApi.batchCatchUp(tmdbId, {
+                    upToSeason: seasonNum,
+                    upToEpisode: epNum,
+                });
+                setUserProgress(res.progress);
+                alert(`Marked all episodes up to S${seasonNum} E${epNum} as watched.`, {
+                    title: 'Caught Up! 🐝',
+                    severity: 'success',
+                });
+            } catch (e) {
+                console.error('Failed to batch catch up:', e);
+                alert('Failed to catch up episodes.', {
+                    title: 'Error',
+                    severity: 'error',
+                });
+            }
+        }
+    };
 
     useEffect(() => {
         if (details?.seasons && details.seasons.length > 0 && selectedSeasonNumber === null) {
@@ -212,6 +277,19 @@ export const MovieDetailsPage: React.FC = () => {
             const foundEntry = entriesRes.entries?.find((e: Entry) => Number(e.tmdbId) === Number(tmdbId));
             if (foundEntry) {
                 setUserEntry(foundEntry);
+            }
+
+            if (mediaType === 'tv') {
+                try {
+                    const [prog, fProg] = await Promise.all([
+                        episodesApi.getShowProgress(tmdbId).catch(() => null),
+                        episodesApi.getFriendsProgress(tmdbId).catch(() => []),
+                    ]);
+                    if (prog) setUserProgress(prog);
+                    if (fProg) setFriendsProgress(fProg);
+                } catch {
+                    // Non-fatal
+                }
             }
         } catch (err) {
             console.error('Failed to fetch details:', err);
@@ -753,6 +831,13 @@ export const MovieDetailsPage: React.FC = () => {
                                                     {details.number_of_seasons || details.seasons.length} Season(s) • {details.number_of_episodes || '—'} Total Episodes
                                                 </p>
                                             </div>
+                                            {userProgress && userProgress.totalEpisodesWatched > 0 && (
+                                                <div className="flex items-center gap-2 bg-[#ffb700]/10 border border-[#ffb700]/30 px-3 py-1.5 rounded-2xl">
+                                                    <span className="text-xs font-black text-[#2D2926]">
+                                                        Overall: {userProgress.totalEpisodesWatched} eps watched ({userProgress.progressPercentage}%)
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Season Selector Tabs */}
@@ -772,6 +857,30 @@ export const MovieDetailsPage: React.FC = () => {
                                             ))}
                                         </div>
 
+                                        {/* Selected Season Progress Bar */}
+                                        {seasonDetails?.episodes && seasonDetails.episodes.length > 0 && selectedSeasonNumber !== null && (() => {
+                                            const totalInSeason = seasonDetails.episodes.length;
+                                            const watchedInSeason = seasonDetails.episodes.filter(ep =>
+                                                userProgress?.watchedEpisodes?.some(w => w.seasonNumber === selectedSeasonNumber && w.episodeNumber === ep.episode_number)
+                                            ).length;
+                                            const seasonPercentage = totalInSeason > 0 ? Math.round((watchedInSeason / totalInSeason) * 100) : 0;
+
+                                            return (
+                                                <div className="flex flex-col gap-2 bg-slate-50/80 p-4 rounded-2xl border border-black/5">
+                                                    <div className="flex items-center justify-between text-xs font-black text-[#2D2926]">
+                                                        <span>Season {selectedSeasonNumber} Progress</span>
+                                                        <span className="text-[#b38000]">{watchedInSeason} / {totalInSeason} eps ({seasonPercentage}%)</span>
+                                                    </div>
+                                                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="bg-[#ffb700] h-full rounded-full transition-all duration-500"
+                                                            style={{ width: `${seasonPercentage}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+
                                         {/* Selected Season Episodes */}
                                         {isSeasonLoading ? (
                                             <div className="py-12 flex justify-center">
@@ -779,53 +888,128 @@ export const MovieDetailsPage: React.FC = () => {
                                             </div>
                                         ) : seasonDetails?.episodes && seasonDetails.episodes.length > 0 ? (
                                             <div className="flex flex-col gap-3 mt-2">
-                                                {seasonDetails.episodes.map(ep => (
-                                                    <div 
-                                                        key={ep.id || ep.episode_number}
-                                                        className="p-4 bg-slate-50/70 hover:bg-[#ffb700]/5 rounded-2xl border border-black/5 hover:border-[#ffb700]/30 transition-all flex flex-col md:flex-row gap-4"
-                                                    >
-                                                        {ep.still_path ? (
-                                                            <img 
-                                                                src={`https://image.tmdb.org/t/p/w300${ep.still_path}`} 
-                                                                alt={ep.name}
-                                                                className="w-full md:w-40 h-24 object-cover rounded-xl shadow-xs shrink-0"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full md:w-40 h-24 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400 shrink-0">
-                                                                <span className="material-symbols-outlined text-3xl">tv</span>
-                                                            </div>
-                                                        )}
+                                                {seasonDetails.episodes.map(ep => {
+                                                    const isWatched = userProgress?.watchedEpisodes?.some(
+                                                        w => w.seasonNumber === selectedSeasonNumber && w.episodeNumber === ep.episode_number
+                                                    );
+                                                    const isToggling = togglingEpisode === `${selectedSeasonNumber}-${ep.episode_number}`;
 
-                                                        <div className="flex flex-col min-w-0 flex-grow gap-1">
-                                                            <div className="flex items-center justify-between gap-2">
-                                                                <div className="flex items-center gap-2 min-w-0">
-                                                                    <span className="px-2 py-0.5 bg-[#ffb700]/10 text-[#ffb700] rounded-md text-[10px] font-black uppercase">
-                                                                        EP {ep.episode_number}
-                                                                    </span>
-                                                                    <h4 className="text-sm font-black text-[#2D2926] truncate">
-                                                                        {ep.name}
-                                                                    </h4>
+                                                    return (
+                                                        <div 
+                                                            key={ep.id || ep.episode_number}
+                                                            className={`p-4 rounded-2xl border transition-all flex flex-col md:flex-row gap-4 ${
+                                                                isWatched
+                                                                    ? 'bg-amber-50/30 border-[#ffb700]/30 hover:bg-amber-50/50'
+                                                                    : 'bg-slate-50/70 hover:bg-[#ffb700]/5 border-black/5 hover:border-[#ffb700]/30'
+                                                            }`}
+                                                        >
+                                                            {ep.still_path ? (
+                                                                <img 
+                                                                    src={`https://image.tmdb.org/t/p/w300${ep.still_path}`} 
+                                                                    alt={ep.name}
+                                                                    className="w-full md:w-40 h-24 object-cover rounded-xl shadow-xs shrink-0"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full md:w-40 h-24 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400 shrink-0">
+                                                                    <span className="material-symbols-outlined text-3xl">tv</span>
                                                                 </div>
-                                                                {ep.vote_average && ep.vote_average > 0 && (
-                                                                    <span className="text-xs font-black text-amber-500 flex items-center gap-0.5 shrink-0">
-                                                                        ⭐ {ep.vote_average.toFixed(1)}
+                                                            )}
+
+                                                            <div className="flex flex-col min-w-0 flex-grow gap-1">
+                                                                <div className="flex items-center justify-between gap-2">
+                                                                    <div className="flex items-center gap-2 min-w-0">
+                                                                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
+                                                                            isWatched ? 'bg-[#ffb700] text-[#2D2926]' : 'bg-[#ffb700]/10 text-[#ffb700]'
+                                                                        }`}>
+                                                                            EP {ep.episode_number}
+                                                                        </span>
+                                                                        <h4 className="text-sm font-black text-[#2D2926] truncate">
+                                                                            {ep.name}
+                                                                        </h4>
+                                                                    </div>
+                                                                    {ep.vote_average && ep.vote_average > 0 && (
+                                                                        <span className="text-xs font-black text-amber-500 flex items-center gap-0.5 shrink-0">
+                                                                            ⭐ {ep.vote_average.toFixed(1)}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400">
+                                                                    {ep.air_date && <span>Aired: {formatDate(ep.air_date)}</span>}
+                                                                    {ep.runtime && <span>• {ep.runtime}m</span>}
+                                                                </div>
+                                                                <p className="text-xs text-slate-600 font-medium line-clamp-2 mt-1">
+                                                                    {ep.overview || 'No episode synopsis available.'}
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Episode Action Controls */}
+                                                            <div className="flex items-center gap-2 shrink-0 self-start md:self-center mt-2 md:mt-0">
+                                                                <button
+                                                                    type="button"
+                                                                    disabled={isToggling}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (selectedSeasonNumber !== null) {
+                                                                            handleToggleEpisode(selectedSeasonNumber, ep.episode_number, ep.id, ep.name);
+                                                                        }
+                                                                    }}
+                                                                    className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                                                                        isWatched
+                                                                            ? 'bg-[#ffb700] hover:bg-rose-500 hover:text-white text-[#2D2926] shadow-xs'
+                                                                            : 'bg-slate-100 hover:bg-[#ffb700] text-[#2D2926] border border-black/5'
+                                                                    }`}
+                                                                >
+                                                                    <span className="material-symbols-outlined text-[15px]">
+                                                                        {isToggling ? 'refresh' : isWatched ? 'check' : 'add'}
                                                                     </span>
+                                                                    <span>{isToggling ? '...' : isWatched ? 'Watched' : 'Mark Watched'}</span>
+                                                                </button>
+
+                                                                {!isWatched && selectedSeasonNumber !== null && (
+                                                                    <button
+                                                                        type="button"
+                                                                        title={`Mark all episodes up to S${selectedSeasonNumber} E${ep.episode_number} as watched`}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleCatchUpToEpisode(selectedSeasonNumber, ep.episode_number);
+                                                                        }}
+                                                                        className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-[#2D2926] text-xs font-bold transition-all cursor-pointer"
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-sm" title="Catch up to here">fast_forward</span>
+                                                                    </button>
                                                                 )}
                                                             </div>
-                                                            <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400">
-                                                                {ep.air_date && <span>Aired: {formatDate(ep.air_date)}</span>}
-                                                                {ep.runtime && <span>• {ep.runtime}m</span>}
-                                                            </div>
-                                                            <p className="text-xs text-slate-600 font-medium line-clamp-2 mt-1">
-                                                                {ep.overview || 'No episode synopsis available.'}
-                                                            </p>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
                                         ) : (
                                             <div className="py-8 text-center text-slate-400 text-xs font-bold">
                                                 Select a season above to inspect episodes.
+                                            </div>
+                                        )}
+
+                                        {/* Friends Progress Section */}
+                                        {friendsProgress.length > 0 && (
+                                            <div className="mt-4 pt-4 border-t border-black/5">
+                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                                                    🐝 Friends Watching This Show
+                                                </span>
+                                                <div className="flex flex-wrap gap-2.5 mt-2.5">
+                                                    {friendsProgress.map(fp => (
+                                                        <div key={fp.user.id} className="flex items-center gap-2 bg-slate-50 border border-black/5 px-2.5 py-1.5 rounded-xl">
+                                                            <Avatar src={fp.user.avatarUrl} name={fp.user.displayName || fp.user.username} size="sm" />
+                                                            <span className="text-xs font-black text-[#2D2926]">{fp.user.displayName || fp.user.username}</span>
+                                                            {fp.currentSeason ? (
+                                                                <span className="text-[10px] font-black bg-[#ffb700]/20 text-[#2D2926] px-1.5 py-0.5 rounded-md">
+                                                                    S{fp.currentSeason} E{fp.currentEpisode}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-[10px] font-bold text-slate-400">Watching</span>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
                                     </div>

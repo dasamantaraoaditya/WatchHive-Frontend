@@ -210,6 +210,18 @@ export const EntryCard: React.FC<{
                     <motion.h4 layoutId={`title-${entry.id}`} className="watchlist-card__title text-[13px] leading-tight font-black text-[#2D2926] truncate" title={entry.title}>
                         {entry.title}
                     </motion.h4>
+                    {entry.type === 'TV_SHOW' && entry.currentSeason && (
+                        <div className="flex items-center gap-1.5 my-1">
+                            <span className="px-1.5 py-0.5 rounded-md bg-[#ffb700]/20 text-[#2D2926] font-black text-[9px] uppercase tracking-wider">
+                                S{entry.currentSeason} • E{entry.currentEpisode}
+                            </span>
+                            {entry.totalEpisodesCount ? (
+                                <span className="text-[9px] font-bold text-slate-400">
+                                    {Math.round(((entry.totalEpisodesWatched || 0) / entry.totalEpisodesCount) * 100)}%
+                                </span>
+                            ) : null}
+                        </div>
+                    )}
                     <div className="text-[10px] text-[#2D2926]/40 font-bold mb-1.5 flex items-center justify-between">
                         <span>{formatDate(entry.watchedAt)}</span>
                         {entry.watchLocation && (
