@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { episodesApi, ContinueWatchingItem } from '../../services/episodes.service';
 import { useCustomAlert } from '../../contexts';
+import { ContinueWatchingSkeleton } from '../common';
 
 interface ContinueWatchingTrayProps {
     onProgressUpdated?: () => void;
@@ -82,7 +83,11 @@ export const ContinueWatchingTray: React.FC<ContinueWatchingTrayProps> = ({
         }
     };
 
-    if (loading || items.length === 0) {
+    if (loading) {
+        return <ContinueWatchingSkeleton />;
+    }
+
+    if (items.length === 0) {
         return null;
     }
 

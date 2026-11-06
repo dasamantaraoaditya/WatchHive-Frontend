@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from '../../types/user.types';
 import userService from '../../services/userService';
 import followsService from '../../services/follows.service';
-import { Avatar, BeeLoader } from '../common';
+import { Avatar, UserListSkeleton } from '../common';
 
 interface AddFriendsModalProps {
     isOpen: boolean;
@@ -231,8 +231,8 @@ export const AddFriendsModal: React.FC<AddFriendsModalProps> = ({ isOpen, onClos
                         </div>
 
                         {loadingSuggestions ? (
-                            <div className="py-8 flex justify-center">
-                                <BeeLoader message="Finding friends..." />
+                            <div className="py-2">
+                                <UserListSkeleton count={4} />
                             </div>
                         ) : suggestedUsers.length === 0 ? (
                             <div className="text-center py-6 bg-white rounded-2xl border border-slate-100">

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { Link, useNavigate } from 'react-router-dom';
-import { BeeLoader, Button, ErrorState } from '../components/common';
+import { BeeLoader, Button, ErrorState, NotificationsSkeleton } from '../components/common';
 import { useUI } from '../contexts';
 import { PageLayout } from '../components/layout';
 import { PushOptInBanner } from '../components/notifications/PushOptInBanner';
@@ -212,9 +212,7 @@ const NotificationsPage: React.FC = () => {
                             onRetry={() => fetchNotifications(1)}
                         />
                     ) : loading && notifications.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 gap-4">
-                            <BeeLoader size="small" message="Loading your activity..." />
-                        </div>
+                        <NotificationsSkeleton count={6} />
                     ) : notifications.length === 0 ? (
                          <div className="flex flex-col items-center justify-center py-24 text-center px-8 bg-white rounded-[32px] border border-black/5 shadow-sm">
                             <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/2 relative">

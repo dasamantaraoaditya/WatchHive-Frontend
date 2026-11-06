@@ -14,7 +14,7 @@ import { motion } from 'framer-motion';
 import { PageLayout } from '../components/layout';
 import { formatUserFriendlyError } from '../utils/errorHandler';
 import { resolveAvatarUrl } from '../components/common/Avatar';
-import { AvatarLightboxModal, BeeLoader, BadgeModal, StreakBadge } from '../components/common';
+import { AvatarLightboxModal, BadgeModal, StreakBadge, RankingsSkeleton } from '../components/common';
 
 export const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -543,9 +543,7 @@ export const UserProfilePage: React.FC = () => {
                                     </div>
 
                                     {isRankingsLoading ? (
-                                        <div className="py-12 flex justify-center">
-                                            <BeeLoader size="medium" message="Loading rankings..." />
-                                        </div>
+                                        <RankingsSkeleton count={4} />
                                     ) : !userRankings || userRankings.length === 0 ? (
                                         <div className="bg-white border border-black/5 rounded-3xl p-12 text-center text-slate-400 font-bold">
                                             <span className="material-symbols-outlined text-4xl mb-2 text-slate-300">format_list_numbered</span>

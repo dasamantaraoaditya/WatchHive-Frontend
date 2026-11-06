@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { User } from '../../types/user.types';
 import userService from '../../services/userService';
-import { Avatar, BeeLoader } from '../common';
+import { Avatar, UserListSkeleton } from '../common';
 import { Link } from 'react-router-dom';
 
 interface FollowListModalProps {
@@ -74,8 +74,8 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto p-2 bg-[#FFF9F0]/50 no-scrollbar">
                     {loading ? (
-                        <div className="flex flex-col items-center justify-center py-12">
-                            <BeeLoader size="small" message="Loading users..." />
+                        <div className="p-2">
+                            <UserListSkeleton count={4} />
                         </div>
                     ) : users.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 px-6 text-center gap-3">

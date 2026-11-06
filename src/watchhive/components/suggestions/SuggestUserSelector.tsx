@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../../types/user.types';
 import userService from '../../services/userService';
-import { Avatar, BeeLoader, ModalBeeOverlay } from '../common';
+import { Avatar, BeeLoader, ModalBeeOverlay, UserListSkeleton } from '../common';
 import { suggestionsApi } from '../../services/suggestions.service';
 
 interface SuggestUserSelectorProps {
@@ -152,8 +152,8 @@ export const SuggestUserSelector: React.FC<SuggestUserSelectorProps> = ({
                 {/* Followers Selection List */}
                 <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
                     {loading ? (
-                        <div className="py-12 flex justify-center">
-                            <BeeLoader size="small" message="Loading followers..." />
+                        <div className="py-2">
+                            <UserListSkeleton count={4} />
                         </div>
                     ) : friends.length === 0 ? (
                         <div className="py-12 text-center bg-[#FFF9F0]/50 rounded-2xl border border-[#ffb700]/10 p-6">

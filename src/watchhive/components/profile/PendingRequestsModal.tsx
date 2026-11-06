@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import followsService from '../../services/follows.service';
-import { Avatar, BeeLoader } from '../common';
+import { Avatar, UserListSkeleton } from '../common';
 import { useCustomAlert } from '../../contexts';
 
 interface PendingRequestsModalProps {
@@ -171,8 +171,8 @@ export const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({ isOp
                     {/* Body */}
                     <div className="flex-1 overflow-y-auto p-2 bg-[#FFF9F0]/50 no-scrollbar">
                         {loading ? (
-                            <div className="flex flex-col items-center justify-center py-14">
-                                <BeeLoader size="small" message="Fetching requests..." />
+                            <div className="p-2">
+                                <UserListSkeleton count={3} />
                             </div>
                         ) : requests.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 px-6 text-center gap-3">
