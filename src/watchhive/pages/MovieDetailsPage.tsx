@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BeeLoader, ErrorState, Avatar } from '../components/common';
+import { ErrorState, Avatar, MovieDetailsSkeleton, EpisodeListSkeleton } from '../components/common';
 import apiClient from '../services/api';
 import { useWatchlist } from '../contexts/WatchlistContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -496,9 +496,7 @@ export const MovieDetailsPage: React.FC = () => {
             </div>
 
             {loading ? (
-                <div className="py-32 flex flex-col items-center justify-center">
-                    <BeeLoader size="large" message="Sourcing cinematic intelligence..." />
-                </div>
+                <MovieDetailsSkeleton />
             ) : error ? (
                 <div className="py-20 px-6 max-w-md mx-auto">
                     <ErrorState message={error} onRetry={() => window.location.reload()} />
@@ -883,9 +881,7 @@ export const MovieDetailsPage: React.FC = () => {
 
                                         {/* Selected Season Episodes */}
                                         {isSeasonLoading ? (
-                                            <div className="py-12 flex justify-center">
-                                                <BeeLoader size="medium" message="Loading episodes..." />
-                                            </div>
+                                            <EpisodeListSkeleton />
                                         ) : seasonDetails?.episodes && seasonDetails.episodes.length > 0 ? (
                                             <div className="flex flex-col gap-3 mt-2">
                                                 {seasonDetails.episodes.map(ep => {

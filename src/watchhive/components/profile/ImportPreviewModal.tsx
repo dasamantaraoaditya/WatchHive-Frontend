@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { PreviewEntry, ImportPreviewResult, dataService } from '../../services/data.service';
 import { useUI } from '../../contexts';
+import { BeeLoader } from '../common';
 
 interface ImportPreviewModalProps {
     isOpen: boolean;
@@ -585,8 +586,8 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                         >
                             {isImporting ? (
                                 <>
-                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                    Importing...
+                                    <BeeLoader size="mini" message="" />
+                                    <span>Importing...</span>
                                 </>
                             ) : (
                                 <>

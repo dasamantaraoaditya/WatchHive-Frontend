@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { Avatar, BeeLoader } from '../common';
+import { Avatar, BeeLoader, CommentsListSkeleton } from '../common';
 import { interactionService, Comment } from '../../services/interaction.service';
 import { useAuth, useCustomAlert, useUI } from '../../contexts';
 
@@ -255,9 +255,7 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
                 {/* Body / Comments List */}
                 <div ref={commentsContainerRef} className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 flex flex-col gap-5 sm:gap-6 min-h-0">
                     {isLoading ? (
-                        <div className="flex flex-col items-center justify-center py-10">
-                            <BeeLoader size="small" message="Loading discussion..." />
-                        </div>
+                        <CommentsListSkeleton count={4} />
                     ) : comments.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
                             <div className="w-14 h-14 rounded-full bg-[#ffb700]/10 flex items-center justify-center mb-3 text-[#ffb700]">

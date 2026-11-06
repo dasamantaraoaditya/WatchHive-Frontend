@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useWatchlist } from '../../contexts/WatchlistContext';
 import { Button } from './Button';
+import { BeeLoader } from './BeeLoader';
 import './WatchlistButton.css';
 
 interface WatchlistButtonProps {
@@ -81,7 +82,7 @@ export const WatchlistButton: React.FC<WatchlistButtonProps> = ({
             className={`watchlist-btn ${className}`}
         >
             {localLoading ? (
-                <span className="wh-spinner-sm" />
+                <BeeLoader size="mini" message="" />
             ) : inList ? (
                 <span className="flex items-center justify-center whitespace-nowrap gap-1">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../services/api';
 import { PageLayout } from '../components/layout';
-import { BeeLoader } from '../components/common';
+import { CompareSkeleton } from '../components/common';
 
 interface UserSummary {
     id: string;
@@ -241,9 +241,7 @@ export const WatchHistoryComparePage: React.FC = () => {
                 </div>
 
                 {loading ? (
-                    <div className="py-20 flex flex-col items-center justify-center bg-white rounded-3xl border border-black/5 shadow-xs">
-                        <BeeLoader size="large" message="Cross-referencing viewing histories..." />
-                    </div>
+                    <CompareSkeleton />
                 ) : isPrivacyRestricted ? (
                     <div className="py-16 text-center px-6 bg-white rounded-3xl border border-black/5 shadow-xs flex flex-col items-center">
                         <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl mb-3">

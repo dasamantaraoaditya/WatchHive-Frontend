@@ -277,4 +277,233 @@ export const ProfileSkeleton: React.FC = () => {
     );
 };
 
+export const MovieDetailsSkeleton: React.FC = () => {
+    return (
+        <div className="w-full flex flex-col -mt-[56px] md:-mt-[64px] animate-pulse">
+            {/* Hero Backdrop Skeleton */}
+            <div className="relative w-full h-[60vh] md:h-[70vh] bg-[#F5E6D3]/40 overflow-hidden">
+                <Skeleton variant="rect" width="100%" height="100%" className="rounded-none opacity-50" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#FFF9F0] via-[#FFF9F0]/60 to-transparent" />
+                <div className="absolute bottom-6 left-4 right-4 md:left-8 md:right-8 flex flex-col md:flex-row md:items-end justify-between gap-6 max-w-5xl mx-auto">
+                    <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Skeleton variant="rect" width={60} height={22} className="rounded-md" />
+                            <Skeleton variant="rect" width={80} height={22} className="rounded-md" />
+                        </div>
+                        <Skeleton variant="text" width="65%" height={36} className="rounded-lg" />
+                        <Skeleton variant="text" width="40%" height={20} className="rounded-md" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Skeleton variant="rect" width={110} height={42} className="rounded-2xl" />
+                        <Skeleton variant="rect" width={120} height={42} className="rounded-2xl" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Content Details Body Skeleton */}
+            <div className="max-w-5xl mx-auto w-full px-4 md:px-8 py-8 space-y-8">
+                {/* Synopsis Section */}
+                <div className="bg-white/70 border border-black/5 rounded-3xl p-6 md:p-8 space-y-4">
+                    <Skeleton variant="text" width={100} height={18} />
+                    <Skeleton variant="text" width="100%" height={14} />
+                    <Skeleton variant="text" width="95%" height={14} />
+                    <Skeleton variant="text" width="75%" height={14} />
+                </div>
+
+                {/* Cast Avatars Row */}
+                <div className="space-y-4">
+                    <Skeleton variant="text" width={120} height={18} />
+                    <div className="flex gap-4 overflow-x-auto pb-2">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="flex flex-col items-center gap-2 shrink-0 w-20">
+                                <Skeleton variant="circle" width={60} height={60} />
+                                <Skeleton variant="text" width={50} height={10} />
+                                <Skeleton variant="text" width={40} height={8} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const EpisodeListSkeleton: React.FC = () => {
+    return (
+        <div className="w-full space-y-4 animate-pulse">
+            {/* Season tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} variant="rect" width={84} height={32} className="rounded-xl shrink-0" />
+                ))}
+            </div>
+            {/* Season Progress Bar Skeleton */}
+            <div className="p-4 bg-white/60 border border-black/5 rounded-2xl space-y-2">
+                <div className="flex justify-between">
+                    <Skeleton variant="text" width={120} height={12} />
+                    <Skeleton variant="text" width={40} height={12} />
+                </div>
+                <Skeleton variant="rect" width="100%" height={8} className="rounded-full" />
+            </div>
+            {/* Episodes List Skeleton */}
+            <div className="space-y-2.5">
+                {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center justify-between p-3.5 bg-white/80 border border-black/5 rounded-2xl">
+                        <div className="flex items-center gap-3 flex-1 min-w-0 mr-4">
+                            <Skeleton variant="circle" width={26} height={26} className="shrink-0" />
+                            <div className="flex-1 space-y-1.5">
+                                <Skeleton variant="text" width="60%" height={14} />
+                                <Skeleton variant="text" width="30%" height={10} />
+                            </div>
+                        </div>
+                        <Skeleton variant="rect" width={70} height={28} className="rounded-xl shrink-0" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export const NotificationsSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
+    return (
+        <div className="flex flex-col gap-3 animate-pulse">
+            {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-4 bg-white border border-black/5 rounded-3xl">
+                    <div className="flex items-center gap-3.5 flex-1 min-w-0 mr-4">
+                        <Skeleton variant="circle" width={44} height={44} className="shrink-0" />
+                        <div className="flex-1 space-y-2">
+                            <Skeleton variant="text" width="70%" height={14} />
+                            <Skeleton variant="text" width="40%" height={10} />
+                        </div>
+                    </div>
+                    <Skeleton variant="rect" width={24} height={24} className="rounded-lg shrink-0 opacity-40" />
+                </div>
+            ))}
+        </div>
+    );
+};
+
+export const UserListSkeleton: React.FC<{ count?: number }> = ({ count = 5 }) => {
+    return (
+        <div className="flex flex-col gap-2.5 animate-pulse">
+            {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between p-3.5 bg-white rounded-2xl border border-black/5">
+                    <div className="flex items-center gap-3 min-w-0 flex-1 mr-3">
+                        <Skeleton variant="circle" width={42} height={42} className="shrink-0" />
+                        <div className="flex-1 space-y-1.5">
+                            <Skeleton variant="text" width="55%" height={14} />
+                            <Skeleton variant="text" width="35%" height={11} />
+                        </div>
+                    </div>
+                    <Skeleton variant="rect" width={72} height={32} className="rounded-xl shrink-0" />
+                </div>
+            ))}
+        </div>
+    );
+};
+
+export const CommentsListSkeleton: React.FC<{ count?: number }> = ({ count = 4 }) => {
+    return (
+        <div className="flex flex-col gap-4 animate-pulse">
+            {[...Array(count)].map((_, i) => (
+                <div key={i} className="flex items-start gap-3">
+                    <Skeleton variant="circle" width={38} height={38} className="shrink-0 mt-1" />
+                    <div className="flex-1 bg-white/80 border border-black/5 rounded-2xl p-3.5 space-y-2">
+                        <div className="flex justify-between items-center">
+                            <Skeleton variant="text" width={100} height={13} />
+                            <Skeleton variant="text" width={50} height={10} />
+                        </div>
+                        <Skeleton variant="text" width="90%" height={13} />
+                        <Skeleton variant="text" width="60%" height={13} />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
+export const ContinueWatchingSkeleton: React.FC = () => {
+    return (
+        <div className="w-full flex flex-col gap-3 py-2 animate-pulse">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Skeleton variant="circle" width={22} height={22} />
+                    <Skeleton variant="text" width={140} height={16} />
+                </div>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+                {[...Array(3)].map((_, i) => (
+                    <div key={i} className="min-w-[240px] sm:min-w-[280px] bg-white border border-black/5 rounded-2xl p-3 flex flex-col gap-2 shrink-0">
+                        <Skeleton variant="rect" width="100%" height={130} className="rounded-xl" />
+                        <Skeleton variant="text" width="70%" height={14} />
+                        <div className="flex justify-between items-center pt-1">
+                            <Skeleton variant="text" width="40%" height={10} />
+                            <Skeleton variant="rect" width={50} height={18} className="rounded-md" />
+                        </div>
+                        <Skeleton variant="rect" width="100%" height={5} className="rounded-full" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+export const CompareSkeleton: React.FC = () => {
+    return (
+        <div className="w-full space-y-8 animate-pulse">
+            {/* Header / Two User Hero */}
+            <div className="bg-white border border-black/5 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-around gap-6">
+                <div className="flex flex-col items-center gap-2">
+                    <Skeleton variant="circle" width={80} height={80} />
+                    <Skeleton variant="text" width={90} height={16} />
+                    <Skeleton variant="text" width={60} height={12} />
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                    <Skeleton variant="circle" width={64} height={64} />
+                    <Skeleton variant="text" width={110} height={12} />
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                    <Skeleton variant="circle" width={80} height={80} />
+                    <Skeleton variant="text" width={90} height={16} />
+                    <Skeleton variant="text" width={60} height={12} />
+                </div>
+            </div>
+            {/* Shared Grid */}
+            <div className="space-y-4">
+                <Skeleton variant="text" width={160} height={20} />
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex flex-col gap-2">
+                            <Skeleton variant="rect" width="100%" height={220} className="rounded-2xl" />
+                            <Skeleton variant="text" width="75%" height={14} />
+                            <Skeleton variant="text" width="45%" height={10} />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const RankingsSkeleton: React.FC<{ count?: number }> = ({ count = 4 }) => {
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
+            {[...Array(count)].map((_, i) => (
+                <div key={i} className="bg-white border border-black/5 rounded-3xl p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <Skeleton variant="text" width="50%" height={20} />
+                        <Skeleton variant="rect" width={60} height={22} className="rounded-full" />
+                    </div>
+                    <Skeleton variant="text" width="80%" height={12} />
+                    <div className="flex gap-3 pt-2">
+                        {[...Array(4)].map((_, j) => (
+                            <Skeleton key={j} variant="rect" width={56} height={84} className="rounded-xl shrink-0" />
+                        ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 export default Skeleton;
