@@ -171,63 +171,65 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                 {/* Status & Filter Bar */}
                 <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
                     {/* Status badges & Controls */}
-                    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 shrink-0 max-w-full">
-                        <span className="px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs shrink-0">
-                            <span className="material-symbols-outlined text-xs">check_circle</span>
-                            {showDuplicates ? matchedCount : entries.filter(e => e.matchStatus === 'MATCHED' && !e.isDuplicate).length} Ready
-                        </span>
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 shrink-0 max-w-full">
                         {unmatchedCount > 0 ? (
-                            <span className="px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs shrink-0">
-                                <span className="material-symbols-outlined text-xs">warning</span>
-                                {unmatchedCount} Need Match
-                            </span>
+                            <>
+                                <span className="h-8 px-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs shrink-0">
+                                    <span className="material-symbols-outlined text-xs">check_circle</span>
+                                    {showDuplicates ? matchedCount : entries.filter(e => e.matchStatus === 'MATCHED' && !e.isDuplicate).length} Ready
+                                </span>
+                                <span className="h-8 px-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs shrink-0">
+                                    <span className="material-symbols-outlined text-xs">warning</span>
+                                    {unmatchedCount} Need Match
+                                </span>
+                            </>
                         ) : (
-                            <span className="px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] sm:text-[10px] font-black uppercase tracking-wider shrink-0">
-                                ✓ Ready to import
+                            <span className="h-8 px-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-2xs shrink-0">
+                                <span className="material-symbols-outlined text-xs">check_circle</span>
+                                {showDuplicates ? matchedCount : entries.filter(e => e.matchStatus === 'MATCHED' && !e.isDuplicate).length} Ready to Import
                             </span>
                         )}
                         {duplicateCount > 0 && (
                             <button
                                 type="button"
                                 onClick={() => setShowDuplicates(prev => !prev)}
-                                className={`px-2.5 py-1 rounded-xl border text-[9px] sm:text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer ${
+                                className={`h-8 px-3 rounded-xl border text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-2xs shrink-0 cursor-pointer ${
                                     showDuplicates
                                         ? 'bg-amber-100/90 border-amber-300 text-amber-900 ring-1 ring-amber-400'
-                                        : 'bg-slate-100 hover:bg-slate-200/80 border-slate-200 text-slate-600'
+                                        : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-600'
                                 }`}
                                 title={showDuplicates ? "Duplicates are currently shown in All. Click to skip them." : "Duplicates are skipped by default. Click to show them in All."}
                             >
-                                <span className="material-symbols-outlined text-xs">
+                                <span className="material-symbols-outlined text-sm">
                                     {showDuplicates ? 'check_box' : 'check_box_outline_blank'}
                                 </span>
-                                <span className="material-symbols-outlined text-xs">content_copy</span>
-                                <span>{duplicateCount} Duplicate{duplicateCount > 1 ? 's' : ''} ({showDuplicates ? 'Shown' : 'Skipped by default'})</span>
+                                <span>{duplicateCount} Duplicates ({showDuplicates ? 'Shown' : 'Skipped'})</span>
                             </button>
                         )}
                     </div>
 
                     {/* Filter tabs */}
-                    <div className="grid grid-cols-3 sm:flex items-center gap-1 bg-white border border-slate-200/80 rounded-xl p-0.5 shadow-sm w-full sm:w-auto">
+                    <div className="grid grid-cols-3 sm:flex items-center gap-1 bg-white border border-slate-200/80 rounded-xl p-1 shadow-2xs w-full sm:w-auto shrink-0">
                         <button
                             onClick={() => setActiveFilter('all')}
-                            className={`px-2 sm:px-3 py-1.5 sm:py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all text-center ${
-                                activeFilter === 'all' ? 'bg-[#ffb700] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                            className={`h-7 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center flex items-center justify-center ${
+                                activeFilter === 'all' ? 'bg-[#ffb700] text-white shadow-xs' : 'text-slate-400 hover:text-slate-600'
                             }`}
                         >
                             All ({showDuplicates ? entries.length : entries.length - duplicateCount})
                         </button>
                         <button
                             onClick={() => setActiveFilter('unmatched')}
-                            className={`px-2 sm:px-3 py-1.5 sm:py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all text-center ${
-                                activeFilter === 'unmatched' ? 'bg-[#ffb700] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                            className={`h-7 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center flex items-center justify-center ${
+                                activeFilter === 'unmatched' ? 'bg-[#ffb700] text-white shadow-xs' : 'text-slate-400 hover:text-slate-600'
                             }`}
                         >
                             Unmatched ({unmatchedCount})
                         </button>
                         <button
                             onClick={() => setActiveFilter('matched')}
-                            className={`px-2 sm:px-3 py-1.5 sm:py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider transition-all text-center ${
-                                activeFilter === 'matched' ? 'bg-[#ffb700] text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                            className={`h-7 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all text-center flex items-center justify-center ${
+                                activeFilter === 'matched' ? 'bg-[#ffb700] text-white shadow-xs' : 'text-slate-400 hover:text-slate-600'
                             }`}
                         >
                             Matched ({showDuplicates ? matchedCount : entries.filter(e => e.matchStatus === 'MATCHED' && !e.isDuplicate).length})
@@ -236,18 +238,18 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                 </div>
 
                 {/* Default to Current Year Toggle Bar */}
-                <div className="px-4 sm:px-6 py-2.5 bg-amber-50/50 border-b border-amber-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-[#ffb700]/15 text-[#ffb700] flex items-center justify-center shrink-0">
-                            <span className="material-symbols-outlined text-base">calendar_today</span>
+                <div className="px-4 sm:px-6 py-3 bg-amber-50/60 border-b border-amber-200/70 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
+                            <span className="material-symbols-outlined text-[18px]">calendar_today</span>
                         </div>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex flex-col justify-center">
                             <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-bold text-slate-800">
+                                <span className="text-xs sm:text-sm font-bold text-slate-800 leading-snug">
                                     Default to current year if no date provided
                                 </span>
                                 {missingDateCount > 0 ? (
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-100/90 border border-amber-200/80 px-2 py-0.5 rounded-full shrink-0">
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100/90 border border-amber-200 px-2 py-0.5 rounded-full shrink-0">
                                         {missingDateCount} undated item{missingDateCount > 1 ? 's' : ''}
                                     </span>
                                 ) : (
@@ -256,29 +258,33 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                     </span>
                                 )}
                             </div>
-                            <p className="text-[11px] text-slate-500 font-medium">
+                            <p className="text-[11px] text-slate-500 font-medium leading-normal mt-0.5">
                                 {localDefaultToCurrentYear
-                                    ? `Items without a watch date will be recorded under ${currentYear}`
+                                    ? `Items without a watch date will be logged under ${currentYear}`
                                     : 'Off — items missing dates will be recorded without a watch date'}
                             </p>
                         </div>
                     </div>
 
-                    <label className="relative inline-flex items-center cursor-pointer shrink-0 self-end sm:self-center gap-2">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                    <div className="flex items-center gap-2.5 shrink-0 select-none">
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md transition-colors ${
+                            localDefaultToCurrentYear ? 'bg-[#ffb700]/20 text-[#b07d00]' : 'bg-slate-200/80 text-slate-500'
+                        }`}>
                             {localDefaultToCurrentYear ? 'On' : 'Off'}
                         </span>
-                        <input
-                            type="checkbox"
-                            className="sr-only peer"
-                            checked={localDefaultToCurrentYear}
-                            onChange={(e) => {
-                                setLocalDefaultToCurrentYear(e.target.checked);
-                                onToggleDefaultToCurrentYear?.(e.target.checked);
-                            }}
-                        />
-                        <div className="w-10 h-5.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[#ffb700]"></div>
-                    </label>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
+                                checked={localDefaultToCurrentYear}
+                                onChange={(e) => {
+                                    setLocalDefaultToCurrentYear(e.target.checked);
+                                    onToggleDefaultToCurrentYear?.(e.target.checked);
+                                }}
+                            />
+                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#ffb700] shadow-inner transition-colors"></div>
+                        </label>
+                    </div>
                 </div>
 
                 {/* Banner Alerts */}
@@ -376,7 +382,7 @@ export const ImportPreviewModal: React.FC<ImportPreviewModalProps> = ({
                                                                 ) : null}
                                                             </span>
                                                         </span>
-                                                    ) : defaultToCurrentYear ? (
+                                                    ) : localDefaultToCurrentYear ? (
                                                         <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md inline-flex items-center gap-1" title={`No watch date in file — will default to current year (${currentYear})`}>
                                                             <span>📅</span>
                                                             <span>No date (defaults to {currentYear})</span>

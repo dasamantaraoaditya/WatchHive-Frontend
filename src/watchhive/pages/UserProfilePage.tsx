@@ -29,7 +29,7 @@ export const UserProfilePage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean; type: 'followers' | 'following' }>({ isOpen: false, type: 'followers' });
-    
+
     const [activeTab, setActiveTabState] = useState<'entries' | 'watching' | 'watchlist' | 'rankings'>(
         tabFromUrl && ['entries', 'watching', 'watchlist', 'rankings'].includes(tabFromUrl) ? tabFromUrl : 'entries'
     );
@@ -158,9 +158,9 @@ export const UserProfilePage: React.FC = () => {
             nextFollowing = false;
             nextRequested = false;
         } else {
-            const isPrivateAccount = profileUser.privacyLevel === 'FOLLOWERS_ONLY' || 
-                                     profileUser.privacyLevel === 'PRIVATE' || 
-                                     profileUser.isPrivate;
+            const isPrivateAccount = profileUser.privacyLevel === 'FOLLOWERS_ONLY' ||
+                profileUser.privacyLevel === 'PRIVATE' ||
+                profileUser.isPrivate;
             if (isPrivateAccount) {
                 nextRequested = true;
             } else {
@@ -227,7 +227,7 @@ export const UserProfilePage: React.FC = () => {
     const isOwner = currentUser?.id === profileUser.id;
     const isFollower = profileUser.isFollowing;
     const isRequested = profileUser.isRequested;
-    
+
     let canViewEntries = false;
     if (isOwner) {
         canViewEntries = true;
@@ -251,7 +251,7 @@ export const UserProfilePage: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex flex-col md:flex-row items-center md:items-start lg:items-center justify-between gap-6 lg:gap-8 pt-2 sm:pt-4 md:pt-2">
-                        <div 
+                        <div
                             className="relative group cursor-pointer shrink-0"
                             onClick={() => setIsAvatarModalOpen(true)}
                             title="Click to view full picture"
@@ -260,11 +260,11 @@ export const UserProfilePage: React.FC = () => {
                             <div className="relative p-1 bg-gradient-to-br from-[#ffb700] via-[#ffaa00] to-transparent rounded-full shadow-lg transition-transform group-hover:scale-105 duration-300">
                                 <div className="bg-white rounded-full p-1 relative overflow-hidden">
                                     {resolveAvatarUrl(profileUser.profilePictureUrl) && !avatarError ? (
-                                        <img 
-                                            className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover" 
-                                            src={resolveAvatarUrl(profileUser.profilePictureUrl)!} 
+                                        <img
+                                            className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover"
+                                            src={resolveAvatarUrl(profileUser.profilePictureUrl)!}
                                             alt={profileUser.displayName || profileUser.username}
-                                            onError={() => setAvatarError(true)} 
+                                            onError={() => setAvatarError(true)}
                                         />
                                     ) : (
                                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
@@ -278,14 +278,14 @@ export const UserProfilePage: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="flex-1 min-w-0 text-center md:text-left space-y-4">
                             <div>
                                 <h1 className="text-3xl font-black text-[#2D2926] tracking-tighter leading-none mb-1">
                                     {profileUser.displayName || profileUser.username}
                                 </h1>
                                 <div className="flex items-center gap-2 mt-1.5 flex-wrap justify-center md:justify-start">
-                                    <p className="text-[#ffb700] font-black text-sm uppercase tracking-widest">@{profileUser.username}</p>
+                                    <p className="text-[#ffb700] font-black text-sm uppercase tracking-widest mb-0">@{profileUser.username}</p>
                                     <span className="text-slate-300">•</span>
                                     <span className="text-[11px] font-black bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
                                         LVL {profileUser.level || 1} · {profileUser.xp || 0} XP
@@ -293,8 +293,8 @@ export const UserProfilePage: React.FC = () => {
                                     {profileUser.watchStreak && profileUser.watchStreak > 0 ? (
                                         <StreakBadge streak={profileUser.watchStreak} onClick={() => setIsBadgeModalOpen(true)} />
                                     ) : null}
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         onClick={() => setIsBadgeModalOpen(true)}
                                         className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#ffb700]/15 hover:bg-[#ffb700]/25 text-[#92400e] px-2 py-0.5 rounded-md transition-colors cursor-pointer"
                                         title="View Honey Level Badges"
@@ -307,7 +307,7 @@ export const UserProfilePage: React.FC = () => {
                             <p className="text-slate-500 font-medium max-w-lg leading-relaxed">
                                 {profileUser.bio || "Building a hive of visual experiences. Passionate about storytelling and cinema."}
                             </p>
-                            
+
                             {canViewEntries && profileUser._count && (
                                 <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-2">
                                     {[
@@ -315,8 +315,8 @@ export const UserProfilePage: React.FC = () => {
                                         { label: 'Followers', count: profileUser._count.followers, icon: 'group', onClick: () => setModalConfig({ isOpen: true, type: 'followers' }) },
                                         { label: 'Following', count: profileUser._count.following, icon: 'person_add', onClick: () => setModalConfig({ isOpen: true, type: 'following' }) }
                                     ].map((stat, i) => (
-                                        <div 
-                                            key={i} 
+                                        <div
+                                            key={i}
                                             className={`bg-slate-50 border border-slate-100 px-5 py-3 rounded-2xl text-center min-w-[100px] transition-all ${stat.onClick ? 'cursor-pointer hover:bg-slate-100' : ''}`}
                                             onClick={stat.onClick}
                                         >
@@ -327,7 +327,7 @@ export const UserProfilePage: React.FC = () => {
                                 </div>
                             )}
                         </div>
-                        
+
                         <div className="flex flex-col gap-2.5 w-full md:w-auto md:min-w-[240px] lg:min-w-[280px] shrink-0 mt-4 md:mt-0">
                             {isOwner ? (
                                 <div className="flex flex-col gap-2 w-full">
@@ -335,7 +335,7 @@ export const UserProfilePage: React.FC = () => {
                                         <span className="material-symbols-outlined text-sm text-amber-600">visibility</span>
                                         <span>Your Public View</span>
                                     </div>
-                                    <button 
+                                    <button
                                         onClick={() => navigate('/watch-hive/profile')}
                                         className="w-full font-bold py-2.5 px-4 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all text-xs flex items-center justify-center gap-1.5 shadow-xs cursor-pointer whitespace-nowrap"
                                     >
@@ -349,15 +349,15 @@ export const UserProfilePage: React.FC = () => {
                                         Wants to Follow You
                                     </p>
                                     <div className="grid grid-cols-2 gap-2 w-full">
-                                        <button 
-                                            onClick={handleAcceptRequest} 
+                                        <button
+                                            onClick={handleAcceptRequest}
                                             className="w-full font-black py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] uppercase tracking-[0.12em] shadow-md shadow-emerald-500/10 active:scale-95 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap"
                                         >
                                             <span className="material-symbols-outlined text-[15px] font-bold">check</span>
                                             <span>Accept</span>
                                         </button>
-                                        <button 
-                                            onClick={handleRejectRequest} 
+                                        <button
+                                            onClick={handleRejectRequest}
                                             className="w-full font-black py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-500 hover:text-white border border-rose-100 hover:border-rose-500 text-rose-500 text-[10px] uppercase tracking-[0.12em] active:scale-95 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer whitespace-nowrap"
                                         >
                                             <span className="material-symbols-outlined text-[15px] font-bold">close</span>
@@ -365,7 +365,7 @@ export const UserProfilePage: React.FC = () => {
                                         </button>
                                     </div>
                                     <div className={`grid ${!isOwner && canViewEntries ? 'grid-cols-2' : 'grid-cols-1'} gap-2 w-full`}>
-                                        <button 
+                                        <button
                                             onClick={() => setIsSuggestModalOpen(true)}
                                             title={profileUser.isFollower === false ? `@${profileUser.username} must follow you to receive suggestions` : 'Suggest a title to this user'}
                                             className="w-full font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[10px] uppercase tracking-[0.12em] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
@@ -389,8 +389,8 @@ export const UserProfilePage: React.FC = () => {
                                 </div>
                             ) : (
                                 <div className="flex flex-col gap-2 w-full">
-                                    <button 
-                                        onClick={handleFollowToggle} 
+                                    <button
+                                        onClick={handleFollowToggle}
                                         onMouseEnter={() => {
                                             if (profileUser.isFollowing) setIsHoveredFollowing(true);
                                             if (profileUser.isRequested) setIsHoveredRequested(true);
@@ -399,13 +399,12 @@ export const UserProfilePage: React.FC = () => {
                                             setIsHoveredFollowing(false);
                                             setIsHoveredRequested(false);
                                         }}
-                                        className={`w-full font-black py-3 px-4 rounded-xl transition-all duration-200 text-[10px] uppercase tracking-[0.14em] shadow-sm hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
-                                            profileUser.isFollowing 
-                                            ? 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-slate-200' 
+                                        className={`w-full font-black py-3 px-4 rounded-xl transition-all duration-200 text-[10px] uppercase tracking-[0.14em] shadow-sm hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${profileUser.isFollowing
+                                            ? 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-slate-200'
                                             : profileUser.isRequested
-                                            ? 'bg-amber-50 text-amber-600 hover:bg-rose-50 hover:text-rose-600 border border-amber-200 shadow-amber-100/50'
-                                            : 'bg-[#ffb700] text-[#2D2926] shadow-md shadow-[#ffb700]/20 hover:brightness-105'
-                                        }`}
+                                                ? 'bg-amber-50 text-amber-600 hover:bg-rose-50 hover:text-rose-600 border border-amber-200 shadow-amber-100/50'
+                                                : 'bg-[#ffb700] text-[#2D2926] shadow-md shadow-[#ffb700]/20 hover:brightness-105'
+                                            }`}
                                     >
                                         {profileUser.isFollowing ? (
                                             isHoveredFollowing ? (
@@ -440,7 +439,7 @@ export const UserProfilePage: React.FC = () => {
                                     </button>
 
                                     <div className={`grid ${!isOwner && canViewEntries ? 'grid-cols-2' : 'grid-cols-1'} gap-2 w-full`}>
-                                        <button 
+                                        <button
                                             onClick={() => setIsSuggestModalOpen(true)}
                                             title={profileUser.isFollower === false ? `@${profileUser.username} must follow you to receive suggestions` : 'Suggest a title to this user'}
                                             className="w-full font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[10px] uppercase tracking-[0.12em] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
@@ -476,12 +475,11 @@ export const UserProfilePage: React.FC = () => {
                             { id: 'watchlist', label: 'Watchlist', show: profileUser.showWatchlist },
                             { id: 'rankings', label: 'Rankings Stacks', show: profileUser.showRankings !== false }
                         ].filter(t => t.show || (currentUser && currentUser.id === profileUser.id)).map(tab => (
-                            <button 
+                            <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`pb-4 px-2 font-black text-[10px] uppercase tracking-[0.2em] whitespace-nowrap relative transition-all ${
-                                    activeTab === tab.id ? 'text-[#ffb700]' : 'text-slate-400 hover:text-slate-600'
-                                }`}
+                                className={`pb-4 px-2 font-black text-[10px] uppercase tracking-[0.2em] whitespace-nowrap relative transition-all ${activeTab === tab.id ? 'text-[#ffb700]' : 'text-slate-400 hover:text-slate-600'
+                                    }`}
                             >
                                 {tab.label}
                                 {activeTab === tab.id && (
@@ -572,7 +570,7 @@ export const UserProfilePage: React.FC = () => {
                                                             const year = item.releaseDate ? new Date(item.releaseDate).getFullYear() : null;
 
                                                             return (
-                                                                <div 
+                                                                <div
                                                                     key={item.id || idx}
                                                                     onClick={() => {
                                                                         const type = item.mediaType === 'tv' ? 'tv' : 'movie';
@@ -581,23 +579,22 @@ export const UserProfilePage: React.FC = () => {
                                                                     className="flex items-center justify-between p-3 bg-slate-50 hover:bg-[#ffb700]/10 rounded-2xl cursor-pointer transition-all border border-black/5 hover:border-[#ffb700]/30 shadow-2xs group"
                                                                 >
                                                                     <div className="flex items-center gap-3.5 min-w-0">
-                                                                        <span className={`w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 shadow-xs ${
-                                                                            idx === 0 
-                                                                                ? 'bg-[#ffb700] text-[#2D2926] ring-2 ring-[#ffb700]/30' 
-                                                                                : idx === 1 
-                                                                                ? 'bg-slate-200 text-[#2D2926] ring-1 ring-slate-300' 
-                                                                                : idx === 2 
-                                                                                ? 'bg-amber-600 text-white ring-1 ring-amber-700/30' 
-                                                                                : 'bg-white text-[#2D2926] border border-black/10 shadow-2xs'
-                                                                        }`}>
+                                                                        <span className={`w-7 h-7 rounded-full text-xs font-black flex items-center justify-center shrink-0 shadow-xs ${idx === 0
+                                                                            ? 'bg-[#ffb700] text-[#2D2926] ring-2 ring-[#ffb700]/30'
+                                                                            : idx === 1
+                                                                                ? 'bg-slate-200 text-[#2D2926] ring-1 ring-slate-300'
+                                                                                : idx === 2
+                                                                                    ? 'bg-amber-600 text-white ring-1 ring-amber-700/30'
+                                                                                    : 'bg-white text-[#2D2926] border border-black/10 shadow-2xs'
+                                                                            }`}>
                                                                             #{idx + 1}
                                                                         </span>
 
                                                                         {posterUrl ? (
-                                                                            <img 
-                                                                                src={posterUrl} 
-                                                                                alt={item.title || 'Movie'} 
-                                                                                className="w-10 h-14 object-cover rounded-lg shadow-sm shrink-0 border border-black/5 group-hover:scale-105 transition-transform" 
+                                                                            <img
+                                                                                src={posterUrl}
+                                                                                alt={item.title || 'Movie'}
+                                                                                className="w-10 h-14 object-cover rounded-lg shadow-sm shrink-0 border border-black/5 group-hover:scale-105 transition-transform"
                                                                             />
                                                                         ) : (
                                                                             <div className="w-10 h-14 bg-slate-200 rounded-lg flex items-center justify-center text-slate-400 shrink-0">
@@ -648,15 +645,15 @@ export const UserProfilePage: React.FC = () => {
                                     {privacyLevel === 'PRIVATE' ? "Strictly Private" : "Connect to View Profile"}
                                 </h3>
                                 <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed">
-                                    {privacyLevel === 'PRIVATE' 
-                                        ? "Activity on this profile is hidden from everyone. Respecting the privacy hive." 
+                                    {privacyLevel === 'PRIVATE'
+                                        ? "Activity on this profile is hidden from everyone. Respecting the privacy hive."
                                         : "Follow this user to see their entries and cinematic activity."}
                                 </p>
                             </div>
                         </div>
                     )}
                 </section>
-                
+
                 {profileUser && (
                     <FollowListModal
                         isOpen={modalConfig.isOpen}
