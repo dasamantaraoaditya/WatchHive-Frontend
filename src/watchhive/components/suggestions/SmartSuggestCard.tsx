@@ -125,8 +125,8 @@ export const SmartSuggestCard: React.FC<SmartSuggestCardProps> = ({ item, onLogW
                     />
                 </div>
 
-                <div className="flex items-center gap-1.5 flex-1 justify-end">
-                    {onLogWatch && (
+                {onLogWatch && (
+                    <div className="flex items-center gap-1.5 justify-end">
                         <button
                             type="button"
                             onClick={() => onLogWatch(item)}
@@ -136,17 +136,8 @@ export const SmartSuggestCard: React.FC<SmartSuggestCardProps> = ({ item, onLogW
                             <span className="material-symbols-outlined text-[15px]">edit_note</span>
                             <span>Log</span>
                         </button>
-                    )}
-
-                    <button
-                        type="button"
-                        onClick={handleNavigate}
-                        className="px-3 py-1.5 bg-[#ffb700] hover:bg-[#ffa700] text-[#2D2926] rounded-xl font-black text-xs uppercase tracking-wider transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
-                    >
-                        <span>View</span>
-                        <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                    </button>
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );
