@@ -819,6 +819,96 @@ export const MovieDetailsPage: React.FC = () => {
                                     );
                                 })()}
 
+                                {/* Where to Watch (Above Episodes) */}
+                                {(() => {
+                                    const watchProvidersData = details['watch/providers']?.results;
+                                    const localProviders = watchProvidersData
+                                        ? watchProvidersData.IN || watchProvidersData.US || Object.values(watchProvidersData)[0]
+                                        : null;
+
+                                    if (!localProviders) return null;
+
+                                    const streamingProviders = localProviders.flatrate || localProviders.free || [];
+                                    const rentProviders = localProviders.rent || [];
+                                    const buyProviders = localProviders.buy || [];
+
+                                    if (!streamingProviders.length && !rentProviders.length && !buyProviders.length) return null;
+
+                                    return (
+                                        <div className="flex flex-col gap-4 bg-white p-8 md:p-10 rounded-3xl border border-[#ffb700]/20 shadow-sm relative overflow-hidden group">
+                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ffb700]/40 via-[#ffb700] to-[#ffb700]/40 opacity-80"></div>
+                                            <h3 className="text-[#2D2926]/50 text-xs font-bold uppercase tracking-[0.3em] flex items-center gap-2">
+                                                <span>Where to Watch</span>
+                                            </h3>
+                                            <div className="flex flex-col gap-3">
+                                                {streamingProviders.length > 0 && (
+                                                    <div className="flex flex-wrap items-center gap-3">
+                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Stream:</span>
+                                                        {streamingProviders.map((p: any) => (
+                                                            <a
+                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                key={p.provider_id}
+                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
+                                                                title={p.provider_name}
+                                                            >
+                                                                <img
+                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
+                                                                    alt={p.provider_name}
+                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
+                                                                />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {rentProviders.length > 0 && (
+                                                    <div className="flex flex-wrap items-center gap-3">
+                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Rent:</span>
+                                                        {rentProviders.map((p: any) => (
+                                                            <a
+                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                key={p.provider_id}
+                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
+                                                                title={p.provider_name}
+                                                            >
+                                                                <img
+                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
+                                                                    alt={p.provider_name}
+                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
+                                                                />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {buyProviders.length > 0 && (
+                                                    <div className="flex flex-wrap items-center gap-3">
+                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Buy:</span>
+                                                        {buyProviders.map((p: any) => (
+                                                            <a
+                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                key={p.provider_id}
+                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
+                                                                title={p.provider_name}
+                                                            >
+                                                                <img
+                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
+                                                                    alt={p.provider_name}
+                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
+                                                                />
+                                                            </a>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
                                 {/* Season & Episode Drill Down Accordion */}
                                 {mediaType === 'tv' && details.seasons && details.seasons.length > 0 && (
                                     <div className="flex flex-col gap-6 bg-white p-6 md:p-8 rounded-3xl border border-[#ffb700]/20 shadow-sm">
@@ -1010,96 +1100,6 @@ export const MovieDetailsPage: React.FC = () => {
                                         )}
                                     </div>
                                 )}
-
-                                {/* Where to Watch */}
-                                {(() => {
-                                    const watchProvidersData = details['watch/providers']?.results;
-                                    const localProviders = watchProvidersData
-                                        ? watchProvidersData.IN || watchProvidersData.US || Object.values(watchProvidersData)[0]
-                                        : null;
-
-                                    if (!localProviders) return null;
-
-                                    const streamingProviders = localProviders.flatrate || localProviders.free || [];
-                                    const rentProviders = localProviders.rent || [];
-                                    const buyProviders = localProviders.buy || [];
-
-                                    if (!streamingProviders.length && !rentProviders.length && !buyProviders.length) return null;
-
-                                    return (
-                                        <div className="flex flex-col gap-4 bg-white p-8 md:p-10 rounded-3xl border border-[#ffb700]/20 shadow-sm relative overflow-hidden group">
-                                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#ffb700]/40 via-[#ffb700] to-[#ffb700]/40 opacity-80"></div>
-                                            <h3 className="text-[#2D2926]/50 text-xs font-bold uppercase tracking-[0.3em]">
-                                                Where to Watch (India)
-                                            </h3>
-                                            <div className="flex flex-col gap-3">
-                                                {streamingProviders.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Stream:</span>
-                                                        {streamingProviders.map((p: any) => (
-                                                            <a
-                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                key={p.provider_id}
-                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
-                                                                title={p.provider_name}
-                                                            >
-                                                                <img
-                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
-                                                                    alt={p.provider_name}
-                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
-                                                                />
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {rentProviders.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Rent:</span>
-                                                        {rentProviders.map((p: any) => (
-                                                            <a
-                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                key={p.provider_id}
-                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
-                                                                title={p.provider_name}
-                                                            >
-                                                                <img
-                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
-                                                                    alt={p.provider_name}
-                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
-                                                                />
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {buyProviders.length > 0 && (
-                                                    <div className="flex flex-wrap items-center gap-3">
-                                                        <span className="text-xs font-bold text-[#2D2926]/60 w-16">Buy:</span>
-                                                        {buyProviders.map((p: any) => (
-                                                            <a
-                                                                href={getDirectLink(p.provider_name, localProviders.link || '', title)}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                key={p.provider_id}
-                                                                className="shrink-0 hover:scale-105 transition-transform duration-200"
-                                                                title={p.provider_name}
-                                                            >
-                                                                <img
-                                                                    src={`https://image.tmdb.org/t/p/w92${p.logo_path}`}
-                                                                    alt={p.provider_name}
-                                                                    className="w-10 h-10 rounded-xl shadow-xs border border-[#2D2926]/5"
-                                                                />
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
                             </div>
                         </>
                     ) : view === 'log' ? (
