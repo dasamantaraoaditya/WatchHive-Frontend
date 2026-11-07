@@ -27,6 +27,9 @@ export const InstallPromptBanner: React.FC = () => {
     useEffect(() => {
         // Check cooldown dismissal
         try {
+            if (localStorage.getItem('watchhive-install-dismissed') === 'true') {
+                setIsDismissed(true);
+            }
             const dismissedAtStr = localStorage.getItem(DISMISS_KEY);
             if (dismissedAtStr) {
                 const dismissedAt = parseInt(dismissedAtStr, 10);
@@ -67,6 +70,7 @@ export const InstallPromptBanner: React.FC = () => {
     const handleDismiss = () => {
         setIsDismissed(true);
         try {
+            localStorage.setItem('watchhive-install-dismissed', 'true');
             localStorage.setItem(DISMISS_KEY, Date.now().toString());
         } catch (_) {}
     };
