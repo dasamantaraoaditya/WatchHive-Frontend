@@ -1273,6 +1273,7 @@ export const LandingPage: React.FC = () => {
                         <Link to="/watch-hive/signup" className="hover:text-amber-600 transition-colors">Sign Up</Link>
                         <Link to="/watch-hive/support" className="hover:text-amber-600 transition-colors">Support</Link>
                         <Link to="/watch-hive/privacy" className="hover:text-amber-600 transition-colors">Privacy Policy</Link>
+                        <Link to="/watch-hive/terms" className="hover:text-amber-600 transition-colors">Terms of Service</Link>
                         <button
                             type="button"
                             onClick={() => setIsLegalModalOpen(true)}

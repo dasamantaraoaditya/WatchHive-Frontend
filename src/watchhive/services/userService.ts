@@ -85,6 +85,10 @@ export const userService = {
     async deleteAccount(): Promise<void> {
         return apiClient.delete('/users/me');
     },
+
+    async exportData(): Promise<any> {
+        return apiClient.get('/users/me/export');
+    },
 };
 
 export default userService;

@@ -283,10 +283,14 @@ export const LoginPage: React.FC = () => {
                     )}
 
                     <div className="mt-8 pt-6 border-t border-[#ffb700]/10 text-center">
-                        <p className="text-[12px] font-medium text-[#2D2926]/40">
+                        <p className="text-[12px] font-medium text-[#2D2926]/50">
                             By continuing, you agree to WatchersHive's{' '}
-                            <Link to="/watch-hive/privacy" className="font-bold text-[#2D2926]/70 hover:underline">
-                                Privacy Policy & Non-Commercial Terms
+                            <Link to="/watch-hive/terms" className="font-bold text-[#2D2926]/80 hover:underline">
+                                Terms of Service
+                            </Link>{' '}
+                            and{' '}
+                            <Link to="/watch-hive/privacy" className="font-bold text-[#2D2926]/80 hover:underline">
+                                Privacy Policy
                             </Link>.
                         </p>
                     </div>

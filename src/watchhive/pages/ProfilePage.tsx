@@ -54,6 +54,7 @@ export const ProfilePage: React.FC = () => {
     const [previewData, setPreviewData] = useState<ImportPreviewResult | null>(null);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [isCommittingImport, setIsCommittingImport] = useState(false);
+    const [isExportingGdpr, setIsExportingGdpr] = useState(false);
     const [copiedPrompt, setCopiedPrompt] = useState(false);
     const importFileRef = useRef<HTMLInputElement>(null);
 
@@ -155,6 +156,27 @@ export const ProfilePage: React.FC = () => {
             showError(err?.response?.data?.error || err.message || 'Export failed');
         } finally {
             setDataLoading(false);
+        }
+    };
+
+    const handleGdprExport = async () => {
+        setIsExportingGdpr(true);
+        try {
+            const data = await userService.exportData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `watchhive-archive-${user?.username || 'user'}-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showSuccess('Complete GDPR personal archive downloaded! 📦');
+        } catch (err: any) {
+            showError(err?.response?.data?.message || err.message || 'Failed to export data');
+        } finally {
+            setIsExportingGdpr(false);
         }
     };
 
@@ -925,16 +947,27 @@ export const ProfilePage: React.FC = () => {
                         <h4 className="text-xs sm:text-sm font-black text-amber-900">Important: Back up your Hive data first</h4>
                     </div>
                     <p className="text-xs text-amber-800 leading-relaxed mb-3">
-                        Your watch history, reviews, and ratings are deeply valuable. If you want to migrate to another app or keep your personal records for future reference, please take a moment to export your data before deleting. Once deleted, your data cannot be restored under any circumstances.
+                        Your watch history, reviews, and ratings are deeply valuable. Under GDPR Article 20 and data portability laws, you have the right to download a complete, machine-readable archive of your personal account, watches, episode logs, and comments at any time.
                     </p>
-                    <button
-                        onClick={scrollToDataManagement}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-black rounded-xl border border-amber-300 transition-colors"
-                    >
-                        <span className="material-symbols-outlined text-sm">download</span>
-                        <span>Go to Data Management for Export</span>
-                        <span className="material-symbols-outlined text-xs">arrow_upward</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                        <button
+                            type="button"
+                            onClick={handleGdprExport}
+                            disabled={isExportingGdpr}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#ffb700] hover:bg-[#e5a500] text-[#2D2926] text-xs font-black rounded-xl border border-amber-400 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                        >
+                            <span className="material-symbols-outlined text-sm">download</span>
+                            <span>{isExportingGdpr ? 'Preparing Archive...' : 'Download Full GDPR Archive (JSON)'}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={scrollToDataManagement}
+                            className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-black rounded-xl border border-amber-300 transition-colors cursor-pointer"
+                        >
+                            <span>CSV / JSON Migration Tool</span>
+                            <span className="material-symbols-outlined text-xs">arrow_upward</span>
+                        </button>
+                    </div>
                 </div>
 
                 <button

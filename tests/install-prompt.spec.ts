@@ -5,7 +5,7 @@ test.describe('PWA Install Prompt Banner', () => {
         // Go to the app running locally (preview or dev server)
         await page.goto('http://localhost:4173/');
         // We ensure that the install prompt doesn't show initially because beforeinstallprompt hasn't fired yet
-        await expect(page.locator('text=Install WatchHive App')).not.toBeVisible();
+        await expect(page.locator('.wh-top-install-banner')).not.toBeVisible();
 
         // Dispatch the custom beforeinstallprompt event inside the browser context
         await page.evaluate(() => {
@@ -19,15 +19,15 @@ test.describe('PWA Install Prompt Banner', () => {
         });
 
         // The banner should now be visible
-        const installBanner = page.locator('text=Install WatchHive App');
+        const installBanner = page.locator('.wh-top-install-banner');
         await expect(installBanner).toBeVisible();
 
         // The banner should contain the install button
-        const installButton = page.locator('button:has-text("Install Now")');
+        const installButton = page.locator('.wh-top-install-btn');
         await expect(installButton).toBeVisible();
 
         // Click the dismiss button (the "X")
-        const dismissButton = page.locator('button[title="Dismiss"]');
+        const dismissButton = page.locator('.wh-top-install-dismiss');
         await expect(dismissButton).toBeVisible();
         await dismissButton.click();
 

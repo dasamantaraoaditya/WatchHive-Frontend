@@ -1,0 +1,11 @@
+{
+  "quality-gate": {
+    "enabled": true,
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "echo '{\"injectSteps\": [{\"ephemeralMessage\": \"WatchHive Frontend active. Remember the Golden Contrast Rule: NO white text on gold/cream, and use skeleton loaders primarily.\"}]}'"
+      }
+    ]
+  }
+}
