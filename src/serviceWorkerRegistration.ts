@@ -17,30 +17,44 @@ export const registerServiceWorker = () => {
 };
 
 // Function to manually trigger "Add to Home Screen" prompt
-let deferredPrompt: any;
+let deferredPrompt: any = null;
 
 export const setupInstallPrompt = () => {
   window.addEventListener('beforeinstallprompt', (e: any) => {
-    // Prevent the mini-infobar from appearing on mobile
+    // Prevent the default mini-infobar from appearing on mobile
     e.preventDefault();
     // Stash the event for later use
     deferredPrompt = e;
     console.log('PWA install prompt is ready');
+    window.dispatchEvent(new CustomEvent('watchhive:install-prompt-ready'));
+  });
+
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    console.log('PWA installed successfully');
+    window.dispatchEvent(new CustomEvent('watchhive:app-installed'));
   });
 };
 
-export const showInstallPrompt = async () => {
+export const showInstallPrompt = async (): Promise<string | null> => {
   if (deferredPrompt) {
-    // Show the install prompt
-    deferredPrompt.prompt();
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
-    // Clear the saved prompt since it can't be used again
-    deferredPrompt = null;
+    try {
+      // Show the install prompt
+      deferredPrompt.prompt();
+      // Wait for the user to respond to the prompt
+      const choiceResult = await deferredPrompt.userChoice;
+      console.log(`User response to install prompt: ${choiceResult?.outcome}`);
+      deferredPrompt = null;
+      window.dispatchEvent(new CustomEvent('watchhive:install-prompt-consumed'));
+      return choiceResult?.outcome || null;
+    } catch (err) {
+      console.error('Error showing install prompt:', err);
+      return null;
+    }
   }
+  return null;
 };
 
-export const isInstallPromptReady = () => {
-  return deferredPrompt !== null;
+export const isInstallPromptReady = (): boolean => {
+  return Boolean(deferredPrompt);
 };

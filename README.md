@@ -175,3 +175,15 @@ For an exhaustive, chapter-by-chapter walkthrough of all product capabilities, s
 14. **Mobile-Responsive UX & Touch Ergonomics**: Adaptive desktop/mobile layouts, bottom drawer sheets, keyboard avoidance.
 
 > 💡 **Developer Note:** All documentation files reside within `docs/` and are strictly excluded from client JS/CSS bundles and native mobile binaries, adding **0 bytes** to production release artifacts.
+
+---
+
+## 🤖 7. Agentic AI & Developer Optimizations (`.agents/`)
+
+This repository is optimized for AI pair programming with Antigravity:
+- **Project Context (`.agents/AGENTS.md`)**: Automatically loads React 18, Vite, design tokens, Golden Contrast Rule, loader rules, and routing structure.
+- **Workflow Skills (`.agents/skills/`)**:
+  - `deploy`: Deployment to Vercel Staging and Production, service worker and header validation.
+  - `test`: Playwright E2E UI testing and headless testing.
+- **Quality Hooks (`.agents/hooks.json`)**: Pre-execution contrast and loader rule reminders.
+

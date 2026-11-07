@@ -131,6 +131,52 @@ export const PrivacyPolicyPage: React.FC = () => {
                         </p>
                     </section>
 
+                    <section>
+                        <h2 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-3">
+                            <span className="w-8 h-8 rounded-lg bg-[#ffb700]/10 text-[#ffb700] flex items-center justify-center text-sm">8</span>
+                            Your Legal Rights (GDPR & CCPA/CPRA)
+                        </h2>
+                        <p className="font-medium text-slate-600 mb-4">
+                            Under the General Data Protection Regulation (EU/UK GDPR) and the California Consumer Privacy Act (CCPA/CPRA), you have enforceable statutory rights regarding your personal information:
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-1">Right to Access & Portability</h3>
+                                <p className="text-[12px] font-medium text-slate-500">
+                                    You can obtain a full JSON export of all your logged movies, episodes, ratings, and lists via the "Export Data" button in your profile settings at any time (GDPR Art. 15 & 20).
+                                </p>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-1">Right to Erasure ("To Be Forgotten")</h3>
+                                <p className="text-[12px] font-medium text-slate-500">
+                                    You can permanently delete your account and all associated records directly inside the app under Profile Danger Zone (GDPR Art. 17).
+                                </p>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-1">Right to Rectification</h3>
+                                <p className="text-[12px] font-medium text-slate-500">
+                                    You have full ability to correct or update your username, bio, avatar, and watch history records directly from your dashboard (GDPR Art. 16).
+                                </p>
+                            </div>
+                            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-1">CCPA "Do Not Sell My Info"</h3>
+                                <p className="text-[12px] font-medium text-slate-500">
+                                    WatchersHive does <strong>NOT sell, rent, or commercialize</strong> your personal information or watch patterns to third-party data brokers or advertisers.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="p-6 rounded-3xl bg-slate-50 border border-slate-200">
+                        <h2 className="text-lg font-black text-slate-900 mb-2 flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[#ffb700] text-xl">child_care</span>
+                            Children's Privacy Protection (COPPA & GDPR Minors)
+                        </h2>
+                        <p className="text-xs font-medium text-slate-600 leading-relaxed">
+                            WatchersHive does not knowingly solicit or collect personal information from children under the age of 13 (or under 16 in certain EU member states). If we discover that a user under the legal age has registered an account without verified parental consent, we will promptly delete the account and associated data. If you believe a child has provided us with personal data, please contact us at <a href="mailto:watchershive@gmail.com" className="font-bold text-[#ffb700] hover:underline">watchershive@gmail.com</a>.
+                        </p>
+                    </section>
+
                     <section className="p-6 rounded-3xl bg-amber-50 border border-amber-200/60 text-slate-700">
                         <h2 className="text-xl font-black mb-3 flex items-center gap-3 text-slate-900">
                             <span className="material-symbols-outlined text-[#ffb700]">gavel</span>

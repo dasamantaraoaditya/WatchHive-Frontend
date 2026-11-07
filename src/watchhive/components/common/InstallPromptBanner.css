@@ -1,0 +1,320 @@
+/* ============================================
+   WatchHive - Letterboxd Style Top PWA Install Banner & Alert
+   ============================================ */
+
+.wh-top-install-banner {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    background: rgba(26, 22, 13, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 183, 0, 0.25);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: whSlideDownBanner 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes whSlideDownBanner {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.wh-top-install-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.wh-top-install-dismiss {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    padding: 6px;
+    font-size: 15px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: color 0.15s ease, background-color 0.15s ease;
+    flex-shrink: 0;
+}
+
+.wh-top-install-dismiss:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.wh-top-install-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(255, 183, 0, 0.25);
+    flex-shrink: 0;
+}
+
+.wh-top-install-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.wh-top-install-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wh-top-install-subtitle {
+    font-size: 11px;
+    font-weight: 500;
+    color: #ffb700;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wh-top-install-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.wh-top-install-btn {
+    background: #ffb700;
+    color: #1a160d;
+    border: none;
+    outline: none;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(255, 183, 0, 0.35);
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.wh-top-install-btn:hover {
+    background: #e6a500;
+    box-shadow: 0 4px 14px rgba(255, 183, 0, 0.45);
+}
+
+.wh-top-install-btn:active {
+    transform: scale(0.96);
+}
+
+/* ============================================
+   Instructional Popup Alert / Modal (iOS & Desktop)
+   ============================================ */
+
+.wh-install-popup-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+    animation: whFadeIn 0.2s ease-out;
+}
+
+@media (min-width: 640px) {
+    .wh-install-popup-backdrop {
+        align-items: center;
+    }
+}
+
+@keyframes whFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.wh-install-popup-card {
+    background: #ffffff;
+    color: #262626;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 183, 0, 0.3);
+    overflow: hidden;
+    animation: whSlideUpModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes whSlideUpModal {
+    from {
+        transform: translateY(20px) scale(0.96);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.wh-install-popup-header {
+    background: linear-gradient(135deg, #fff9f0 0%, #fff3e0 100%);
+    padding: 20px 20px 16px 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wh-install-popup-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wh-install-popup-header-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(255, 183, 0, 0.3);
+}
+
+.wh-install-popup-header-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #262626;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.wh-install-popup-header-subtitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: #737373;
+    margin: 2px 0 0 0;
+}
+
+.wh-install-popup-close {
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #525252;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.wh-install-popup-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #262626;
+}
+
+.wh-install-popup-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.wh-install-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.wh-install-step-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: #fff3e0;
+    color: #e59700;
+    border: 1px solid rgba(255, 183, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.wh-install-step-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #2d2926;
+}
+
+.wh-install-step-text strong {
+    color: #1a160d;
+    font-weight: 700;
+}
+
+.wh-install-step-icon {
+    display: inline-flex;
+    vertical-align: middle;
+    margin: 0 4px;
+    color: #3b82f6;
+}
+
+.wh-install-popup-footer {
+    padding: 12px 20px 20px 20px;
+}
+
+.wh-install-popup-confirm-btn {
+    width: 100%;
+    background: #ffb700;
+    color: #1a160d;
+    border: none;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 12px 20px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 4px 14px rgba(255, 183, 0, 0.35);
+}
+
+.wh-install-popup-confirm-btn:hover {
+    background: #e6a500;
+}
+
+.wh-install-popup-confirm-btn:active {
+    transform: scale(0.98);
+}

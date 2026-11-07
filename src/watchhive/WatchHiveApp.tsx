@@ -2,14 +2,15 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, useCustomAlert, TourProvider } from './contexts';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
-import { DonationButton, OfflineBanner, Modal, AppLoadingScreen, InstallPromptBanner, OpenInAppBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
+import { DonationButton, OfflineBanner, Modal, AppLoadingScreen, InstallPromptBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
 import { SuggestMovieModal } from './components/suggestions/SuggestMovieModal';
 import { WatchPreferencesModal } from './components/onboarding/WatchPreferencesModal';
 import { EntryForm } from './components/entries/EntryForm';
 import { useWatchlist, WatchlistProvider } from './contexts/WatchlistContext';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage, MovieDetailsPage, WatchHistoryComparePage, SupportPage, VerifyEmailPage } from './pages';
+import { LoginPage, SignupPage, ProfilePage, FeedPage, EntriesPage, LandingPage, SearchUsersPage, UserProfilePage, MindLensPage, NotificationsPage, PrivacyPolicyPage, TermsOfServicePage, CinematicStacksPage, ForgotPasswordPage, ResetPasswordPage, MovieDetailsPage, WatchHistoryComparePage, SupportPage, VerifyEmailPage } from './pages';
 import { ScrollToTop } from './components/common';
+import { CookieConsentBanner } from './components/common/CookieConsentBanner';
 import './index.css';
 
 // Protected Route Component
@@ -104,7 +105,7 @@ const AppRoutes: React.FC = () => {
 
     return (
         <div className="min-h-screen flex flex-col bg-[#FFF9F0]">
-            <OpenInAppBanner />
+            <InstallPromptBanner />
             <div className="app-layout flex-1">
                 {isAuthenticated && <Sidebar />}
                 {/* Main content area needs to be pushed to the right to accommodate the 256px wide fixed sidebar */}
@@ -247,6 +248,10 @@ const AppRoutes: React.FC = () => {
                     element={<PrivacyPolicyPage />}
                 />
                 <Route
+                    path="/watch-hive/terms"
+                    element={<TermsOfServicePage />}
+                />
+                <Route
                     path="/watch-hive/support"
                     element={<SupportPage />}
                 />
@@ -256,6 +261,7 @@ const AppRoutes: React.FC = () => {
                 <Route path="/login" element={<LegacyUrlRedirect />} />
                 <Route path="/verify-email" element={<LegacyUrlRedirect />} />
                 <Route path="/privacy" element={<LegacyUrlRedirect />} />
+                <Route path="/terms" element={<LegacyUrlRedirect />} />
                 <Route path="/support" element={<LegacyUrlRedirect />} />
                 <Route path="/feed" element={<LegacyUrlRedirect />} />
                 <Route path="/rankings" element={<LegacyUrlRedirect />} />
@@ -336,7 +342,7 @@ const AppRoutes: React.FC = () => {
             </main>
             </div>
             <OfflineBanner />
-            <InstallPromptBanner />
+            <CookieConsentBanner />
         </div>
     );
 };

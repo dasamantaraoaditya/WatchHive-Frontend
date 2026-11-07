@@ -16,4 +16,5 @@ export { VerifyEmailPage } from './VerifyEmailPage';
 export { MovieDetailsPage } from './MovieDetailsPage';
 export { WatchHistoryComparePage } from './WatchHistoryComparePage';
 export { SupportPage } from './SupportPage';
+export { TermsOfServicePage } from './TermsOfServicePage';
 
