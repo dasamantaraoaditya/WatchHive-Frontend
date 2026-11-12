@@ -7,7 +7,6 @@ import { SmartSuggestCard } from './SmartSuggestCard';
 import { SmartSuggestDeckModal } from './SmartSuggestDeckModal';
 import { SkeletonCard, SkeletonGrid, ErrorState, FilterBar, Modal } from '../common';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
-import { SuggestMovieModal } from './SuggestMovieModal';
 import { EntryForm } from '../entries/EntryForm';
 
 interface SuggestionsTabProps {
@@ -37,7 +36,6 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState('recent-desc');
-    const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [entryFormPrefill, setEntryFormPrefill] = useState<{
         tmdbId: number;
         title: string;
@@ -181,12 +179,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
 
     return (
         <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
-            <SuggestMovieModal 
-                isOpen={isSuggestModalOpen} 
-                onClose={() => setIsSuggestModalOpen(false)} 
-                onSuccess={fetchSuggestions}
-            />
-            {/* Sub-tabs for SmartSuggest vs Suggestions (Received) vs Suggested (Sent) & Suggest to Friends Action */}
+            {/* Sub-tabs for SmartSuggest vs Suggestions (Received) vs Suggested (Sent) */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 bg-black/5 rounded-2xl w-fit self-start overflow-x-auto max-w-full">
                     <button
@@ -236,14 +229,6 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                         </span>
                     </button>
                 </div>
-
-                <button
-                    onClick={() => setIsSuggestModalOpen(true)}
-                    className="px-4 py-2.5 bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-2xl shadow-md shadow-[#ffb700]/20 transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 self-end sm:self-center"
-                >
-                    <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                    <span>Suggest to Friends</span>
-                </button>
             </div>
 
             {subTab === 'smart' ? (
@@ -380,16 +365,9 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                                     ? `We couldn't find any ${subTab === 'received' ? 'suggestions' : 'suggested items'} matching "${searchQuery}"`
                                     : (subTab === 'received'
                                         ? "When your friends suggest movies or shows to you, they will appear here!"
-                                        : "You haven't suggested any movies or shows to friends yet. Use 'Suggest to Friends' to share your favorite titles!")}
+                                        : "You haven't suggested any movies or shows to friends yet. Suggest your favorite titles from any movie or show's details page!")}
                             </p>
                             <div className="flex flex-wrap items-center justify-center gap-3">
-                                <button
-                                    onClick={() => setIsSuggestModalOpen(true)}
-                                    className="bg-[#ffb700] hover:brightness-105 active:scale-95 text-[#2D2926] font-black py-3 px-5 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-md shadow-[#ffb700]/20 flex items-center gap-2 cursor-pointer"
-                                >
-                                    <span className="material-symbols-outlined text-lg">auto_awesome</span>
-                                    <span>Suggest to Friends</span>
-                                </button>
                                 <button
                                     onClick={() => navigate('/watch-hive/search?tab=people')}
                                     className="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-black py-3 px-5 rounded-2xl text-xs uppercase tracking-wider transition-all shadow-2xs flex items-center gap-2 cursor-pointer"

@@ -9,6 +9,7 @@ import { SuggestMovieModal } from '../suggestions/SuggestMovieModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { interactionService } from '../../services/interaction.service';
 import { CommentsModal } from '../comments/CommentsModal';
+import { LikesModal } from './LikesModal';
 import { shareCompletedWatch } from '../../utils/shareHelper';
 import whLogo from '../../assets/images/watchhive-logo.png';
 import './Feed.css';
@@ -31,6 +32,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
     const [isLiked, setIsLiked] = useState<boolean>(entryData?.isLiked || false);
     const [likeCount, setLikeCount] = useState<number>(entryData?._count?.likes || 0);
     const [commentCount, setCommentCount] = useState<number>(entryData?._count?.comments || 0);
+    const [showLikes, setShowLikes] = useState<boolean>(false);
     const [showComments, setShowComments] = useState<boolean>(false);
     const [showShareFeedback, setShowShareFeedback] = useState<boolean>(false);
     const [isCommented, setIsCommented] = useState<boolean>(entryData?.isCommented || false);
@@ -360,13 +362,34 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     <div className="flex gap-4 sm:gap-6 items-center">
                         {!isSuggestion && (
                             <>
-                                <button
-                                    className={`action-btn ${isLiked ? 'action-btn--liked' : ''}`}
-                                    onClick={handleLike}
-                                >
-                                    <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'filled' : ''}`}>favorite</span>
-                                    <span className="text-sm font-medium">{likeCount}</span>
-                                </button>
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        className={`action-btn ${isLiked ? 'action-btn--liked' : ''}`}
+                                        onClick={handleLike}
+                                        title={isLiked ? 'Unlike' : 'Like'}
+                                        aria-label={isLiked ? 'Unlike post' : 'Like post'}
+                                    >
+                                        <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'filled' : ''}`}>favorite</span>
+                                    </button>
+                                    {likeCount > 0 ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowLikes(true)}
+                                            className="text-sm font-bold text-[#2D2926]/80 hover:text-[#E59700] underline decoration-[#ffb700]/60 underline-offset-2 transition-colors cursor-pointer bg-transparent border-none px-1 py-0.5"
+                                            title="See who liked this post"
+                                        >
+                                            {likeCount} {likeCount === 1 ? 'like' : 'likes'}
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={handleLike}
+                                            className="text-sm font-medium text-[#2D2926]/50 hover:text-[#E59700] transition-colors cursor-pointer bg-transparent border-none px-0.5 py-0.5"
+                                        >
+                                            0
+                                        </button>
+                                    )}
+                                </div>
                                 <button
                                     className={`action-btn ${isCommented ? 'action-btn--commented' : ''}`}
                                     onClick={() => setShowComments(true)}
@@ -435,6 +458,17 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Likes Modal */}
+            {!isSuggestion && entryData && (
+                <LikesModal
+                    isOpen={showLikes}
+                    onClose={() => setShowLikes(false)}
+                    entryId={entryData.id}
+                    entryTitle={title}
+                    initialLikeCount={likeCount}
+                />
+            )}
 
             {/* Comments Modal */}
             {!isSuggestion && entryData && (
