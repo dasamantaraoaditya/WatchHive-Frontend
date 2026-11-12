@@ -275,15 +275,28 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const { user } = useAuth();
     const { alert } = useCustomAlert();
 
+    const isCompletingActiveWatch = !!entry?.isWatching && defaultIsWatching === false;
+    const initialStartedAt = entry?.startedAt
+        ? toLocalISOString(entry.startedAt)
+        : (entry?.isWatching && (entry.watchedAt || entry.createdAt)
+            ? toLocalISOString(entry.watchedAt || entry.createdAt)
+            : '');
+
     // ── Form state ──
-    const [hasWatchDate, setHasWatchDate] = useState<boolean>(() => !entry || !!entry.watchedAt);
+    const [startedAtStr, setStartedAtStr] = useState<string>(initialStartedAt);
+    const [isEditingStartedAt, setIsEditingStartedAt] = useState<boolean>(false);
+    const [hasWatchDate, setHasWatchDate] = useState<boolean>(() => !entry || isCompletingActiveWatch || !!(entry.completedAt || entry.watchedAt));
     const [formData, setFormData] = useState<CreateEntryData>({
         tmdbId: entry?.tmdbId || prefillData?.tmdbId || 0,
         title: entry?.title || prefillData?.title || '',
         type: entry?.type || prefillData?.type || 'MOVIE',
-        watchedAt: entry
-            ? (entry.watchedAt ? toLocalISOString(entry.watchedAt) : '')
-            : toLocalISOString(new Date()),
+        watchedAt: isCompletingActiveWatch
+            ? toLocalISOString(new Date())
+            : entry
+                ? ((entry.isWatching ? (entry.startedAt || entry.watchedAt) : (entry.completedAt || entry.watchedAt))
+                    ? toLocalISOString((entry.isWatching ? (entry.startedAt || entry.watchedAt) : (entry.completedAt || entry.watchedAt))!)
+                    : '')
+                : toLocalISOString(new Date()),
         rating: entry?.rating || undefined,
         review: entry?.review || '',
         tags: entry?.tags || [],
@@ -494,10 +507,10 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
         try {
             let savedEntry: Entry;
-            const payload = { ...formData };
+            const payload: any = { ...formData };
+            const now = new Date();
             if (hasWatchDate && payload.watchedAt) {
                 const d = new Date(payload.watchedAt);
-                const now = new Date();
                 const safeDate = !isNaN(d.getTime()) && d.getTime() > now.getTime() ? now : d;
                 payload.watchedAt = safeDate.toISOString();
             } else {
@@ -507,6 +520,24 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
             // If user has provided a rating or review, or is logging a completed watch, ensure isWatching is set to false
             if (payload.rating !== undefined || (payload.review && payload.review.trim().length > 0)) {
                 payload.isWatching = false;
+            }
+
+            if (payload.isWatching) {
+                payload.startedAt = payload.watchedAt || now.toISOString();
+                if (!payload.watchedAt) {
+                    payload.watchedAt = payload.startedAt;
+                    payload.unspecifiedDate = false;
+                }
+            } else {
+                if (payload.watchedAt) {
+                    payload.completedAt = payload.watchedAt;
+                }
+                if (startedAtStr) {
+                    const sd = new Date(startedAtStr);
+                    if (!isNaN(sd.getTime())) {
+                        payload.startedAt = (sd.getTime() > now.getTime() ? now : sd).toISOString();
+                    }
+                }
             }
 
             if (isEditing && entry) {
@@ -741,32 +772,75 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
                             {/* Date Picker & Switches */}
                             <div className="flex flex-col gap-3.5 p-4 sm:p-5 bg-white border border-[#ffb700]/25 rounded-3xl shadow-sm">
+                                {!formData.isWatching && startedAtStr && (
+                                    <div className="p-3 bg-[#FFF9F0] border border-[#ffb700]/30 rounded-2xl flex flex-col gap-2.5">
+                                        <div className="flex items-center justify-between gap-2">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className="w-2 h-2 rounded-full bg-[#ffb700] shrink-0" />
+                                                <span className="text-[11px] font-black uppercase tracking-wider text-[#2D2926]/70">
+                                                    Started Watching
+                                                </span>
+                                                <span className="text-xs font-bold text-[#2D2926] truncate">
+                                                    {new Date(startedAtStr).toLocaleString(undefined, {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                        hour: 'numeric',
+                                                        minute: '2-digit',
+                                                    })}
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsEditingStartedAt((prev) => !prev)}
+                                                className="text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl bg-white border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/15 transition-all cursor-pointer shrink-0"
+                                            >
+                                                {isEditingStartedAt ? 'Done' : 'Edit'}
+                                            </button>
+                                        </div>
+                                        {isEditingStartedAt && (
+                                            <HiveDatePicker
+                                                value={startedAtStr}
+                                                onChange={(val: string) => {
+                                                    if (val) setStartedAtStr(val);
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+                                )}
+
                                 <div className="flex items-center justify-between gap-2">
                                     <label className="text-xs font-black uppercase tracking-wider text-[#2D2926]/70">
-                                        When did you watch this?
+                                        {formData.isWatching
+                                            ? 'Started Watching'
+                                            : startedAtStr
+                                                ? 'Completed Watching'
+                                                : 'When did you watch this?'}
                                     </label>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            if (hasWatchDate) {
-                                                setHasWatchDate(false);
-                                                setFormData((prev) => ({ ...prev, watchedAt: '' }));
-                                            } else {
-                                                setHasWatchDate(true);
-                                                setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
-                                            }
-                                        }}
-                                        className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
-                                            !hasWatchDate
-                                                ? 'bg-amber-500/20 text-amber-700 border border-amber-500/30'
-                                                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                                        }`}
-                                    >
-                                        <span className="material-symbols-outlined text-[14px]">
-                                            {!hasWatchDate ? 'calendar_today' : 'history_toggle_off'}
-                                        </span>
-                                        {!hasWatchDate ? 'Set Date' : "Don't know when"}
-                                    </button>
+                                    {!formData.isWatching && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (hasWatchDate) {
+                                                    setHasWatchDate(false);
+                                                    setFormData((prev) => ({ ...prev, watchedAt: '' }));
+                                                } else {
+                                                    setHasWatchDate(true);
+                                                    setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
+                                                }
+                                            }}
+                                            className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+                                                !hasWatchDate
+                                                    ? 'bg-amber-500/20 text-amber-700 border border-amber-500/30'
+                                                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                                            }`}
+                                        >
+                                            <span className="material-symbols-outlined text-[14px]">
+                                                {!hasWatchDate ? 'calendar_today' : 'history_toggle_off'}
+                                            </span>
+                                            {!hasWatchDate ? 'Set Date' : "Don't know when"}
+                                        </button>
+                                    )}
                                 </div>
 
                                 {hasWatchDate ? (
@@ -993,7 +1067,22 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 <input
                                                     type="checkbox"
                                                     checked={formData.isWatching}
-                                                    onChange={(e) => setFormData((prev) => ({ ...prev, isWatching: e.target.checked }))}
+                                                    onChange={(e) => {
+                                                        const nextIsWatching = e.target.checked;
+                                                        if (!nextIsWatching && entry?.isWatching) {
+                                                            setHasWatchDate(true);
+                                                            if (!startedAtStr) {
+                                                                setStartedAtStr(initialStartedAt || (entry.watchedAt ? toLocalISOString(new Date(entry.watchedAt)) : toLocalISOString(new Date())));
+                                                            }
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                isWatching: false,
+                                                                watchedAt: toLocalISOString(new Date()),
+                                                            }));
+                                                        } else {
+                                                            setFormData((prev) => ({ ...prev, isWatching: nextIsWatching }));
+                                                        }
+                                                    }}
                                                     className="sr-only"
                                                 />
                                                 <div
