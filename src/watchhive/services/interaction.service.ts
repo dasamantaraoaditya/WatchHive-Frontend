@@ -16,6 +16,26 @@ export interface Comment {
     replies?: Comment[];
 }
 
+export interface LikedUser {
+    id: string;
+    username: string;
+    displayName: string | null;
+    profilePictureUrl: string | null;
+    likedAt?: string;
+}
+
+export interface EntryLikesResponse {
+    likes: LikedUser[];
+    pagination: {
+        page: number;
+        limit: number;
+        offset: number;
+        total: number;
+        totalPages: number;
+        hasMore: boolean;
+    };
+}
+
 export const interactionService = {
     // Likes
     likeEntry: async (entryId: string) => {
@@ -24,6 +44,12 @@ export const interactionService = {
 
     unlikeEntry: async (entryId: string) => {
         return await apiClient.delete<{ message: string, likeCount: number }>(`/likes/${entryId}`);
+    },
+
+    getEntryLikes: async (entryId: string, limit = 3, offset = 0) => {
+        return await apiClient.get<EntryLikesResponse>(
+            `/likes/${entryId}?limit=${limit}&offset=${offset}`
+        );
     },
 
     // Comments
