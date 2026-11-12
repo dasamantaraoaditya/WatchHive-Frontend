@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { suggestionsApi, SmartSuggestItem, SmartSuggestResponse } from '../../services/suggestions.service';
+import { suggestionsApi, SmartSuggestItem, SmartSuggestMode, SmartSuggestResponse } from '../../services/suggestions.service';
 import { SmartSuggestDeckModal } from './SmartSuggestDeckModal';
 import { WatchlistButton, BeeSpinner } from '../common';
 
 export const SmartSuggestHeroCard: React.FC = () => {
     const navigate = useNavigate();
-    const [mode, setMode] = useState<'social' | 'critic' | 'explore'>('social');
+    const [mode, setMode] = useState<SmartSuggestMode>('social');
     const [items, setItems] = useState<SmartSuggestItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -18,7 +18,7 @@ export const SmartSuggestHeroCard: React.FC = () => {
         const fetchPicks = async () => {
             setLoading(true);
             try {
-                const res: SmartSuggestResponse = await suggestionsApi.getSmartSuggestions(mode, 8);
+                const res: SmartSuggestResponse = await suggestionsApi.getSmartSuggestions(mode, 10);
                 if (isMounted) {
                     setItems(res.items || []);
                     setCurrentIndex(0);
@@ -37,6 +37,24 @@ export const SmartSuggestHeroCard: React.FC = () => {
     if (isDismissed) return null;
 
     const currentItem = items[currentIndex];
+
+    const handleRegenerate = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setLoading(true);
+        try {
+            const excludeIds = items.map((it) => it.tmdbId);
+            const res: SmartSuggestResponse = await suggestionsApi.getSmartSuggestions(mode, 10, {
+                excludeIds,
+                seed: Date.now()
+            });
+            setItems(res.items || []);
+            setCurrentIndex(0);
+        } catch (err) {
+            console.error('[SmartSuggestHeroCard] Failed to regenerate picks:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleShuffle = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -85,13 +103,13 @@ export const SmartSuggestHeroCard: React.FC = () => {
                         </button>
                         <button
                             type="button"
-                            onClick={() => setMode('critic')}
+                            onClick={() => setMode('watchlist')}
                             className={`px-2 py-0.5 rounded-lg transition-colors cursor-pointer ${
-                                mode === 'critic' ? 'bg-[#ffb700] text-[#2D2926]' : 'text-[#2D2926]/50 hover:text-[#2D2926]'
+                                mode === 'watchlist' ? 'bg-[#ffb700] text-[#2D2926]' : 'text-[#2D2926]/50 hover:text-[#2D2926]'
                             }`}
-                            title="Certified Gold: Critical & Audience acclaim"
+                            title="Watchlist Gems: Exceptional picks from your Watchlist"
                         >
-                            Critic
+                            Watchlist
                         </button>
                         <button
                             type="button"
@@ -99,7 +117,7 @@ export const SmartSuggestHeroCard: React.FC = () => {
                             className={`px-2 py-0.5 rounded-lg transition-colors cursor-pointer ${
                                 mode === 'explore' ? 'bg-[#ffb700] text-[#2D2926]' : 'text-[#2D2926]/50 hover:text-[#2D2926]'
                             }`}
-                            title="Palate Cleanser: Contrasting fresh genres"
+                            title="Explore: World top-rated picks matching your taste"
                         >
                             Explore
                         </button>
@@ -173,12 +191,22 @@ export const SmartSuggestHeroCard: React.FC = () => {
 
                         {/* Action Buttons */}
                         <div className="flex items-center gap-2 self-end sm:self-center shrink-0 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-[#ffb700]/15">
+                            {/* Regenerate Fresh Picks */}
+                            <button
+                                type="button"
+                                onClick={handleRegenerate}
+                                className="w-9 h-9 rounded-xl bg-white hover:bg-slate-50 text-[#2D2926] flex items-center justify-center shadow-xs border border-[#ffb700]/20 transition-all cursor-pointer"
+                                title="Regenerate fresh recommendations"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">refresh</span>
+                            </button>
+
                             {/* Shuffle Pick */}
                             <button
                                 type="button"
                                 onClick={handleShuffle}
                                 className="w-9 h-9 rounded-xl bg-white hover:bg-slate-50 text-[#2D2926] flex items-center justify-center shadow-xs border border-[#ffb700]/20 transition-all cursor-pointer"
-                                title="Shuffle to another smart pick"
+                                title="Shuffle to next pick"
                             >
                                 <span className="material-symbols-outlined text-[18px]">cached</span>
                             </button>
