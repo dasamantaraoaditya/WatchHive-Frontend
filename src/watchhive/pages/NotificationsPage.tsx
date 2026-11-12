@@ -127,7 +127,7 @@ const NotificationsPage: React.FC = () => {
 
     const getNotificationIcon = (type: string) => {
         switch (type) {
-            case 'LIKE': return <span className="material-symbols-outlined text-rose-500 fill-1 text-xl">favorite</span>;
+            case 'LIKE': return <span className="material-symbols-outlined text-[#ffb700] fill-1 text-xl">favorite</span>;
             case 'COMMENT': return <span className="material-symbols-outlined text-blue-500 text-xl">chat_bubble</span>;
             case 'REPLY': return <span className="material-symbols-outlined text-indigo-500 text-xl">reply</span>;
             case 'FOLLOW': return <span className="material-symbols-outlined text-emerald-500 text-xl">person_add</span>;

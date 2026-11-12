@@ -185,7 +185,16 @@
 }
 
 .action-btn--liked {
-    color: var(--accent-primary);
+    color: var(--primary-500) !important;
+}
+
+.action-btn--liked:hover {
+    color: var(--primary-600) !important;
+}
+
+.action-btn--liked .material-symbols-outlined {
+    color: var(--primary-500) !important;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24 !important;
 }
 
 .icon-only-btn {

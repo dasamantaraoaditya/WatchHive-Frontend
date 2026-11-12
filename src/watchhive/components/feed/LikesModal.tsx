@@ -137,7 +137,7 @@ export const LikesModal: React.FC<LikesModalProps> = ({
                 {/* Header */}
                 <div className="px-5 sm:px-6 py-3.5 sm:py-4 border-b border-[#ffb700]/15 flex items-center justify-between bg-white/75 backdrop-blur-md shrink-0">
                     <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-[#ffb700]/15 border border-[#ffb700]/30 text-[#e59700] flex items-center justify-center shrink-0">
                             <span
                                 className="material-symbols-outlined text-[20px]"
                                 style={{ fontVariationSettings: "'FILL' 1" }}
