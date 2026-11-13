@@ -373,7 +373,7 @@ export const WatchHistoryComparePage: React.FC = () => {
                                 }`}
                             >
                                 <span>🤝 In Common</span>
-                                <span className="px-1.5 py-0.5 rounded-full bg-[#ffb700]/15 text-[#ffb700] text-[9px] font-black">
+                                <span className="px-1.5 py-0.5 rounded-full bg-[#ffb700]/20 text-[#2D2926] text-[9px] font-black">
                                     {data.stats.totalCommon}
                                 </span>
                             </button>

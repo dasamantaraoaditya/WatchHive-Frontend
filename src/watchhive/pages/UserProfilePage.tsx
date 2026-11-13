@@ -64,20 +64,21 @@ export const UserProfilePage: React.FC = () => {
         setAvatarError(false);
         if (!id) return;
         const isPreview = searchParams.get('preview') === 'true' || searchParams.get('view') === 'public';
-        if (currentUser && id === currentUser.id && !isPreview) {
+        if (currentUser && (id === currentUser.id || id.toLowerCase() === currentUser.username?.toLowerCase()) && !isPreview) {
             navigate('/watch-hive/profile');
             return;
         }
 
         const fetchUser = async (showLoading = true) => {
             if (showLoading) setLoading(true);
+            setError(null);
             try {
                 const data = await userService.getUser(id);
                 setProfileUser(data);
                 setPageTitle(data.displayName || data.username);
                 setPageIcon('person');
             } catch (err) {
-                console.error(err);
+                console.error('Failed to load user profile:', err);
                 setError(formatUserFriendlyError(err, {
                     resourceType: 'profile',
                     defaultMessage: 'This user profile could not be found.'
@@ -88,7 +89,7 @@ export const UserProfilePage: React.FC = () => {
         };
 
         fetchUser();
-    }, [id, currentUser, navigate, setPageTitle, setPageIcon]);
+    }, [id, currentUser, navigate, searchParams, setPageTitle, setPageIcon]);
 
     // Select first enabled tab automatically if no tab in URL
     useEffect(() => {
@@ -108,39 +109,43 @@ export const UserProfilePage: React.FC = () => {
 
     // Fetch watchlist if active
     useEffect(() => {
-        if (activeTab === 'watchlist' && id && watchlistItems === null) {
+        const targetUserId = profileUser?.id || id;
+        if (activeTab === 'watchlist' && targetUserId && watchlistItems === null) {
             const fetchWatchlist = async () => {
                 setIsWatchlistLoading(true);
                 try {
-                    const data = await listsApi.getUserWatchlist(id);
+                    const data = await listsApi.getUserWatchlist(targetUserId);
                     setWatchlistItems(data.items || []);
                 } catch (err) {
                     console.error('Failed to fetch user watchlist', err);
+                    setWatchlistItems([]);
                 } finally {
                     setIsWatchlistLoading(false);
                 }
             };
             fetchWatchlist();
         }
-    }, [activeTab, id, watchlistItems]);
+    }, [activeTab, id, profileUser?.id, watchlistItems]);
 
     // Fetch user rankings if active
     useEffect(() => {
-        if (activeTab === 'rankings' && id && userRankings === null) {
+        const targetUserId = profileUser?.id || id;
+        if (activeTab === 'rankings' && targetUserId && userRankings === null) {
             const fetchRankings = async () => {
                 setIsRankingsLoading(true);
                 try {
-                    const data = await listsApi.getUserRankings(id);
+                    const data = await listsApi.getUserRankings(targetUserId);
                     setUserRankings(data || []);
                 } catch (err) {
                     console.error('Failed to fetch user rankings', err);
+                    setUserRankings([]);
                 } finally {
                     setIsRankingsLoading(false);
                 }
             };
             fetchRankings();
         }
-    }, [activeTab, id, userRankings]);
+    }, [activeTab, id, profileUser?.id, userRankings]);
 
     const handleFollowToggle = async () => {
         if (!profileUser) return;
@@ -216,8 +221,38 @@ export const UserProfilePage: React.FC = () => {
                 <div className="bg-white border border-[#2D2926]/10 shadow-sm rounded-3xl p-8 max-w-md text-center">
                     <div className="text-4xl mb-4">⚠️</div>
                     <h3 className="text-xl font-bold text-[#2D2926] mb-2">Something went wrong</h3>
-                    <p className="text-[#2D2926]/60 mb-6">{error || 'User not found.'}</p>
-                    <button onClick={() => navigate('/watch-hive/feed')} className="px-6 py-2 bg-[#ffb700] text-[#2D2926] font-bold rounded-xl">Go Back to Feed</button>
+                    <p className="text-[#2D2926]/60 mb-6">{error || 'This user profile could not be loaded.'}</p>
+                    <div className="flex items-center justify-center gap-3">
+                        <button 
+                            onClick={() => {
+                                if (!id) return;
+                                setLoading(true);
+                                setError(null);
+                                userService.getUser(id)
+                                    .then(data => {
+                                        setProfileUser(data);
+                                        setPageTitle(data.displayName || data.username);
+                                        setPageIcon('person');
+                                    })
+                                    .catch(err => {
+                                        setError(formatUserFriendlyError(err, {
+                                            resourceType: 'profile',
+                                            defaultMessage: 'This user profile could not be found.'
+                                        }));
+                                    })
+                                    .finally(() => setLoading(false));
+                            }} 
+                            className="px-6 py-2.5 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-bold rounded-xl transition-all shadow-sm cursor-pointer"
+                        >
+                            Try Again
+                        </button>
+                        <button 
+                            onClick={() => navigate(currentUser ? '/watch-hive/feed' : '/watch-hive')} 
+                            className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all cursor-pointer"
+                        >
+                            {currentUser ? 'Back to Feed' : 'Go Home'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </PageLayout>
@@ -242,6 +277,37 @@ export const UserProfilePage: React.FC = () => {
     return (
         <PageLayout maxWidth="5xl">
             <div className="flex flex-col gap-8 pb-12">
+                {/* Guest Banner if unauthenticated */}
+                {!currentUser && (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <span className="material-symbols-outlined text-2xl text-amber-600">movie</span>
+                            <div>
+                                <p className="text-sm font-bold text-[#2D2926]">
+                                    You're viewing @{profileUser.username}'s public profile on WatchersHive
+                                </p>
+                                <p className="text-xs text-[#2D2926]/70">
+                                    Join WatchersHive to track movies, write reviews, and share recommendations with friends.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                            <button
+                                onClick={() => navigate(`/watch-hive/signup?ref=${encodeURIComponent(profileUser.username)}`)}
+                                className="flex-1 sm:flex-initial px-4 py-2 bg-[#ffb700] hover:bg-[#ffaa00] text-[#2D2926] font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                            >
+                                Join Free
+                            </button>
+                            <button
+                                onClick={() => navigate(`/watch-hive/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`)}
+                                className="flex-1 sm:flex-initial px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 transition-all cursor-pointer whitespace-nowrap"
+                            >
+                                Log In
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Profile Hero */}
                 <div className="relative rounded-[32px] border border-black/5 bg-white shadow-sm p-6 md:p-8 lg:p-10 animate-slide-up">
                     <div className="absolute top-0 right-0 p-4 sm:p-6">
@@ -390,7 +456,7 @@ export const UserProfilePage: React.FC = () => {
                             ) : (
                                 <div className="flex flex-col gap-2 w-full">
                                     <button
-                                        onClick={handleFollowToggle}
+                                        onClick={currentUser ? handleFollowToggle : () => navigate(`/watch-hive/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`)}
                                         onMouseEnter={() => {
                                             if (profileUser.isFollowing) setIsHoveredFollowing(true);
                                             if (profileUser.isRequested) setIsHoveredRequested(true);
@@ -440,7 +506,7 @@ export const UserProfilePage: React.FC = () => {
 
                                     <div className={`grid ${!isOwner && canViewEntries ? 'grid-cols-2' : 'grid-cols-1'} gap-2 w-full`}>
                                         <button
-                                            onClick={() => setIsSuggestModalOpen(true)}
+                                            onClick={currentUser ? () => setIsSuggestModalOpen(true) : () => navigate(`/watch-hive/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`)}
                                             title={profileUser.isFollower === false ? `@${profileUser.username} must follow you to receive suggestions` : 'Suggest a title to this user'}
                                             className="w-full font-black py-2.5 px-3 rounded-xl bg-white border border-black/5 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700]/30 hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[10px] uppercase tracking-[0.12em] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                                         >
@@ -450,7 +516,7 @@ export const UserProfilePage: React.FC = () => {
                                         {!isOwner && canViewEntries && (
                                             <button
                                                 onClick={() => navigate(`/watch-hive/compare/${profileUser.id}`, {
-                                                    state: { from: location.pathname + location.search }
+                                                    state: { from: window.location.pathname + window.location.search }
                                                 })}
                                                 className="w-full font-black py-2.5 px-3 rounded-xl bg-white border border-[#ffb700]/40 text-[#2D2926] hover:bg-[#ffb700]/10 hover:border-[#ffb700] hover:text-[#ffb700] hover:-translate-y-0.5 active:scale-95 transition-all duration-200 text-[10px] uppercase tracking-[0.12em] shadow-xs flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                                                 title="Compare Watch Histories"
@@ -468,7 +534,7 @@ export const UserProfilePage: React.FC = () => {
 
                 {/* Navigation Tabs */}
                 {canViewEntries && (
-                    <div className="flex border-b border-black/5 gap-8 overflow-x-auto no-scrollbar">
+                    <div className="flex border-b border-black/5 gap-3 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain pb-px">
                         {[
                             { id: 'entries', label: 'Entries', show: profileUser.showWatchEntries },
                             { id: 'watching', label: 'Watching', show: profileUser.showCurrentlyWatching },
@@ -478,12 +544,13 @@ export const UserProfilePage: React.FC = () => {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`pb-4 px-2 font-black text-[10px] uppercase tracking-[0.2em] whitespace-nowrap relative transition-all ${activeTab === tab.id ? 'text-[#ffb700]' : 'text-slate-400 hover:text-slate-600'
-                                    }`}
+                                className={`pb-3 pt-1 px-3 sm:px-2 font-black text-[11px] sm:text-xs uppercase tracking-wider whitespace-nowrap relative shrink-0 transition-all cursor-pointer ${
+                                    activeTab === tab.id ? 'text-[#2D2926]' : 'text-slate-400 hover:text-slate-600'
+                                }`}
                             >
                                 {tab.label}
                                 {activeTab === tab.id && (
-                                    <motion.div layoutId="tabUnderline" className="absolute bottom-0 left-0 right-0 h-1 bg-[#ffb700] rounded-full" />
+                                    <motion.div layoutId="tabUnderline" className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#ffb700] rounded-full shadow-xs" />
                                 )}
                             </button>
                         ))}
