@@ -183,7 +183,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
         <section className="flex flex-col gap-6 animate-[fade-in_0.3s_ease-out] mb-12">
             {/* Sub-tabs for SmartSuggest vs Suggestions (Received) vs Suggested (Sent) */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 bg-black/5 rounded-2xl w-fit self-start overflow-x-auto max-w-full">
+                <div className="flex items-center gap-1.5 sm:gap-2 p-1.5 bg-black/5 rounded-2xl w-full sm:w-fit overflow-x-auto no-scrollbar">
                     <button
                         onClick={() => setSubTab('smart')}
                         className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
@@ -237,7 +237,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                 <>
                     {/* SmartSuggest Mode Selector & Deck Launcher Bar */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-black/5 shadow-xs">
-                        <div className="flex items-center gap-1.5 p-1 bg-black/5 rounded-xl self-start overflow-x-auto max-w-full">
+                        <div className="flex items-center gap-1.5 p-1 bg-black/5 rounded-xl w-full sm:w-auto overflow-x-auto no-scrollbar">
                             <button
                                 onClick={() => setSmartMode('social')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
@@ -267,11 +267,11 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                             </button>
                         </div>
 
-                        <div className="flex items-center gap-2 self-end sm:self-center">
+                        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
                             <button
                                 onClick={() => fetchSmartSuggestions(smartMode, true)}
                                 disabled={isSmartLoading}
-                                className="px-3.5 py-2 bg-[#FFF9F0] hover:bg-[#ffb700]/20 text-[#2D2926] border border-[#ffb700]/40 font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                className="flex-1 sm:flex-none px-3.5 py-2 bg-[#FFF9F0] hover:bg-[#ffb700]/20 text-[#2D2926] border border-[#ffb700]/40 font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                                 title="Regenerate fresh recommendations"
                             >
                                 <span className="material-symbols-outlined text-base">refresh</span>
@@ -279,10 +279,10 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                             </button>
                             <button
                                 onClick={() => setIsDeckOpen(true)}
-                                className="px-4 py-2 bg-gradient-to-r from-amber-500 to-[#ffb700] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                                className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-amber-500 to-[#ffb700] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                             >
                                 <span className="material-symbols-outlined text-base">style</span>
-                                <span>Launch Decision Deck</span>
+                                <span>Decision Deck</span>
                             </button>
                         </div>
                     </div>

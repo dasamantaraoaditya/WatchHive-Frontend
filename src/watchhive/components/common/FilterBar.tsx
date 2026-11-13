@@ -30,15 +30,15 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     isLoading = false
 }) => {
     return (
-        <div className={`flex flex-row items-center ${onSearchChange ? 'justify-between' : 'justify-end'} gap-1.5 sm:gap-4 py-1 w-full`}>
+        <div className={`flex flex-row items-center ${onSearchChange ? 'justify-between' : 'justify-end'} gap-2 sm:gap-4 py-1 w-full`}>
             {onSearchChange && (
-                <div className="flex-1 relative group max-w-2xl">
+                <div className="flex-1 relative group max-w-2xl min-w-0">
                     {isLoading ? (
-                        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
+                        <div className="absolute left-2.5 sm:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none">
                             <BeeLoader size="mini" message="" />
                         </div>
                     ) : (
-                        <span className="material-symbols-outlined absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-[#2D2926]/40 group-focus-within:text-[#ffb700] transition-colors text-[14px] sm:text-[20px]">
+                        <span className="material-symbols-outlined absolute left-2.5 sm:left-4 top-1/2 -translate-y-1/2 text-[#2D2926]/40 group-focus-within:text-[#ffb700] transition-colors text-[18px] sm:text-[20px] pointer-events-none">
                             search
                         </span>
                     )}
@@ -47,16 +47,15 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                         placeholder={placeholder}
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        className="w-full pl-6.5 sm:pl-12 pr-6.5 sm:pr-12 py-1 sm:py-2.5 bg-slate-50 border border-[#ffb700]/10 rounded-md sm:rounded-2xl text-[10px] sm:text-[14px] font-medium text-[#2D2926] placeholder-[#2D2926]/30 focus:outline-none focus:ring-2 focus:ring-[#ffb700]/10 focus:border-[#ffb700]/30 transition-all shadow-sm group-hover:bg-white"
-                        style={{ paddingLeft: '1.65rem', textIndent: '15px' }}
+                        className="w-full pl-9 sm:pl-11 pr-8 sm:pr-10 py-2 sm:py-2.5 bg-slate-50 border border-[#ffb700]/15 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-[#2D2926] placeholder-[#2D2926]/40 focus:outline-none focus:ring-2 focus:ring-[#ffb700]/20 focus:border-[#ffb700] transition-all shadow-xs group-hover:bg-white"
                     />
                     {search && !isLoading && (
                         <button
                             onClick={() => onSearchChange('')}
-                            className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-4 text-slate-400 hover:text-[#ffb700] transition-colors"
+                            className="absolute inset-y-0 right-0 flex items-center pr-2.5 sm:pr-3 text-slate-400 hover:text-[#ffb700] transition-colors cursor-pointer"
                             title="Clear Search"
                         >
-                            <span className="material-symbols-outlined text-[12px] sm:text-[18px]">close</span>
+                            <span className="material-symbols-outlined text-[16px] sm:text-[18px]">close</span>
                         </button>
                     )}
                 </div>
@@ -71,17 +70,16 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     </div>
                 )}
 
-                <div className="flex items-center gap-0.5 sm:gap-2 bg-[#ffb700]/5 hover:bg-[#ffb700]/10 px-1.5 py-1 sm:px-4 sm:py-2.5 rounded-md sm:rounded-2xl border border-[#ffb700]/20 shadow-sm transition-all group cursor-pointer relative">
-                    <span className="material-symbols-outlined text-[11px] sm:text-[16px] text-[#b07d00] font-bold shrink-0">sort</span>
+                <div className="flex items-center gap-1 sm:gap-2 bg-[#ffb700]/10 hover:bg-[#ffb700]/15 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl sm:rounded-2xl border border-[#ffb700]/25 shadow-xs transition-all group cursor-pointer relative shrink-0">
+                    <span className="material-symbols-outlined text-[15px] sm:text-[17px] text-[#2D2926] font-bold shrink-0">sort</span>
                     <select
-                        className="bg-transparent border-none text-[7.5px] sm:text-[10px] font-black text-[#b07d00] focus:ring-0 cursor-pointer p-0 pr-3 sm:pr-6 uppercase tracking-widest outline-none appearance-none -webkit-appearance-none -moz-appearance-none"
+                        className="bg-transparent border-none text-[11px] sm:text-xs font-black text-[#2D2926] focus:ring-0 cursor-pointer p-0 pr-4 sm:pr-6 uppercase tracking-wider outline-none appearance-none -webkit-appearance-none -moz-appearance-none"
                         value={sortBy}
                         onChange={(e) => onSortChange(e.target.value)}
                         style={{
                             appearance: 'none',
                             WebkitAppearance: 'none',
                             MozAppearance: 'none',
-                            paddingRight: '0.75rem',
                             backgroundImage: 'none'
                         }}
                     >

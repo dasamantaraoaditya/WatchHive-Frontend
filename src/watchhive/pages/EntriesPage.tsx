@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { entriesApi, Entry } from '../services/entries.service';
 import { EntryForm } from '../components/entries/EntryForm';
@@ -212,38 +213,48 @@ export const EntriesPage: React.FC = () => {
 
                     
                     {/* Navigation Tabs */}
-                    <div 
-                        className="flex border-b border-black/5 gap-0 md:gap-8 mt-4 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain"
-                        onWheel={(e) => {
-                            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-                                e.currentTarget.scrollLeft += e.deltaY;
-                            }
-                        }}
-                    >
-                        <button 
-                            onClick={() => handleTabSwitch('watching')}
-                            className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'watching' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
+                    <div className="relative border-b border-black/5 mt-2">
+                        <div 
+                            className="flex items-center gap-2 sm:gap-6 md:gap-8 overflow-x-auto no-scrollbar scroll-smooth overscroll-x-contain pb-px"
+                            onWheel={(e) => {
+                                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                                    e.currentTarget.scrollLeft += e.deltaY;
+                                }
+                            }}
                         >
-                            Currently Watching
-                        </button>
-                        <button 
-                            onClick={() => handleTabSwitch('history')}
-                            className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'history' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                            Watch History
-                        </button>
-                        <button 
-                            onClick={() => handleTabSwitch('watchlist')}
-                            className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'watchlist' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                            Watchlist
-                        </button>
-                        <button 
-                            onClick={() => handleTabSwitch('suggestions')}
-                            className={`pb-4 px-4 md:px-2 font-black uppercase tracking-widest text-[11px] whitespace-nowrap transition-colors relative scroll-snap-align-start ${activeTab === 'suggestions' ? 'text-[#ffb700] border-b-2 border-[#ffb700]' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                            Suggestions
-                        </button>
+                            {[
+                                { id: 'watching' as const, label: 'Currently Watching', icon: 'live_tv' },
+                                { id: 'history' as const, label: 'Watch History', icon: 'history' },
+                                { id: 'watchlist' as const, label: 'Watchlist', icon: 'bookmark' },
+                                { id: 'suggestions' as const, label: 'Suggestions', icon: 'recommend' },
+                            ].map((tab) => {
+                                const isActive = activeTab === tab.id;
+                                return (
+                                    <button 
+                                        key={tab.id}
+                                        type="button"
+                                        onClick={() => handleTabSwitch(tab.id)}
+                                        className={`flex items-center gap-1.5 pb-3 pt-1 px-3 md:px-2 font-black uppercase tracking-wider text-[11px] sm:text-xs whitespace-nowrap transition-colors relative shrink-0 cursor-pointer ${
+                                            isActive ? 'text-[#2D2926]' : 'text-slate-400 hover:text-slate-600'
+                                        }`}
+                                    >
+                                        <span className={`material-symbols-outlined text-[17px] sm:text-[19px] transition-colors ${
+                                            isActive ? 'text-[#ffb700]' : 'text-slate-300'
+                                        }`}>
+                                            {tab.icon}
+                                        </span>
+                                        <span>{tab.label}</span>
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="entriesTabUnderline"
+                                                className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#ffb700] rounded-full shadow-xs"
+                                                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                            />
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     {activeTab === 'watching' && (

@@ -170,11 +170,7 @@ const AppRoutes: React.FC = () => {
                 />
                 <Route
                     path="/watch-hive/profile/:id"
-                    element={
-                        <ProtectedRoute>
-                            <UserProfilePage />
-                        </ProtectedRoute>
-                    }
+                    element={<UserProfilePage />}
                 />
                 <Route
                     path="/watch-hive/compare/:targetUserId"
