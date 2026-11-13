@@ -29,7 +29,8 @@ export const UIProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
                 const next = Math.max(0, prev - 1);
                 if (next === 0) {
                     document.body.classList.remove('modal-open');
-                    document.body.style.overflow = 'unset';
+                    document.body.style.removeProperty('overflow');
+                    document.body.style.overflow = '';
                 }
                 return next;
             });
@@ -63,7 +64,8 @@ const fallbackUI: UIContextType = {
         document.body.style.overflow = 'hidden';
         return () => {
             document.body.classList.remove('modal-open');
-            document.body.style.overflow = 'unset';
+            document.body.style.removeProperty('overflow');
+            document.body.style.overflow = '';
         };
     },
 };

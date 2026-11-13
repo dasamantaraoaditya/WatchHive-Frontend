@@ -44,9 +44,23 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
     const { registerModal } = useUI();
     const [comments, setComments] = useState<Comment[]>([]);
 
+    // Synchronize modal state with UIContext & body scroll lock
     useEffect(() => {
         if (!isOpen) return;
-        return registerModal();
+
+        const unregister = registerModal();
+        document.body.setAttribute('data-modal-open', 'true');
+
+        return () => {
+            unregister();
+            document.body.removeAttribute('data-modal-open');
+            const otherModal = document.querySelector('[data-modal-open="true"]');
+            if (!otherModal) {
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.overflow = '';
+            }
+        };
     }, [isOpen, registerModal]);
     const [newComment, setNewComment] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -64,19 +78,6 @@ export const CommentsModal: React.FC<CommentsModalProps> = ({
             fetchComments();
         }
     }, [isOpen, entryId]);
-
-    // Body scroll lock
-    useEffect(() => {
-        if (isOpen) {
-            const originalOverflow = document.body.style.overflow;
-            document.body.style.overflow = 'hidden';
-            document.body.setAttribute('data-modal-open', 'true');
-            return () => {
-                document.body.style.overflow = originalOverflow;
-                document.body.removeAttribute('data-modal-open');
-            };
-        }
-    }, [isOpen]);
 
     // Handle Escape key
     useEffect(() => {

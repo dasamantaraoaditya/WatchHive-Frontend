@@ -26,6 +26,7 @@ export interface Entry {
     startedAt?: string;
     completedAt?: string;
     currentSeason?: number | null;
+    seasons?: number[] | null;
     currentEpisode?: number | null;
     totalEpisodesWatched?: number;
     totalEpisodesCount?: number | null;
@@ -62,6 +63,7 @@ export interface CreateEntryData {
     suggestedByUserId?: string | null;
     postToFeed?: boolean;
     currentSeason?: number | null;
+    seasons?: number[] | null;
     currentEpisode?: number | null;
 }
 
@@ -81,6 +83,7 @@ export interface UpdateEntryData {
     suggestedByUserId?: string | null;
     postToFeed?: boolean;
     currentSeason?: number | null;
+    seasons?: number[] | null;
     currentEpisode?: number | null;
 }
 
