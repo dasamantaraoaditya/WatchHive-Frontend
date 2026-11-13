@@ -258,6 +258,11 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     >
                                         {title}
                                     </button>
+                                    {entryData?.currentSeason && (
+                                        <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#ffb700]/20 text-[#2D2926] font-black text-[9px] uppercase tracking-wider align-middle">
+                                            Season {entryData.currentSeason}
+                                        </span>
+                                    )}
                                 </p>
 
                                 {entryData?.suggestedByUser && (

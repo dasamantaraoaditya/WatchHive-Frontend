@@ -145,6 +145,7 @@ export const MovieDetailsPage: React.FC = () => {
     const [userProgress, setUserProgress] = useState<ShowProgress | null>(null);
     const [friendsProgress, setFriendsProgress] = useState<FriendShowProgress[]>([]);
     const [togglingEpisode, setTogglingEpisode] = useState<string | null>(null);
+    const [completedSeasonNumber, setCompletedSeasonNumber] = useState<number | null>(null);
 
     const handleToggleEpisode = async (seasonNum: number, epNum: number, epId?: number, epName?: string) => {
         if (!tmdbId || togglingEpisode) return;
@@ -155,6 +156,10 @@ export const MovieDetailsPage: React.FC = () => {
             w => w.seasonNumber === seasonNum && w.episodeNumber === epNum
         );
 
+        const totalSeasonEps = seasonDetails?.episodes?.length || 0;
+        const watchedInSeasonBefore = userProgress?.watchedEpisodes.filter(w => w.seasonNumber === seasonNum && w.episodeNumber !== epNum).length || 0;
+        const willCompleteSeason = !isCurrentlyWatched && totalSeasonEps > 0 && (watchedInSeasonBefore + 1) >= totalSeasonEps;
+
         try {
             const res = await episodesApi.toggleEpisodeWatch(tmdbId, {
                 seasonNumber: seasonNum,
@@ -164,6 +169,11 @@ export const MovieDetailsPage: React.FC = () => {
                 isWatched: !isCurrentlyWatched,
             });
             setUserProgress(res.progress);
+            if (willCompleteSeason) {
+                setCompletedSeasonNumber(seasonNum);
+                setIsCompletingWatch(true);
+                setView('log');
+            }
         } catch (e) {
             console.error('Failed to toggle episode watch:', e);
             alert('Failed to update episode watch state.', {
@@ -193,10 +203,18 @@ export const MovieDetailsPage: React.FC = () => {
                     upToEpisode: epNum,
                 });
                 setUserProgress(res.progress);
-                alert(`Marked all episodes up to S${seasonNum} E${epNum} as watched.`, {
-                    title: 'Caught Up! 🐝',
-                    severity: 'success',
-                });
+                const totalSeasonEps = seasonDetails?.episodes?.length || 0;
+                const isSeasonDone = totalSeasonEps > 0 && epNum >= totalSeasonEps;
+                if (isSeasonDone) {
+                    setCompletedSeasonNumber(seasonNum);
+                    setIsCompletingWatch(true);
+                    setView('log');
+                } else {
+                    alert(`Marked all episodes up to S${seasonNum} E${epNum} as watched.`, {
+                        title: 'Caught Up! 🐝',
+                        severity: 'success',
+                    });
+                }
             } catch (e) {
                 console.error('Failed to batch catch up:', e);
                 alert('Failed to catch up episodes.', {
@@ -341,8 +359,14 @@ export const MovieDetailsPage: React.FC = () => {
         if (!tmdbId || isTransitioning) return;
 
         const confirmed = await confirm(
-            `Would you like to move "${title}" to your Currently Watching log?`,
-            { title: 'Log as Currently Watching', confirmText: 'Move to Currently Watching', severity: 'primary' }
+            inWatchlist
+                ? `Would you like to move "${title}" to your Currently Watching log?`
+                : `Would you like to add "${title}" to your Currently Watching log?`,
+            {
+                title: 'Log as Currently Watching',
+                confirmText: inWatchlist ? 'Move to Currently Watching' : 'Start Watching',
+                severity: 'primary',
+            }
         );
         if (!confirmed) return;
 
@@ -567,16 +591,16 @@ export const MovieDetailsPage: React.FC = () => {
                                             {inWatchlist ? 'In Watchlist' : 'Add to Watchlist'}
                                         </button>
 
-                                        {inWatchlist && (
+                                        {!userEntry?.isWatching && (
                                             <button
                                                 onClick={handleStartWatching}
                                                 disabled={isTransitioning}
-                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/15 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs"
+                                                className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/15 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs cursor-pointer"
                                             >
                                                 <span className="material-symbols-outlined text-[18px] text-[#ffb700]">
                                                      visibility
                                                  </span>
-                                                 Log Currently Watching
+                                                 {isTransitioning ? 'Starting...' : 'Log Currently Watching'}
                                             </button>
                                         )}
 
@@ -1137,6 +1161,7 @@ export const MovieDetailsPage: React.FC = () => {
                                     overview: details.overview,
                                     suggestedByUserId: resolvedSuggestedByUserId,
                                     suggestedByUser: resolvedSuggestedByUser,
+                                    currentSeason: completedSeasonNumber || undefined,
                                 }}
                                 defaultIsWatching={isCompletingWatch ? false : undefined}
                                 isModal={false}
@@ -1147,10 +1172,12 @@ export const MovieDetailsPage: React.FC = () => {
                                         fetchDetails();
                                     }
                                     setIsCompletingWatch(false);
+                                    setCompletedSeasonNumber(null);
                                     setView('details');
                                 }}
                                 onCancel={() => {
                                     setIsCompletingWatch(false);
+                                    setCompletedSeasonNumber(null);
                                     setView('details');
                                 }}
                             />

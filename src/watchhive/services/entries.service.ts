@@ -61,6 +61,8 @@ export interface CreateEntryData {
     watchLocation?: string;
     suggestedByUserId?: string | null;
     postToFeed?: boolean;
+    currentSeason?: number | null;
+    currentEpisode?: number | null;
 }
 
 export interface UpdateEntryData {
@@ -78,6 +80,8 @@ export interface UpdateEntryData {
     watchLocation?: string;
     suggestedByUserId?: string | null;
     postToFeed?: boolean;
+    currentSeason?: number | null;
+    currentEpisode?: number | null;
 }
 
 export interface GetEntriesParams {
