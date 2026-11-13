@@ -305,10 +305,15 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         watchLocation: entry?.watchLocation || '',
         suggestedByUserId: entry?.suggestedByUserId || prefillData?.suggestedByUserId || undefined,
         postToFeed: entry?.postToFeed !== undefined ? entry.postToFeed : true,
-        currentSeason: entry?.currentSeason ?? prefillData?.currentSeason ?? (entry?.type === 'TV_SHOW' || prefillData?.type === 'TV_SHOW' ? 1 : undefined),
+        currentSeason: entry?.currentSeason ?? prefillData?.currentSeason ?? undefined,
+        seasons: (entry as any)?.seasons && Array.isArray((entry as any).seasons) && (entry as any).seasons.length > 0
+            ? (entry as any).seasons
+            : (entry?.currentSeason ? [entry.currentSeason] : (prefillData?.currentSeason ? [prefillData.currentSeason] : undefined)),
     });
 
     // ── UI state ──
+    const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
+    const [isLoadingSeasons, setIsLoadingSeasons] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState(prefillData?.title || '');
     const [searchResults, setSearchResults] = useState<TmdbResult[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -340,14 +345,69 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [hasWatchedBefore, setHasWatchedBefore] = useState(false);
     const [previousEntry, setPreviousEntry] = useState<any | null>(null);
 
-    const checkPreviousWatch = useCallback(async (tmdbId: number, season?: number | null) => {
+    // Fetch dynamic seasons whenever TV show tmdbId is selected
+    useEffect(() => {
+        let isMounted = true;
+        if (formData.type === 'TV_SHOW' && formData.tmdbId) {
+            setIsLoadingSeasons(true);
+            apiClient.get(`/tmdb/tv/${formData.tmdbId}`)
+                .then((data: any) => {
+                    if (!isMounted) return;
+                    let seasonNums: number[] = [];
+                    if (Array.isArray(data?.seasons) && data.seasons.length > 0) {
+                        seasonNums = data.seasons
+                            .map((s: any) => s.season_number)
+                            .filter((sn: number) => typeof sn === 'number' && sn > 0)
+                            .sort((a: number, b: number) => a - b);
+                    } else if (data?.number_of_seasons && data.number_of_seasons > 0) {
+                        seasonNums = Array.from({ length: data.number_of_seasons }, (_, i) => i + 1);
+                    }
+                    setAvailableSeasons(seasonNums);
+                })
+                .catch(() => {
+                    if (!isMounted) return;
+                    setAvailableSeasons([]);
+                })
+                .finally(() => {
+                    if (isMounted) setIsLoadingSeasons(false);
+                });
+        } else {
+            setAvailableSeasons([]);
+            setIsLoadingSeasons(false);
+        }
+        return () => { isMounted = false; };
+    }, [formData.tmdbId, formData.type]);
+
+    const toggleSeason = (s: number) => {
+        setFormData((prev) => {
+            const currentList = prev.seasons || (prev.currentSeason ? [prev.currentSeason] : []);
+            let nextList: number[];
+            if (currentList.includes(s)) {
+                nextList = currentList.filter((item) => item !== s);
+            } else {
+                nextList = [...currentList, s].sort((a, b) => a - b);
+            }
+            return {
+                ...prev,
+                seasons: nextList.length > 0 ? nextList : undefined,
+                currentSeason: nextList.length > 0 ? nextList[nextList.length - 1] : undefined,
+            };
+        });
+    };
+
+    const checkPreviousWatch = useCallback(async (tmdbId: number, season?: number | null, seasons?: number[] | null) => {
         if (!tmdbId || isEditing) {
             setHasWatchedBefore(false);
             setPreviousEntry(null);
             return;
         }
         try {
-            const seasonParam = season !== undefined && season !== null ? `?season=${season}` : '';
+            let seasonParam = '';
+            if (seasons && seasons.length > 0) {
+                seasonParam = `?seasons=${seasons.join(',')}`;
+            } else if (season !== undefined && season !== null) {
+                seasonParam = `?season=${season}`;
+            }
             const res: any = await apiClient.get(`/entries/check/${tmdbId}${seasonParam}`);
             if (res && res.hasWatched) {
                 setHasWatchedBefore(true);
@@ -364,9 +424,13 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
     useEffect(() => {
         if (formData.tmdbId && !isEditing) {
-            checkPreviousWatch(formData.tmdbId, formData.type === 'TV_SHOW' ? formData.currentSeason : undefined);
+            checkPreviousWatch(
+                formData.tmdbId,
+                formData.type === 'TV_SHOW' ? formData.currentSeason : undefined,
+                formData.type === 'TV_SHOW' ? formData.seasons : undefined
+            );
         }
-    }, [formData.tmdbId, formData.currentSeason, formData.type, checkPreviousWatch, isEditing]);
+    }, [formData.tmdbId, formData.currentSeason, formData.seasons, formData.type, checkPreviousWatch, isEditing]);
 
     const [suggestedUser, setSuggestedUser] = useState<SuggestedUser | null>(
         entry?.suggestedByUser || prefillData?.suggestedByUser || null
@@ -492,7 +556,14 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const handleSelectResult = (result: TmdbResult) => {
         const title = result.title || result.name || '';
         const type = result.media_type === 'tv' ? 'TV_SHOW' : 'MOVIE';
-        setFormData((prev) => ({ ...prev, tmdbId: result.id, title, type: type as 'MOVIE' | 'TV_SHOW' }));
+        setFormData((prev) => ({
+            ...prev,
+            tmdbId: result.id,
+            title,
+            type: type as 'MOVIE' | 'TV_SHOW',
+            currentSeason: undefined,
+            seasons: undefined,
+        }));
         setSearchQuery(title);
         setShowResults(false);
         setSelectedMovieResult(result);
@@ -561,6 +632,17 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 }
             }
 
+            if (payload.type === 'TV_SHOW') {
+                const finalSeasons = Array.isArray(formData.seasons) && formData.seasons.length > 0
+                    ? formData.seasons
+                    : (formData.currentSeason ? [formData.currentSeason] : undefined);
+                payload.seasons = finalSeasons || null;
+                payload.currentSeason = finalSeasons && finalSeasons.length > 0 ? finalSeasons[finalSeasons.length - 1] : null;
+            } else {
+                payload.seasons = null;
+                payload.currentSeason = null;
+            }
+
             if (isEditing && entry) {
                 const { tmdbId, ...updateData } = payload;
                 savedEntry = await entriesApi.updateEntry(entry.id, updateData);
@@ -619,6 +701,101 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const yearOf = (r: TmdbResult) => {
         const d = r.release_date || r.first_air_date;
         return d ? d.slice(0, 4) : '';
+    };
+
+    const renderSeasonPicker = () => {
+        if (formData.type !== 'TV_SHOW') return null;
+        const selectedList = formData.seasons || (formData.currentSeason ? [formData.currentSeason] : []);
+
+        return (
+            <div className="flex flex-col gap-1.5 bg-amber-50/70 border border-[#ffb700]/30 rounded-xl p-2.5 mt-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]">
+                            Seasons:
+                        </span>
+                        {isLoadingSeasons ? (
+                            <span className="text-[9px] font-bold text-[#E59700] animate-pulse">Loading TMDb seasons...</span>
+                        ) : (
+                            <span className="text-[10px] font-bold text-[#525252]">
+                                {selectedList.length === 0 ? 'None (Entire Series)' : `Selected: S${selectedList.join(', S')}`}
+                            </span>
+                        )}
+                    </div>
+                    {availableSeasons.length > 0 && (
+                        <div className="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const allSelected = availableSeasons.every((s) => selectedList.includes(s));
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        seasons: allSelected ? undefined : [...availableSeasons],
+                                        currentSeason: allSelected ? undefined : availableSeasons[availableSeasons.length - 1],
+                                    }));
+                                }}
+                                className="text-[10px] font-black text-[#2D2926] hover:text-[#E59700] underline"
+                            >
+                                {availableSeasons.every((s) => selectedList.includes(s)) ? 'Deselect All' : 'Select All'}
+                            </button>
+                            {selectedList.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData((prev) => ({ ...prev, seasons: undefined, currentSeason: undefined }))}
+                                    className="text-[10px] font-bold text-red-500 hover:text-red-700"
+                                >
+                                    Clear
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    {(availableSeasons.length > 0 ? availableSeasons : [1, 2, 3, 4, 5]).map((s) => {
+                        const isSelected = selectedList.includes(s);
+                        return (
+                            <button
+                                key={s}
+                                type="button"
+                                onClick={() => toggleSeason(s)}
+                                className={`px-2.5 py-1 text-[11px] font-black rounded-lg border transition-all flex items-center gap-1 ${
+                                    isSelected
+                                        ? 'bg-[#FFB700] border-[#E59700] text-[#2D2926] shadow-xs'
+                                        : 'bg-white border-[#E5E5E5] text-[#525252] hover:bg-[#FFF9F0] hover:border-[#FFB700]/40'
+                                }`}
+                            >
+                                {isSelected && <span className="text-xs leading-none">✓</span>}
+                                S{s}
+                            </button>
+                        );
+                    })}
+                    <input
+                        type="number"
+                        min="1"
+                        max="99"
+                        placeholder="+ S#"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const val = parseInt((e.target as HTMLInputElement).value, 10);
+                                if (!isNaN(val) && val > 0) {
+                                    toggleSeason(val);
+                                    (e.target as HTMLInputElement).value = '';
+                                }
+                            }
+                        }}
+                        className="w-14 px-1.5 py-1 text-[10px] font-black rounded-lg border border-[#E5E5E5] text-[#2D2926] bg-white text-center focus:outline-none focus:border-[#FFB700]"
+                        title="Add custom season number and press Enter"
+                    />
+                </div>
+                <span className="text-[9px] text-[#2D2926]/50">
+                    {selectedList.length === 0
+                        ? 'Tip: Leave unselected to log the whole series, or click season(s) to log specific seasons.'
+                        : `Multi-select active: ${selectedList.length} season${selectedList.length > 1 ? 's' : ''} selected.`}
+                </span>
+            </div>
+        );
     };
 
     const hasSelection = formData.tmdbId > 0 && formData.title.length > 0;
@@ -763,42 +940,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     <span className="inline-block px-2 py-0.5 bg-[#ffb700]/15 text-[#2D2926] font-black text-[9px] uppercase tracking-wider rounded-md">
                                                         {formData.type === 'TV_SHOW' ? '📺 TV Show' : '🎬 Movie'}
                                                     </span>
-                                                    {formData.type === 'TV_SHOW' && (
-                                                        <div className="flex items-center gap-1.5 bg-amber-50/70 border border-[#ffb700]/30 rounded-xl px-2 py-1">
-                                                            <span className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/70">
-                                                                Season:
-                                                            </span>
-                                                            <div className="flex items-center gap-1">
-                                                                {[1, 2, 3, 4, 5].map((s) => (
-                                                                    <button
-                                                                        key={s}
-                                                                        type="button"
-                                                                        onClick={() => setFormData((prev) => ({ ...prev, currentSeason: s }))}
-                                                                        className={`px-2 py-0.5 text-[10px] font-black rounded-lg border transition-all ${
-                                                                            formData.currentSeason === s
-                                                                                ? 'bg-[#FFB700] border-[#E59700] text-[#2D2926] shadow-xs'
-                                                                                : 'bg-white border-[#E5E5E5] text-[#525252] hover:bg-[#FFF9F0]'
-                                                                        }`}
-                                                                    >
-                                                                        S{s}
-                                                                    </button>
-                                                                ))}
-                                                                <input
-                                                                    type="number"
-                                                                    min="1"
-                                                                    max="99"
-                                                                    value={formData.currentSeason ?? ''}
-                                                                    onChange={(e) => {
-                                                                        const val = parseInt(e.target.value, 10);
-                                                                        setFormData((prev) => ({ ...prev, currentSeason: isNaN(val) ? undefined : val }));
-                                                                    }}
-                                                                    placeholder="#"
-                                                                    className="w-10 px-1 py-0.5 text-[10px] font-black rounded-lg border border-[#E5E5E5] text-[#2D2926] bg-white text-center focus:outline-none focus:border-[#FFB700]"
-                                                                    title="Custom season number"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                    {formData.type === 'TV_SHOW' && renderSeasonPicker()}
                                                 </div>
                                                 {selectedOverview && (
                                                     <p className="text-[#2D2926]/50 text-xs leading-relaxed line-clamp-2 max-w-sm">{selectedOverview}</p>
@@ -828,6 +970,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         <span className="material-symbols-outlined text-[#ffb700]">movie</span>
                                         {formData.title}
                                     </div>
+                                    {formData.type === 'TV_SHOW' && renderSeasonPicker()}
                                 </div>
                             )}
 

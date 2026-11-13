@@ -367,35 +367,42 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                     <div className="flex gap-4 sm:gap-6 items-center">
                         {!isSuggestion && (
                             <>
-                                <div className="flex items-center gap-1">
+                                <div
+                                    className={`action-btn inline-flex items-center gap-1.5 cursor-pointer select-none ${
+                                        isLiked ? 'action-btn--liked text-[#ffb700]' : 'text-[#737373] hover:text-[#e59700]'
+                                    }`}
+                                >
                                     <button
-                                        className={`action-btn ${isLiked ? 'action-btn--liked text-[#ffb700]' : 'text-[#737373] hover:text-[#e59700]'}`}
+                                        type="button"
                                         onClick={handleLike}
+                                        className="p-0 bg-transparent border-none cursor-pointer flex items-center justify-center text-inherit transition-transform active:scale-125 focus:outline-none"
                                         title={isLiked ? 'Unlike' : 'Like'}
                                         aria-label={isLiked ? 'Unlike post' : 'Like post'}
                                     >
-                                        <span className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${isLiked ? 'filled text-[#ffb700] scale-110' : ''}`}>favorite</span>
-                                    </button>
-                                    {likeCount > 0 ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowLikes(true)}
-                                            className={`text-sm font-bold underline decoration-[#ffb700]/60 underline-offset-2 transition-colors cursor-pointer bg-transparent border-none px-1 py-0.5 ${
-                                                isLiked ? 'text-[#e59700] hover:text-[#bf7100]' : 'text-[#2D2926]/80 hover:text-[#e59700]'
+                                        <span
+                                            className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${
+                                                isLiked ? 'filled text-[#ffb700] scale-110' : ''
                                             }`}
-                                            title="See who liked this post"
                                         >
-                                            {likeCount} {likeCount === 1 ? 'like' : 'likes'}
-                                        </button>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={handleLike}
-                                            className="text-sm font-medium text-[#2D2926]/50 hover:text-[#E59700] transition-colors cursor-pointer bg-transparent border-none px-0.5 py-0.5"
-                                        >
-                                            0
-                                        </button>
-                                    )}
+                                            favorite
+                                        </span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (likeCount > 0) {
+                                                setShowLikes(true);
+                                            } else {
+                                                handleLike();
+                                            }
+                                        }}
+                                        className="text-sm font-medium bg-transparent border-none cursor-pointer p-0 text-inherit hover:opacity-85 focus:outline-none"
+                                        title={likeCount > 0 ? 'See who liked this post' : 'Like'}
+                                        aria-label={likeCount > 0 ? `See ${likeCount} likes` : 'Like post'}
+                                    >
+                                        {likeCount}
+                                    </button>
                                 </div>
                                 <button
                                     className={`action-btn ${isCommented ? 'action-btn--commented' : ''}`}

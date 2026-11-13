@@ -31,9 +31,23 @@ export const LikesModal: React.FC<LikesModalProps> = ({
     const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Synchronize modal state with UIContext & body scroll lock
     useEffect(() => {
         if (!isOpen) return;
-        return registerModal();
+
+        const unregister = registerModal();
+        document.body.setAttribute('data-modal-open', 'true');
+
+        return () => {
+            unregister();
+            document.body.removeAttribute('data-modal-open');
+            const otherModal = document.querySelector('[data-modal-open="true"]');
+            if (!otherModal) {
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.overflow = '';
+            }
+        };
     }, [isOpen, registerModal]);
 
     const fetchLikes = useCallback(
@@ -85,19 +99,6 @@ export const LikesModal: React.FC<LikesModalProps> = ({
             fetchLikes(INITIAL_LIMIT, 0, false);
         }
     }, [isOpen, entryId, initialLikeCount, fetchLikes]);
-
-    // Body scroll lock
-    useEffect(() => {
-        if (isOpen) {
-            const originalOverflow = document.body.style.overflow;
-            document.body.style.overflow = 'hidden';
-            document.body.setAttribute('data-modal-open', 'true');
-            return () => {
-                document.body.style.overflow = originalOverflow;
-                document.body.removeAttribute('data-modal-open');
-            };
-        }
-    }, [isOpen]);
 
     // Close on Escape
     useEffect(() => {
