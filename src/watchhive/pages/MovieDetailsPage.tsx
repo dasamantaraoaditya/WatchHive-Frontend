@@ -138,6 +138,8 @@ export const MovieDetailsPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [userEntry, setUserEntry] = useState<Entry | null>(null);
+    const [friendsEntries, setFriendsEntries] = useState<Entry[]>([]);
+    const [showFriendsModal, setShowFriendsModal] = useState(false);
 
     const [selectedSeasonNumber, setSelectedSeasonNumber] = useState<number | null>(null);
     const [seasonDetails, setSeasonDetails] = useState<{ episodes: EpisodeItem[]; overview?: string; name?: string } | null>(null);
@@ -286,15 +288,17 @@ export const MovieDetailsPage: React.FC = () => {
         setError(null);
         try {
             const endpoint = mediaType === 'movie' ? `/tmdb/movie/${tmdbId}` : `/tmdb/tv/${tmdbId}`;
-            const [data, entriesRes]: [any, any] = await Promise.all([
+            const [data, socialRes]: [any, any] = await Promise.all([
                 apiClient.get(endpoint),
-                entriesApi.getEntries({ tmdbId, limit: 10 }).catch(() => ({ entries: [] }))
+                entriesApi.getMediaSocial(tmdbId).catch(() => ({ userEntry: null, friendsEntries: [] }))
             ]);
             setDetails(data);
 
-            const foundEntry = entriesRes.entries?.find((e: Entry) => Number(e.tmdbId) === Number(tmdbId));
-            if (foundEntry) {
-                setUserEntry(foundEntry);
+            if (socialRes?.userEntry) {
+                setUserEntry(socialRes.userEntry);
+            }
+            if (socialRes?.friendsEntries) {
+                setFriendsEntries(socialRes.friendsEntries);
             }
 
             if (mediaType === 'tv') {
@@ -648,6 +652,65 @@ export const MovieDetailsPage: React.FC = () => {
                                         </button>
                                     </div>
                                 </div>
+
+                                {/* Friends Who Watched Bar (Social Proof) */}
+                                {friendsEntries.length > 0 && (
+                                    <div
+                                        onClick={() => setShowFriendsModal(true)}
+                                        className="flex items-center justify-between gap-3 p-4 bg-[#FFF9F0] hover:bg-[#FFF3E0] border border-[#ffb700]/30 rounded-2xl cursor-pointer transition-all shadow-xs group"
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            {/* Overlapping Avatars */}
+                                            <div className="flex items-center -space-x-2 shrink-0">
+                                                {friendsEntries.slice(0, 3).map((fe) => (
+                                                    <div key={fe.id} className="relative ring-2 ring-white rounded-full">
+                                                        <Avatar
+                                                            src={fe.user?.profilePictureUrl}
+                                                            name={fe.user?.displayName || fe.user?.username || 'Friend'}
+                                                            size="sm"
+                                                        />
+                                                    </div>
+                                                ))}
+                                                {friendsEntries.length > 3 && (
+                                                    <div className="relative z-10 w-8 h-8 rounded-full bg-[#ffb700] border-2 border-white flex items-center justify-center text-[10px] font-black text-[#2D2926]">
+                                                        +{friendsEntries.length - 3}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Summary text */}
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-black text-[#2D2926] truncate">
+                                                    {friendsEntries.length === 1
+                                                        ? `${friendsEntries[0].user?.displayName || friendsEntries[0].user?.username || '1 friend'} watched this`
+                                                        : friendsEntries.length === 2
+                                                        ? `${friendsEntries[0].user?.displayName || friendsEntries[0].user?.username} and ${friendsEntries[1].user?.displayName || friendsEntries[1].user?.username} watched this`
+                                                        : `${friendsEntries[0].user?.displayName || friendsEntries[0].user?.username} and ${friendsEntries.length - 1} others watched this`}
+                                                </p>
+                                                <p className="text-xs font-semibold text-slate-500">
+                                                    Click to view friend reviews & ratings
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Trailing Rating Badge & Chevron */}
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            {(() => {
+                                                const rated = friendsEntries.filter(f => f.rating && f.rating > 0);
+                                                if (rated.length === 0) return null;
+                                                const avg = (rated.reduce((acc, curr) => acc + (curr.rating || 0), 0) / rated.length).toFixed(1);
+                                                return (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#ffb700]/20 border border-[#ffb700]/40 rounded-xl text-xs font-black text-[#2D2926]">
+                                                        ⭐ {avg}
+                                                    </span>
+                                                );
+                                            })()}
+                                            <span className="material-symbols-outlined text-slate-400 group-hover:text-[#2D2926] transition-colors">
+                                                chevron_right
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Logged Watch Entry & Suggested By Card */}
                                 {userEntry && (
@@ -1197,6 +1260,88 @@ export const MovieDetailsPage: React.FC = () => {
                                     setView('details');
                                 }}
                             />
+                        </div>
+                    )}
+
+                    {/* Friends Who Watched Modal */}
+                    {showFriendsModal && (
+                        <div
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-[fade-in_0.2s_ease-out]"
+                            onClick={() => setShowFriendsModal(false)}
+                        >
+                            <div
+                                className="bg-[#FFF9F0] border border-[#ffb700]/30 rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Header */}
+                                <div className="flex items-center justify-between p-5 border-b border-black/5 bg-white/70">
+                                    <div className="flex items-center gap-2.5">
+                                        <span className="w-8 h-8 rounded-xl bg-[#ffb700]/20 flex items-center justify-center text-[#2D2926]">
+                                            🐝
+                                        </span>
+                                        <div>
+                                            <h3 className="text-base font-black text-[#2D2926]">
+                                                Friends Who Watched
+                                            </h3>
+                                            <p className="text-xs font-bold text-slate-400 truncate max-w-[240px]">
+                                                {title}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowFriendsModal(false)}
+                                        className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                                    >
+                                        <span className="material-symbols-outlined text-[20px]">close</span>
+                                    </button>
+                                </div>
+
+                                {/* Friends Reviews List */}
+                                <div className="p-5 overflow-y-auto space-y-4">
+                                    {friendsEntries.map((fe) => (
+                                        <div
+                                            key={fe.id}
+                                            className="p-4 bg-white rounded-2xl border border-black/5 shadow-xs flex flex-col gap-2.5"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div
+                                                    className="flex items-center gap-2.5 cursor-pointer"
+                                                    onClick={() => {
+                                                        setShowFriendsModal(false);
+                                                        navigate(`/profile/${fe.user?.username || fe.user?.id}`);
+                                                    }}
+                                                >
+                                                    <Avatar
+                                                        src={fe.user?.profilePictureUrl}
+                                                        name={fe.user?.displayName || fe.user?.username || 'Friend'}
+                                                        size="sm"
+                                                    />
+                                                    <div>
+                                                        <p className="text-xs font-black text-[#2D2926] hover:underline">
+                                                            {fe.user?.displayName || fe.user?.username}
+                                                        </p>
+                                                        <p className="text-[10px] font-semibold text-slate-400">
+                                                            @{fe.user?.username} {fe.watchedAt ? `• ${formatDate(fe.watchedAt)}` : ''}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {fe.rating && fe.rating > 0 ? (
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#ffb700]/20 border border-[#ffb700]/40 rounded-xl text-xs font-black text-[#2D2926]">
+                                                        ⭐ {fe.rating}
+                                                    </span>
+                                                ) : null}
+                                            </div>
+
+                                            {fe.review && (
+                                                <p className="text-xs font-medium text-[#2D2926]/90 italic border-l-2 border-[#ffb700] pl-3 py-0.5">
+                                                    "{fe.review}"
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     )}
                 </>

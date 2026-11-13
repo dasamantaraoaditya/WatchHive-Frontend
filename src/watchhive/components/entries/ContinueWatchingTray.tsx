@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { episodesApi, ContinueWatchingItem } from '../../services/episodes.service';
+import { apiClient } from '../../services/api';
 import { useCustomAlert } from '../../contexts';
 import { ContinueWatchingSkeleton } from '../common';
 
@@ -121,22 +122,7 @@ export const ContinueWatchingTray: React.FC<ContinueWatchingTrayProps> = ({
                         >
                             <div className="flex items-start gap-3">
                                 {/* Thumbnail Poster */}
-                                <div className="relative w-14 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-900 border border-black/5">
-                                    {item.posterPath ? (
-                                        <img
-                                            src={`https://image.tmdb.org/t/p/w185${item.posterPath}`}
-                                            alt={item.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
-                                            <span className="material-symbols-outlined">tv</span>
-                                        </div>
-                                    )}
-                                    <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-black/70 text-white font-black text-[8px] uppercase tracking-wider backdrop-blur-xs">
-                                        TV
-                                    </span>
-                                </div>
+                                <ContinueWatchingPoster item={item} />
 
                                 {/* Text & Current Progress */}
                                 <div className="flex flex-col min-w-0 flex-1">
@@ -202,5 +188,46 @@ export const ContinueWatchingTray: React.FC<ContinueWatchingTrayProps> = ({
                 })}
             </div>
         </section>
+    );
+};
+
+const ContinueWatchingPoster: React.FC<{ item: ContinueWatchingItem }> = ({ item }) => {
+    const [posterPath, setPosterPath] = useState<string | null>(item.posterPath || null);
+
+    useEffect(() => {
+        if (!posterPath && item.tmdbId) {
+            let isMounted = true;
+            apiClient.get<any>(`/tmdb/tv/${item.tmdbId}`).then(res => {
+                if (isMounted) {
+                    const found = res?.poster_path || res?.backdrop_path || null;
+                    if (found) setPosterPath(found);
+                }
+            }).catch(() => {});
+            return () => { isMounted = false; };
+        }
+    }, [item.tmdbId, posterPath]);
+
+    const resolvedUrl = posterPath
+        ? (posterPath.startsWith('http') ? posterPath : `https://image.tmdb.org/t/p/w185${posterPath.startsWith('/') ? '' : '/'}${posterPath}`)
+        : null;
+
+    return (
+        <div className="relative w-14 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-900 border border-black/5">
+            {resolvedUrl ? (
+                <img
+                    src={resolvedUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                />
+            ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-400">
+                    <span className="material-symbols-outlined">tv</span>
+                </div>
+            )}
+            <span className="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-black/70 text-white font-black text-[8px] uppercase tracking-wider backdrop-blur-xs">
+                TV
+            </span>
+        </div>
     );
 };

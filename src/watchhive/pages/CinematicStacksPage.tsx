@@ -73,11 +73,35 @@ export const CinematicStacksPage: React.FC = () => {
         try {
             const allLists = await listsApi.getLists();
             const rankingStacks = allLists.filter(l => l.type === 'RANKING_STACK');
-            setLists(rankingStacks);
             
-            if (rankingStacks.length > 0 && !currentList) {
-                loadRankedList(rankingStacks[0].id);
-            } else if (rankingStacks.length === 0) {
+            // Resilient count enrichment: If any list is missing items/itemCount,
+            // fetch each stack's ranked items in parallel so counts are immediately accurate.
+            const enrichedStacks = await Promise.all(
+                rankingStacks.map(async (stack) => {
+                    if (stack.itemCount !== undefined) return stack;
+                    if (stack.items && stack.items.length > 0) {
+                        return { ...stack, itemCount: stack.items.length };
+                    }
+                    try {
+                        const res = await listsApi.getRankedList(stack.id);
+                        const seen = new Set<number>();
+                        const unique = (res.items || []).filter(item => {
+                            if (seen.has(item.tmdbId)) return false;
+                            seen.add(item.tmdbId);
+                            return true;
+                        });
+                        return { ...stack, items: unique, itemCount: unique.length };
+                    } catch {
+                        return { ...stack, itemCount: 0 };
+                    }
+                })
+            );
+
+            setLists(enrichedStacks);
+            
+            if (enrichedStacks.length > 0 && !currentList) {
+                loadRankedList(enrichedStacks[0].id);
+            } else if (enrichedStacks.length === 0) {
                 setIsLoading(false);
             }
         } catch (err) {
@@ -102,6 +126,7 @@ export const CinematicStacksPage: React.FC = () => {
             });
 
             setItems(uniqueItems);
+            setLists(prev => prev.map(l => l.id === listId ? { ...l, items: uniqueItems, itemCount: uniqueItems.length } : l));
         } catch (err) {
             setError('Failed to load ranked items');
         } finally {
@@ -169,7 +194,11 @@ export const CinematicStacksPage: React.FC = () => {
 
         try {
             await listsApi.removeFromStack(currentList.id, tmdbId);
-            setItems(prev => prev.filter(item => item.tmdbId !== tmdbId));
+            setItems(prev => {
+                const next = prev.filter(item => item.tmdbId !== tmdbId);
+                setLists(prevLists => prevLists.map(l => l.id === currentList.id ? { ...l, items: next, itemCount: next.length } : l));
+                return next;
+            });
         } catch (err) {
             await alert('Failed to remove item', { title: 'Error', severity: 'error' });
         }
@@ -210,7 +239,12 @@ export const CinematicStacksPage: React.FC = () => {
                 type: 'RANKING_STACK',
                 isPublic: true
             });
-            setLists(prev => [newList, ...prev]);
+            const createdWithCount: List = {
+                ...newList,
+                items: [],
+                itemCount: 0
+            };
+            setLists(prev => [createdWithCount, ...prev]);
             loadRankedList(newList.id);
             setIsCreateModalOpen(false);
             setNewStackName('');
@@ -396,7 +430,9 @@ export const CinematicStacksPage: React.FC = () => {
                             >
                                 <span className="stack-card__name truncate">{list.name}</span>
                                 <div className="flex items-center justify-between">
-                                    <span className="stack-card__count">{currentList?.id === list.id ? `${items.length}/10` : '— /10'}</span>
+                                    <span className="stack-card__count">
+                                        {currentList?.id === list.id ? `${items.length}/10` : `${list.itemCount ?? list.items?.length ?? 0}/10`}
+                                    </span>
                                     {currentList?.id === list.id && (
                                         <span className="material-symbols-outlined text-[14px] text-[#ffb700]">verified</span>
                                     )}

@@ -84,7 +84,12 @@ export const StackButton: React.FC<StackButtonProps> = ({
                                     disabled={isSaving}
                                     className="flex items-center justify-between p-4 rounded-2xl bg-[#ffb700]/5 hover:bg-[#ffb700]/10 border border-[#ffb700]/10 transition-all font-black text-sm text-[#2D2926]"
                                 >
-                                    <span>{stack.name}</span>
+                                    <div className="flex items-center gap-2.5">
+                                        <span>{stack.name}</span>
+                                        <span className="px-2 py-0.5 rounded-full bg-[#ffb700]/15 text-[#92400e] text-[10px] font-bold">
+                                            {stack.itemCount ?? stack.items?.length ?? 0}/10
+                                        </span>
+                                    </div>
                                     {isSaving ? (
                                         <BeeLoader size="small" />
                                     ) : (

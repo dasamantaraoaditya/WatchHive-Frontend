@@ -121,7 +121,8 @@ export interface EntryStats {
 export const entriesApi = {
     // Create a new entry
     createEntry: async (data: CreateEntryData): Promise<Entry> => {
-        return await apiClient.post<Entry>('/entries', data);
+        const response: any = await apiClient.post('/entries', data);
+        return response?.entry || response;
     },
 
     // Get all entries with filters
@@ -131,12 +132,14 @@ export const entriesApi = {
 
     // Get a single entry
     getEntry: async (id: string): Promise<Entry> => {
-        return await apiClient.get<Entry>(`/entries/${id}`);
+        const response: any = await apiClient.get(`/entries/${id}`);
+        return response?.entry || response;
     },
 
     // Update an entry
     updateEntry: async (id: string, data: UpdateEntryData): Promise<Entry> => {
-        return await apiClient.put<Entry>(`/entries/${id}`, data);
+        const response: any = await apiClient.put(`/entries/${id}`, data);
+        return response?.entry || response;
     },
 
     // Delete an entry
@@ -147,6 +150,11 @@ export const entriesApi = {
     // Get entry statistics
     getStats: async (): Promise<EntryStats> => {
         return await apiClient.get<EntryStats>('/entries/stats/summary');
+    },
+
+    // Get social entries for media (current user's entry and followed friends' entries)
+    getMediaSocial: async (tmdbId: number): Promise<{ userEntry: Entry | null; friendsEntries: Entry[] }> => {
+        return await apiClient.get<{ userEntry: Entry | null; friendsEntries: Entry[] }>(`/entries/media/${tmdbId}/social`);
     },
 };
 
