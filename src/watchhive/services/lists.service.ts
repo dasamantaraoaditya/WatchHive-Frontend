@@ -33,6 +33,7 @@ export interface List {
     createdAt: string;
     updatedAt: string;
     items?: ListItem[];
+    itemCount?: number;
 }
 
 export interface RankedListResponse {
