@@ -6,10 +6,9 @@ import { HiveDatePicker } from '../common/HiveDatePicker';
 import { Avatar } from '../common/Avatar';
 import { BeeLoader, ModalBeeOverlay, WHRatingPicker } from '../common';
 import { useAuth } from '../../contexts/AuthContext';
-import { useCustomAlert } from '../../contexts/CustomAlertContext';
-import { shareCompletedWatch } from '../../utils/shareHelper';
 import { userService } from '../../services/userService';
 import { suggestionsApi } from '../../services/suggestions.service';
+import { PostLogSuccessModal } from './PostLogSuccessModal';
 
 export function calculateFuzzyScore(query: string, targetTitle: string): number {
     if (!query || !targetTitle) return 0;
@@ -87,6 +86,7 @@ interface TmdbResult {
     name?: string;
     media_type?: string;
     poster_path: string | null;
+    backdrop_path?: string | null;
     release_date?: string;
     first_air_date?: string;
     overview?: string;
@@ -274,7 +274,6 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     }, []);
 
     const { user } = useAuth();
-    const { alert } = useCustomAlert();
 
     const isCompletingActiveWatch = !!entry?.isWatching && defaultIsWatching === false;
     const initialStartedAt = entry?.startedAt
@@ -316,6 +315,24 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [showResults, setShowResults] = useState(false);
     const [selectedPoster, setSelectedPoster] = useState<string | null>(prefillData?.posterPath ? `https://image.tmdb.org/t/p/w342${prefillData.posterPath}` : null);
     const [selectedOverview, setSelectedOverview] = useState<string | null>(prefillData?.overview || null);
+    const [selectedMovieResult, setSelectedMovieResult] = useState<TmdbResult | null>(null);
+    const [successModalData, setSuccessModalData] = useState<{
+        entry: Entry;
+        title: string;
+        tmdbId?: number | null;
+        mediaType?: string;
+        posterPath?: string | null;
+        backdropPath?: string | null;
+        rating?: number | null;
+        review?: string | null;
+        isWatching?: boolean;
+        releaseYear?: string | null;
+        user?: {
+            displayName?: string | null;
+            username?: string | null;
+            profilePictureUrl?: string | null;
+        } | null;
+    } | null>(null);
     const [tagInput, setTagInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -478,6 +495,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         setFormData((prev) => ({ ...prev, tmdbId: result.id, title, type: type as 'MOVIE' | 'TV_SHOW' }));
         setSearchQuery(title);
         setShowResults(false);
+        setSelectedMovieResult(result);
         if (result.poster_path) setSelectedPoster(`https://image.tmdb.org/t/p/w342${result.poster_path}`);
         else setSelectedPoster(null);
         setSelectedOverview(result.overview || null);
@@ -549,39 +567,52 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
             } else {
                 savedEntry = await entriesApi.createEntry(payload as CreateEntryData);
             }
-            onSuccess?.(savedEntry);
+
+            const unwrappedEntry: Entry = (savedEntry as any)?.entry || savedEntry;
+            const resolvedTitle = (unwrappedEntry?.title && unwrappedEntry.title !== 'undefined' && unwrappedEntry.title.trim())
+                ? unwrappedEntry.title.trim()
+                : (payload?.title || formData?.title || entry?.title || 'Movie');
+            unwrappedEntry.title = resolvedTitle;
+
             if (typeof window !== 'undefined') {
-                window.dispatchEvent(new CustomEvent('watchhive:entry-created', { detail: savedEntry }));
+                window.dispatchEvent(new CustomEvent('watchhive:entry-created', { detail: unwrappedEntry }));
             }
+
             if (!isEditing) {
-                await alert(
-                    payload.isWatching
-                        ? `"${savedEntry.title}" has been added to your Currently Watching log!`
-                        : `"${savedEntry.title}" has been successfully logged to your Hive!`,
-                    {
-                        title: payload.isWatching ? 'Marked as Watching' : 'Watch Logged',
-                        severity: 'success',
-                        confirmText: 'Done',
-                        actionText: 'Share',
-                        actionIcon: 'share',
-                        onAction: () => {
-                            shareCompletedWatch({
-                                title: savedEntry.title,
-                                rating: savedEntry.rating,
-                                review: savedEntry.review,
-                                tmdbId: savedEntry.tmdbId,
-                                mediaType: savedEntry.type === 'TV_SHOW' ? 'tv' : 'movie',
-                                username: user?.username,
-                                isWatching: !!payload.isWatching,
-                            });
-                        },
-                    }
-                );
+                setSuccessModalData({
+                    entry: unwrappedEntry,
+                    title: resolvedTitle,
+                    tmdbId: unwrappedEntry.tmdbId || payload.tmdbId || selectedMovieResult?.id || null,
+                    mediaType: unwrappedEntry.type === 'TV_SHOW' ? 'tv' : 'movie',
+                    posterPath: (unwrappedEntry as any).posterPath || selectedMovieResult?.poster_path || prefillData?.posterPath || null,
+                    backdropPath: (unwrappedEntry as any).backdropPath || selectedMovieResult?.backdrop_path || null,
+                    rating: unwrappedEntry.rating != null ? Number(unwrappedEntry.rating) : (payload.rating != null ? Number(payload.rating) : null),
+                    review: unwrappedEntry.review || payload.review || null,
+                    isWatching: !!payload.isWatching,
+                    releaseYear: selectedMovieResult?.release_date
+                        ? selectedMovieResult.release_date.slice(0, 4)
+                        : (selectedMovieResult?.first_air_date ? selectedMovieResult.first_air_date.slice(0, 4) : null),
+                    user: user ? {
+                        displayName: user.displayName,
+                        username: user.username,
+                        profilePictureUrl: user.profilePictureUrl,
+                    } : null,
+                });
+            } else {
+                onSuccess?.(unwrappedEntry);
             }
         } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to save entry');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleCloseSuccessModal = () => {
+        const finalEntry = successModalData?.entry;
+        setSuccessModalData(null);
+        if (finalEntry) {
+            onSuccess?.(finalEntry);
         }
     };
 
@@ -1457,6 +1488,23 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                     </div>
                 </form>
             </div>
+
+            {successModalData && (
+                <PostLogSuccessModal
+                    isOpen={!!successModalData}
+                    onClose={handleCloseSuccessModal}
+                    title={successModalData.title}
+                    tmdbId={successModalData.tmdbId}
+                    mediaType={successModalData.mediaType}
+                    posterPath={successModalData.posterPath}
+                    backdropPath={successModalData.backdropPath}
+                    rating={successModalData.rating}
+                    review={successModalData.review}
+                    isWatching={successModalData.isWatching}
+                    releaseYear={successModalData.releaseYear}
+                    user={successModalData.user}
+                />
+            )}
         </div>
     );
 };

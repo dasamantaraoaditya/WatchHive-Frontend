@@ -359,22 +359,22 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 <rect
                                     width="100%"
                                     height="100%"
-                                    fill="rgba(30, 27, 25, 0.65)"
+                                    fill="rgba(30, 27, 25, 0.52)"
                                     mask="url(#tour-spotlight-mask)"
                                     className="pointer-events-auto cursor-default"
                                 />
-                                {/* Pulsing Golden Ring Framing Highlighted Target */}
+                                {/* Soft Ambient Honey Ring Framing Highlighted Target */}
                                 <rect
                                     x={targetRect.left - 8}
                                     y={targetRect.top - 8}
                                     width={targetRect.width + 16}
                                     height={targetRect.height + 16}
                                     rx={Math.abs(targetRect.width - targetRect.height) < 8 ? "9999" : "18"}
-                                    fill="none"
-                                    stroke="#ffb700"
-                                    strokeWidth="3"
+                                    fill="rgba(255, 183, 0, 0.06)"
+                                    stroke="rgba(255, 218, 64, 0.85)"
+                                    strokeWidth="1.75"
                                     className="animate-pulse pointer-events-none"
-                                    style={{ filter: 'drop-shadow(0 0 10px rgba(255, 183, 0, 0.9))' }}
+                                    style={{ filter: 'drop-shadow(0 0 8px rgba(255, 183, 0, 0.28))' }}
                                 />
                             </svg>
                         ) : (
