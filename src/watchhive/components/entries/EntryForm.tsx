@@ -73,6 +73,7 @@ interface EntryFormProps {
         overview?: string | null;
         suggestedByUserId?: string | null;
         suggestedByUser?: SuggestedUser | null;
+        currentSeason?: number | null;
     };
     onSuccess?: (entry: Entry) => void;
     onCancel?: () => void;
@@ -305,6 +306,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         watchLocation: entry?.watchLocation || '',
         suggestedByUserId: entry?.suggestedByUserId || prefillData?.suggestedByUserId || undefined,
         postToFeed: entry?.postToFeed !== undefined ? entry.postToFeed : true,
+        currentSeason: entry?.currentSeason ?? prefillData?.currentSeason ?? (entry?.type === 'TV_SHOW' || prefillData?.type === 'TV_SHOW' ? 1 : undefined),
     });
 
     // ── UI state ──
@@ -321,14 +323,15 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [hasWatchedBefore, setHasWatchedBefore] = useState(false);
     const [previousEntry, setPreviousEntry] = useState<any | null>(null);
 
-    const checkPreviousWatch = useCallback(async (tmdbId: number) => {
+    const checkPreviousWatch = useCallback(async (tmdbId: number, season?: number | null) => {
         if (!tmdbId || isEditing) {
             setHasWatchedBefore(false);
             setPreviousEntry(null);
             return;
         }
         try {
-            const res: any = await apiClient.get(`/entries/check/${tmdbId}`);
+            const seasonParam = season !== undefined && season !== null ? `?season=${season}` : '';
+            const res: any = await apiClient.get(`/entries/check/${tmdbId}${seasonParam}`);
             if (res && res.hasWatched) {
                 setHasWatchedBefore(true);
                 setPreviousEntry(res.existingEntry);
@@ -344,9 +347,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
     useEffect(() => {
         if (formData.tmdbId && !isEditing) {
-            checkPreviousWatch(formData.tmdbId);
+            checkPreviousWatch(formData.tmdbId, formData.type === 'TV_SHOW' ? formData.currentSeason : undefined);
         }
-    }, [formData.tmdbId, checkPreviousWatch, isEditing]);
+    }, [formData.tmdbId, formData.currentSeason, formData.type, checkPreviousWatch, isEditing]);
 
     const [suggestedUser, setSuggestedUser] = useState<SuggestedUser | null>(
         entry?.suggestedByUser || prefillData?.suggestedByUser || null
@@ -725,9 +728,47 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             )}
                                             <div className="flex-1 pt-1 min-w-0 relative z-10">
                                                 <h3 className="text-base font-black text-[#2D2926] truncate leading-snug">{formData.title}</h3>
-                                                <span className="inline-block px-2 py-0.5 bg-[#ffb700]/15 text-[#2D2926] font-black text-[9px] uppercase tracking-wider rounded-md mt-1 mb-2">
-                                                    {formData.type === 'TV_SHOW' ? '📺 TV Show' : '🎬 Movie'}
-                                                </span>
+                                                <div className="flex items-center gap-2 flex-wrap mt-1 mb-2">
+                                                    <span className="inline-block px-2 py-0.5 bg-[#ffb700]/15 text-[#2D2926] font-black text-[9px] uppercase tracking-wider rounded-md">
+                                                        {formData.type === 'TV_SHOW' ? '📺 TV Show' : '🎬 Movie'}
+                                                    </span>
+                                                    {formData.type === 'TV_SHOW' && (
+                                                        <div className="flex items-center gap-1.5 bg-amber-50/70 border border-[#ffb700]/30 rounded-xl px-2 py-1">
+                                                            <span className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/70">
+                                                                Season:
+                                                            </span>
+                                                            <div className="flex items-center gap-1">
+                                                                {[1, 2, 3, 4, 5].map((s) => (
+                                                                    <button
+                                                                        key={s}
+                                                                        type="button"
+                                                                        onClick={() => setFormData((prev) => ({ ...prev, currentSeason: s }))}
+                                                                        className={`px-2 py-0.5 text-[10px] font-black rounded-lg border transition-all ${
+                                                                            formData.currentSeason === s
+                                                                                ? 'bg-[#FFB700] border-[#E59700] text-[#2D2926] shadow-xs'
+                                                                                : 'bg-white border-[#E5E5E5] text-[#525252] hover:bg-[#FFF9F0]'
+                                                                        }`}
+                                                                    >
+                                                                        S{s}
+                                                                    </button>
+                                                                ))}
+                                                                <input
+                                                                    type="number"
+                                                                    min="1"
+                                                                    max="99"
+                                                                    value={formData.currentSeason ?? ''}
+                                                                    onChange={(e) => {
+                                                                        const val = parseInt(e.target.value, 10);
+                                                                        setFormData((prev) => ({ ...prev, currentSeason: isNaN(val) ? undefined : val }));
+                                                                    }}
+                                                                    placeholder="#"
+                                                                    className="w-10 px-1 py-0.5 text-[10px] font-black rounded-lg border border-[#E5E5E5] text-[#2D2926] bg-white text-center focus:outline-none focus:border-[#FFB700]"
+                                                                    title="Custom season number"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 {selectedOverview && (
                                                     <p className="text-[#2D2926]/50 text-xs leading-relaxed line-clamp-2 max-w-sm">{selectedOverview}</p>
                                                 )}

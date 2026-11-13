@@ -213,9 +213,9 @@ export const EntryCard: React.FC<{
                     {entry.type === 'TV_SHOW' && entry.currentSeason && (
                         <div className="flex items-center gap-1.5 my-1">
                             <span className="px-1.5 py-0.5 rounded-md bg-[#ffb700]/20 text-[#2D2926] font-black text-[9px] uppercase tracking-wider">
-                                S{entry.currentSeason} • E{entry.currentEpisode}
+                                {entry.isWatching && entry.currentEpisode ? `S${entry.currentSeason} • E${entry.currentEpisode}` : `Season ${entry.currentSeason}`}
                             </span>
-                            {entry.totalEpisodesCount ? (
+                            {entry.isWatching && entry.totalEpisodesCount ? (
                                 <span className="text-[9px] font-bold text-slate-400">
                                     {Math.round(((entry.totalEpisodesWatched || 0) / entry.totalEpisodesCount) * 100)}%
                                 </span>

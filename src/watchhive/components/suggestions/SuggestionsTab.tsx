@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { suggestionsApi, GroupedSuggestion, SmartSuggestItem } from '../../services/suggestions.service';
+import { suggestionsApi, GroupedSuggestion, SmartSuggestItem, SmartSuggestMode } from '../../services/suggestions.service';
 import apiClient from '../../services/api.js';
 import { SuggestionCard } from './SuggestionCard';
 import { SmartSuggestCard } from './SmartSuggestCard';
@@ -26,7 +26,7 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
 }) => {
     const navigate = useNavigate();
     const [subTab, setSubTab] = useState<'smart' | 'received' | 'sent'>('smart');
-    const [smartMode, setSmartMode] = useState<'social' | 'critic' | 'explore'>('social');
+    const [smartMode, setSmartMode] = useState<SmartSuggestMode>('social');
     const [smartItems, setSmartItems] = useState<SmartSuggestItem[]>([]);
     const [isSmartLoading, setIsSmartLoading] = useState(true);
     const [isDeckOpen, setIsDeckOpen] = useState(false);
@@ -107,23 +107,25 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
         fetchSuggestions();
     }, [fetchSuggestions]);
 
-    const fetchSmartSuggestions = useCallback(async (modeToFetch: 'social' | 'critic' | 'explore') => {
+    const fetchSmartSuggestions = useCallback(async (modeToFetch: SmartSuggestMode, regenerate: boolean = false) => {
         setIsSmartLoading(true);
         try {
-            const res = await suggestionsApi.getSmartSuggestions(modeToFetch, 16);
+            const excludeIds = regenerate ? smartItems.map((it) => it.tmdbId) : undefined;
+            const res = await suggestionsApi.getSmartSuggestions(modeToFetch, 16, regenerate ? { excludeIds, seed: Date.now() } : undefined);
             setSmartItems(res.items || []);
         } catch (e) {
             console.error('Failed to fetch smart suggestions', e);
         } finally {
             setIsSmartLoading(false);
         }
-    }, []);
+    }, [smartItems]);
 
     useEffect(() => {
         if (subTab === 'smart') {
             fetchSmartSuggestions(smartMode);
         }
-    }, [subTab, smartMode, fetchSmartSuggestions]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [subTab, smartMode]);
 
     const activeGroups = subTab === 'received' ? receivedGroups : sentGroups;
 
@@ -246,13 +248,13 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                                 <span>Hive Mind</span>
                             </button>
                             <button
-                                onClick={() => setSmartMode('critic')}
+                                onClick={() => setSmartMode('watchlist')}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                                    smartMode === 'critic' ? 'bg-[#ffb700] text-[#2D2926] shadow-xs' : 'text-slate-500 hover:text-[#2D2926]'
+                                    smartMode === 'watchlist' ? 'bg-[#ffb700] text-[#2D2926] shadow-xs' : 'text-slate-500 hover:text-[#2D2926]'
                                 }`}
                             >
-                                <span className="material-symbols-outlined text-sm">verified</span>
-                                <span>Certified Gold</span>
+                                <span className="material-symbols-outlined text-sm">bookmark</span>
+                                <span>Watchlist Gems</span>
                             </button>
                             <button
                                 onClick={() => setSmartMode('explore')}
@@ -260,18 +262,29 @@ export const SuggestionsTab: React.FC<SuggestionsTabProps> = ({
                                     smartMode === 'explore' ? 'bg-[#ffb700] text-[#2D2926] shadow-xs' : 'text-slate-500 hover:text-[#2D2926]'
                                 }`}
                             >
-                                <span className="material-symbols-outlined text-sm">cached</span>
-                                <span>Palate Cleanser</span>
+                                <span className="material-symbols-outlined text-sm">explore</span>
+                                <span>Explore</span>
                             </button>
                         </div>
 
-                        <button
-                            onClick={() => setIsDeckOpen(true)}
-                            className="px-4 py-2 bg-gradient-to-r from-amber-500 to-[#ffb700] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer self-end sm:self-center"
-                        >
-                            <span className="material-symbols-outlined text-base">style</span>
-                            <span>Launch Decision Deck</span>
-                        </button>
+                        <div className="flex items-center gap-2 self-end sm:self-center">
+                            <button
+                                onClick={() => fetchSmartSuggestions(smartMode, true)}
+                                disabled={isSmartLoading}
+                                className="px-3.5 py-2 bg-[#FFF9F0] hover:bg-[#ffb700]/20 text-[#2D2926] border border-[#ffb700]/40 font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                                title="Regenerate fresh recommendations"
+                            >
+                                <span className="material-symbols-outlined text-base">refresh</span>
+                                <span>Regenerate</span>
+                            </button>
+                            <button
+                                onClick={() => setIsDeckOpen(true)}
+                                className="px-4 py-2 bg-gradient-to-r from-amber-500 to-[#ffb700] text-[#2D2926] font-black text-xs uppercase tracking-wider rounded-xl shadow-xs transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                                <span className="material-symbols-outlined text-base">style</span>
+                                <span>Launch Decision Deck</span>
+                            </button>
+                        </div>
                     </div>
 
                     {/* Filter / Search Bar */}

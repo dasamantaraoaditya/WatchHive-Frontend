@@ -61,12 +61,25 @@ export const suggestionsApi = {
         await apiClient.delete(`/suggestions/${id}`);
     },
 
-    getSmartSuggestions: async (mode: 'social' | 'critic' | 'explore' = 'social', limit: number = 10): Promise<SmartSuggestResponse> => {
+    getSmartSuggestions: async (
+        mode: SmartSuggestMode = 'social',
+        limit: number = 10,
+        options?: { excludeIds?: number[]; seed?: number }
+    ): Promise<SmartSuggestResponse> => {
+        const params: Record<string, any> = { mode, limit: Math.max(10, limit) };
+        if (options?.excludeIds && options.excludeIds.length > 0) {
+            params.excludeIds = options.excludeIds.join(',');
+        }
+        if (options?.seed !== undefined) {
+            params.seed = options.seed;
+        }
         return await apiClient.get<SmartSuggestResponse>('/suggestions/smart-suggest', {
-            params: { mode, limit }
+            params
         });
     }
 };
+
+export type SmartSuggestMode = 'social' | 'watchlist' | 'explore';
 
 export interface SmartSuggestBadge {
     type: 'friend_pick' | 'network_buzz' | 'critical_acclaim' | 'palate_cleanser' | 'taste_match' | 'watchlist';
@@ -98,7 +111,7 @@ export interface SmartSuggestItem {
 }
 
 export interface SmartSuggestResponse {
-    mode: 'social' | 'critic' | 'explore';
+    mode: SmartSuggestMode;
     items: SmartSuggestItem[];
     lastWatchedTitle?: string | null;
     lastWatchedGenre?: string | null;

@@ -258,6 +258,11 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     >
                                         {title}
                                     </button>
+                                    {entryData?.currentSeason && (
+                                        <span className="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#ffb700]/20 text-[#2D2926] font-black text-[9px] uppercase tracking-wider align-middle">
+                                            Season {entryData.currentSeason}
+                                        </span>
+                                    )}
                                 </p>
 
                                 {entryData?.suggestedByUser && (
@@ -364,18 +369,20 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                             <>
                                 <div className="flex items-center gap-1">
                                     <button
-                                        className={`action-btn ${isLiked ? 'action-btn--liked' : ''}`}
+                                        className={`action-btn ${isLiked ? 'action-btn--liked text-[#ffb700]' : 'text-[#737373] hover:text-[#e59700]'}`}
                                         onClick={handleLike}
                                         title={isLiked ? 'Unlike' : 'Like'}
                                         aria-label={isLiked ? 'Unlike post' : 'Like post'}
                                     >
-                                        <span className={`material-symbols-outlined text-[20px] ${isLiked ? 'filled' : ''}`}>favorite</span>
+                                        <span className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${isLiked ? 'filled text-[#ffb700] scale-110' : ''}`}>favorite</span>
                                     </button>
                                     {likeCount > 0 ? (
                                         <button
                                             type="button"
                                             onClick={() => setShowLikes(true)}
-                                            className="text-sm font-bold text-[#2D2926]/80 hover:text-[#E59700] underline decoration-[#ffb700]/60 underline-offset-2 transition-colors cursor-pointer bg-transparent border-none px-1 py-0.5"
+                                            className={`text-sm font-bold underline decoration-[#ffb700]/60 underline-offset-2 transition-colors cursor-pointer bg-transparent border-none px-1 py-0.5 ${
+                                                isLiked ? 'text-[#e59700] hover:text-[#bf7100]' : 'text-[#2D2926]/80 hover:text-[#e59700]'
+                                            }`}
                                             title="See who liked this post"
                                         >
                                             {likeCount} {likeCount === 1 ? 'like' : 'likes'}

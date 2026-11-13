@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { suggestionsApi, SmartSuggestItem, SmartSuggestResponse } from '../../services/suggestions.service';
+import { suggestionsApi, SmartSuggestItem, SmartSuggestMode, SmartSuggestResponse } from '../../services/suggestions.service';
 import { WatchlistButton } from '../common';
 import { EntryForm } from '../entries/EntryForm';
 import { Modal } from '../common/Modal';
@@ -9,7 +9,7 @@ import { Modal } from '../common/Modal';
 interface SmartSuggestDeckModalProps {
     isOpen: boolean;
     onClose: () => void;
-    initialMode?: 'social' | 'critic' | 'explore';
+    initialMode?: SmartSuggestMode;
 }
 
 export const SmartSuggestDeckModal: React.FC<SmartSuggestDeckModalProps> = ({
@@ -18,7 +18,7 @@ export const SmartSuggestDeckModal: React.FC<SmartSuggestDeckModalProps> = ({
     initialMode = 'social'
 }) => {
     const navigate = useNavigate();
-    const [mode, setMode] = useState<'social' | 'critic' | 'explore'>(initialMode);
+    const [mode, setMode] = useState<SmartSuggestMode>(initialMode);
     const [items, setItems] = useState<SmartSuggestItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -91,14 +91,33 @@ export const SmartSuggestDeckModal: React.FC<SmartSuggestDeckModalProps> = ({
         });
     };
 
+    const handleRegenerate = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const excludeIds = items.map((it) => it.tmdbId);
+            const res: SmartSuggestResponse = await suggestionsApi.getSmartSuggestions(mode, 12, {
+                excludeIds,
+                seed: Date.now()
+            });
+            setItems(res.items || []);
+            setCurrentIndex(0);
+        } catch (err) {
+            console.error('[SmartSuggest] Failed to regenerate suggestions:', err);
+            setError('Failed to regenerate recommendations right now. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const getModeDescription = () => {
         switch (mode) {
             case 'social':
                 return 'Prioritizing picks from your trusted circle & friend suggestions.';
-            case 'critic':
-                return 'Prioritizing top critical acclaim, audience consensus & IMDb scores.';
+            case 'watchlist':
+                return 'Exceptional high-rated gems waiting in your Watchlist.';
             case 'explore':
-                return 'Nudging you outside your comfort zone with contrasting genres.';
+                return 'Top-rated movies & shows worldwide matched to your taste.';
         }
     };
 
@@ -156,15 +175,15 @@ export const SmartSuggestDeckModal: React.FC<SmartSuggestDeckModalProps> = ({
                         </button>
                         <button
                             type="button"
-                            onClick={() => setMode('critic')}
+                            onClick={() => setMode('watchlist')}
                             className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                                mode === 'critic'
+                                mode === 'watchlist'
                                     ? 'bg-[#ffb700] text-[#2D2926] shadow-xs'
                                     : 'text-[#2D2926]/60 hover:text-[#2D2926]'
                             }`}
                         >
-                            <span className="material-symbols-outlined text-[16px]">stars</span>
-                            <span>Certified Gold</span>
+                            <span className="material-symbols-outlined text-[16px]">bookmark</span>
+                            <span>Watchlist Gems</span>
                         </button>
                         <button
                             type="button"
@@ -176,19 +195,31 @@ export const SmartSuggestDeckModal: React.FC<SmartSuggestDeckModalProps> = ({
                             }`}
                         >
                             <span className="material-symbols-outlined text-[16px]">explore</span>
-                            <span>Palate Cleanser</span>
+                            <span>Explore</span>
                         </button>
                     </div>
                 </div>
 
                 {/* Subtitle / Mode Guidance */}
-                <div className="bg-[#fffbea] px-6 py-2 border-b border-[#ffb700]/10 flex items-center justify-between text-[11px] font-bold text-[#b07d00]">
+                <div className="bg-[#fffbea] px-6 py-2 border-b border-[#ffb700]/10 flex items-center justify-between text-[11px] font-bold text-[#b07d00] gap-2">
                     <span className="truncate">{getModeDescription()}</span>
-                    {items.length > 0 && !loading && (
-                        <span className="shrink-0 font-extrabold text-[#2D2926]/60 ml-2">
-                            Pick {currentIndex + 1} of {items.length}
-                        </span>
-                    )}
+                    <div className="flex items-center gap-2 shrink-0">
+                        {items.length > 0 && !loading && (
+                            <span className="font-extrabold text-[#2D2926]/60">
+                                Pick {currentIndex + 1} of {items.length}
+                            </span>
+                        )}
+                        <button
+                            type="button"
+                            onClick={handleRegenerate}
+                            disabled={loading}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] font-black text-[10px] uppercase tracking-wider transition-colors cursor-pointer disabled:opacity-50"
+                            title="Regenerate fresh suggestions"
+                        >
+                            <span className="material-symbols-outlined text-[13px]">refresh</span>
+                            <span>Regenerate</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Card Content Area */}
