@@ -23,6 +23,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
 }) => {
     const { watchlist: contextWatchlist, isLoading: contextLoading, hasLoaded: contextHasLoaded, error: contextError, fetchWatchlist, promptAddToWatchlist } = useWatchlist();
     const [sortBy, setSortBy] = useState('recent-desc');
+    const [typeFilter, setTypeFilter] = useState<string | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const PAGE_SIZE = 20;
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -40,6 +41,11 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
 
     const filteredItems = [...items]
         .filter(item => {
+            if (typeFilter) {
+                const itemType = (item.mediaType || (item as any).type || '').toUpperCase();
+                if (typeFilter === 'MOVIE' && !itemType.includes('MOVIE')) return false;
+                if (typeFilter === 'TV_SHOW' && (!itemType.includes('TV') && !itemType.includes('SERIES'))) return false;
+            }
             if (!searchQuery) return true;
             return (item.title || '').toLowerCase().includes(searchQuery.toLowerCase());
         })
@@ -61,7 +67,7 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
     // Reset visible count when filter/sort changes
     useEffect(() => {
         setVisibleCount(PAGE_SIZE);
-    }, [searchQuery, sortBy]);
+    }, [searchQuery, sortBy, typeFilter]);
 
     const handleLoadMore = useCallback(() => {
         setVisibleCount(prev => prev + PAGE_SIZE);
@@ -91,6 +97,8 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                         { value: 'title-asc', label: 'Title: A-Z' },
                         { value: 'title-desc', label: 'Title: Z-A' }
                     ]}
+                    typeFilter={typeFilter}
+                    onTypeFilterChange={setTypeFilter}
                     count={0}
                     countLabel="Saved Titles"
                     isLoading={loading}
@@ -115,8 +123,10 @@ export const WatchlistGrid: React.FC<WatchlistGridProps> = ({
                         { value: 'title-asc', label: 'Title: A-Z' },
                         { value: 'title-desc', label: 'Title: Z-A' }
                     ]}
+                    typeFilter={typeFilter}
+                    onTypeFilterChange={setTypeFilter}
                     count={filteredItems.length}
-                    countLabel={searchQuery ? "Matching Titles" : "Saved Titles"}
+                    countLabel={searchQuery || typeFilter ? "Matching Titles" : "Saved Titles"}
                     isLoading={loading}
                 />
 

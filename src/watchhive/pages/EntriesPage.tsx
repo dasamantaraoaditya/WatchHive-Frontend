@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
@@ -59,6 +59,7 @@ export const EntriesPage: React.FC = () => {
     const [watchingError, setWatchingError] = useState<string | null>(null);
     const [watchingPagination, setWatchingPagination] = useState({ total: 0, limit: 20, offset: 0, hasMore: false });
     const [watchingSort, setWatchingSort] = useState('recent-desc');
+    const [watchingTypeFilter, setWatchingTypeFilter] = useState<string | null>(null);
     const [searchQueries, setSearchQueries] = useState({
         history: '',
         watching: '',
@@ -66,6 +67,10 @@ export const EntriesPage: React.FC = () => {
         suggestions: ''
     });
     const [debouncedHistorySearch, setDebouncedHistorySearch] = useState('');
+
+    const historyFilters = useMemo(() => ({
+        search: debouncedHistorySearch.trim() || undefined
+    }), [debouncedHistorySearch]);
 
     // Debounce the search query for the history tab to avoid redundant API hits
     useEffect(() => {
@@ -202,9 +207,12 @@ export const EntriesPage: React.FC = () => {
             return 0;
         });
 
-    const filteredWatchingEntries = sortedWatchingEntries.filter(entry => 
-        entry.title.toLowerCase().includes(searchQueries.watching.toLowerCase())
-    );
+    const filteredWatchingEntries = sortedWatchingEntries.filter(entry => {
+        const q = searchQueries.watching.trim().toLowerCase();
+        const matchesSearch = !q || entry.title.toLowerCase().includes(q) || (entry.review && entry.review.toLowerCase().includes(q));
+        const matchesType = !watchingTypeFilter || entry.type === watchingTypeFilter;
+        return matchesSearch && matchesType;
+    });
 
     return (
         <PageLayout maxWidth="5xl">
@@ -273,8 +281,10 @@ export const EntriesPage: React.FC = () => {
                                     { value: 'title-asc', label: 'Title: A-Z' },
                                     { value: 'title-desc', label: 'Title: Z-A' }
                                 ]}
+                                typeFilter={watchingTypeFilter}
+                                onTypeFilterChange={setWatchingTypeFilter}
                                 count={filteredWatchingEntries.length}
-                                countLabel={searchQueries.watching ? "Matching Sessions" : "Active Sessions"}
+                                countLabel={searchQueries.watching || watchingTypeFilter ? "Matching Sessions" : "Active Sessions"}
                             />
                             
                             {watchingError ? (
@@ -357,7 +367,7 @@ export const EntriesPage: React.FC = () => {
                                 onAddNew={handleAddNew}
                                 searchQuery={searchQueries.history}
                                 onSearchChange={(val) => setSearchQueries(prev => ({ ...prev, history: val }))}
-                                filters={{ search: debouncedHistorySearch }}
+                                filters={historyFilters}
                             />
                         </section>
                     )}
