@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FeedItem } from '../../services/feed.service';
+import { WatchBuddy } from '../../services/entries.service';
 import { useTmdbDetails } from '../../hooks/useTmdbDetails';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, WatchlistButton } from '../common';
@@ -284,6 +285,34 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                                 @{entryData.suggestedByUser.username.length > 10 ? `${entryData.suggestedByUser.username.slice(0, 10)}...` : entryData.suggestedByUser.username}
                                             </span>
                                         </Link>
+                                    </div>
+                                )}
+
+                                {entryData?.watchBuddies && entryData.watchBuddies.length > 0 && (
+                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-[#2D2926]/70 font-medium flex-wrap">
+                                        <span className="text-[11px] font-medium text-[#2D2926]/60 shrink-0 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[14px] text-[#ffb700]">group</span>
+                                            Watched with
+                                        </span>
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                            {entryData.watchBuddies.map((buddy: WatchBuddy) => (
+                                                <Link
+                                                    key={buddy.id}
+                                                    to={`/watch-hive/profile/${buddy.id}`}
+                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-[#2D2926] font-bold text-[11px] transition-colors"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    title={buddy.displayName ? `${buddy.displayName} (@${buddy.username})` : `@${buddy.username}`}
+                                                >
+                                                    <Avatar
+                                                        src={buddy.profilePictureUrl}
+                                                        name={buddy.displayName || buddy.username}
+                                                        size="xxs"
+                                                        showBorder={false}
+                                                    />
+                                                    <span>@{buddy.username}</span>
+                                                </Link>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
 

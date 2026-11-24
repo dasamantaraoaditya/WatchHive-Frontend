@@ -7,6 +7,13 @@ export interface SuggestedUser {
     profilePictureUrl: string | null;
 }
 
+export interface WatchBuddy {
+    id: string;
+    username: string;
+    displayName: string | null;
+    profilePictureUrl: string | null;
+}
+
 // Entry types
 export interface Entry {
     id: string;
@@ -31,6 +38,7 @@ export interface Entry {
     totalEpisodesWatched?: number;
     totalEpisodesCount?: number | null;
     watchLocation: string | null;
+    watchBuddies?: WatchBuddy[];
     postToFeed?: boolean;
     createdAt: string;
     updatedAt: string;
@@ -60,6 +68,7 @@ export interface CreateEntryData {
     startedAt?: string;
     completedAt?: string;
     watchLocation?: string;
+    watchBuddyIds?: string[];
     suggestedByUserId?: string | null;
     postToFeed?: boolean;
     currentSeason?: number | null;
@@ -80,6 +89,7 @@ export interface UpdateEntryData {
     startedAt?: string;
     completedAt?: string;
     watchLocation?: string;
+    watchBuddyIds?: string[];
     suggestedByUserId?: string | null;
     postToFeed?: boolean;
     currentSeason?: number | null;
@@ -94,6 +104,7 @@ export interface GetEntriesParams {
     rating?: number;
     tag?: string;
     isWatching?: boolean;
+    watchedWithUserId?: string;
     search?: string;
     limit?: number; // Default should be 10
     offset?: number;
