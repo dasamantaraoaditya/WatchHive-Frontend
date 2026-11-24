@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { entriesApi, CreateEntryData, Entry, SuggestedUser } from '../../services/entries.service';
+import { entriesApi, CreateEntryData, Entry, SuggestedUser, WatchBuddy } from '../../services/entries.service';
 import apiClient from '../../services/api.js';
 import { HiveDatePicker } from '../common/HiveDatePicker';
 import { Avatar } from '../common/Avatar';
@@ -472,6 +472,41 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [suggestorResults, setSuggestorResults] = useState<SuggestedUser[]>([]);
     const [isSearchingSuggestors, setIsSearchingSuggestors] = useState(false);
 
+    // ── Watch Buddies (Group Watch Tagging) state ──
+    const [selectedBuddies, setSelectedBuddies] = useState<WatchBuddy[]>(() => entry?.watchBuddies || []);
+    const [showBuddyPicker, setShowBuddyPicker] = useState(false);
+    const [buddySearchQuery, setBuddySearchQuery] = useState('');
+    const [buddyResults, setBuddyResults] = useState<WatchBuddy[]>([]);
+    const [isSearchingBuddies, setIsSearchingBuddies] = useState(false);
+    const [frequentBuddies, setFrequentBuddies] = useState<WatchBuddy[]>([]);
+    const buddyRef = useRef<HTMLDivElement>(null);
+
+    const fetchBuddySuggestions = useCallback(async (q: string) => {
+        setIsSearchingBuddies(true);
+        try {
+            const list = await userService.getTaggableFriends(q, 15);
+            setBuddyResults(list || []);
+            if (!q.trim() && frequentBuddies.length === 0) {
+                setFrequentBuddies((list || []).slice(0, 5));
+            }
+        } catch {
+            setBuddyResults([]);
+        } finally {
+            setIsSearchingBuddies(false);
+        }
+    }, [frequentBuddies.length]);
+
+    const handleToggleBuddy = (buddy: WatchBuddy) => {
+        setSelectedBuddies(prev => {
+            const exists = prev.some(b => b.id === buddy.id);
+            if (exists) {
+                return prev.filter(b => b.id !== buddy.id);
+            } else {
+                return [...prev, buddy];
+            }
+        });
+    };
+
     const searchRef = useRef<HTMLDivElement>(null);
     const suggestorRef = useRef<HTMLDivElement>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -512,6 +547,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
             }
             if (suggestorRef.current && !suggestorRef.current.contains(e.target as Node)) {
                 setShowSuggestorPicker(false);
+            }
+            if (buddyRef.current && !buddyRef.current.contains(e.target as Node)) {
+                setShowBuddyPicker(false);
             }
         };
         document.addEventListener('mousedown', handler);
@@ -642,6 +680,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 payload.seasons = null;
                 payload.currentSeason = null;
             }
+
+            // Group Watch Tagging (Watch Buddies)
+            payload.watchBuddyIds = selectedBuddies.map(b => b.id);
 
             if (isEditing && entry) {
                 const { tmdbId, ...updateData } = payload;
@@ -1588,6 +1629,136 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         )}
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Watched With (Group Watch / Friends Tagging) */}
+                            <div className="flex flex-col gap-2.5">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50 flex items-center justify-between">
+                                    <span className="flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-[14px] text-[#ffb700]">groups</span>
+                                        Watched With
+                                    </span>
+                                    <span className="text-[#ffb700] text-[9px] font-bold">Tag friends you watched this with</span>
+                                </label>
+
+                                {/* Selected Buddies Chips */}
+                                {selectedBuddies.length > 0 && (
+                                    <div className="flex flex-wrap gap-1.5 p-2 bg-amber-50/70 border border-amber-200/60 rounded-2xl">
+                                        {selectedBuddies.map((buddy) => (
+                                            <span
+                                                key={buddy.id}
+                                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-[#ffb700]/30 text-[#2D2926] shadow-xs text-xs font-black"
+                                            >
+                                                <Avatar
+                                                    src={buddy.profilePictureUrl}
+                                                    name={buddy.displayName || buddy.username}
+                                                    size="xxs"
+                                                    showBorder={false}
+                                                />
+                                                <span className="truncate max-w-[120px]">{buddy.displayName || buddy.username}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleToggleBuddy(buddy)}
+                                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-[#2D2926]/10 hover:bg-red-500 hover:text-white text-[#2D2926] transition-colors ml-0.5 text-[9px] font-black cursor-pointer"
+                                                    aria-label={`Remove ${buddy.username}`}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Quick Frequent Buddy Chips */}
+                                {frequentBuddies.filter(fb => !selectedBuddies.some(sb => sb.id === fb.id)).length > 0 && (
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-[10px] font-bold text-[#2D2926]/40 uppercase tracking-wider">Quick Tag:</span>
+                                        {frequentBuddies
+                                            .filter(fb => !selectedBuddies.some(sb => sb.id === fb.id))
+                                            .slice(0, 4)
+                                            .map((buddy) => (
+                                                <button
+                                                    key={buddy.id}
+                                                    type="button"
+                                                    onClick={() => handleToggleBuddy(buddy)}
+                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-100/70 hover:bg-[#ffb700]/30 border border-[#ffb700]/30 text-[#2D2926] text-[10px] font-extrabold transition-colors cursor-pointer"
+                                                >
+                                                    <span>+ {buddy.displayName || buddy.username}</span>
+                                                </button>
+                                            ))}
+                                    </div>
+                                )}
+
+                                {/* Buddy Search Input & Autocomplete Dropdown */}
+                                <div className="relative" ref={buddyRef}>
+                                    <div className="relative flex items-center">
+                                        <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">person_add</span>
+                                        <input
+                                            type="text"
+                                            value={buddySearchQuery}
+                                            onFocus={() => {
+                                                setShowBuddyPicker(true);
+                                                if (buddyResults.length === 0) fetchBuddySuggestions('');
+                                            }}
+                                            onChange={(e) => {
+                                                setBuddySearchQuery(e.target.value);
+                                                setShowBuddyPicker(true);
+                                                fetchBuddySuggestions(e.target.value);
+                                            }}
+                                            className="w-full pl-9 pr-4 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
+                                            placeholder="Search friends to tag who you watched with..."
+                                        />
+                                    </div>
+
+                                    {showBuddyPicker && (
+                                        <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto p-1.5 flex flex-col gap-1">
+                                            {isSearchingBuddies ? (
+                                                <div className="p-3 text-center text-xs text-slate-400 font-bold">Searching friends...</div>
+                                            ) : buddyResults.length === 0 ? (
+                                                <div className="p-3.5 text-center flex flex-col items-center gap-1.5">
+                                                    <span className="material-symbols-outlined text-slate-400 text-lg">person_search</span>
+                                                    <p className="text-xs text-slate-500 font-bold">
+                                                        {buddySearchQuery ? `No friends matching "${buddySearchQuery}"` : "No friends found in your hive"}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                buddyResults.map(u => {
+                                                    const isSelected = selectedBuddies.some(b => b.id === u.id);
+                                                    return (
+                                                        <button
+                                                            key={u.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                handleToggleBuddy(u);
+                                                                setBuddySearchQuery('');
+                                                            }}
+                                                            className={`w-full flex items-center justify-between p-2 rounded-xl transition-colors text-left cursor-pointer ${
+                                                                isSelected ? 'bg-amber-100/60 hover:bg-amber-100' : 'hover:bg-[#ffb700]/10'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center gap-2.5 min-w-0">
+                                                                <Avatar
+                                                                    src={u.profilePictureUrl}
+                                                                    name={u.displayName || u.username}
+                                                                    size="xxs"
+                                                                />
+                                                                <div className="flex flex-col min-w-0">
+                                                                    <span className="text-xs font-bold text-[#2D2926] truncate">{u.displayName || u.username}</span>
+                                                                    <span className="text-[9px] text-[#2D2926]/40 font-bold truncate">@{u.username}</span>
+                                                                </div>
+                                                            </div>
+                                                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                                                                isSelected ? 'bg-amber-500 text-black' : 'bg-slate-100 text-[#2D2926]/70'
+                                                            }`}>
+                                                                {isSelected ? '✓ Tagged' : '+ Tag'}
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                })
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
