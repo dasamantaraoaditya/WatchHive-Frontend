@@ -301,6 +301,7 @@ export const EntryList: React.FC<EntryListProps> = ({
     const [selectedEntry, setSelectedEntry] = useState<{ entry: Entry, details: TmdbDetails | null } | null>(null);
     const [sortBy, setSortBy] = useState<'watchedAt' | 'rating' | 'title'>('watchedAt');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+    const [typeFilter, setTypeFilter] = useState<string | null>(null);
     const [pagination, setPagination] = useState({
         total: 0,
         limit: 10,
@@ -315,6 +316,7 @@ export const EntryList: React.FC<EntryListProps> = ({
             const response = await entriesApi.getEntries({
                 limit: 20,
                 ...filters,
+                type: (typeFilter as any) || undefined,
                 sortBy,
                 order: sortOrder,
                 ...params
@@ -330,7 +332,7 @@ export const EntryList: React.FC<EntryListProps> = ({
         } finally {
             setIsLoading(false);
         }
-    }, [filters, sortBy, sortOrder]);
+    }, [filters, typeFilter, sortBy, sortOrder]);
 
     const handleLoadMore = useCallback(() => {
         if (pagination.hasMore && !isLoading) {
@@ -409,6 +411,8 @@ export const EntryList: React.FC<EntryListProps> = ({
                         { value: 'title-asc', label: 'Movie: A-Z' },
                         { value: 'title-desc', label: 'Movie: Z-A' }
                     ]}
+                    typeFilter={typeFilter}
+                    onTypeFilterChange={setTypeFilter}
                     count={0}
                     countLabel="Logged Titles"
                 />
@@ -552,6 +556,7 @@ export const EntryList: React.FC<EntryListProps> = ({
     };
 
     const hasSearch = typeof filters?.search === 'string' && !!filters.search;
+    const hasFilter = hasSearch || typeFilter !== null;
 
     return (
         <div className="w-full flex animate-[fade-in_0.3s_ease-out] flex-col gap-6">
@@ -573,8 +578,10 @@ export const EntryList: React.FC<EntryListProps> = ({
                     { value: 'title-asc', label: 'Movie: A-Z' },
                     { value: 'title-desc', label: 'Movie: Z-A' }
                 ]}
+                typeFilter={typeFilter}
+                onTypeFilterChange={setTypeFilter}
                 count={pagination.total}
-                countLabel="Logged Titles"
+                countLabel={hasFilter ? "Matching Titles" : "Logged Titles"}
                 isLoading={isLoading}
             />
 
@@ -589,18 +596,32 @@ export const EntryList: React.FC<EntryListProps> = ({
                     <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 border border-black/5 relative">
                         <span className="absolute -inset-1.5 bg-[#ffb700]/10 rounded-full blur-lg opacity-40"></span>
                         <span className="material-symbols-outlined text-4xl text-slate-300 relative z-10">
-                            {hasSearch ? "travel_explore" : "movie"}
+                            {hasFilter ? "travel_explore" : "movie"}
                         </span>
                     </div>
                     <h3 className="text-2xl font-black text-[#2D2926] mb-2">
-                        {hasSearch ? "No matching entries" : "No entries yet"}
+                        {hasFilter ? "No matching entries" : "No entries yet"}
                     </h3>
                     <p className="text-slate-400 font-bold max-w-sm mx-auto leading-relaxed mb-6">
-                        {hasSearch
-                            ? `No results found for "${filters!.search}"`
-                            : "Start building your cinematic journey — log a movie or show you've watched!"}
+                        {hasSearch && typeFilter
+                            ? `No ${typeFilter === 'MOVIE' ? 'movies' : 'TV shows'} found matching "${filters!.search}"`
+                            : hasSearch
+                                ? `No results found for "${filters!.search}"`
+                                : typeFilter
+                                    ? `You haven't logged any ${typeFilter === 'MOVIE' ? 'movies' : 'TV shows'} yet.`
+                                    : "Start building your cinematic journey — log a movie or show you've watched!"}
                     </p>
-                    {!hasSearch && onAddNew && (
+                    {hasFilter ? (
+                        <button
+                            onClick={() => {
+                                if (onSearchChange) onSearchChange('');
+                                setTypeFilter(null);
+                            }}
+                            className="bg-slate-100 hover:bg-slate-200 text-[#2D2926] font-black py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider transition-all"
+                        >
+                            Clear All Filters
+                        </button>
+                    ) : onAddNew ? (
                         <button
                             onClick={onAddNew}
                             className="bg-[#ffb700] hover:brightness-105 text-[#2D2926] font-black py-3.5 px-8 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg shadow-[#ffb700]/20 active:scale-95 flex items-center gap-2"
@@ -608,7 +629,7 @@ export const EntryList: React.FC<EntryListProps> = ({
                             <span className="material-symbols-outlined text-base font-bold">add</span>
                             Log a Watch
                         </button>
-                    )}
+                    ) : null}
                 </div>
             ) : (
                 <div className="watchlist-grid outline-none">

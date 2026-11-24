@@ -98,110 +98,67 @@ interface TmdbResult {
 /* ── Custom Brand SVGs for OTT Locations ── */
 
 const CinemaIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="url(#cinemaBg)" />
-        <path d="M4 8h16M4 12h16M4 16h16" stroke="#FFD700" strokeWidth="0.8" strokeDasharray="1.5 1.5" strokeOpacity="0.4" />
-        <path d="M5 6h14a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 6z" fill="#D32F2F" stroke="#FFD700" strokeWidth="1" />
-        <circle cx="12" cy="12" r="2.2" fill="#FFD700" />
-        <polygon points="11,10.5 14,12 11,13.5" fill="#B71C1C" />
-        <defs>
-            <linearGradient id="cinemaBg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#7F1D1D" />
-                <stop offset="100%" stopColor="#350808" />
-            </linearGradient>
-        </defs>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
+        <rect width="24" height="24" rx="5" fill="#881337" />
+        <path d="M4 6.5C4 5.67 4.67 5 5.5 5H18.5C19.33 5 20 5.67 20 6.5V9H4V6.5Z" fill="#BE123C" />
+        <path d="M7 5L5 9M11 5L9 9M15 5L13 9M19 5L17 9" stroke="#FFF" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M4 9H20V17.5C20 18.33 19.33 19 18.5 19H5.5C4.67 19 4 18.33 4 17.5V9Z" fill="#9F1239" />
+        <circle cx="12" cy="14" r="2.8" fill="#FFB700" />
+        <polygon points="12,12.2 12.6,13.4 13.9,13.6 13,14.5 13.2,15.8 12,15.2 10.8,15.8 11,14.5 10.1,13.6 11.4,13.4" fill="#881337" />
     </svg>
 );
 
 const HomeIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="url(#homeBg)" />
-        <path d="M5 11V8a1.5 1.5 0 0 1 1.5-1.5h11A1.5 1.5 0 0 1 19 8v3M4 12a1.5 1.5 0 0 1 1.5-1.5h13a1.5 1.5 0 0 1 1.5 1.5v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z" fill="#FFF" fillOpacity="0.9" />
-        <rect x="6.5" y="12.5" width="4.5" height="3.5" rx="0.8" fill="#F59E0B" />
-        <rect x="13" y="12.5" width="4.5" height="3.5" rx="0.8" fill="#F59E0B" />
-        <defs>
-            <linearGradient id="homeBg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#F59E0B" />
-                <stop offset="100%" stopColor="#B45309" />
-            </linearGradient>
-        </defs>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
+        <rect width="24" height="24" rx="5" fill="#F59E0B" />
+        <path d="M6 10.5C6 9.67 6.67 9 7.5 9H16.5C17.33 9 18 9.67 18 10.5V14H6V10.5Z" fill="#FFF" />
+        <path d="M4.5 12C4.5 11.45 4.95 11 5.5 11H6.5V15.5C6.5 16.05 6.05 16.5 5.5 16.5H5C4.72 16.5 4.5 16.28 4.5 16V12Z" fill="#FEF3C7" />
+        <path d="M19.5 12C19.5 11.45 19.05 11 18.5 11H17.5V15.5C17.5 16.05 17.95 16.5 18.5 16.5H19C19.28 16.5 19.5 16.28 19.5 16V12Z" fill="#FEF3C7" />
+        <rect x="6.5" y="13.5" width="11" height="2.5" rx="0.8" fill="#FFF" />
+        <rect x="7" y="16.5" width="1.8" height="1.8" rx="0.5" fill="#B45309" />
+        <rect x="15.2" y="16.5" width="1.8" height="1.8" rx="0.5" fill="#B45309" />
     </svg>
 );
 
 const NetflixIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
         <rect width="24" height="24" rx="5" fill="#000000" />
-        {/* Left vertical pillar */}
-        <path d="M6 3.5h3.6v17H6z" fill="#B81D24" />
-        {/* Right vertical pillar */}
-        <path d="M14.4 3.5h3.6v17h-3.6z" fill="#B81D24" />
-        {/* Center diagonal sash (bright red) with 3D shadow */}
-        <path 
-            d="M6 3.5h3.6l8.4 17h-3.6L6 3.5z" 
-            fill="#E50914" 
-            style={{ filter: 'drop-shadow(-1px 0px 2px rgba(0, 0, 0, 0.45))' }}
-        />
+        <path d="M6.5 4H9.5V20H6.5V4Z" fill="#B81D24" />
+        <path d="M14.5 4H17.5V20H14.5V4Z" fill="#B81D24" />
+        <path d="M6.5 4H9.7L17.5 20H14.3L6.5 4Z" fill="#E50914" />
     </svg>
 );
 
 const HotstarIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="url(#hotstarBg)" />
-        {/* Disney+ Swoosh Arc */}
-        <path d="M4 14C5.2 8.5 9.8 5.8 15.5 6.2c1.2.1 2.5.4 3.5.8" stroke="url(#disneyArcGrad)" strokeWidth="1.6" strokeLinecap="round" />
-        {/* Hotstar Star Emblem */}
-        <path d="M16.5 4.5L17.5 7.5L20.5 8.5L17.5 9.5L16.5 12.5L15.5 9.5L12.5 8.5L15.5 7.5Z" fill="url(#starGrad)" />
-        <circle cx="16.5" cy="8.5" r="0.8" fill="#FFF" />
-        {/* "D" shape at bottom-left */}
-        <path d="M6 11.5v6.5h2.2c2.2 0 3.8-1.2 3.8-3.25S10.4 11.5 8.2 11.5H6zm1.8 1.5h.4c1.2 0 2 .6 2 1.75s-.8 1.75-2 1.75h-.4V13z" fill="#FFF" />
-        <path d="M13 14.75h2.5M14.25 13.5v2.5" stroke="#00D2D3" strokeWidth="1.2" strokeLinecap="round" />
-        <defs>
-            <linearGradient id="hotstarBg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#0B133A" />
-                <stop offset="60%" stopColor="#0F1F54" />
-                <stop offset="100%" stopColor="#060C24" />
-            </linearGradient>
-            <linearGradient id="disneyArcGrad" x1="4" y1="10" x2="19" y2="6" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#FFF" />
-                <stop offset="100%" stopColor="#00D2D3" />
-            </linearGradient>
-            <linearGradient id="starGrad" x1="12.5" y1="4.5" x2="20.5" y2="12.5" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#FFE066" />
-                <stop offset="50%" stopColor="#FFB700" />
-                <stop offset="100%" stopColor="#FF8800" />
-            </linearGradient>
-        </defs>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
+        <rect width="24" height="24" rx="5" fill="#071026" />
+        <path d="M4 14.5C5.5 9 10.5 6.5 16 7" stroke="#00D2D3" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M17 5L17.6 6.6L19.2 7.2L17.6 7.8L17 9.4L16.4 7.8L14.8 7.2L16.4 6.6Z" fill="#FFB700" />
+        <path d="M6.5 11.5V17H8.8C10.5 17 11.5 16 11.5 14.2C11.5 12.5 10.5 11.5 8.8 11.5H6.5ZM8 13H8.7C9.5 13 10 13.5 10 14.2C10 15 9.5 15.5 8.7 15.5H8V13Z" fill="#FFFFFF" />
+        <path d="M13.5 14.2H16.5M15 12.7V15.7" stroke="#00D2D3" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 );
 
 const PrimeIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
         <rect width="24" height="24" rx="5" fill="#00050D" />
-        <rect width="24" height="3" rx="1.5" fill="#00A8E8" />
-        {/* Play triangle */}
-        <polygon points="10,8 15,11 10,14" fill="#FFFFFF" />
-        {/* Amazon Smile Arrow in Vibrant Cyan */}
-        <path d="M5.5 17C8.5 18.5 14.5 18.5 18.5 16.5" stroke="#00A8E8" strokeWidth="1.8" strokeLinecap="round" />
-        <path d="M18.8 16.2l-1.8 1.4M18.8 16.2l-1.5-.8" stroke="#00A8E8" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="2" y="2" width="20" height="2" rx="1" fill="#00A8E8" />
+        <polygon points="10,7.5 15.5,10.5 10,13.5" fill="#FFFFFF" />
+        <path d="M6 16.5C9 18.2 15 18.2 18 16" stroke="#00A8E8" strokeWidth="1.7" strokeLinecap="round" />
+        <path d="M18.2 15.8L16.7 17.5M18.2 15.8L16.5 15" stroke="#00A8E8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
 );
 
 const JioCinemaIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="url(#jioGrad)" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
+        <rect width="24" height="24" rx="5" fill="#D80064" />
         <circle cx="12" cy="12" r="7.5" fill="rgba(255,255,255,0.18)" />
         <polygon points="10.5,8.5 15.5,12 10.5,15.5" fill="#FFFFFF" />
-        <defs>
-            <linearGradient id="jioGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#D80064" />
-                <stop offset="100%" stopColor="#80003C" />
-            </linearGradient>
-        </defs>
     </svg>
 );
 
 const YouTubeIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
         <rect width="24" height="24" rx="5" fill="#0F0F0F" />
         <rect x="3.5" y="6" width="17" height="12" rx="3.5" fill="#FF0000" />
         <polygon points="10,9 15.5,12 10,15" fill="#FFFFFF" />
@@ -209,25 +166,19 @@ const YouTubeIcon = () => (
 );
 
 const AppleTvIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
         <rect width="24" height="24" rx="5" fill="#1C1C1E" />
         <path d="M7.8 7.8c.4-.5.7-1.2.6-1.8-.6 0-1.3.4-1.7.9-.4.4-.7 1.1-.6 1.7.7.1 1.3-.3 1.7-.8zM8.5 8.7c-.9 0-1.7.5-2.1.5-.5 0-1.1-.5-1.9-.5-1 0-1.9.6-2.4 1.5-1 1.8-.3 4.4.7 5.8.5.7 1 1.4 1.8 1.4.7 0 1-.5 1.8-.5s1.1.5 1.8.5c.8 0 1.3-.7 1.8-1.4.5-.8.8-1.5.8-1.6-.1 0-1.5-.6-1.5-2.2 0-1.4 1.1-2 1.2-2.1-.6-1-1.6-1.4-2.2-1.5z" fill="#FFFFFF" />
-        <text x="12" y="14" fill="#FFFFFF" fontSize="6.5" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif">tv+</text>
+        <text x="11.5" y="14.2" fill="#FFFFFF" fontSize="6.5" fontWeight="900" fontFamily="system-ui, -apple-system, sans-serif">tv+</text>
     </svg>
 );
 
 const MobileIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-        <rect width="24" height="24" rx="5" fill="url(#mobileGrad)" />
-        <rect x="7" y="3.5" width="10" height="17" rx="2" fill="#0F172A" stroke="#38BDF8" strokeWidth="1" />
-        <circle cx="12" cy="18" r="0.8" fill="#38BDF8" />
-        <polygon points="10.8,9.5 14,11.5 10.8,13.5" fill="#38BDF8" />
-        <defs>
-            <linearGradient id="mobileGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="#0284C7" />
-                <stop offset="100%" stopColor="#0369A1" />
-            </linearGradient>
-        </defs>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="rounded-[4px] shrink-0">
+        <rect width="24" height="24" rx="5" fill="#0284C7" />
+        <rect x="7" y="4" width="10" height="16" rx="2" fill="#0F172A" stroke="#BAE6FD" strokeWidth="0.8" />
+        <polygon points="10.5,9.5 14.5,12 10.5,14.5" fill="#38BDF8" />
+        <circle cx="12" cy="18" r="0.75" fill="#BAE6FD" />
     </svg>
 );
 
@@ -243,8 +194,8 @@ const LOCATION_PRESETS: LocationPreset[] = [
     { label: 'Cinema', value: 'Cinema', renderIcon: () => <CinemaIcon /> },
     { label: 'Home', value: 'Home', renderIcon: () => <HomeIcon /> },
     { label: 'Netflix', value: 'Netflix', renderIcon: () => <NetflixIcon /> },
-    { label: 'Hotstar', value: 'Disney+ Hotstar', altValues: ['Disney+', 'Hotstar'], renderIcon: () => <HotstarIcon /> },
-    { label: 'Prime', value: 'Prime Video', altValues: ['Prime'], renderIcon: () => <PrimeIcon /> },
+    { label: 'Disney+ Hotstar', value: 'Disney+ Hotstar', altValues: ['Disney+', 'Hotstar'], renderIcon: () => <HotstarIcon /> },
+    { label: 'Prime Video', value: 'Prime Video', altValues: ['Prime'], renderIcon: () => <PrimeIcon /> },
     { label: 'JioCinema', value: 'JioCinema', renderIcon: () => <JioCinemaIcon /> },
     { label: 'YouTube', value: 'YouTube', renderIcon: () => <YouTubeIcon /> },
     { label: 'Apple TV+', value: 'Apple TV+', renderIcon: () => <AppleTvIcon /> },
@@ -647,10 +598,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 payload.watchedAt = null;
                 payload.unspecifiedDate = true;
             }
-            // If user has provided a rating or review, or is logging a completed watch, ensure isWatching is set to false
-            if (payload.rating !== undefined || (payload.review && payload.review.trim().length > 0)) {
-                payload.isWatching = false;
-            }
+            payload.isWatching = Boolean(formData.isWatching);
 
             if (payload.isWatching) {
                 payload.startedAt = payload.watchedAt || now.toISOString();
@@ -1026,116 +974,242 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 />
                             </div>
 
-                            {/* Date Picker & Switches */}
-                            <div className="flex flex-col gap-3.5 p-4 sm:p-5 bg-white border border-[#ffb700]/25 rounded-3xl shadow-sm">
-                                {!formData.isWatching && startedAtStr && (
-                                    <div className="p-3 bg-[#FFF9F0] border border-[#ffb700]/30 rounded-2xl flex flex-col gap-2.5">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <span className="w-2 h-2 rounded-full bg-[#ffb700] shrink-0" />
-                                                <span className="text-[11px] font-black uppercase tracking-wider text-[#2D2926]/70">
-                                                    Started Watching
-                                                </span>
-                                                <span className="text-xs font-bold text-[#2D2926] truncate">
-                                                    {new Date(startedAtStr).toLocaleString(undefined, {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        year: 'numeric',
-                                                        hour: 'numeric',
-                                                        minute: '2-digit',
-                                                    })}
-                                                </span>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => setIsEditingStartedAt((prev) => !prev)}
-                                                className="text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl bg-white border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/15 transition-all cursor-pointer shrink-0"
-                                            >
-                                                {isEditingStartedAt ? 'Done' : 'Edit'}
-                                            </button>
-                                        </div>
-                                        {isEditingStartedAt && (
-                                            <HiveDatePicker
-                                                value={startedAtStr}
-                                                onChange={(val: string) => {
-                                                    if (val) setStartedAtStr(val);
-                                                }}
-                                            />
-                                        )}
-                                    </div>
-                                )}
-
-                                <div className="flex items-center justify-between gap-2">
-                                    <label className="text-xs font-black uppercase tracking-wider text-[#2D2926]/70">
-                                        {formData.isWatching
-                                            ? 'Started Watching'
-                                            : startedAtStr
-                                                ? 'Completed Watching'
-                                                : 'When did you watch this?'}
-                                    </label>
-                                    {!formData.isWatching && (
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                if (hasWatchDate) {
-                                                    setHasWatchDate(false);
-                                                    setFormData((prev) => ({ ...prev, watchedAt: '' }));
-                                                } else {
-                                                    setHasWatchDate(true);
-                                                    setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
-                                                }
-                                            }}
-                                            className={`text-[11px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
-                                                !hasWatchDate
-                                                    ? 'bg-amber-500/20 text-amber-700 border border-amber-500/30'
-                                                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                                            }`}
-                                        >
-                                            <span className="material-symbols-outlined text-[14px]">
-                                                {!hasWatchDate ? 'calendar_today' : 'history_toggle_off'}
-                                            </span>
-                                            {!hasWatchDate ? 'Set Date' : "Don't know when"}
-                                        </button>
-                                    )}
-                                </div>
-
-                                {hasWatchDate ? (
-                                    <HiveDatePicker
-                                        value={formData.watchedAt}
-                                        onChange={(val: string) => {
-                                            if (!val) {
-                                                setHasWatchDate(false);
-                                                setFormData((prev) => ({ ...prev, watchedAt: '' }));
-                                            } else {
-                                                setFormData((prev) => ({ ...prev, watchedAt: val }));
+                            {/* Watch Status & Date Management Card */}
+                            <div className="flex flex-col gap-4 p-4 sm:p-5 bg-white border border-[#ffb700]/25 rounded-3xl shadow-sm">
+                                {/* Watch Status Segmented Selector */}
+                                <div className="flex items-center p-1 bg-[#FFF9F0] border border-[#ffb700]/30 rounded-2xl gap-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (formData.isWatching) {
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    isWatching: false,
+                                                    watchedAt: prev.watchedAt || toLocalISOString(new Date()),
+                                                }));
+                                                setHasWatchDate(true);
                                             }
                                         }}
-                                    />
-                                ) : (
-                                    <div className="flex items-center justify-between p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl animate-fade-in">
-                                        <div className="flex items-center gap-2.5 min-w-0">
-                                            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
-                                                <span className="material-symbols-outlined text-[18px]">history_toggle_off</span>
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                            !formData.isWatching
+                                                ? 'bg-[#ffb700] text-[#2D2926] shadow-sm'
+                                                : 'text-[#2D2926]/60 hover:text-[#2D2926] hover:bg-white/60'
+                                        }`}
+                                    >
+                                        <span className="material-symbols-outlined text-[17px]">task_alt</span>
+                                        <span>Completed Watch</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            if (!formData.isWatching) {
+                                                setFormData((prev) => ({
+                                                    ...prev,
+                                                    isWatching: true,
+                                                    watchedAt: prev.watchedAt || toLocalISOString(new Date()),
+                                                }));
+                                                setHasWatchDate(true);
+                                            }
+                                        }}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                                            formData.isWatching
+                                                ? 'bg-[#22c55e] text-white shadow-sm'
+                                                : 'text-[#2D2926]/60 hover:text-[#2D2926] hover:bg-white/60'
+                                        }`}
+                                    >
+                                        <span className="material-symbols-outlined text-[17px]">play_circle</span>
+                                        <span>Currently Watching</span>
+                                    </button>
+                                </div>
+
+                                {/* Completed Watch Controls */}
+                                {!formData.isWatching ? (
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                            <div className="flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-[18px] text-[#ffb700]">
+                                                    event_available
+                                                </span>
+                                                <span className="text-xs font-black uppercase tracking-wider text-[#2D2926]">
+                                                    Completed Watching
+                                                </span>
+                                                <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/20">
+                                                    Finished
+                                                </span>
                                             </div>
-                                            <div className="flex flex-col min-w-0">
-                                                <span className="text-xs font-black text-amber-950">
-                                                    No specific watch date recorded
-                                                </span>
-                                                <span className="text-[11px] font-medium text-amber-800/80 truncate">
-                                                    Logged as past watch without an exact date or screening time
-                                                </span>
+
+                                            {/* Quick Date Actions */}
+                                            <div className="flex items-center gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setHasWatchDate(true);
+                                                        setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
+                                                    }}
+                                                    className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
+                                                >
+                                                    Now
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setHasWatchDate(true);
+                                                        const yesterday = new Date(Date.now() - 86400000);
+                                                        setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(yesterday) }));
+                                                    }}
+                                                    className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
+                                                >
+                                                    Yesterday
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (hasWatchDate) {
+                                                            setHasWatchDate(false);
+                                                            setFormData((prev) => ({ ...prev, watchedAt: '' }));
+                                                        } else {
+                                                            setHasWatchDate(true);
+                                                            setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
+                                                        }
+                                                    }}
+                                                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                                                        !hasWatchDate
+                                                            ? 'bg-amber-500/20 text-amber-900 border-amber-500/40'
+                                                            : 'bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200'
+                                                    }`}
+                                                >
+                                                    {!hasWatchDate ? 'Set Exact Date' : 'Past Watch'}
+                                                </button>
                                             </div>
                                         </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setHasWatchDate(true);
-                                                setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
+
+                                        {hasWatchDate ? (
+                                            <HiveDatePicker
+                                                value={formData.watchedAt}
+                                                fieldTitle="Completed Watching"
+                                                icon="task_alt"
+                                                onChange={(val: string) => {
+                                                    if (!val) {
+                                                        setHasWatchDate(false);
+                                                        setFormData((prev) => ({ ...prev, watchedAt: '' }));
+                                                    } else {
+                                                        setHasWatchDate(true);
+                                                        setFormData((prev) => ({ ...prev, watchedAt: val }));
+                                                    }
+                                                }}
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-between p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl animate-fade-in">
+                                                <div className="flex items-center gap-2.5 min-w-0">
+                                                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
+                                                        <span className="material-symbols-outlined text-[18px]">history_toggle_off</span>
+                                                    </div>
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="text-xs font-black text-amber-950">
+                                                            Past viewing without exact time
+                                                        </span>
+                                                        <span className="text-[11px] font-medium text-amber-800/80 truncate">
+                                                            Logged in Hive history without a specific screening date
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setHasWatchDate(true);
+                                                        setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
+                                                    }}
+                                                    className="px-3 py-1 bg-[#ffb700] text-[#2D2926] rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 active:scale-95 transition-all cursor-pointer shrink-0 ml-2"
+                                                >
+                                                    Set Date
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Watch Journey Milestone (if completing from an active watching queue) */}
+                                        {startedAtStr && (
+                                            <div className="p-3 bg-[#FFF9F0] border border-[#ffb700]/30 rounded-2xl flex flex-col gap-2">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <span className="material-symbols-outlined text-[15px] text-[#ffb700]">play_circle</span>
+                                                        <span className="text-[11px] font-black uppercase tracking-wider text-[#2D2926]/70">
+                                                            Started Watching:
+                                                        </span>
+                                                        <span className="text-xs font-bold text-[#2D2926] truncate">
+                                                            {new Date(startedAtStr).toLocaleString(undefined, {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                year: 'numeric',
+                                                                hour: 'numeric',
+                                                                minute: '2-digit',
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setIsEditingStartedAt((prev) => !prev)}
+                                                        className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-white border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/15 transition-all cursor-pointer shrink-0"
+                                                    >
+                                                        {isEditingStartedAt ? 'Done' : 'Edit'}
+                                                    </button>
+                                                </div>
+                                                {isEditingStartedAt && (
+                                                    <HiveDatePicker
+                                                        value={startedAtStr}
+                                                        fieldTitle="Started Watching"
+                                                        icon="play_circle"
+                                                        onChange={(val: string) => {
+                                                            if (val) setStartedAtStr(val);
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    /* Currently Watching Controls */
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                            <div className="flex items-center gap-2">
+                                                <span className="material-symbols-outlined text-[18px] text-emerald-600">
+                                                    play_circle
+                                                </span>
+                                                <span className="text-xs font-black uppercase tracking-wider text-[#2D2926]">
+                                                    Started Watching Date
+                                                </span>
+                                                <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 flex items-center gap-1">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                    Active
+                                                </span>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
+                                                }}
+                                                className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
+                                            >
+                                                Reset to Now
+                                            </button>
+                                        </div>
+
+                                        <HiveDatePicker
+                                            value={formData.watchedAt}
+                                            fieldTitle="Started Watching"
+                                            icon="play_circle"
+                                            onChange={(val: string) => {
+                                                if (val) setFormData((prev) => ({ ...prev, watchedAt: val }));
                                             }}
-                                            className="px-3 py-1 bg-[#ffb700] text-stone-900 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 active:scale-95 transition-all cursor-pointer shrink-0 ml-2"
-                                        >
-                                            Set Date
-                                        </button>
+                                        />
+
+                                        <div className="p-3 bg-emerald-500/[0.08] border border-emerald-500/20 rounded-2xl flex items-center gap-2.5">
+                                            <span className="material-symbols-outlined text-[20px] text-emerald-600 shrink-0">info</span>
+                                            <p className="text-[11px] font-medium text-emerald-950 leading-relaxed">
+                                                Added to your <strong>Currently Watching</strong> queue. Rating and review are optional while watching — you can complete them anytime!
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
 
@@ -1143,7 +1217,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 <div className="flex items-center gap-2 pt-1 pb-0.5">
                                     <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#ffb700]/30 to-transparent" />
                                     <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2D2926]/50 whitespace-nowrap">
-                                        Watch Options & Status
+                                        Watch Options
                                     </span>
                                     <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#ffb700]/30 to-transparent" />
                                 </div>
@@ -1223,7 +1297,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             <div
                                                 className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                                                     formData.isRewatch
-                                                        ? 'bg-[#ffb700] text-black font-black'
+                                                        ? 'bg-[#ffb700] text-[#2D2926] font-black'
                                                         : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#ffb700]'
                                                 }`}
                                             >
@@ -1245,7 +1319,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             <span
                                                 className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
                                                     formData.isRewatch
-                                                        ? 'bg-[#ffb700] text-black font-extrabold border-[#ffb700] shadow-xs'
+                                                        ? 'bg-[#ffb700] text-[#2D2926] font-extrabold border-[#ffb700] shadow-xs'
                                                         : 'bg-[#2D2926]/5 text-[#2D2926]/40 border-[#2D2926]/10'
                                                 }`}
                                             >
@@ -1281,82 +1355,6 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         </div>
                                     </label>
 
-                                    {/* Currently Watching Toggle Card */}
-                                    <label
-                                        className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
-                                            formData.isWatching
-                                                ? 'bg-emerald-500/[0.08] border-emerald-500 shadow-sm'
-                                                : 'bg-white/80 border-[#2D2926]/12 hover:border-emerald-500/40 hover:bg-emerald-50/20'
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0 pr-2">
-                                            <div
-                                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                                                    formData.isWatching
-                                                        ? 'bg-[#22c55e] text-white font-black'
-                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#22c55e]'
-                                                }`}
-                                            >
-                                                <span className="material-symbols-outlined text-[18px]">play_circle</span>
-                                            </div>
-                                            <div className="flex flex-col min-w-0">
-                                                <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#22c55e] transition-colors">
-                                                    Currently Watching
-                                                </span>
-                                                <span className="text-[10px] font-medium text-[#2D2926]/50 truncate">
-                                                    Keep in your active queue to track progress
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2.5 shrink-0">
-                                            <span
-                                                className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
-                                                    formData.isWatching
-                                                        ? 'bg-[#22c55e] text-white font-extrabold border-[#22c55e] shadow-xs'
-                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/40 border-[#2D2926]/10'
-                                                }`}
-                                            >
-                                                {formData.isWatching ? 'YES' : 'NO'}
-                                            </span>
-                                            <div className="relative inline-flex items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.isWatching}
-                                                    onChange={(e) => {
-                                                        const nextIsWatching = e.target.checked;
-                                                        if (!nextIsWatching && entry?.isWatching) {
-                                                            setHasWatchDate(true);
-                                                            if (!startedAtStr) {
-                                                                setStartedAtStr(initialStartedAt || (entry.watchedAt ? toLocalISOString(new Date(entry.watchedAt)) : toLocalISOString(new Date())));
-                                                            }
-                                                            setFormData((prev) => ({
-                                                                ...prev,
-                                                                isWatching: false,
-                                                                watchedAt: toLocalISOString(new Date()),
-                                                            }));
-                                                        } else {
-                                                            setFormData((prev) => ({ ...prev, isWatching: nextIsWatching }));
-                                                        }
-                                                    }}
-                                                    className="sr-only"
-                                                />
-                                                <div
-                                                    className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
-                                                        formData.isWatching
-                                                            ? 'bg-[#22c55e] border-[#22c55e]'
-                                                            : 'bg-[#2D2926]/15 border-[#2D2926]/20'
-                                                    }`}
-                                                />
-                                                <div
-                                                    className={`absolute top-[2px] left-[2px] w-5 h-5 rounded-full bg-white shadow-md border border-[#2D2926]/10 transition-transform duration-200 ${
-                                                        formData.isWatching ? 'translate-x-5' : 'translate-x-0'
-                                                    }`}
-                                                />
-                                            </div>
-                                        </div>
-                                    </label>
-
                                     {/* Post to Feed Toggle Card */}
                                     <label
                                         className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
@@ -1369,7 +1367,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             <div
                                                 className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                                                     formData.postToFeed
-                                                        ? 'bg-[#ffb700] text-black font-black'
+                                                        ? 'bg-[#ffb700] text-[#2D2926] font-black'
                                                         : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#ffb700]'
                                                 }`}
                                             >
@@ -1389,7 +1387,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             <span
                                                 className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
                                                     formData.postToFeed
-                                                        ? 'bg-[#ffb700] text-black font-extrabold border-[#ffb700] shadow-xs'
+                                                        ? 'bg-[#ffb700] text-[#2D2926] font-extrabold border-[#ffb700] shadow-xs'
                                                         : 'bg-[#2D2926]/5 text-[#2D2926]/40 border-[#2D2926]/10'
                                                 }`}
                                             >
@@ -1441,41 +1439,61 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 </div>
                             </div>
 
-                            {/* Colorful Watch Location Brand Selectors */}
+                            {/* Where did you watch it? - Compact Brand Pills */}
                             <div className="flex flex-col gap-2.5">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Where did you watch it?</label>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">
+                                        Where did you watch it?
+                                    </label>
+                                    {formData.watchLocation && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData((prev) => ({ ...prev, watchLocation: '' }))}
+                                            className="text-[10px] font-black uppercase tracking-wider text-amber-700 hover:text-amber-900 transition-colors cursor-pointer"
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                                     {LOCATION_PRESETS.map((l) => {
                                         const isSelected = formData.watchLocation === l.value || (l.altValues?.includes(formData.watchLocation || '') ?? false);
                                         return (
                                             <button
                                                 key={l.value}
                                                 type="button"
-                                                className={`flex-1 min-w-[76px] sm:min-w-[85px] max-w-[120px] flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2 transition-all group/loc relative overflow-hidden cursor-pointer
-                                                ${isSelected
-                                                        ? 'bg-white border-[#ffb700] shadow-[0_4px_15px_-4px_rgba(255,183,0,0.22)] scale-[1.03]'
-                                                        : 'bg-white/50 border-[#ffb700]/10 text-[#2D2926]/60 hover:border-[#ffb700]/30 hover:bg-white hover:scale-[1.02]'}`}
                                                 onClick={() => setFormData((prev) => ({ ...prev, watchLocation: isSelected ? '' : l.value }))}
+                                                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                                    isSelected
+                                                        ? 'bg-white border-[#ffb700] text-[#2D2926] shadow-[0_2px_8px_-2px_rgba(255,183,0,0.35)] ring-1 ring-[#ffb700]'
+                                                        : 'bg-white/80 border-[#2D2926]/10 text-[#2D2926]/75 hover:bg-white hover:border-[#ffb700]/40 hover:text-[#2D2926]'
+                                                }`}
                                             >
-                                                <div className="transition-transform group-hover/loc:scale-110 duration-300">
+                                                <div className="shrink-0 flex items-center justify-center">
                                                     {l.renderIcon()}
                                                 </div>
-                                                <span className={`text-[9px] font-black uppercase tracking-wider transition-colors ${isSelected ? 'text-[#2D2926]' : 'text-[#2D2926]/40'}`}>
+                                                <span className="text-[11px] font-extrabold tracking-tight">
                                                     {l.label}
                                                 </span>
+                                                {isSelected && (
+                                                    <span className="material-symbols-outlined text-[14px] text-[#ffb700] font-black">
+                                                        check_circle
+                                                    </span>
+                                                )}
                                             </button>
                                         );
                                     })}
                                 </div>
 
                                 <div className="relative flex items-center mt-1">
-                                    <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">location_on</span>
+                                    <span className="material-symbols-outlined absolute left-3 text-[#ffb700] text-[18px]">location_on</span>
                                     <input
                                         type="text"
                                         value={formData.watchLocation || ''}
                                         onChange={(e) => setFormData((prev) => ({ ...prev, watchLocation: e.target.value }))}
-                                        className="w-full pl-9 pr-4 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
-                                        placeholder="Or type custom location (e.g. IMAX, Airplane, Living Room)..."
+                                        className="w-full pl-9 pr-4 py-2.5 bg-white/90 border border-[#ffb700]/25 outline-none focus:border-[#ffb700] focus:bg-white focus:ring-4 focus:ring-[#ffb700]/10 rounded-xl text-xs text-[#2D2926] font-medium transition-all placeholder:text-[#2D2926]/40"
+                                        placeholder="Or type custom location (e.g. IMAX Laser, Flight, Living Room)..."
                                     />
                                 </div>
                             </div>

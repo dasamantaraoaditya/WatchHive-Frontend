@@ -5,9 +5,12 @@ interface HiveDatePickerProps {
     value?: string | null; // Format: YYYY-MM-DDTHH:mm
     onChange: (newValue: string) => void;
     label?: string;
+    fieldTitle?: string;
+    openTitle?: string;
+    icon?: string;
 }
 
-export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange, label }) => {
+export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange, label, fieldTitle, openTitle, icon }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     // Parse value to a local Date object, defaulting to current date-time
@@ -286,12 +289,12 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
                     <div className="flex items-center gap-3 min-w-0">
                         <div className="w-8 h-8 rounded-xl bg-[#ffb700]/15 flex items-center justify-center flex-shrink-0">
                             <span className="material-symbols-outlined text-[#ffb700] text-[19px]">
-                                calendar_month
+                                {icon || 'calendar_month'}
                             </span>
                         </div>
                         <div className="flex flex-col min-w-0">
                             <span className="text-[10px] font-black uppercase tracking-wider text-[#2D2926]/50">
-                                {isOpen ? 'Editing Screening Date & Time' : 'Watch Date & Time'}
+                                {isOpen ? (openTitle || `Selecting ${fieldTitle || 'Date & Time'}`) : (fieldTitle || 'Watch Date & Time')}
                             </span>
                             <span className="text-sm font-black text-[#2D2926] truncate">
                                 {displayText}
