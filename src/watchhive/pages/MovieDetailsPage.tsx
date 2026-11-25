@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ErrorState, Avatar, MovieDetailsSkeleton, EpisodeListSkeleton } from '../components/common';
 import apiClient from '../services/api';
@@ -296,6 +296,16 @@ export const MovieDetailsPage: React.FC = () => {
 
             if (socialRes?.userEntry) {
                 setUserEntry(socialRes.userEntry);
+            } else {
+                // Resilient fallback: check user's watch entries directly for this TMDb ID
+                try {
+                    const checkRes: any = await apiClient.get(`/entries/check/${tmdbId}`);
+                    if (checkRes?.hasWatched && checkRes?.existingEntry) {
+                        setUserEntry(checkRes.existingEntry);
+                    }
+                } catch {
+                    // Ignore check failure
+                }
             }
             if (socialRes?.friendsEntries) {
                 setFriendsEntries(socialRes.friendsEntries);
@@ -627,8 +637,8 @@ export const MovieDetailsPage: React.FC = () => {
                                                 }}
                                                 className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/30 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs cursor-pointer"
                                             >
-                                                <span className="material-symbols-outlined text-[18px] text-[#ffb700]">check_circle</span>
-                                                {userEntry.rating ? `Logged (⭐ ${userEntry.rating})` : 'Logged ✓'}
+                                                <span className="material-symbols-outlined text-[18px] text-[#ffb700]">edit_note</span>
+                                                {userEntry.rating ? `Edit Watch (⭐ ${userEntry.rating})` : 'Edit Your Watch ✓'}
                                             </button>
                                         ) : (
                                             <button
@@ -768,6 +778,31 @@ export const MovieDetailsPage: React.FC = () => {
                                                         <span className="underline truncate max-w-[150px]" title={`@${userEntry.suggestedByUser.username}`}>
                                                             @{userEntry.suggestedByUser.username.length > 10 ? `${userEntry.suggestedByUser.username.slice(0, 10)}...` : userEntry.suggestedByUser.username}
                                                         </span>
+                                                    </div>
+                                                )}
+
+                                                {/* Watch Buddies (Watched with) */}
+                                                {userEntry.watchBuddies && userEntry.watchBuddies.length > 0 && (
+                                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100/80 border border-amber-300/80 rounded-2xl text-xs font-black text-amber-900 shadow-2xs flex-wrap">
+                                                        <span className="flex items-center gap-1 text-[11px] font-bold text-amber-900/80">
+                                                            <span className="material-symbols-outlined text-[14px] text-amber-600">group</span>
+                                                            Watched with
+                                                        </span>
+                                                        {userEntry.watchBuddies.map((buddy: any) => (
+                                                            <Link
+                                                                key={buddy.id}
+                                                                to={`/watch-hive/profile/${buddy.id}`}
+                                                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-200/80 hover:bg-amber-300 text-[#2D2926] font-bold text-[11px] transition-colors"
+                                                                title={`@${buddy.username}`}
+                                                            >
+                                                                <Avatar
+                                                                    src={buddy.profilePictureUrl}
+                                                                    name={buddy.displayName || buddy.username}
+                                                                    size="xxs"
+                                                                />
+                                                                <span>@{buddy.username}</span>
+                                                            </Link>
+                                                        ))}
                                                     </div>
                                                 )}
                                             </div>
