@@ -215,7 +215,9 @@ const toLocalISOString = (dateInput: Date | string | number) => {
 
 export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSuccess, onCancel, isModal = false, defaultIsWatching }) => {
     const navigate = useNavigate();
-    const isEditing = !!entry;
+    const [overrideEntry, setOverrideEntry] = useState<Entry | null>(null);
+    const activeEntry = overrideEntry || entry;
+    const isEditing = !!activeEntry;
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     useEffect(() => {
@@ -377,6 +379,41 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
             console.error('Failed to check previous watch status:', err);
         }
     }, [isEditing]);
+
+    const handleSwitchToEditExisting = useCallback((target: any) => {
+        if (!target) return;
+        setOverrideEntry(target);
+        setHasWatchedBefore(false);
+        setError(null);
+        setFormData(prev => ({
+            ...prev,
+            tmdbId: target.tmdbId ? Number(target.tmdbId) : prev.tmdbId,
+            title: target.title || prev.title,
+            type: target.type || prev.type,
+            rating: target.rating != null ? Number(target.rating) : prev.rating,
+            review: target.review ?? prev.review,
+            tags: target.tags ?? prev.tags,
+            isRewatch: target.isRewatch ?? prev.isRewatch,
+            isWatching: target.isWatching ?? prev.isWatching,
+            watchLocation: target.watchLocation ?? prev.watchLocation,
+            currentSeason: target.currentSeason ?? prev.currentSeason,
+            seasons: target.seasons ?? prev.seasons,
+            watchedAt: target.watchedAt ? toLocalISOString(target.watchedAt) : prev.watchedAt,
+        }));
+        if (target.startedAt) {
+            setStartedAtStr(toLocalISOString(target.startedAt));
+            setHasStartedDate(true);
+        }
+        if (target.watchedAt || target.completedAt) {
+            setHasWatchDate(true);
+        }
+        if (Array.isArray(target.watchBuddies) && target.watchBuddies.length > 0) {
+            setSelectedBuddies(target.watchBuddies);
+        }
+        if (target.posterPath && !selectedPoster) {
+            setSelectedPoster(`https://image.tmdb.org/t/p/w342${target.posterPath}`);
+        }
+    }, [selectedPoster]);
 
     useEffect(() => {
         if (formData.tmdbId && !isEditing) {
@@ -662,9 +699,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
             // Group Watch Tagging (Watch Buddies)
             payload.watchBuddyIds = selectedBuddies.map(b => b.id);
 
-            if (isEditing && entry) {
+            if (isEditing && activeEntry) {
                 const { tmdbId, ...updateData } = payload;
-                savedEntry = await entriesApi.updateEntry(entry.id, updateData);
+                savedEntry = await entriesApi.updateEntry(activeEntry.id, updateData);
             } else {
                 savedEntry = await entriesApi.createEntry(payload as CreateEntryData);
             }
@@ -672,7 +709,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
             const unwrappedEntry: Entry = (savedEntry as any)?.entry || savedEntry;
             const resolvedTitle = (unwrappedEntry?.title && unwrappedEntry.title !== 'undefined' && unwrappedEntry.title.trim())
                 ? unwrappedEntry.title.trim()
-                : (payload?.title || formData?.title || entry?.title || 'Movie');
+                : (payload?.title || formData?.title || activeEntry?.title || 'Movie');
             unwrappedEntry.title = resolvedTitle;
 
             if (typeof window !== 'undefined') {
@@ -703,7 +740,15 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 onSuccess?.(unwrappedEntry);
             }
         } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to save entry');
+            const errData = err.response?.data;
+            if (errData?.code === 'ALREADY_WATCHED' && errData?.existingEntry) {
+                setHasWatchedBefore(true);
+                setPreviousEntry(errData.existingEntry);
+                setFormData(prev => ({ ...prev, isRewatch: true }));
+                setError(errData.error || 'You have already watched this title. Rewatch must be enabled to log a duplicate entry, or you can edit your existing entry.');
+            } else {
+                setError(errData?.error || 'Failed to save entry');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -825,7 +870,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 <ModalBeeOverlay
                     message={
                         isEditing
-                            ? (entry?.isWatching && !formData.isWatching ? 'Completing your watch...' : 'Updating your entry...')
+                            ? (activeEntry?.isWatching && !formData.isWatching ? 'Completing your watch...' : 'Updating your entry...')
                             : (formData.isWatching ? "Saving what you're watching..." : 'Logging to your Hive...')
                     }
                 />
@@ -836,7 +881,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                         <h2 className="text-2xl font-black text-[#2D2926] flex items-center gap-2.5">
                             {isEditing ? (
                                 <span className="text-[#ffb700] material-symbols-outlined text-[28px]">
-                                    {entry?.isWatching && !formData.isWatching ? 'task_alt' : 'edit'}
+                                    {activeEntry?.isWatching && !formData.isWatching ? 'task_alt' : 'edit'}
                                 </span>
                             ) : (
                                 <span className="text-[#ffb700] material-symbols-outlined text-[28px]">
@@ -844,12 +889,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 </span>
                             )}
                             {isEditing
-                                ? (entry?.isWatching && !formData.isWatching ? 'Complete Your Watch' : 'Edit Your Entry')
+                                ? (activeEntry?.isWatching && !formData.isWatching ? 'Complete Your Watch' : 'Edit Your Entry')
                                 : (formData.isWatching ? 'Track What You\'re Watching' : 'Log a Watch')}
                         </h2>
                         <p className="text-xs text-[#2D2926]/50 font-bold uppercase tracking-wider">
                             {isEditing
-                                ? (entry?.isWatching && !formData.isWatching
+                                ? (activeEntry?.isWatching && !formData.isWatching
                                     ? 'Give your rating and final thoughts to complete this watch.'
                                     : 'Refine your rating, review, and details below.')
                                 : 'Search for a movie or TV show, rate it, and add it to your history.'}
@@ -858,9 +903,21 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 )}
 
                 {error && (
-                    <div className="bg-red-50 text-red-600 border border-red-100 font-bold p-3.5 rounded-2xl mb-6 flex items-center gap-2 text-sm">
-                        <span className="material-symbols-outlined text-lg">warning</span>
-                        {error}
+                    <div className="bg-red-50 text-red-600 border border-red-100 font-bold p-3.5 rounded-2xl mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-lg shrink-0">warning</span>
+                            <span>{error}</span>
+                        </div>
+                        {previousEntry && !isEditing && (
+                            <button
+                                type="button"
+                                onClick={() => handleSwitchToEditExisting(previousEntry)}
+                                className="shrink-0 px-3.5 py-1.5 bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] font-black text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                            >
+                                <span className="material-symbols-outlined text-[16px]">edit_note</span>
+                                Edit Existing Entry Instead
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -1450,8 +1507,20 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             {/* Previous Logged Item Card */}
                                             {previousEntry && (
                                                 <div className="bg-white/95 border border-amber-200/60 rounded-xl p-3 flex flex-col gap-2 shadow-xs">
-                                                    <div className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40">
-                                                        Previously Logged Watch
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40">
+                                                            Previously Logged Watch
+                                                        </div>
+                                                        {!isEditing && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleSwitchToEditExisting(previousEntry)}
+                                                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] font-extrabold text-[10px] rounded-lg transition-colors cursor-pointer"
+                                                            >
+                                                                <span className="material-symbols-outlined text-[13px]">edit_note</span>
+                                                                Edit This Instead
+                                                            </button>
+                                                        )}
                                                     </div>
                                                     <div className="flex items-center justify-between border-b border-amber-100 pb-2">
                                                         <div className="flex items-center gap-1.5 text-amber-900 text-[11px] font-extrabold">
@@ -2010,11 +2079,11 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 <>
                                     <span className="material-symbols-outlined text-sm font-bold">
                                         {isEditing
-                                            ? (entry?.isWatching && !formData.isWatching ? 'task_alt' : 'edit_note')
+                                            ? (activeEntry?.isWatching && !formData.isWatching ? 'task_alt' : 'edit_note')
                                             : (formData.isWatching ? 'visibility' : 'add')}
                                     </span>
                                     {isEditing
-                                        ? (entry?.isWatching && !formData.isWatching ? 'Complete Watch' : 'Update Entry')
+                                        ? (activeEntry?.isWatching && !formData.isWatching ? 'Complete Watch' : 'Update Entry')
                                         : (formData.isWatching ? 'Track Watching' : 'Log Entry')}
                                 </>
                             )}
