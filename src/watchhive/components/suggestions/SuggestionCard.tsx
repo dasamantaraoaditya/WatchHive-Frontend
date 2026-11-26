@@ -157,9 +157,10 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ group, onStatusC
                 },
             });
             onStatusChange?.();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to move item to currently watching', err);
-            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
+            const serverMsg = err?.response?.data?.error || err?.response?.data?.message;
+            await alert(serverMsg || `Failed to add "${title}" to currently watching log. Please try again.`, {
                 title: 'Error',
                 severity: 'error'
             });

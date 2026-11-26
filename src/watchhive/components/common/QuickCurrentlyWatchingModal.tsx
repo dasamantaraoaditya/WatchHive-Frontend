@@ -116,9 +116,10 @@ export const QuickCurrentlyWatchingModal: React.FC<QuickCurrentlyWatchingModalPr
 
             if (onSuccess) onSuccess();
             onClose();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to add to currently watching log', err);
-            await alert(`Failed to add "${title}" to your log. Please try again.`, {
+            const serverMsg = err?.response?.data?.error || err?.response?.data?.message;
+            await alert(serverMsg || `Failed to add "${title}" to your log. Please try again.`, {
                 title: 'Error',
                 severity: 'error'
             });

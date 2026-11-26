@@ -74,8 +74,12 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                 suggestedByUserId: suggestedByUser?.id || suggestedByUserId || null
             });
 
-            // Remove from watchlist
-            await removeFromList(tmdbId);
+            // Remove from watchlist safely (non-blocking)
+            try {
+                await removeFromList(tmdbId);
+            } catch (removeErr) {
+                console.warn('[WatchlistCard] Non-blocking watchlist removal failed:', removeErr);
+            }
 
             // Display beautiful success alert with Share CTA
             await alert(`"${resolvedTitle}" has been added to your Currently Watching log!`, {
@@ -93,9 +97,10 @@ export const WatchlistCard: React.FC<WatchlistCardProps> = ({ tmdbId, mediaType 
                     });
                 },
             });
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to move item to currently watching', err);
-            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
+            const serverMsg = err?.response?.data?.error || err?.response?.data?.message;
+            await alert(serverMsg || `Failed to add "${title}" to currently watching log. Please try again.`, {
                 title: 'Error',
                 severity: 'error'
             });

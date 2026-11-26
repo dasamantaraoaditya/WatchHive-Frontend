@@ -395,9 +395,23 @@ export const MovieDetailsPage: React.FC = () => {
                 isWatching: true,
                 startedAt: new Date().toISOString(),
                 suggestedByUserId: suggestedByUserId || null,
+                isRewatch: Boolean(userEntry && !userEntry.isWatching),
             });
             setUserEntry(createdEntry);
-            await removeFromList(tmdbId);
+
+            // Remove from watchlist safely if present (non-blocking)
+            if (inWatchlist) {
+                try {
+                    await removeFromList(tmdbId);
+                } catch (removeErr) {
+                    console.warn('[MovieDetails] Non-blocking watchlist removal failed:', removeErr);
+                }
+            }
+
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('watchhive:entry-created', { detail: createdEntry }));
+            }
+
             await alert(`"${title}" has been added to your Currently Watching log!`, {
                 title: 'Marked as Watching',
                 severity: 'success',
@@ -413,9 +427,10 @@ export const MovieDetailsPage: React.FC = () => {
                     });
                 },
             });
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to add to currently watching log:', err);
-            await alert(`Failed to add "${title}" to currently watching log. Please try again.`, {
+            const serverMsg = err?.response?.data?.error || err?.response?.data?.message;
+            await alert(serverMsg || `Failed to add "${title}" to currently watching log. Please try again.`, {
                 title: 'Error',
                 severity: 'error',
             });
