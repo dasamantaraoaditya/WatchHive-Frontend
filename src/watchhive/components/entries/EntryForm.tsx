@@ -205,7 +205,8 @@ const LOCATION_PRESETS: LocationPreset[] = [
 
 
 /* ── Timezone-Aware Local ISO Formatter ── */
-const toLocalISOString = (dateInput: Date | string | number) => {
+const toLocalISOString = (dateInput?: Date | string | number | null) => {
+    if (!dateInput) return '';
     const d = new Date(dateInput);
     if (isNaN(d.getTime())) return '';
     const offset = d.getTimezoneOffset() * 60000;
@@ -245,7 +246,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     });
     const [hasWatchDate, setHasWatchDate] = useState<boolean>(() => !entry || isCompletingActiveWatch || !!(entry.completedAt || entry.watchedAt));
     const [formData, setFormData] = useState<CreateEntryData>({
-        tmdbId: entry?.tmdbId || prefillData?.tmdbId || 0,
+        tmdbId: entry?.tmdbId ? Number(entry.tmdbId) : (prefillData?.tmdbId ? Number(prefillData.tmdbId) : 0),
         title: entry?.title || prefillData?.title || '',
         type: entry?.type || prefillData?.type || 'MOVIE',
         watchedAt: isCompletingActiveWatch
@@ -255,18 +256,22 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                     ? toLocalISOString((entry.isWatching ? (entry.startedAt || entry.watchedAt) : (entry.completedAt || entry.watchedAt))!)
                     : '')
                 : toLocalISOString(new Date()),
-        rating: entry?.rating || undefined,
+        rating: entry?.rating != null && !isNaN(Number(entry.rating)) && Number(entry.rating) > 0 ? Number(entry.rating) : undefined,
         review: entry?.review || '',
-        tags: entry?.tags || [],
+        tags: Array.isArray(entry?.tags)
+            ? entry.tags
+            : (typeof (entry as any)?.tags === 'string'
+                ? (entry as any).tags.replace(/[{}]/g, '').split(',').map((t: string) => t.trim()).filter(Boolean)
+                : []),
         isRewatch: entry?.isRewatch || false,
         isWatching: defaultIsWatching !== undefined ? defaultIsWatching : (entry?.isWatching || false),
         watchLocation: entry?.watchLocation || '',
         suggestedByUserId: entry?.suggestedByUserId || prefillData?.suggestedByUserId || undefined,
         postToFeed: entry?.postToFeed !== undefined ? entry.postToFeed : true,
-        currentSeason: entry?.currentSeason ?? prefillData?.currentSeason ?? undefined,
-        seasons: (entry as any)?.seasons && Array.isArray((entry as any).seasons) && (entry as any).seasons.length > 0
-            ? (entry as any).seasons
-            : (entry?.currentSeason ? [entry.currentSeason] : (prefillData?.currentSeason ? [prefillData.currentSeason] : undefined)),
+        currentSeason: entry?.currentSeason != null ? Number(entry.currentSeason) : (prefillData?.currentSeason != null ? Number(prefillData.currentSeason) : undefined),
+        seasons: Array.isArray((entry as any)?.seasons) && (entry as any).seasons.length > 0
+            ? (entry as any).seasons.map(Number).filter((n: number) => !isNaN(n) && n > 0)
+            : (entry?.currentSeason != null ? [Number(entry.currentSeason)] : (prefillData?.currentSeason != null ? [Number(prefillData.currentSeason)] : undefined)),
     });
 
     // ── UI state ──
@@ -467,7 +472,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [isSearchingSuggestors, setIsSearchingSuggestors] = useState(false);
 
     // ── Watch Buddies (Group Watch Tagging) state ──
-    const [selectedBuddies, setSelectedBuddies] = useState<WatchBuddy[]>(() => entry?.watchBuddies || []);
+    const [selectedBuddies, setSelectedBuddies] = useState<WatchBuddy[]>(() => Array.isArray(entry?.watchBuddies) ? entry.watchBuddies : []);
     const [showBuddyPicker, setShowBuddyPicker] = useState(false);
     const [buddySearchQuery, setBuddySearchQuery] = useState('');
     const [buddyResults, setBuddyResults] = useState<WatchBuddy[]>([]);
@@ -799,7 +804,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
     const renderSeasonPicker = () => {
         if (formData.type !== 'TV_SHOW') return null;
-        const selectedList = formData.seasons || (formData.currentSeason ? [formData.currentSeason] : []);
+        const rawList = formData.seasons || (formData.currentSeason ? [formData.currentSeason] : []);
+        const selectedList = Array.isArray(rawList) ? rawList.map(Number).filter(n => !isNaN(n)) : [];
 
         return (
             <div className="flex flex-col gap-1.5 bg-amber-50/70 border border-[#ffb700]/30 rounded-xl p-2.5 mt-2">
@@ -1669,7 +1675,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 </label>
 
                                 {/* Selected Buddies Chips */}
-                                {selectedBuddies.length > 0 && (
+                                {Array.isArray(selectedBuddies) && selectedBuddies.length > 0 && (
                                     <div className="flex flex-wrap gap-1.5 p-2 bg-amber-50/70 border border-amber-200/60 rounded-2xl">
                                         {selectedBuddies.map((buddy) => (
                                             <span
@@ -1973,7 +1979,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         </button>
                                     </div>
 
-                                    {formData.tags && formData.tags.length > 0 && (
+                                    {Array.isArray(formData.tags) && formData.tags.length > 0 && (
                                         <div className="flex flex-wrap gap-1 mt-0.5">
                                             {formData.tags.map((tag) => (
                                                 <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/15 border border-[#ffb700]/30 text-[#2D2926] px-2 py-1 rounded-lg text-[11px] font-black transition-colors">

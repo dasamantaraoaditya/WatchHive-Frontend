@@ -9,7 +9,7 @@ export interface WHRatingMoodInfo {
 }
 
 export interface WHRatingPickerProps {
-    rating: number | undefined;
+    rating: number | string | undefined | null;
     onRatingChanged: (newRating: number | undefined) => void;
     enabled?: boolean;
     className?: string;
@@ -135,8 +135,12 @@ export const WHRatingPicker: React.FC<WHRatingPickerProps> = ({
     const [isInteracting, setIsInteracting] = useState(false);
     const trackContainerRef = useRef<HTMLDivElement>(null);
 
-    const currentScore = rating ?? 0;
-    const isRated = rating !== undefined && rating > 0;
+    // Normalize rating to numeric value safely, accepting strings (e.g. "8.5") from API
+    const numericRating = rating !== undefined && rating !== null && !isNaN(Number(rating)) && Number(rating) > 0
+        ? Number(rating)
+        : undefined;
+    const currentScore = numericRating ?? 0;
+    const isRated = numericRating !== undefined && numericRating > 0;
     const mood = getMoodInfo(currentScore);
 
     const calculateScoreFromClientX = useCallback((clientX: number) => {
@@ -197,7 +201,7 @@ export const WHRatingPicker: React.FC<WHRatingPickerProps> = ({
 
         if (delta !== 0) {
             e.preventDefault();
-            const nextScore = Math.max(0, Math.min(10, Math.round(((rating ?? 0) + delta) * 10) / 10));
+            const nextScore = Math.max(0, Math.min(10, Math.round((currentScore + delta) * 10) / 10));
             onRatingChanged(nextScore === 0 ? undefined : nextScore);
         }
     };
