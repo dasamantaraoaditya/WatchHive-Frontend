@@ -114,8 +114,8 @@ export const HeaderActions: React.FC = () => {
                     <div className="absolute right-0 top-full mt-3 w-64 bg-white/95 backdrop-blur-xl border border-black/5 rounded-2xl shadow-2xl overflow-hidden z-50 animate-slide-up">
                         <div className="p-5 bg-gradient-to-br from-[#ffb700]/10 to-transparent flex flex-col items-center border-b border-black/5">
                             <Avatar src={user?.profilePictureUrl} name={user?.displayName || user?.username || 'User'} size="md" className="mb-3 shadow-lg shadow-[#ffb700]/10" />
-                            <strong className="text-sm font-black text-[#2D2926] truncate w-full text-center">{user?.displayName || user?.username}</strong>
-                            <span className="text-[10px] uppercase font-bold text-[#2D2926]/40 tracking-widest truncate w-full text-center mt-1">@{user?.username}</span>
+                            <strong className="text-sm font-black text-[#2D2926] truncate w-full text-center">{user?.displayName || user?.username || 'Cinephile'}</strong>
+                            <span className="text-[10px] uppercase font-bold text-[#2D2926]/40 tracking-widest truncate w-full text-center mt-1">{user?.username ? `@${user.username}` : ''}</span>
                         </div>
                         <div className="p-2 flex flex-col gap-1">
                             <Link to="/watch-hive/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-3 text-xs font-black uppercase tracking-widest text-[#2D2926] hover:bg-[#ffb700]/10 rounded-xl transition-colors">
