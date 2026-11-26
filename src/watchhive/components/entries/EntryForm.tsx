@@ -299,6 +299,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
     const [tagInput, setTagInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const formTopRef = useRef<HTMLDivElement>(null);
 
     const [hasWatchedBefore, setHasWatchedBefore] = useState(false);
     const [previousEntry, setPreviousEntry] = useState<any | null>(null);
@@ -619,10 +620,12 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         e.preventDefault();
         if (!formData.tmdbId || !formData.title) {
             setError('Please search for and select a movie or TV show');
+            formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             return;
         }
         if (hasWatchedBefore && !formData.isRewatch && !formData.isWatching) {
             setError('You have already watched this title. Rewatch must be enabled to log a duplicate entry.');
+            formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             return;
         }
         setIsLoading(true);
@@ -740,6 +743,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 onSuccess?.(unwrappedEntry);
             }
         } catch (err: any) {
+            console.error('Entry save error:', err);
             const errData = err.response?.data;
             if (errData?.code === 'ALREADY_WATCHED' && errData?.existingEntry) {
                 setHasWatchedBefore(true);
@@ -747,8 +751,19 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 setFormData(prev => ({ ...prev, isRewatch: true }));
                 setError(errData.error || 'You have already watched this title. Rewatch must be enabled to log a duplicate entry, or you can edit your existing entry.');
             } else {
-                setError(errData?.error || 'Failed to save entry');
+                let parsedError = 'Failed to save entry';
+                if (errData?.error && typeof errData.error === 'string') {
+                    parsedError = errData.error;
+                } else if (errData?.message && typeof errData.message === 'string') {
+                    parsedError = errData.message;
+                } else if (Array.isArray(errData?.errors) && errData.errors.length > 0) {
+                    parsedError = errData.errors.map((e: any) => e.msg || e.message || 'Validation error').filter(Boolean).join(', ');
+                } else if (err.message && typeof err.message === 'string') {
+                    parsedError = err.message;
+                }
+                setError(parsedError);
             }
+            formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } finally {
             setIsLoading(false);
         }
@@ -901,6 +916,8 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                         </p>
                     </div>
                 )}
+
+                <div ref={formTopRef} />
 
                 {error && (
                     <div className="bg-red-50 text-red-600 border border-red-100 font-bold p-3.5 rounded-2xl mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
@@ -1624,14 +1641,16 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 </div>
                             </div>
 
-                            {/* Watched With (Group Watch / Friends Tagging) */}
+                            {/* Watched With / Watching With (Group Watch / Friends Tagging) */}
                             <div className="flex flex-col gap-2.5">
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50 flex items-center justify-between">
                                     <span className="flex items-center gap-1.5">
                                         <span className="material-symbols-outlined text-[14px] text-[#ffb700]">groups</span>
-                                        Watched With
+                                        {formData.isWatching ? 'Watching With' : 'Watched With'}
                                     </span>
-                                    <span className="text-[#ffb700] text-[9px] font-bold">Tag friends you watched this with</span>
+                                    <span className="text-[#ffb700] text-[9px] font-bold">
+                                        {formData.isWatching ? 'Tag friends you are watching this with' : 'Tag friends you watched this with'}
+                                    </span>
                                 </label>
 
                                 {/* Selected Buddies Chips */}
@@ -1699,7 +1718,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                 fetchBuddySuggestions(e.target.value);
                                             }}
                                             className="w-full pl-9 pr-4 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
-                                            placeholder="Search friends to tag who you watched with..."
+                                            placeholder={formData.isWatching ? "Search friends to tag who you're watching with..." : "Search friends to tag who you watched with..."}
                                         />
                                     </div>
 
@@ -1908,6 +1927,26 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                             </div>
                         </div>
                     </div>
+
+                    {/* ── Error Banner (Footer / Instant Visibility) ── */}
+                    {error && (
+                        <div className="bg-red-50 text-red-600 border border-red-200/80 font-bold p-3.5 rounded-2xl mt-5 mb-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm shadow-xs">
+                            <div className="flex items-center gap-2">
+                                <span className="material-symbols-outlined text-lg shrink-0 text-red-500">error</span>
+                                <span className="leading-snug">{error}</span>
+                            </div>
+                            {previousEntry && !isEditing && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleSwitchToEditExisting(previousEntry)}
+                                    className="shrink-0 px-3.5 py-1.5 bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] font-black text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                                >
+                                    <span className="material-symbols-outlined text-[16px]">edit_note</span>
+                                    Edit Existing Entry Instead
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     {/* ── Actions Footer ── */}
                     <div className={`flex flex-row items-center justify-end gap-3 border-t border-[#ffb700]/15 pt-5 mt-6 ${isMobile && isModal ? 'pb-8' : ''}`}>

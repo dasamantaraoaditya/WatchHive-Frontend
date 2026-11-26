@@ -67,14 +67,16 @@ export const LoginPage: React.FC = () => {
         }
     };
 
-    const handleVerifyCode = async (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-        const cleanCode = code.trim().replace(/\D/g, '');
+    const isVerifyingRef = useRef(false);
+
+    const executeVerifyCode = async (cleanCode: string) => {
+        if (isVerifyingRef.current) return;
         if (cleanCode.length !== 6) {
             setError('Please enter the full 6-digit code received in your email.');
             return;
         }
 
+        isVerifyingRef.current = true;
         setIsLoading(true);
         setError(null);
 
@@ -85,7 +87,14 @@ export const LoginPage: React.FC = () => {
             setError(err.response?.data?.error || err.message || 'Incorrect or expired sign-in code. Please try again.');
         } finally {
             setIsLoading(false);
+            isVerifyingRef.current = false;
         }
+    };
+
+    const handleVerifyCode = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        const cleanCode = code.trim().replace(/\D/g, '');
+        await executeVerifyCode(cleanCode);
     };
 
     const handleGoogleSuccess = async (idToken: string) => {
@@ -225,12 +234,10 @@ export const LoginPage: React.FC = () => {
                                         const clean = e.target.value.replace(/\D/g, '').slice(0, 6);
                                         setCode(clean);
                                         setError(null);
-                                        if (clean.length === 6) {
+                                        if (clean.length === 6 && !isVerifyingRef.current) {
                                             // Automatically submit once 6 digits are typed
                                             setTimeout(() => {
-                                                verifyEmailOtp(email.trim().toLowerCase(), clean)
-                                                    .then(() => navigate('/watch-hive/feed'))
-                                                    .catch((err) => setError(err.response?.data?.error || err.message || 'Incorrect code.'));
+                                                executeVerifyCode(clean);
                                             }, 50);
                                         }
                                     }}

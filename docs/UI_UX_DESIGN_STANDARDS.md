@@ -124,6 +124,17 @@ Micro Badges        0.6875rem (11px)                              ExtraBold (800
 - Fixed bottom-right trigger (mobile: above bottom nav bar, desktop: bottom right corner).
 - Circular 56×56px honey gold FAB (`#ffb700`) with smooth rotational transform on open.
 
+### 6. Brand-Themed Like Interaction
+- When active, the like button transitions to a warm honey gold (`text-[#ffb700]` and `bg-[#ffb700]/12`) matching WatchersHive brand identity, rather than generic social red or blue.
+
+### 7. Watch Buddy Avatar Pills
+- Rendered on `FeedCard` and `MovieDetailsModal` to showcase co-watchers:
+- Circular 24×24px avatar chips with `@username` hover tooltip, clicking navigates to buddy profile.
+
+### 8. Loader Hierarchy
+- **Primary Loader**: Shimmer Skeleton boxes (`skeleton-box`, `animate-pulse`) used for cards, lists, carousels, and feed items while data is fetching.
+- **Secondary Loader**: WatchHive Bee Loader (`AppLoadingScreen`). Used strictly on initial app boot or blocking full-page transitions.
+
 ---
 
 ## 📱 6. Responsive Breakpoints & Grid System

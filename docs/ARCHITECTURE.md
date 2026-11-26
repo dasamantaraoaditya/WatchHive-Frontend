@@ -199,4 +199,29 @@ sequenceDiagram
     Component-->>User: Renders Feed Items dynamically
 ```
 
+---
+
+## Social Co-Watching & Watch Buddies Architecture
+
+WatchHive Web supports collaborative co-watching records:
+1. **EntryForm Integration**:
+   - When submitting or editing a watch log, users can search and select mutual friends as "Watch Buddies".
+   - The selected user IDs are sent to the backend as `watchBuddyUserIds`.
+2. **Visual Presentation**:
+   - `FeedCard` and `MovieDetailsModal` render dedicated Watch Buddy pills with user avatars and handles.
+   - Clicking a buddy navigates to their profile (`/profile/:id` or `/u/:username`).
+3. **Accurate Watch Timing & Form Clamping**:
+   - Dual timestamp capture (`startedAt` and `watchedAt`) with an "I don't remember when I started" toggle for historical logs.
+   - Client-side clamping guarantees `watchedAt` cannot be set earlier than `startedAt` or in the future.
+
+---
+
+## Legal, Privacy & Global Compliance (Web PWA)
+
+- **GDPR Data Export**: Available under Settings/Data, allowing users to download their complete watch archive as JSON (`GET /api/v1/data/export`).
+- **Right to Erasure (Account Deletion)**: A dedicated "Danger Zone" in profile settings allows irreversible account and data deletion (`DELETE /api/v1/users/me`).
+- **TMDb Legal Disclaimers & Non-Hosting Notice**: Displayed in app footers and about dialogs, explicitly stating that WatchersHive does not host or stream media content.
+- **UGC Reporting & Safety**: In-app reporting mechanisms for reviews and comments.
+
+
 

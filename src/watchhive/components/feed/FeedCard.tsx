@@ -292,7 +292,7 @@ export const FeedCard: React.FC<FeedCardProps> = ({ item }) => {
                                     <div className="mt-1 flex items-center gap-1.5 text-xs text-[#2D2926]/70 font-medium flex-wrap">
                                         <span className="text-[11px] font-medium text-[#2D2926]/60 shrink-0 flex items-center gap-1">
                                             <span className="material-symbols-outlined text-[14px] text-[#ffb700]">group</span>
-                                            Watched with
+                                            {entryData.isWatching ? 'Watching with' : 'Watched with'}
                                         </span>
                                         <div className="flex items-center gap-1.5 flex-wrap">
                                             {entryData.watchBuddies.map((buddy: WatchBuddy) => (
