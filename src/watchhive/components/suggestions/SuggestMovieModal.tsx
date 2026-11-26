@@ -240,7 +240,7 @@ export const SuggestMovieModal: React.FC<SuggestMovieModalProps> = ({
 
     return createPortal(
         <div 
-            className="fixed inset-0 z-[3500] flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display"
+            className="fixed inset-0 z-[4500] flex items-center justify-center p-3 sm:p-4 bg-[#2D2926]/60 backdrop-blur-sm animate-[fade-in_0.2s_ease-out] font-display"
             role="dialog"
             aria-modal="true"
         >

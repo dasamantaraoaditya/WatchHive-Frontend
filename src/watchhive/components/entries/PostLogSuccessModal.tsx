@@ -72,7 +72,10 @@ export const PostLogSuccessModal: React.FC<PostLogSuccessModalProps> = ({
     };
 
     const modalContent = (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
+        <div
+            className="fixed inset-0 z-[4000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
+            onClick={onClose}
+        >
             <div
                 className="relative w-full max-w-md bg-[#FFF9F0] rounded-3xl shadow-2xl border-2 border-[#FFB700]/30 overflow-hidden flex flex-col max-h-[92vh]"
                 onClick={(e) => e.stopPropagation()}

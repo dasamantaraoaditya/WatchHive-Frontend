@@ -786,7 +786,7 @@ export const MovieDetailsPage: React.FC = () => {
                                                     <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100/80 border border-amber-300/80 rounded-2xl text-xs font-black text-amber-900 shadow-2xs flex-wrap">
                                                         <span className="flex items-center gap-1 text-[11px] font-bold text-amber-900/80">
                                                             <span className="material-symbols-outlined text-[14px] text-amber-600">group</span>
-                                                            Watched with
+                                                            {userEntry.isWatching ? 'Watching with' : 'Watched with'}
                                                         </span>
                                                         {userEntry.watchBuddies.map((buddy: any) => (
                                                             <Link
