@@ -2,27 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface HiveDatePickerProps {
-    value?: string | null; // Format: YYYY-MM-DDTHH:mm
+    value?: string | null; // Format: YYYY-MM-DDTHH:mm or ISO string
     onChange: (newValue: string) => void;
     label?: string;
     fieldTitle?: string;
     openTitle?: string;
     icon?: string;
+    emptyText?: string;
 }
 
-export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange, label, fieldTitle, openTitle, icon }) => {
+export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange, label, fieldTitle, openTitle, icon, emptyText }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     // Parse value to a local Date object, defaulting to current date-time
     const parseValue = (val?: string | null): Date => {
         if (!val) return new Date();
         try {
-            const [datePart, timePart] = val.split('T');
-            if (!datePart || !timePart) return new Date();
-            const [year, month, day] = datePart.split('-').map(Number);
-            const [hours, minutes] = timePart.split(':').map(Number);
-
-            const parsed = new Date(year, month - 1, day, hours, minutes);
+            if (val.includes('T')) {
+                const [datePart, timePart] = val.split('T');
+                if (datePart && timePart) {
+                    const [year, month, day] = datePart.split('-').map(Number);
+                    const cleanTime = timePart.split('.')[0].replace('Z', '');
+                    const [hours, minutes] = cleanTime.split(':').map(Number);
+                    if (!isNaN(year) && !isNaN(month) && !isNaN(day) && !isNaN(hours) && !isNaN(minutes)) {
+                        const parsed = new Date(year, month - 1, day, hours, minutes, 0, 0);
+                        if (!isNaN(parsed.getTime())) return parsed;
+                    }
+                }
+            }
+            const parsed = new Date(val);
             return isNaN(parsed.getTime()) ? new Date() : parsed;
         } catch {
             return new Date();
@@ -54,7 +62,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
 
     // Format display string for the button, e.g., "Tue, Nov 3, 2026 • 12:19 AM"
     const formatDisplay = (val?: string | null) => {
-        if (!val) return 'No specific date (Watched in past)';
+        if (!val) return emptyText || 'No specific date (Watched in past)';
         try {
             const date = parseValue(val);
             const dateFormatted = date.toLocaleDateString(undefined, {
@@ -70,7 +78,7 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
             });
             return `${dateFormatted} • ${timeFormatted}`;
         } catch {
-            return 'No specific date (Watched in past)';
+            return emptyText || 'No specific date (Watched in past)';
         }
     };
 
@@ -84,9 +92,9 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
     };
 
     const isFutureDay = (d: Date) => {
-        const today = new Date();
-        today.setHours(23, 59, 59, 999);
-        return d.getTime() > today.getTime();
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+        return d.getTime() > todayEnd.getTime();
     };
 
     // Calendar generation
@@ -154,16 +162,13 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
     const handleDateSelect = (selectedDate: Date) => {
         if (isFutureDay(selectedDate)) return;
 
-        const now = new Date();
         const newDate = new Date(tempDate);
         newDate.setFullYear(selectedDate.getFullYear());
         newDate.setMonth(selectedDate.getMonth());
         newDate.setDate(selectedDate.getDate());
 
-        // If selected date is today, ensure time does not exceed current time
-        const clampedDate = newDate.getTime() > now.getTime() ? now : newDate;
-        setTempDate(clampedDate);
-        onChange(formatValue(clampedDate));
+        setTempDate(newDate);
+        onChange(formatValue(newDate));
     };
 
     // Time info & handlers
@@ -174,23 +179,23 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
     const currentMinutes = tempDate.getMinutes();
 
     const commitTime = (hours: number, minutes: number) => {
-        const now = new Date();
         const candidate = new Date(tempDate);
         candidate.setHours(hours);
         candidate.setMinutes(minutes);
+        candidate.setSeconds(0);
+        candidate.setMilliseconds(0);
 
-        const clamped = candidate.getTime() > now.getTime() ? now : candidate;
-        setTempDate(clamped);
-        onChange(formatValue(clamped));
+        setTempDate(candidate);
+        onChange(formatValue(candidate));
     };
 
     const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const h12 = Number(e.target.value);
         let updatedHours = h12;
-        if (currentAMPM === 'PM' && h12 < 12) {
-            updatedHours = h12 + 12;
-        } else if (currentAMPM === 'AM' && h12 === 12) {
-            updatedHours = 0;
+        if (currentAMPM === 'PM') {
+            updatedHours = h12 === 12 ? 12 : h12 + 12;
+        } else {
+            updatedHours = h12 === 12 ? 0 : h12;
         }
         commitTime(updatedHours, currentMinutes);
     };
@@ -203,10 +208,10 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
     const handleAMPMChange = (ampm: 'AM' | 'PM') => {
         if (ampm === currentAMPM) return;
         let updatedHours = currentHour12;
-        if (ampm === 'PM' && currentHour12 < 12) {
-            updatedHours = currentHour12 + 12;
-        } else if (ampm === 'AM' && currentHour12 === 12) {
-            updatedHours = 0;
+        if (ampm === 'PM') {
+            updatedHours = currentHour12 === 12 ? 12 : currentHour12 + 12;
+        } else {
+            updatedHours = currentHour12 === 12 ? 0 : currentHour12;
         }
         commitTime(updatedHours, currentMinutes);
     };
@@ -237,10 +242,9 @@ export const HiveDatePicker: React.FC<HiveDatePickerProps> = ({ value, onChange,
         newDate.setFullYear(now.getFullYear());
         newDate.setMonth(now.getMonth());
         newDate.setDate(now.getDate());
-        const clamped = newDate.getTime() > now.getTime() ? now : newDate;
-        setTempDate(clamped);
+        setTempDate(newDate);
         setViewDate(new Date(now.getFullYear(), now.getMonth(), 1));
-        onChange(formatValue(clamped));
+        onChange(formatValue(newDate));
     };
 
     const selectYesterday = () => {

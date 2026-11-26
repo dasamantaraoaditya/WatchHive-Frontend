@@ -922,10 +922,10 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
-                        {/* ── Left Column: Media Information & Rating (5/12 cols) ── */}
-                        <div className="lg:col-span-5 flex flex-col gap-5">
+                        {/* ── Left Column: Media Information, Rating & Review ── */}
+                        <div className="flex flex-col gap-5">
 
                             {/* Search or Selected Media Header */}
                             {!isEditing ? (
@@ -1061,8 +1061,222 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 />
                             </div>
 
+                            {/* Rich Notebook Review */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Write a Review or Log Thoughts</label>
+                                <div className="relative">
+                                    <textarea
+                                        value={formData.review || ''}
+                                        onChange={(e) => setFormData((prev) => ({ ...prev, review: e.target.value }))}
+                                        className="w-full px-4 py-3 bg-white/90 border border-[#ffb700]/25 outline-none focus:border-[#ffb700] focus:bg-white focus:ring-4 focus:ring-[#ffb700]/10 rounded-2xl text-[#2D2926] text-sm leading-relaxed transition-all min-h-[130px]"
+                                        rows={4}
+                                        placeholder="Pour your cinematic critique here... how was the cinematography, acting, writing, or sound design?"
+                                    />
+                                    <span className="absolute bottom-2.5 right-3 text-[9px] font-black text-[#2D2926]/40 uppercase tracking-wider">
+                                        {(formData.review || '').length} chars
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Watch Options: Rewatch & Post to Feed */}
+                            <div className="flex flex-col gap-2.5">
+                                {hasWatchedBefore && (
+                                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex flex-col gap-2.5 animate-fade-in shadow-xs">
+                                        <div className="flex items-start gap-2.5">
+                                            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
+                                                <span className="material-symbols-outlined text-[20px]">history</span>
+                                            </div>
+                                            <div className="flex flex-col gap-0.5 min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h4 className="text-xs font-black text-amber-950 uppercase tracking-wide">
+                                                        You already watched this title!
+                                                    </h4>
+                                                    <span className="bg-amber-500/25 text-amber-800 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
+                                                        Rewatch Required
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] font-bold text-amber-900/80 leading-relaxed">
+                                                    Rewatch is enabled by default to record this viewing, creating another entry in your Hive history.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {previousEntry && (
+                                            <div className="bg-white/95 border border-amber-200/60 rounded-xl p-3 flex flex-col gap-2 shadow-xs">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40">
+                                                        Previously Logged Watch
+                                                    </div>
+                                                    {!isEditing && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleSwitchToEditExisting(previousEntry)}
+                                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] font-extrabold text-[10px] rounded-lg transition-colors cursor-pointer"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[13px]">edit_note</span>
+                                                            Edit This Instead
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+                                                    <div className="flex items-center gap-1.5 text-amber-900 text-[11px] font-extrabold">
+                                                        <span className="material-symbols-outlined text-[15px]">calendar_today</span>
+                                                        <span>
+                                                            Watched on {previousEntry.watchedAt ? new Date(previousEntry.watchedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Previous session'}
+                                                        </span>
+                                                    </div>
+                                                    {previousEntry.rating ? (
+                                                        <div className="flex items-center gap-1 bg-amber-100/80 text-amber-950 px-2 py-0.5 rounded-md text-[11px] font-black">
+                                                            <span className="material-symbols-outlined text-amber-500 text-[13px]">star</span>
+                                                            <span>{previousEntry.rating}/10</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold text-stone-400">Unrated</span>
+                                                    )}
+                                                </div>
+
+                                                {previousEntry.watchLocation && (
+                                                    <div className="flex items-center gap-1.5 text-stone-600 text-[11px] font-semibold">
+                                                        <span className="material-symbols-outlined text-[13px] text-amber-600">location_on</span>
+                                                        <span>Watched at <strong>{previousEntry.watchLocation}</strong></span>
+                                                    </div>
+                                                )}
+
+                                                {previousEntry.review && (
+                                                    <div className="text-[11px] font-medium text-stone-700 italic bg-amber-50/50 rounded-lg p-2 border-l-2 border-amber-400">
+                                                        "{previousEntry.review}"
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    {/* Rewatch Toggle Card */}
+                                    <label
+                                        className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
+                                            formData.isRewatch
+                                                ? 'bg-amber-500/[0.07] border-[#ffb700] shadow-sm'
+                                                : 'bg-white/80 border-[#2D2926]/12 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2.5 min-w-0 pr-1">
+                                            <div
+                                                className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                                    formData.isRewatch
+                                                        ? 'bg-[#ffb700] text-[#2D2926] font-black'
+                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#ffb700]'
+                                                }`}
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">replay</span>
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
+                                                    Rewatch
+                                                </span>
+                                                <span className="text-[10px] font-medium text-[#2D2926]/50 truncate">
+                                                    Repeat viewing
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="relative inline-flex items-center shrink-0">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.isRewatch}
+                                                onChange={(e) => {
+                                                    if (hasWatchedBefore && !e.target.checked) {
+                                                        setError('You already watched this title. Rewatch must be enabled to log a duplicate entry.');
+                                                        return;
+                                                    }
+                                                    setError(null);
+                                                    setFormData((prev) => ({ ...prev, isRewatch: e.target.checked }));
+                                                }}
+                                                className="sr-only"
+                                            />
+                                            <div
+                                                className={`w-10 h-5.5 rounded-full border transition-colors duration-200 shadow-inner ${
+                                                    formData.isRewatch
+                                                        ? 'bg-[#ffb700] border-[#ffb700]'
+                                                        : 'bg-[#2D2926]/15 border-[#2D2926]/20'
+                                                }`}
+                                            />
+                                            <div
+                                                className={`absolute top-[2px] left-[2px] w-4.5 h-4.5 rounded-full bg-white shadow-md border border-[#2D2926]/10 transition-transform duration-200 ${
+                                                    formData.isRewatch ? 'translate-x-4.5' : 'translate-x-0'
+                                                }`}
+                                            />
+                                        </div>
+                                    </label>
+
+                                    {/* Post to Feed Toggle Card */}
+                                    <label
+                                        className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
+                                            formData.postToFeed
+                                                ? 'bg-amber-500/[0.07] border-[#ffb700] shadow-sm'
+                                                : 'bg-white/80 border-[#2D2926]/12 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2.5 min-w-0 pr-1">
+                                            <div
+                                                className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                                    formData.postToFeed
+                                                        ? 'bg-[#ffb700] text-[#2D2926] font-black'
+                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#ffb700]'
+                                                }`}
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">campaign</span>
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
+                                                    Post to Feed
+                                                </span>
+                                                <span className="text-[10px] font-medium text-[#2D2926]/50 truncate">
+                                                    Share to hive
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="relative inline-flex items-center shrink-0">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.postToFeed ?? true}
+                                                onChange={(e) => setFormData((prev) => ({ ...prev, postToFeed: e.target.checked }))}
+                                                className="sr-only"
+                                            />
+                                            <div
+                                                className={`w-10 h-5.5 rounded-full border transition-colors duration-200 shadow-inner ${
+                                                    formData.postToFeed
+                                                        ? 'bg-[#ffb700] border-[#ffb700]'
+                                                        : 'bg-[#2D2926]/15 border-[#2D2926]/20'
+                                                }`}
+                                            />
+                                            <div
+                                                className={`absolute top-[2px] left-[2px] w-4.5 h-4.5 rounded-full bg-white shadow-md border border-[#2D2926]/10 transition-transform duration-200 ${
+                                                    formData.postToFeed ? 'translate-x-4.5' : 'translate-x-0'
+                                                }`}
+                                            />
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ── Right Column: Watch Timeline, Locations, Buddies & Tags ── */}
+                        <div className="flex flex-col gap-5">
+
                             {/* Watch Status & Date Management Card */}
                             <div className="flex flex-col gap-4 p-4 sm:p-5 bg-white border border-[#ffb700]/25 rounded-3xl shadow-sm">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">
+                                        Watch Status & Timeline
+                                    </label>
+                                    <span className="text-[9px] font-bold text-[#ffb700] uppercase tracking-wider">
+                                        {formData.isWatching ? 'Currently Watching' : 'Completed Watch'}
+                                    </span>
+                                </div>
+
                                 {/* Watch Status Segmented Selector */}
                                 <div className="flex items-center p-1 bg-[#FFF9F0] border border-[#ffb700]/30 rounded-2xl gap-1">
                                     <button
@@ -1115,113 +1329,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
 
                                 {/* Completed Watch Controls */}
                                 {!formData.isWatching ? (
-                                    <div className="flex flex-col gap-5">
-                                        {/* Started Watching Section */}
-                                        <div className="flex flex-col gap-2.5 p-3.5 bg-white/70 border border-[#e5e5e5] rounded-2xl">
-                                            <div className="flex items-center justify-between gap-2 flex-wrap">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="material-symbols-outlined text-[18px] text-[#ffb700]">
-                                                        play_circle
-                                                    </span>
-                                                    <span className="text-xs font-black uppercase tracking-wider text-[#2D2926]">
-                                                        Started Watching
-                                                    </span>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-900 border border-amber-500/20">
-                                                        Start
-                                                    </span>
-                                                </div>
-
-                                                {/* Quick Date Actions for Started */}
-                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setHasStartedDate(true);
-                                                            setStartedAtStr(toLocalISOString(new Date()));
-                                                        }}
-                                                        className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
-                                                    >
-                                                        Now
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setHasStartedDate(true);
-                                                            const yesterday = new Date(Date.now() - 86400000);
-                                                            setStartedAtStr(toLocalISOString(yesterday));
-                                                        }}
-                                                        className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
-                                                    >
-                                                        Yesterday
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            if (hasStartedDate) {
-                                                                setHasStartedDate(false);
-                                                                setStartedAtStr('');
-                                                            } else {
-                                                                setHasStartedDate(true);
-                                                                setStartedAtStr(formData.watchedAt || toLocalISOString(new Date()));
-                                                            }
-                                                        }}
-                                                        className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                                                            !hasStartedDate
-                                                                ? 'bg-amber-500/20 text-amber-900 border-amber-500/40'
-                                                                : 'bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200'
-                                                        }`}
-                                                    >
-                                                        {!hasStartedDate ? 'Set Exact Date' : "Don't know start"}
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            {hasStartedDate ? (
-                                                <HiveDatePicker
-                                                    value={startedAtStr}
-                                                    fieldTitle="Start Date & Time"
-                                                    icon="play_circle"
-                                                    onChange={(val: string) => {
-                                                        if (!val) {
-                                                            setHasStartedDate(false);
-                                                            setStartedAtStr('');
-                                                        } else {
-                                                            setHasStartedDate(true);
-                                                            setStartedAtStr(val);
-                                                        }
-                                                    }}
-                                                />
-                                            ) : (
-                                                <div className="flex items-center justify-between p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl animate-fade-in">
-                                                    <div className="flex items-center gap-2.5 min-w-0">
-                                                        <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
-                                                            <span className="material-symbols-outlined text-[18px]">help_outline</span>
-                                                        </div>
-                                                        <div className="flex flex-col min-w-0">
-                                                            <span className="text-xs font-black text-amber-950">
-                                                                Don't know when I started watching
-                                                            </span>
-                                                            <span className="text-[11px] font-medium text-amber-800/80 truncate">
-                                                                Start date omitted · You can edit or add it anytime
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setHasStartedDate(true);
-                                                            setStartedAtStr(formData.watchedAt || toLocalISOString(new Date()));
-                                                        }}
-                                                        className="px-3 py-1 bg-[#ffb700] text-[#2D2926] rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 active:scale-95 transition-all cursor-pointer shrink-0 ml-2 shadow-xs"
-                                                    >
-                                                        Set Date
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-
+                                    <div className="flex flex-col gap-3.5">
                                         {/* Completed Watching Section */}
-                                        <div className="flex flex-col gap-2.5 p-3.5 bg-white/70 border border-[#e5e5e5] rounded-2xl">
+                                        <div className="flex flex-col gap-2 p-3 bg-white/90 border border-[#ffb700]/25 rounded-2xl">
                                             <div className="flex items-center justify-between gap-2 flex-wrap">
                                                 <div className="flex items-center gap-2">
                                                     <span className="material-symbols-outlined text-[18px] text-[#ffb700]">
@@ -1230,54 +1340,30 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     <span className="text-xs font-black uppercase tracking-wider text-[#2D2926]">
                                                         Completed Watching
                                                     </span>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/20">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/20">
                                                         Finished
                                                     </span>
                                                 </div>
 
-                                                {/* Quick Date Actions for Completed */}
-                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (hasWatchDate) {
+                                                            setHasWatchDate(false);
+                                                            setFormData((prev) => ({ ...prev, watchedAt: '' }));
+                                                        } else {
                                                             setHasWatchDate(true);
                                                             setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
-                                                        }}
-                                                        className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
-                                                    >
-                                                        Now
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setHasWatchDate(true);
-                                                            const yesterday = new Date(Date.now() - 86400000);
-                                                            setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(yesterday) }));
-                                                        }}
-                                                        className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
-                                                    >
-                                                        Yesterday
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            if (hasWatchDate) {
-                                                                setHasWatchDate(false);
-                                                                setFormData((prev) => ({ ...prev, watchedAt: '' }));
-                                                            } else {
-                                                                setHasWatchDate(true);
-                                                                setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
-                                                            }
-                                                        }}
-                                                        className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                                                            !hasWatchDate
-                                                                ? 'bg-amber-500/20 text-amber-900 border-amber-500/40'
-                                                                : 'bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200'
-                                                        }`}
-                                                    >
-                                                        {!hasWatchDate ? 'Set Exact Date' : 'Past Watch'}
-                                                    </button>
-                                                </div>
+                                                        }
+                                                    }}
+                                                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                                                        !hasWatchDate
+                                                            ? 'bg-amber-500/20 text-amber-950 border-amber-500/40'
+                                                            : 'bg-[#FFF9F0] text-[#2D2926]/70 border-[#ffb700]/30 hover:bg-[#ffb700]/20'
+                                                    }`}
+                                                >
+                                                    {!hasWatchDate ? 'Set Exact Time' : 'Past Watch'}
+                                                </button>
                                             </div>
 
                                             {hasWatchDate ? (
@@ -1296,19 +1382,10 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="flex items-center justify-between p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl animate-fade-in">
-                                                    <div className="flex items-center gap-2.5 min-w-0">
-                                                        <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
-                                                            <span className="material-symbols-outlined text-[18px]">history_toggle_off</span>
-                                                        </div>
-                                                        <div className="flex flex-col min-w-0">
-                                                            <span className="text-xs font-black text-amber-950">
-                                                                Past viewing without exact time
-                                                            </span>
-                                                            <span className="text-[11px] font-medium text-amber-800/80 truncate">
-                                                                Logged in Hive history without a specific screening date
-                                                            </span>
-                                                        </div>
+                                                <div className="flex items-center justify-between px-3 py-2 bg-[#FFF9F0] border border-[#ffb700]/25 rounded-xl animate-fade-in">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-[#2D2926]/70">
+                                                        <span className="material-symbols-outlined text-[17px] text-amber-600">history_toggle_off</span>
+                                                        <span>Past viewing: <strong className="text-[#2D2926]">No exact time</strong></span>
                                                     </div>
                                                     <button
                                                         type="button"
@@ -1316,9 +1393,81 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                             setHasWatchDate(true);
                                                             setFormData((prev) => ({ ...prev, watchedAt: toLocalISOString(new Date()) }));
                                                         }}
-                                                        className="px-3 py-1 bg-[#ffb700] text-[#2D2926] rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 active:scale-95 transition-all cursor-pointer shrink-0 ml-2 shadow-xs"
+                                                        className="px-2.5 py-1 bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 cursor-pointer shadow-xs"
                                                     >
-                                                        Set Date
+                                                        + Set Time
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Started Watching Section */}
+                                        <div className="flex flex-col gap-2 p-3 bg-white/90 border border-[#ffb700]/25 rounded-2xl">
+                                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="material-symbols-outlined text-[18px] text-[#ffb700]">
+                                                        play_circle
+                                                    </span>
+                                                    <span className="text-xs font-black uppercase tracking-wider text-[#2D2926]">
+                                                        Started Watching
+                                                    </span>
+                                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-900 border border-amber-500/20">
+                                                        Optional
+                                                    </span>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (hasStartedDate) {
+                                                            setHasStartedDate(false);
+                                                            setStartedAtStr('');
+                                                        } else {
+                                                            setHasStartedDate(true);
+                                                            setStartedAtStr(formData.watchedAt || toLocalISOString(new Date()));
+                                                        }
+                                                    }}
+                                                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                                                        !hasStartedDate
+                                                            ? 'bg-amber-500/20 text-amber-950 border-amber-500/40'
+                                                            : 'bg-[#FFF9F0] text-[#2D2926]/70 border-[#ffb700]/30 hover:bg-[#ffb700]/20'
+                                                    }`}
+                                                >
+                                                    {!hasStartedDate ? 'Set Exact Time' : "Don't know start"}
+                                                </button>
+                                            </div>
+
+                                            {hasStartedDate ? (
+                                                <HiveDatePicker
+                                                    value={startedAtStr}
+                                                    fieldTitle="Start Date & Time"
+                                                    icon="play_circle"
+                                                    emptyText="Start date not set"
+                                                    onChange={(val: string) => {
+                                                        if (!val) {
+                                                            setHasStartedDate(false);
+                                                            setStartedAtStr('');
+                                                        } else {
+                                                            setHasStartedDate(true);
+                                                            setStartedAtStr(val);
+                                                        }
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-between px-3 py-2 bg-[#FFF9F0] border border-[#ffb700]/25 rounded-xl animate-fade-in">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-[#2D2926]/70">
+                                                        <span className="material-symbols-outlined text-[17px] text-amber-600">help_outline</span>
+                                                        <span>Started: <strong className="text-[#2D2926]">Unknown / Not specified</strong></span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setHasStartedDate(true);
+                                                            setStartedAtStr(formData.watchedAt || toLocalISOString(new Date()));
+                                                        }}
+                                                        className="px-2.5 py-1 bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 cursor-pointer shadow-xs"
+                                                    >
+                                                        + Add Start Date
                                                     </button>
                                                 </div>
                                             )}
@@ -1327,7 +1476,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                 ) : (
                                     /* Currently Watching Controls */
                                     <div className="flex flex-col gap-3">
-                                        <div className="flex flex-col gap-2.5 p-3.5 bg-white/70 border border-[#e5e5e5] rounded-2xl">
+                                        <div className="flex flex-col gap-2 p-3 bg-white/90 border border-[#ffb700]/25 rounded-2xl">
                                             <div className="flex items-center justify-between gap-2 flex-wrap">
                                                 <div className="flex items-center gap-2">
                                                     <span className="material-symbols-outlined text-[18px] text-emerald-600">
@@ -1336,61 +1485,34 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     <span className="text-xs font-black uppercase tracking-wider text-[#2D2926]">
                                                         Started Watching Date
                                                     </span>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 flex items-center gap-1">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 flex items-center gap-1">
                                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                                         Active
                                                     </span>
                                                 </div>
 
-                                                {/* Quick Date Actions for Currently Watching */}
-                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (hasStartedDate) {
+                                                            setHasStartedDate(false);
+                                                            setStartedAtStr('');
+                                                            setFormData((prev) => ({ ...prev, watchedAt: '' }));
+                                                        } else {
                                                             const nowStr = toLocalISOString(new Date());
                                                             setHasStartedDate(true);
                                                             setStartedAtStr(nowStr);
                                                             setFormData((prev) => ({ ...prev, watchedAt: nowStr }));
-                                                        }}
-                                                        className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
-                                                    >
-                                                        Reset to Now
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const yesterday = toLocalISOString(new Date(Date.now() - 86400000));
-                                                            setHasStartedDate(true);
-                                                            setStartedAtStr(yesterday);
-                                                            setFormData((prev) => ({ ...prev, watchedAt: yesterday }));
-                                                        }}
-                                                        className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg bg-[#FFF9F0] border border-[#ffb700]/30 text-[#2D2926] hover:bg-[#ffb700]/20 transition-all cursor-pointer"
-                                                    >
-                                                        Yesterday
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            if (hasStartedDate) {
-                                                                setHasStartedDate(false);
-                                                                setStartedAtStr('');
-                                                                setFormData((prev) => ({ ...prev, watchedAt: '' }));
-                                                            } else {
-                                                                const nowStr = toLocalISOString(new Date());
-                                                                setHasStartedDate(true);
-                                                                setStartedAtStr(nowStr);
-                                                                setFormData((prev) => ({ ...prev, watchedAt: nowStr }));
-                                                            }
-                                                        }}
-                                                        className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
-                                                            !hasStartedDate
-                                                                ? 'bg-amber-500/20 text-amber-900 border-amber-500/40'
-                                                                : 'bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200'
-                                                        }`}
-                                                    >
-                                                        {!hasStartedDate ? 'Set Exact Date' : "Don't know start"}
-                                                    </button>
-                                                </div>
+                                                        }
+                                                    }}
+                                                    className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                                                        !hasStartedDate
+                                                            ? 'bg-amber-500/20 text-amber-950 border-amber-500/40'
+                                                            : 'bg-[#FFF9F0] text-[#2D2926]/70 border-[#ffb700]/30 hover:bg-[#ffb700]/20'
+                                                    }`}
+                                                >
+                                                    {!hasStartedDate ? 'Set Exact Time' : "Don't know start"}
+                                                </button>
                                             </div>
 
                                             {hasStartedDate ? (
@@ -1398,6 +1520,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     value={startedAtStr || formData.watchedAt}
                                                     fieldTitle="Start Date & Time"
                                                     icon="play_circle"
+                                                    emptyText="Start date not set"
                                                     onChange={(val: string) => {
                                                         if (!val) {
                                                             setHasStartedDate(false);
@@ -1411,19 +1534,10 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="flex items-center justify-between p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl animate-fade-in">
-                                                    <div className="flex items-center gap-2.5 min-w-0">
-                                                        <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
-                                                            <span className="material-symbols-outlined text-[18px]">help_outline</span>
-                                                        </div>
-                                                        <div className="flex flex-col min-w-0">
-                                                            <span className="text-xs font-black text-amber-950">
-                                                                Don't know when I started watching
-                                                            </span>
-                                                            <span className="text-[11px] font-medium text-amber-800/80 truncate">
-                                                                Tracking progress without an exact start date · Edit anytime
-                                                            </span>
-                                                        </div>
+                                                <div className="flex items-center justify-between px-3 py-2 bg-[#FFF9F0] border border-[#ffb700]/25 rounded-xl animate-fade-in">
+                                                    <div className="flex items-center gap-2 text-xs font-bold text-[#2D2926]/70">
+                                                        <span className="material-symbols-outlined text-[17px] text-amber-600">help_outline</span>
+                                                        <span>Started: <strong className="text-[#2D2926]">Unknown / In progress</strong></span>
                                                     </div>
                                                     <button
                                                         type="button"
@@ -1433,259 +1547,22 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                             setStartedAtStr(nowStr);
                                                             setFormData((prev) => ({ ...prev, watchedAt: nowStr }));
                                                         }}
-                                                        className="px-3 py-1 bg-[#ffb700] text-[#2D2926] rounded-xl text-xs font-black uppercase tracking-wider hover:bg-amber-400 active:scale-95 transition-all cursor-pointer shrink-0 ml-2 shadow-xs"
+                                                        className="px-2.5 py-1 bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] text-[10px] font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 cursor-pointer shadow-xs"
                                                     >
-                                                        Set Date
+                                                        + Set Time
                                                     </button>
                                                 </div>
                                             )}
                                         </div>
 
                                         <div className="p-3 bg-emerald-500/[0.08] border border-emerald-500/20 rounded-2xl flex items-center gap-2.5">
-                                            <span className="material-symbols-outlined text-[20px] text-emerald-600 shrink-0">info</span>
+                                            <span className="material-symbols-outlined text-[19px] text-emerald-600 shrink-0">info</span>
                                             <p className="text-[11px] font-medium text-emerald-950 leading-relaxed">
-                                                Added to your <strong>Currently Watching</strong> queue. Rating and review are optional while watching — you can complete them anytime!
+                                                Added to your <strong>Currently Watching</strong> queue. Rating and review are optional while watching.
                                             </p>
                                         </div>
                                     </div>
                                 )}
-
-                                {/* Dividing Line with Title */}
-                                <div className="flex items-center gap-2 pt-1 pb-0.5">
-                                    <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#ffb700]/30 to-transparent" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.16em] text-[#2D2926]/50 whitespace-nowrap">
-                                        Watch Options
-                                    </span>
-                                    <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#ffb700]/30 to-transparent" />
-                                </div>
-
-                                <div className="flex flex-col gap-2.5">
-                                    {/* Already Watched Notice & Previous Logged Item Card */}
-                                    {hasWatchedBefore && (
-                                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex flex-col gap-2.5 animate-fade-in shadow-xs">
-                                            <div className="flex items-start gap-2.5">
-                                                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0">
-                                                    <span className="material-symbols-outlined text-[20px]">history</span>
-                                                </div>
-                                                <div className="flex flex-col gap-0.5 min-w-0">
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <h4 className="text-xs font-black text-amber-950 uppercase tracking-wide">
-                                                            You already watched this title!
-                                                        </h4>
-                                                        <span className="bg-amber-500/25 text-amber-800 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
-                                                            Rewatch Required
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-[11px] font-bold text-amber-900/80 leading-relaxed">
-                                                        Rewatch is enabled by default to record this viewing, creating another entry in your Hive history.
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {/* Previous Logged Item Card */}
-                                            {previousEntry && (
-                                                <div className="bg-white/95 border border-amber-200/60 rounded-xl p-3 flex flex-col gap-2 shadow-xs">
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="text-[10px] font-black uppercase tracking-widest text-[#2D2926]/40">
-                                                            Previously Logged Watch
-                                                        </div>
-                                                        {!isEditing && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleSwitchToEditExisting(previousEntry)}
-                                                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#ffb700] hover:bg-[#e59700] text-[#2D2926] font-extrabold text-[10px] rounded-lg transition-colors cursor-pointer"
-                                                            >
-                                                                <span className="material-symbols-outlined text-[13px]">edit_note</span>
-                                                                Edit This Instead
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center justify-between border-b border-amber-100 pb-2">
-                                                        <div className="flex items-center gap-1.5 text-amber-900 text-[11px] font-extrabold">
-                                                            <span className="material-symbols-outlined text-[15px]">calendar_today</span>
-                                                            <span>
-                                                                Watched on {previousEntry.watchedAt ? new Date(previousEntry.watchedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Previous session'}
-                                                            </span>
-                                                        </div>
-                                                        {previousEntry.rating ? (
-                                                            <div className="flex items-center gap-1 bg-amber-100/80 text-amber-950 px-2 py-0.5 rounded-md text-[11px] font-black">
-                                                                <span className="material-symbols-outlined text-amber-500 text-[13px]">star</span>
-                                                                <span>{previousEntry.rating}/10</span>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-[10px] font-bold text-stone-400">Unrated</span>
-                                                        )}
-                                                    </div>
-
-                                                    {previousEntry.watchLocation && (
-                                                        <div className="flex items-center gap-1.5 text-stone-600 text-[11px] font-semibold">
-                                                            <span className="material-symbols-outlined text-[13px] text-amber-600">location_on</span>
-                                                            <span>Watched at <strong>{previousEntry.watchLocation}</strong></span>
-                                                        </div>
-                                                    )}
-
-                                                    {previousEntry.review && (
-                                                        <div className="text-[11px] font-medium text-stone-700 italic bg-amber-50/50 rounded-lg p-2 border-l-2 border-amber-400">
-                                                            "{previousEntry.review}"
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Rewatch Toggle Card */}
-                                    <label
-                                        className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
-                                            formData.isRewatch
-                                                ? 'bg-amber-500/[0.07] border-[#ffb700] shadow-sm'
-                                                : 'bg-white/80 border-[#2D2926]/12 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0 pr-2">
-                                            <div
-                                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                                                    formData.isRewatch
-                                                        ? 'bg-[#ffb700] text-[#2D2926] font-black'
-                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#ffb700]'
-                                                }`}
-                                            >
-                                                <span className="material-symbols-outlined text-[18px]">replay</span>
-                                            </div>
-                                            <div className="flex flex-col min-w-0">
-                                                <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
-                                                    Rewatch
-                                                </span>
-                                                <span className="text-[10px] font-medium text-[#2D2926]/50 truncate">
-                                                    {hasWatchedBefore
-                                                        ? 'Rewatch enabled for title already in Hive'
-                                                        : 'Repeat viewing of this movie or show'}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2.5 shrink-0">
-                                            <span
-                                                className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
-                                                    formData.isRewatch
-                                                        ? 'bg-[#ffb700] text-[#2D2926] font-extrabold border-[#ffb700] shadow-xs'
-                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/40 border-[#2D2926]/10'
-                                                }`}
-                                            >
-                                                {formData.isRewatch ? 'YES' : 'NO'}
-                                            </span>
-                                            <div className="relative inline-flex items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.isRewatch}
-                                                    onChange={(e) => {
-                                                        if (hasWatchedBefore && !e.target.checked) {
-                                                            setError('You already watched this title. Rewatch must be enabled to log a duplicate entry.');
-                                                            return;
-                                                        }
-                                                        setError(null);
-                                                        setFormData((prev) => ({ ...prev, isRewatch: e.target.checked }));
-                                                    }}
-                                                    className="sr-only"
-                                                />
-                                                <div
-                                                    className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
-                                                        formData.isRewatch
-                                                            ? 'bg-[#ffb700] border-[#ffb700]'
-                                                            : 'bg-[#2D2926]/15 border-[#2D2926]/20'
-                                                    }`}
-                                                />
-                                                <div
-                                                    className={`absolute top-[2px] left-[2px] w-5 h-5 rounded-full bg-white shadow-md border border-[#2D2926]/10 transition-transform duration-200 ${
-                                                        formData.isRewatch ? 'translate-x-5' : 'translate-x-0'
-                                                    }`}
-                                                />
-                                            </div>
-                                        </div>
-                                    </label>
-
-                                    {/* Post to Feed Toggle Card */}
-                                    <label
-                                        className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-200 cursor-pointer group ${
-                                            formData.postToFeed
-                                                ? 'bg-amber-500/[0.07] border-[#ffb700] shadow-sm'
-                                                : 'bg-white/80 border-[#2D2926]/12 hover:border-[#ffb700]/40 hover:bg-[#FFF9F0]/40'
-                                        }`}
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0 pr-2">
-                                            <div
-                                                className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
-                                                    formData.postToFeed
-                                                        ? 'bg-[#ffb700] text-[#2D2926] font-black'
-                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/50 group-hover:text-[#ffb700]'
-                                                }`}
-                                            >
-                                                <span className="material-symbols-outlined text-[18px]">campaign</span>
-                                            </div>
-                                            <div className="flex flex-col min-w-0">
-                                                <span className="font-extrabold text-[#2D2926] text-xs uppercase tracking-wider group-hover:text-[#ffb700] transition-colors">
-                                                    Post to Feed
-                                                </span>
-                                                <span className="text-[10px] font-medium text-[#2D2926]/50 truncate">
-                                                    Share this watch log to your community feed
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-2.5 shrink-0">
-                                            <span
-                                                className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md border transition-all duration-200 ${
-                                                    formData.postToFeed
-                                                        ? 'bg-[#ffb700] text-[#2D2926] font-extrabold border-[#ffb700] shadow-xs'
-                                                        : 'bg-[#2D2926]/5 text-[#2D2926]/40 border-[#2D2926]/10'
-                                                }`}
-                                            >
-                                                {formData.postToFeed ? 'YES' : 'NO'}
-                                            </span>
-                                            <div className="relative inline-flex items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.postToFeed ?? true}
-                                                    onChange={(e) => setFormData((prev) => ({ ...prev, postToFeed: e.target.checked }))}
-                                                    className="sr-only"
-                                                />
-                                                <div
-                                                    className={`w-11 h-6 rounded-full border transition-colors duration-200 shadow-inner ${
-                                                        formData.postToFeed
-                                                            ? 'bg-[#ffb700] border-[#ffb700]'
-                                                            : 'bg-[#2D2926]/15 border-[#2D2926]/20'
-                                                    }`}
-                                                />
-                                                <div
-                                                    className={`absolute top-[2px] left-[2px] w-5 h-5 rounded-full bg-white shadow-md border border-[#2D2926]/10 transition-transform duration-200 ${
-                                                        formData.postToFeed ? 'translate-x-5' : 'translate-x-0'
-                                                    }`}
-                                                />
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ── Right Column: Rich Review, Colorful Locations, Tags (7/12 cols) ── */}
-                        <div className="lg:col-span-7 flex flex-col gap-5 bg-[#FFF9F0]/25 p-5 sm:p-5.5 md:p-6.5 rounded-[24px] border border-[#ffb700]/10 backdrop-blur-sm">
-
-                            {/* Rich Notebook Review */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Write a Review or Log Thoughts</label>
-                                <div className="relative">
-                                    <textarea
-                                        value={formData.review || ''}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, review: e.target.value }))}
-                                        className="w-full px-4 py-3 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white focus:ring-4 focus:ring-[#ffb700]/10 rounded-2xl text-[#2D2926] text-sm leading-relaxed transition-all min-h-[140px]"
-                                        rows={4}
-                                        placeholder="Pour your cinematic critique here... how was the cinematography, acting, writing, or sound design?"
-                                    />
-                                    <span className="absolute bottom-2.5 right-3 text-[9px] font-black text-[#2D2926]/30 uppercase tracking-wider">
-                                        {(formData.review || '').length} chars
-                                    </span>
-                                </div>
                             </div>
 
                             {/* Where did you watch it? - Compact Brand Pills */}
@@ -1745,157 +1622,6 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                         placeholder="Or type custom location (e.g. IMAX Laser, Flight, Living Room)..."
                                     />
                                 </div>
-                            </div>
-
-                            {/* Tags Input System */}
-                            <div className="flex flex-col gap-2.5">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Cinematic Tags</label>
-                                <div className="relative flex items-center">
-                                    <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">sell</span>
-                                    <input
-                                        type="text"
-                                        value={tagInput}
-                                        onChange={(e) => setTagInput(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault();
-                                                handleAddTag();
-                                            }
-                                        }}
-                                        className="w-full pl-9 pr-20 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
-                                        placeholder="Add tag (e.g. masterpiece, visual-splendor) and press Enter..."
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleAddTag}
-                                        className="absolute right-2 px-3 py-1 bg-[#ffb700] hover:bg-[#ffb700]/90 text-[#2D2926] rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
-                                    >
-                                        Add +
-                                    </button>
-                                </div>
-
-                                {formData.tags && formData.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1.5 mt-1">
-                                        {formData.tags.map((tag) => (
-                                            <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/15 border border-[#ffb700]/30 text-[#2D2926] px-2.5 py-1.5 rounded-lg text-xs font-black transition-colors">
-                                                #{tag}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleRemoveTag(tag)}
-                                                    className="w-4 h-4 flex items-center justify-center rounded-full bg-[#2D2926]/10 hover:bg-red-500 hover:text-white text-[#2D2926] transition-colors ml-1 focus:outline-none text-[8px] font-black cursor-pointer"
-                                                    aria-label={`Remove tag ${tag}`}
-                                                >
-                                                    ✕
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Suggested By Friend Selector */}
-                            <div className="flex flex-col gap-2.5">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50 flex items-center justify-between">
-                                    <span>Suggested By</span>
-                                    <span className="text-[#ffb700] text-[9px] font-bold">Tag a friend who recommended this</span>
-                                </label>
-                                
-                                {suggestedUser ? (
-                                    <div className="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200/80 rounded-2xl">
-                                        <div className="flex items-center gap-2.5">
-                                            <Avatar 
-                                                src={suggestedUser.profilePictureUrl} 
-                                                name={suggestedUser.displayName || suggestedUser.username} 
-                                                size="xs" 
-                                            />
-                                            <div className="flex flex-col">
-                                                <span className="text-xs font-black text-[#2D2926]">{suggestedUser.displayName || suggestedUser.username}</span>
-                                                <span className="text-[10px] text-amber-700 font-bold">@{suggestedUser.username}</span>
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setSuggestedUser(null);
-                                                setFormData(prev => ({ ...prev, suggestedByUserId: null }));
-                                            }}
-                                            className="text-xs text-amber-700 font-bold hover:text-red-500 px-2 py-1 rounded-lg hover:bg-amber-100/60 transition-colors"
-                                        >
-                                            Clear
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="relative" ref={suggestorRef}>
-                                        <div className="relative flex items-center">
-                                            <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">lightbulb</span>
-                                            <input
-                                                type="text"
-                                                value={suggestorSearchQuery}
-                                                onFocus={() => {
-                                                    setShowSuggestorPicker(true);
-                                                    if (suggestorResults.length === 0) fetchConnections('');
-                                                }}
-                                                onChange={(e) => {
-                                                    setSuggestorSearchQuery(e.target.value);
-                                                    setShowSuggestorPicker(true);
-                                                    fetchConnections(e.target.value);
-                                                }}
-                                                className="w-full pl-9 pr-4 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
-                                                placeholder="Search follower username to tag suggestor..."
-                                            />
-                                        </div>
-
-                                        {showSuggestorPicker && (
-                                            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
-                                                {isSearchingSuggestors ? (
-                                                    <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading followers...</div>
-                                                ) : suggestorResults.length === 0 ? (
-                                                    <div className="p-3.5 text-center flex flex-col items-center gap-1.5">
-                                                        <span className="material-symbols-outlined text-slate-400 text-lg">group_off</span>
-                                                        <p className="text-xs text-slate-500 font-bold">
-                                                            {suggestorSearchQuery ? `No followers matching "${suggestorSearchQuery}"` : "No friends in your hive yet"}
-                                                        </p>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setShowSuggestorPicker(false);
-                                                                navigate('/watch-hive/search?tab=people');
-                                                            }}
-                                                            className="text-[11px] font-black text-[#ffb700] hover:underline flex items-center gap-1 cursor-pointer"
-                                                        >
-                                                            <span className="material-symbols-outlined text-xs">person_search</span>
-                                                            Find friends to follow
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    suggestorResults.map(u => (
-                                                        <button
-                                                            key={u.id}
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setSuggestedUser(u);
-                                                                setFormData(prev => ({ ...prev, suggestedByUserId: u.id }));
-                                                                setShowSuggestorPicker(false);
-                                                                setSuggestorSearchQuery('');
-                                                            }}
-                                                            className="w-full flex items-center gap-2.5 p-2 hover:bg-[#ffb700]/10 rounded-xl transition-colors text-left"
-                                                        >
-                                                            <Avatar 
-                                                                src={u.profilePictureUrl} 
-                                                                name={u.displayName || u.username} 
-                                                                size="xxs" 
-                                                            />
-                                                            <div className="flex flex-col min-w-0 flex-1">
-                                                                <span className="text-xs font-bold text-[#2D2926] truncate">{u.displayName || u.username}</span>
-                                                                <span className="text-[9px] text-[#2D2926]/40 font-bold truncate">@{u.username}</span>
-                                                            </div>
-                                                        </button>
-                                                    ))
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
                             </div>
 
                             {/* Watched With (Group Watch / Friends Tagging) */}
@@ -2023,6 +1749,159 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                                     );
                                                 })
                                             )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Suggested By & Tags Section */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                                {/* Suggested By Friend Selector */}
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">
+                                        Suggested By
+                                    </label>
+                                    
+                                    {suggestedUser ? (
+                                        <div className="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200/80 rounded-2xl">
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <Avatar 
+                                                    src={suggestedUser.profilePictureUrl} 
+                                                    name={suggestedUser.displayName || suggestedUser.username} 
+                                                    size="xs" 
+                                                />
+                                                <div className="flex flex-col min-w-0">
+                                                    <span className="text-xs font-black text-[#2D2926] truncate">{suggestedUser.displayName || suggestedUser.username}</span>
+                                                    <span className="text-[9px] text-amber-700 font-bold truncate">@{suggestedUser.username}</span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setSuggestedUser(null);
+                                                    setFormData(prev => ({ ...prev, suggestedByUserId: null }));
+                                                }}
+                                                className="text-xs text-amber-700 font-bold hover:text-red-500 px-2 py-1 rounded-lg hover:bg-amber-100/60 transition-colors cursor-pointer shrink-0"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="relative" ref={suggestorRef}>
+                                            <div className="relative flex items-center">
+                                                <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">lightbulb</span>
+                                                <input
+                                                    type="text"
+                                                    value={suggestorSearchQuery}
+                                                    onFocus={() => {
+                                                        setShowSuggestorPicker(true);
+                                                        if (suggestorResults.length === 0) fetchConnections('');
+                                                    }}
+                                                    onChange={(e) => {
+                                                        setSuggestorSearchQuery(e.target.value);
+                                                        setShowSuggestorPicker(true);
+                                                        fetchConnections(e.target.value);
+                                                    }}
+                                                    className="w-full pl-9 pr-3 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
+                                                    placeholder="Search follower..."
+                                                />
+                                            </div>
+
+                                            {showSuggestorPicker && (
+                                                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
+                                                    {isSearchingSuggestors ? (
+                                                        <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading followers...</div>
+                                                    ) : suggestorResults.length === 0 ? (
+                                                        <div className="p-3.5 text-center flex flex-col items-center gap-1.5">
+                                                            <span className="material-symbols-outlined text-slate-400 text-lg">group_off</span>
+                                                            <p className="text-xs text-slate-500 font-bold">
+                                                                {suggestorSearchQuery ? `No followers matching "${suggestorSearchQuery}"` : "No friends in your hive yet"}
+                                                            </p>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setShowSuggestorPicker(false);
+                                                                    navigate('/watch-hive/search?tab=people');
+                                                                }}
+                                                                className="text-[11px] font-black text-[#ffb700] hover:underline flex items-center gap-1 cursor-pointer"
+                                                            >
+                                                                <span className="material-symbols-outlined text-xs">person_search</span>
+                                                                Find friends
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        suggestorResults.map(u => (
+                                                            <button
+                                                                key={u.id}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSuggestedUser(u);
+                                                                    setFormData(prev => ({ ...prev, suggestedByUserId: u.id }));
+                                                                    setShowSuggestorPicker(false);
+                                                                    setSuggestorSearchQuery('');
+                                                                }}
+                                                                className="w-full flex items-center gap-2.5 p-2 hover:bg-[#ffb700]/10 rounded-xl transition-colors text-left cursor-pointer"
+                                                            >
+                                                                <Avatar 
+                                                                    src={u.profilePictureUrl} 
+                                                                    name={u.displayName || u.username} 
+                                                                    size="xxs" 
+                                                                />
+                                                                <div className="flex flex-col min-w-0 flex-1">
+                                                                    <span className="text-xs font-bold text-[#2D2926] truncate">{u.displayName || u.username}</span>
+                                                                    <span className="text-[9px] text-[#2D2926]/40 font-bold truncate">@{u.username}</span>
+                                                                </div>
+                                                            </button>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Cinematic Tags */}
+                                <div className="flex flex-col gap-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2D2926]/50">Cinematic Tags</label>
+                                    <div className="relative flex items-center">
+                                        <span className="material-symbols-outlined absolute left-3 text-[#ffb700]/50 text-[18px]">sell</span>
+                                        <input
+                                            type="text"
+                                            value={tagInput}
+                                            onChange={(e) => setTagInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleAddTag();
+                                                }
+                                            }}
+                                            className="w-full pl-9 pr-14 py-2.5 bg-white/80 border border-[#ffb700]/20 outline-none focus:border-[#ffb700] focus:bg-white rounded-xl text-xs text-[#2D2926] transition-all"
+                                            placeholder="Tag + Enter..."
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleAddTag}
+                                            className="absolute right-1.5 px-2 py-1 bg-[#ffb700] hover:bg-[#ffb700]/90 text-[#2D2926] rounded-lg text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+
+                                    {formData.tags && formData.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-0.5">
+                                            {formData.tags.map((tag) => (
+                                                <span key={tag} className="flex items-center gap-1 bg-[#ffb700]/15 border border-[#ffb700]/30 text-[#2D2926] px-2 py-1 rounded-lg text-[11px] font-black transition-colors">
+                                                    #{tag}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveTag(tag)}
+                                                        className="w-3.5 h-3.5 flex items-center justify-center rounded-full bg-[#2D2926]/10 hover:bg-red-500 hover:text-white text-[#2D2926] transition-colors ml-0.5 focus:outline-none text-[8px] font-black cursor-pointer"
+                                                        aria-label={`Remove tag ${tag}`}
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </span>
+                                            ))}
                                         </div>
                                     )}
                                 </div>
