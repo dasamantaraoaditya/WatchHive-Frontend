@@ -144,14 +144,21 @@ export const WatchlistProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (!watchlist || !isAuthenticated) return;
 
         const previousItems = watchlist.items || [];
+        const isPresent = previousItems.some(i => Number(i.tmdbId) === Number(tmdbId));
+        if (!isPresent) return;
+
         setWatchlist({
             ...watchlist,
-            items: (watchlist.items || []).filter(i => i.tmdbId !== tmdbId)
+            items: previousItems.filter(i => Number(i.tmdbId) !== Number(tmdbId))
         });
 
         try {
             await listsApi.removeFromWatchlist(watchlist.id, tmdbId);
-        } catch (error) {
+        } catch (error: any) {
+            // Idempotent: If item was already absent on the server (404), treat as success
+            if (error?.response?.status === 404) {
+                return;
+            }
             console.error('Failed to remove from watchlist', error);
             // Revert
             setWatchlist(prev => prev ? { ...prev, items: previousItems } : null);
