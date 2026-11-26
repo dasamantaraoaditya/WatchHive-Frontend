@@ -533,9 +533,9 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         }
     }, [user?.id]);
 
-    // ── Close search results when clicking outside ──
+    // ── Close search results & pickers when clicking outside or pressing Escape ──
     useEffect(() => {
-        const handler = (e: MouseEvent) => {
+        const handler = (e: MouseEvent | TouchEvent) => {
             if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
                 setShowResults(false);
             }
@@ -546,9 +546,24 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                 setShowBuddyPicker(false);
             }
         };
+
+        const keyHandler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                if (showResults) setShowResults(false);
+                if (showSuggestorPicker) setShowSuggestorPicker(false);
+                if (showBuddyPicker) setShowBuddyPicker(false);
+            }
+        };
+
         document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
+        document.addEventListener('touchstart', handler);
+        window.addEventListener('keydown', keyHandler);
+        return () => {
+            document.removeEventListener('mousedown', handler);
+            document.removeEventListener('touchstart', handler);
+            window.removeEventListener('keydown', keyHandler);
+        };
+    }, [showResults, showSuggestorPicker, showBuddyPicker]);
 
     const doSearch = useCallback(async (q: string) => {
         if (q.length < 2) {
@@ -1723,15 +1738,40 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                     </div>
 
                                     {showBuddyPicker && (
-                                        <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-52 overflow-y-auto p-1.5 flex flex-col gap-1">
+                                        <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-56 overflow-y-auto p-1.5 flex flex-col gap-1 animate-fade-in">
+                                            {/* Header with Close Button */}
+                                            <div className="flex items-center justify-between px-2.5 py-1 border-b border-slate-100 mb-0.5">
+                                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                                                    Tag Friends
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowBuddyPicker(false)}
+                                                    className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-[#2D2926] transition-colors text-xs cursor-pointer font-bold"
+                                                    title="Close list"
+                                                    aria-label="Close list"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+
                                             {isSearchingBuddies ? (
                                                 <div className="p-3 text-center text-xs text-slate-400 font-bold">Searching friends...</div>
                                             ) : buddyResults.length === 0 ? (
-                                                <div className="p-3.5 text-center flex flex-col items-center gap-1.5">
-                                                    <span className="material-symbols-outlined text-slate-400 text-lg">person_search</span>
-                                                    <p className="text-xs text-slate-500 font-bold">
+                                                <div className="p-3.5 text-center flex flex-col items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                                                        <span className="material-symbols-outlined text-base">person_search</span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-600 font-bold">
                                                         {buddySearchQuery ? `No friends matching "${buddySearchQuery}"` : "No friends found in your hive"}
                                                     </p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowBuddyPicker(false)}
+                                                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-[#2D2926] rounded-xl text-xs font-black transition-colors cursor-pointer"
+                                                    >
+                                                        Dismiss
+                                                    </button>
                                                 </div>
                                             ) : (
                                                 buddyResults.map(u => {
@@ -1827,26 +1867,53 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             </div>
 
                                             {showSuggestorPicker && (
-                                                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
+                                                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#ffb700]/30 rounded-2xl shadow-xl z-50 max-h-56 overflow-y-auto p-1.5 flex flex-col gap-1 animate-fade-in">
+                                                    {/* Header with Close Button */}
+                                                    <div className="flex items-center justify-between px-2.5 py-1 border-b border-slate-100 mb-0.5">
+                                                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                                                            Followers
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowSuggestorPicker(false)}
+                                                            className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-[#2D2926] transition-colors text-xs cursor-pointer font-bold"
+                                                            title="Close list"
+                                                            aria-label="Close list"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+
                                                     {isSearchingSuggestors ? (
                                                         <div className="p-3 text-center text-xs text-slate-400 font-bold">Loading followers...</div>
                                                     ) : suggestorResults.length === 0 ? (
-                                                        <div className="p-3.5 text-center flex flex-col items-center gap-1.5">
-                                                            <span className="material-symbols-outlined text-slate-400 text-lg">group_off</span>
-                                                            <p className="text-xs text-slate-500 font-bold">
+                                                        <div className="p-3.5 text-center flex flex-col items-center gap-2">
+                                                            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                                                                <span className="material-symbols-outlined text-base">group_off</span>
+                                                            </div>
+                                                            <p className="text-xs text-slate-600 font-bold">
                                                                 {suggestorSearchQuery ? `No followers matching "${suggestorSearchQuery}"` : "No friends in your hive yet"}
                                                             </p>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setShowSuggestorPicker(false);
-                                                                    navigate('/watch-hive/search?tab=people');
-                                                                }}
-                                                                className="text-[11px] font-black text-[#ffb700] hover:underline flex items-center gap-1 cursor-pointer"
-                                                            >
-                                                                <span className="material-symbols-outlined text-xs">person_search</span>
-                                                                Find friends
-                                                            </button>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setShowSuggestorPicker(false)}
+                                                                    className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-[#2D2926] rounded-xl text-xs font-black transition-colors cursor-pointer"
+                                                                >
+                                                                    Dismiss
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setShowSuggestorPicker(false);
+                                                                        navigate('/watch-hive/search?tab=people');
+                                                                    }}
+                                                                    className="px-3 py-1 bg-[#ffb700] hover:bg-[#ffc83b] text-[#2D2926] rounded-xl text-xs font-black transition-colors flex items-center gap-1 cursor-pointer"
+                                                                >
+                                                                    <span className="material-symbols-outlined text-xs">person_search</span>
+                                                                    Find friends
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     ) : (
                                                         suggestorResults.map(u => (

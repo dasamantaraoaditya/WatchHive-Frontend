@@ -84,7 +84,8 @@ export const userService = {
     },
 
     async updatePreferences(preferences: any, hasCompletedOnboarding = true): Promise<User> {
-        return apiClient.put<User>('/users/me/preferences', { preferences, hasCompletedOnboarding });
+        const response: any = await apiClient.put('/users/me/preferences', { preferences, hasCompletedOnboarding });
+        return response?.user || response;
     },
 
     async deleteAccount(): Promise<void> {
