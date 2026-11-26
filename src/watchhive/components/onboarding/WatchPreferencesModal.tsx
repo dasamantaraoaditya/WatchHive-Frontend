@@ -129,8 +129,14 @@ export const WatchPreferencesModal: React.FC<WatchPreferencesModalProps> = ({
                   };
 
             const updatedUser = await userService.updatePreferences(newPreferences, true);
+            const resolvedUser = (updatedUser as any)?.user || updatedUser;
             if (updateUser) {
-                updateUser(updatedUser);
+                updateUser({
+                    ...(user || {}),
+                    ...resolvedUser,
+                    hasCompletedOnboarding: true,
+                    preferences: newPreferences,
+                });
             }
 
             window.dispatchEvent(new CustomEvent('watchhive:preferences-updated', { detail: newPreferences }));

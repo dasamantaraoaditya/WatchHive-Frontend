@@ -48,6 +48,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const suggestorRef = useRef<HTMLDivElement>(null);
 
     // Sync initial user if provided
     useEffect(() => {
@@ -64,6 +65,43 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
             setShowUserDropdown(false);
         }
     }, [isOpen, initialSuggestedByUserId, initialSuggestedByUser]);
+
+    // Close user dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+            if (suggestorRef.current && !suggestorRef.current.contains(e.target as Node)) {
+                setShowUserDropdown(false);
+            }
+        };
+
+        if (showUserDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener('touchstart', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, [showUserDropdown]);
+
+    // Close user dropdown on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && showUserDropdown) {
+                e.stopPropagation();
+                setShowUserDropdown(false);
+            }
+        };
+
+        if (showUserDropdown) {
+            window.addEventListener('keydown', handleKeyDown, true);
+        }
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown, true);
+        };
+    }, [showUserDropdown]);
 
     const cachedFollowersRef = useRef<User[] | null>(null);
 
@@ -216,7 +254,7 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                             </button>
                         </div>
                     ) : (
-                        <div className="relative">
+                        <div className="relative" ref={suggestorRef}>
                             <div className="relative flex items-center">
                                 <span className="material-symbols-outlined absolute left-3 text-slate-400 text-lg select-none">
                                     person_search
@@ -227,48 +265,93 @@ export const AddToWatchlistModal: React.FC<AddToWatchlistModalProps> = ({
                                     onChange={handleSearchChange}
                                     onFocus={handleInputFocus}
                                     placeholder="Search follower who suggested this..."
-                                    className="w-full pl-9 pr-8 py-2.5 bg-black/5 border border-transparent focus:border-[#ffb700] rounded-xl text-xs font-medium text-[#2D2926] outline-none transition-all placeholder:text-slate-400"
+                                    className="w-full pl-9 pr-9 py-2.5 bg-black/5 border border-transparent focus:border-[#ffb700] rounded-xl text-xs font-medium text-[#2D2926] outline-none transition-all placeholder:text-slate-400"
                                 />
-                                {searchQuery && (
+                                {searchQuery ? (
                                     <button
                                         type="button"
                                         onClick={() => {
                                             setSearchQuery('');
                                             fetchUsers('');
                                         }}
-                                        className="absolute right-2.5 text-slate-400 hover:text-slate-600 text-xs"
+                                        className="absolute right-2.5 w-5 h-5 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 text-xs transition-colors cursor-pointer"
+                                        title="Clear search"
                                     >
                                         ✕
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowUserDropdown(!showUserDropdown)}
+                                        className="absolute right-2.5 text-slate-400 hover:text-slate-600 p-0.5 flex items-center justify-center cursor-pointer transition-colors"
+                                        title={showUserDropdown ? "Close list" : "Open list"}
+                                        aria-label={showUserDropdown ? "Close list" : "Open list"}
+                                    >
+                                        <span className={`material-symbols-outlined text-base transition-transform duration-200 ${showUserDropdown ? 'rotate-180' : ''}`}>
+                                            expand_more
+                                        </span>
                                     </button>
                                 )}
                             </div>
 
                             {/* Dropdown Results */}
                             {showUserDropdown && (
-                                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto p-1.5 flex flex-col gap-1">
+                                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-56 overflow-y-auto p-1.5 flex flex-col gap-1 animate-fade-in">
+                                    {/* Header with Close Button */}
+                                    <div className="flex items-center justify-between px-2.5 py-1 border-b border-slate-100 mb-0.5">
+                                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                                            Suggested by
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowUserDropdown(false)}
+                                            className="w-5 h-5 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 hover:text-[#2D2926] transition-colors text-xs cursor-pointer font-bold"
+                                            title="Close list"
+                                            aria-label="Close list"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+
                                     {isLoadingUsers ? (
                                         <div className="p-3 text-center text-xs text-slate-400 font-bold flex items-center justify-center gap-2">
                                             <BeeLoader size="mini" message="" />
                                             <span>Searching followers...</span>
                                         </div>
                                     ) : searchResults.length === 0 ? (
-                                        <div className="p-3 text-center flex flex-col items-center gap-1.5">
-                                            <span className="material-symbols-outlined text-slate-400 text-lg">group_off</span>
-                                            <p className="text-xs text-slate-500 font-bold">
-                                                {searchQuery ? `No followers matching "${searchQuery}"` : "No friends in your hive yet"}
-                                            </p>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setShowUserDropdown(false);
-                                                    onClose();
-                                                    navigate('/watch-hive/search?tab=people');
-                                                }}
-                                                className="text-[11px] font-black text-[#ffb700] hover:underline flex items-center gap-1 cursor-pointer"
-                                            >
-                                                <span className="material-symbols-outlined text-xs">person_search</span>
-                                                Find friends to follow
-                                            </button>
+                                        <div className="p-3.5 text-center flex flex-col items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                                                <span className="material-symbols-outlined text-base">group_off</span>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-[#2D2926] font-extrabold">
+                                                    {searchQuery ? `No followers matching "${searchQuery}"` : "No friends in your hive yet"}
+                                                </p>
+                                                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                                                    You can still add this title to your watchlist without a suggestion.
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowUserDropdown(false)}
+                                                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-[#2D2926] rounded-xl text-xs font-black transition-colors cursor-pointer"
+                                                >
+                                                    Dismiss
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setShowUserDropdown(false);
+                                                        onClose();
+                                                        navigate('/watch-hive/search?tab=people');
+                                                    }}
+                                                    className="px-3 py-1.5 bg-[#ffb700] hover:bg-[#ffc83b] text-[#2D2926] rounded-xl text-xs font-black transition-colors flex items-center gap-1 cursor-pointer"
+                                                >
+                                                    <span className="material-symbols-outlined text-xs">person_search</span>
+                                                    Find friends
+                                                </button>
+                                            </div>
                                         </div>
                                     ) : (
                                         searchResults.map((u) => (

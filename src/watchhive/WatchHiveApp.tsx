@@ -58,7 +58,7 @@ const AppRoutes: React.FC = () => {
 
     // Auto-prompt onboarding preferences if user is authenticated but has not completed onboarding
     React.useEffect(() => {
-        if (isAuthenticated && user) {
+        if (isAuthenticated && user && user.id) {
             const hasCompleted = user.hasCompletedOnboarding;
             const prefs = user.preferences;
             const hasPrefs = prefs && (
