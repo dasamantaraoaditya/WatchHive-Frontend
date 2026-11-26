@@ -638,7 +638,7 @@ export const MovieDetailsPage: React.FC = () => {
                                                 className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-[#FFF9F0] text-[#2D2926] border border-[#ffb700]/30 hover:bg-[#ffb700]/10 flex items-center gap-2 transition-all shadow-xs cursor-pointer"
                                             >
                                                 <span className="material-symbols-outlined text-[18px] text-[#ffb700]">edit_note</span>
-                                                {userEntry.rating ? `Edit Watch (⭐ ${userEntry.rating})` : 'Edit Your Watch ✓'}
+                                                {userEntry.rating != null && !isNaN(Number(userEntry.rating)) ? `Edit Watch (⭐ ${Number(userEntry.rating).toFixed(1)})` : 'Edit Your Watch ✓'}
                                             </button>
                                         ) : (
                                             <button
@@ -706,9 +706,9 @@ export const MovieDetailsPage: React.FC = () => {
                                         {/* Trailing Rating Badge & Chevron */}
                                         <div className="flex items-center gap-2 shrink-0">
                                             {(() => {
-                                                const rated = friendsEntries.filter(f => f.rating && f.rating > 0);
+                                                const rated = friendsEntries.filter(f => f.rating != null && !isNaN(Number(f.rating)) && Number(f.rating) > 0);
                                                 if (rated.length === 0) return null;
-                                                const avg = (rated.reduce((acc, curr) => acc + (curr.rating || 0), 0) / rated.length).toFixed(1);
+                                                const avg = (rated.reduce((acc, curr) => acc + (Number(curr.rating) || 0), 0) / rated.length).toFixed(1);
                                                 return (
                                                     <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#ffb700]/20 border border-[#ffb700]/40 rounded-xl text-xs font-black text-[#2D2926]">
                                                         ⭐ {avg}
@@ -1250,6 +1250,7 @@ export const MovieDetailsPage: React.FC = () => {
                             </div>
 
                             <EntryForm
+                                key={userEntry ? `edit-${userEntry.id}-${isCompletingWatch ? 'complete' : 'edit'}` : `new-${tmdbId}`}
                                 entry={userEntry || undefined}
                                 prefillData={{
                                     tmdbId: tmdbId!,
