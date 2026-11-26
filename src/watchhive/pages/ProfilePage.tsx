@@ -428,7 +428,7 @@ export const ProfilePage: React.FC = () => {
 
                         <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 pt-2 w-full max-w-sm sm:max-w-none">
                             <div className="bg-[#ffb700]/5 border border-[#ffb700]/10 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-center flex-1 sm:flex-initial min-w-[74px] sm:min-w-[90px] md:min-w-[100px] hover:shadow-sm transition-shadow">
-                                <p className="text-xl md:text-2xl font-black text-[#ffb700]">{user._count?.entries || user.entriesCount || 0}</p>
+                                <p className="text-xl md:text-2xl font-black text-[#ffb700]">{user._count?.entries ?? user.entriesCount ?? 0}</p>
                                 <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Watches</p>
                             </div>
                             <div 

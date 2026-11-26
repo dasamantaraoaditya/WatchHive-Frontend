@@ -26,6 +26,7 @@ export interface User {
     hasCompletedOnboarding?: boolean;
     watchStreak?: number;
     lastWatchDate?: string;
+    entriesCount?: number;
     createdAt: string;
     updatedAt: string;
     // Auth capability flags — set by the backend, never expose raw googleId/passwordHash

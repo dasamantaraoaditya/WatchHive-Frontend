@@ -99,7 +99,7 @@ export const Sidebar: React.FC = () => {
                             size="sm"
                         />
                         <div className="wh-sidebar__user-info">
-                            <p className="wh-sidebar__user-name">{user?.displayName || user?.username}</p>
+                            <p className="wh-sidebar__user-name">{user?.displayName || user?.username || 'Cinephile'}</p>
                             <p className="wh-sidebar__user-role">Explorer</p>
                         </div>
                         <button className="wh-sidebar__settings-btn" onClick={logout} title="Sign Out">
