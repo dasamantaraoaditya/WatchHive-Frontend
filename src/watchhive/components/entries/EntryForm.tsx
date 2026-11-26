@@ -1090,28 +1090,6 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            if (formData.isWatching) {
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    isWatching: false,
-                                                    watchedAt: prev.watchedAt || toLocalISOString(new Date()),
-                                                }));
-                                                setHasWatchDate(true);
-                                            }
-                                        }}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                                            !formData.isWatching
-                                                ? 'bg-[#ffb700] text-[#2D2926] shadow-sm'
-                                                : 'text-[#2D2926]/60 hover:text-[#2D2926] hover:bg-white/60'
-                                        }`}
-                                    >
-                                        <span className="material-symbols-outlined text-[17px]">task_alt</span>
-                                        <span>Completed Watch</span>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => {
                                             if (!formData.isWatching) {
                                                 const currentOrNow = startedAtStr || formData.watchedAt || toLocalISOString(new Date());
                                                 setFormData((prev) => ({
@@ -1201,7 +1179,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             {hasStartedDate ? (
                                                 <HiveDatePicker
                                                     value={startedAtStr}
-                                                    fieldTitle="Started Watching"
+                                                    fieldTitle="Start Date & Time"
                                                     icon="play_circle"
                                                     onChange={(val: string) => {
                                                         if (!val) {
@@ -1305,7 +1283,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             {hasWatchDate ? (
                                                 <HiveDatePicker
                                                     value={formData.watchedAt}
-                                                    fieldTitle="Completed Watching"
+                                                    fieldTitle="Watch Date & Time"
                                                     icon="task_alt"
                                                     onChange={(val: string) => {
                                                         if (!val) {
@@ -1418,7 +1396,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                                             {hasStartedDate ? (
                                                 <HiveDatePicker
                                                     value={startedAtStr || formData.watchedAt}
-                                                    fieldTitle="Started Watching"
+                                                    fieldTitle="Start Date & Time"
                                                     icon="play_circle"
                                                     onChange={(val: string) => {
                                                         if (!val) {
