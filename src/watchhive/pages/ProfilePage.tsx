@@ -64,8 +64,34 @@ export const ProfilePage: React.FC = () => {
         setTimeout(() => setCopiedPrompt(false), 2000);
     };
 
+    const [isProfileFetching, setIsProfileFetching] = useState(!user);
+
+    // Actively hydrate fresh profile data on mount to ensure immediate loading without manual page refresh
     useEffect(() => {
-        if (user) {
+        let isMounted = true;
+        const fetchCurrentProfile = async () => {
+            try {
+                const freshUser = await userService.getMe();
+                if (isMounted && freshUser) {
+                    updateUser(freshUser);
+                }
+            } catch (err) {
+                console.error('Failed to sync profile on mount:', err);
+            } finally {
+                if (isMounted) {
+                    setIsProfileFetching(false);
+                }
+            }
+        };
+
+        fetchCurrentProfile();
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (user?.id) {
             userService.getFollowStats(user.id).then(setStats).catch(console.error);
         }
     }, [user?.id]);
@@ -94,7 +120,25 @@ export const ProfilePage: React.FC = () => {
         };
     }, [isDeleteModalOpen]);
 
-    if (!user) return <ProfileSkeleton />;
+    if (!user && isProfileFetching) return <ProfileSkeleton />;
+
+    if (!user) {
+        return (
+            <PageLayout maxWidth="5xl" className="font-sans text-slate-900 py-12 text-center">
+                <div className="bg-white rounded-3xl p-8 border border-slate-200 max-w-md mx-auto shadow-sm">
+                    <span className="material-symbols-outlined text-4xl text-[#ffb700] mb-3">person_off</span>
+                    <h2 className="text-xl font-bold text-slate-800">Profile Not Found</h2>
+                    <p className="text-sm text-slate-500 mt-2">We couldn't load your profile. Please try logging in again.</p>
+                    <button
+                        onClick={() => navigate('/watch-hive/login')}
+                        className="mt-6 px-6 py-2.5 bg-[#ffb700] hover:bg-[#e6a500] text-[#2D2926] font-bold rounded-xl transition-all shadow-md"
+                    >
+                        Go to Login
+                    </button>
+                </div>
+            </PageLayout>
+        );
+    }
 
     const handleUploadClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -384,7 +428,7 @@ export const ProfilePage: React.FC = () => {
 
                         <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-3 md:gap-4 pt-2 w-full max-w-sm sm:max-w-none">
                             <div className="bg-[#ffb700]/5 border border-[#ffb700]/10 px-2.5 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl text-center flex-1 sm:flex-initial min-w-[74px] sm:min-w-[90px] md:min-w-[100px] hover:shadow-sm transition-shadow">
-                                <p className="text-xl md:text-2xl font-black text-[#ffb700]">{user._count?.entries || 0}</p>
+                                <p className="text-xl md:text-2xl font-black text-[#ffb700]">{user._count?.entries || user.entriesCount || 0}</p>
                                 <p className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-slate-500">Watches</p>
                             </div>
                             <div 

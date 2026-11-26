@@ -5,7 +5,14 @@ import { AuthContextType, LoginCredentials, RegisterData, AuthResponse } from '.
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<AuthResponse['user'] | null>(null);
+    const [user, setUser] = useState<AuthResponse['user'] | null>(() => {
+        try {
+            const stored = localStorage.getItem('user');
+            return stored ? JSON.parse(stored) : null;
+        } catch {
+            return null;
+        }
+    });
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
