@@ -9,17 +9,23 @@ export interface ShareWatchParams {
     mediaType?: string;
     username?: string;
     isWatching?: boolean;
+    watchBuddies?: Array<{ username?: string; displayName?: string }> | string[] | null;
 }
 
 export const shareCompletedWatch = async (params: ShareWatchParams): Promise<boolean> => {
-    const { title, rating, review, tmdbId, mediaType = 'movie', username, isWatching = false } = params;
+    const { title, rating, review, tmdbId, mediaType = 'movie', username, isWatching = false, watchBuddies } = params;
     const shareTitle = isWatching
         ? `WatchersHive: Currently watching ${title}`
         : `WatchersHive: Finished watching ${title}`;
 
+    const buddiesNames = Array.isArray(watchBuddies)
+        ? watchBuddies.map(b => (typeof b === 'string' ? b : (b?.displayName || b?.username || '')).trim()).filter(Boolean)
+        : [];
+    const withBuddies = buddiesNames.length > 0 ? ` with ${buddiesNames.join(', ')}` : '';
+
     const prefix = isWatching
-        ? (username ? `${username} is currently watching` : 'Currently watching')
-        : (username ? `${username} finished` : 'Just finished');
+        ? (username ? `${username} is currently watching${withBuddies}` : `Currently watching${withBuddies}`)
+        : (username ? `${username} finished${withBuddies}` : `Just finished${withBuddies}`);
     let text = isWatching
         ? `📺 ${prefix} "${title}" on WatchersHive! 🐝\n`
         : `🍿 ${prefix} watching "${title}" on WatchersHive! 🐝\n`;
@@ -35,7 +41,7 @@ export const shareCompletedWatch = async (params: ShareWatchParams): Promise<boo
     }
 
     const shareUrl = tmdbId
-        ? `${window.location.origin}/watch-hive/details/${mediaType.toLowerCase()}/${tmdbId}?source=share`
+        ? `${window.location.origin}/watch-hive/details/${mediaType.toLowerCase()}/${tmdbId}?source=story${username ? `&ref=${encodeURIComponent(username)}` : ''}`
         : window.location.origin;
 
     if (navigator.share) {

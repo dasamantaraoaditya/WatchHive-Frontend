@@ -295,6 +295,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         review?: string | null;
         isWatching?: boolean;
         releaseYear?: string | null;
+        watchBuddies?: any[] | null;
         user?: {
             displayName?: string | null;
             username?: string | null;
@@ -758,6 +759,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                     releaseYear: selectedMovieResult?.release_date
                         ? selectedMovieResult.release_date.slice(0, 4)
                         : (selectedMovieResult?.first_air_date ? selectedMovieResult.first_air_date.slice(0, 4) : null),
+                    watchBuddies: unwrappedEntry.watchBuddies || selectedBuddies || null,
                     user: user ? {
                         displayName: user.displayName,
                         username: user.username,
@@ -2079,6 +2081,7 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
                     review={successModalData.review}
                     isWatching={successModalData.isWatching}
                     releaseYear={successModalData.releaseYear}
+                    watchBuddies={successModalData.watchBuddies}
                     user={successModalData.user}
                 />
             )}
