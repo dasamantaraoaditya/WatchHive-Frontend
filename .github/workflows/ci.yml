@@ -31,6 +31,9 @@ jobs:
       - name: TypeScript Check
         run: npx tsc --noEmit
 
+      - name: Run Unit & Component Tests
+        run: npm test
+
       - name: Build Staging
         if: github.ref == 'refs/heads/staging' || github.base_ref == 'staging'
         run: npm run build:staging
