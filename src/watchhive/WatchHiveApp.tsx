@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth, UIProvider, CustomAlertProvider, useCustomAlert, TourProvider } from './contexts';
+import { ErrorBoundary } from './components/common';
 import { Sidebar, QuickAddFAB, BottomNav, TopBar } from './components/layout';
 import { DonationButton, OfflineBanner, Modal, AppLoadingScreen, InstallPromptBanner, SearchMediaModal, QuickCurrentlyWatchingModal } from './components/common';
 import { SuggestMovieModal } from './components/suggestions/SuggestMovieModal';
@@ -346,22 +347,24 @@ const AppRoutes: React.FC = () => {
 // Main WatchHive App Component
 export const WatchHiveApp: React.FC = () => {
     return (
-        <BrowserRouter>
-            <ScrollToTop />
-            <UIProvider>
-                <AuthProvider>
-                    <NotificationProvider>
-                        <WatchlistProvider>
-                            <CustomAlertProvider>
-                                <TourProvider>
-                                    <AppRoutes />
-                                </TourProvider>
-                            </CustomAlertProvider>
-                        </WatchlistProvider>
-                    </NotificationProvider>
-                </AuthProvider>
-            </UIProvider>
-        </BrowserRouter>
+        <ErrorBoundary>
+            <BrowserRouter>
+                <ScrollToTop />
+                <UIProvider>
+                    <AuthProvider>
+                        <NotificationProvider>
+                            <WatchlistProvider>
+                                <CustomAlertProvider>
+                                    <TourProvider>
+                                        <AppRoutes />
+                                    </TourProvider>
+                                </CustomAlertProvider>
+                            </WatchlistProvider>
+                        </NotificationProvider>
+                    </AuthProvider>
+                </UIProvider>
+            </BrowserRouter>
+        </ErrorBoundary>
     );
 };
 

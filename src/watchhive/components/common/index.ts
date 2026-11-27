@@ -25,3 +25,4 @@ export * from './CardDropdownMenu';
 export * from './AvatarLightboxModal';
 export * from './SupportModal';
 export * from './WHRatingPicker';
+export * from './ErrorBoundary';
