@@ -495,6 +495,11 @@ export const EntryForm: React.FC<EntryFormProps> = ({ entry, prefillData, onSucc
         }
     }, [frequentBuddies.length]);
 
+    // Prefetch buddies on mount so frequent tags and autocomplete results are immediately ready
+    useEffect(() => {
+        fetchBuddySuggestions('');
+    }, [fetchBuddySuggestions]);
+
     const handleToggleBuddy = (buddy: WatchBuddy) => {
         setSelectedBuddies(prev => {
             const exists = prev.some(b => b.id === buddy.id);

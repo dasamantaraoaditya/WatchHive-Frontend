@@ -76,7 +76,7 @@ export const userService = {
 
     async getTaggableFriends(query = '', limit = 15): Promise<any[]> {
         const response: any = await apiClient.get(`/users/taggable-friends?q=${encodeURIComponent(query)}&limit=${limit}`);
-        return response.users || [];
+        return response?.users || response?.data || (Array.isArray(response) ? response : []);
     },
 
     async getDetailedStats(days = 30, type?: string, genre?: string, minRating?: number): Promise<any> {
